@@ -7,16 +7,17 @@ const companies = await getCompanies();
 ---
 
 <section
-    class="py-4 lg:py-6 border-y border-black/5 bg-white relative overflow-hidden flex flex-col justify-center min-h-[15vh]"
+    class="border-y border-black/5 bg-white relative overflow-hidden flex flex-col justify-center h-[15vh] z-20"
     id="companies-section"
 >
-    <div class="section-container mb-4">
-        <div class="flex items-center justify-center gap-4">
+    <!-- Contenedor con padding reducido para asegurar que quepa en 15vh -->
+    <div class="section-container">
+        <div class="flex items-center justify-center gap-4 mb-2">
             <div
                 class="h-px w-16 bg-gradient-to-r from-transparent to-black/10"
             >
             </div>
-            <span class="text-[10px] text-dark/60 font-mono tracking-widest uppercase"
+            <span class="text-[10px] text-dark/70 font-mono tracking-[0.3em] uppercase font-bold"
                 >Marcas que confían en nosotros</span
             >
             <div
@@ -31,8 +32,8 @@ const companies = await getCompanies();
             {
                 [...companies, ...companies, ...companies, ...companies].map(
                     (company: any) => (
-                        <div class="flex items-center justify-center px-12 flex-shrink-0 group cursor-default">
-                            <img src={`https://placehold.co/120x60/transparent/333333?text=${company.name.replace(/\s/g, '+')}`} alt={company.name} class="h-6 lg:h-8 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 object-contain" />
+                        <div class="flex items-center justify-center px-12 lg:px-20 flex-shrink-0 group cursor-default">
+                            <img src={`https://placehold.co/120x60/transparent/333333?text=${company.name.replace(/\s/g, '+')}`} alt={company.name} class="h-14 lg:h-20 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110" />
                         </div>
                     ),
                 )

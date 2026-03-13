@@ -64,24 +64,24 @@ const settings = await getSettings();
                     >
                         <a
                             href="/contacto"
-                            class="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-carmin-light to-carmin text-white font-display font-semibold rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_0_50px_rgba(232,54,79,0.4)] hover:-translate-y-0.5"
+                            class="group relative inline-flex items-center gap-4 px-12 py-5 bg-gradient-to-br from-carmin-light via-carmin to-carmin-dark text-white font-display font-bold rounded-2xl overflow-hidden shadow-[0_20px_50px_-10px_rgba(232,54,79,0.5)] transition-all duration-500 hover:shadow-[0_25px_70px_-10px_rgba(232,54,79,0.7)] hover:-translate-y-1 active:scale-95 border border-white/20"
                         >
-                            <span class="relative z-10"
+                            <span class="relative z-10 uppercase tracking-wider"
                                 >Solicitar presupuesto</span
                             >
                             <svg
-                                class="w-4 h-4 relative z-10 transition-transform group-hover:translate-x-1"
+                                class="w-5 h-5 relative z-10 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
                                 ><path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="2"
+                                    stroke-width="2.5"
                                     d="M7 17L17 7M17 7H7M17 7v10"></path></svg
                             >
                             <div
-                                class="absolute inset-0 bg-gradient-to-r from-carmin to-carmin-light opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
                             >
                             </div>
                         </a>
@@ -89,17 +89,17 @@ const settings = await getSettings();
                             href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20hablar%20sobre%20un%20proyecto%20audiovisual.`}
                             target="_blank"
                             rel="noopener"
-                            class="group inline-flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 text-white font-display font-medium rounded-2xl transition-all duration-500 hover:bg-[#25D366]/10 hover:border-[#25D366]/30 hover:-translate-y-0.5"
+                            class="group inline-flex items-center gap-4 px-12 py-5 bg-white/5 border border-white/20 text-white font-display font-bold rounded-2xl backdrop-blur-2xl transition-all duration-500 hover:bg-[#25D366]/10 hover:border-[#25D366]/40 hover:shadow-[0_20px_40px_-15px_rgba(37,211,102,0.3)] hover:-translate-y-1 active:scale-95"
                         >
                             <svg
-                                class="w-5 h-5 text-[#25D366]"
+                                class="w-5 h-5 text-[#25D366] transition-transform duration-300 group-hover:scale-110"
                                 fill="currentColor"
                                 viewBox="0 0 24 24"
                                 ><path
                                     d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"
                                 ></path></svg
                             >
-                            WhatsApp directo
+                            <span class="uppercase tracking-wider">WhatsApp directo</span>
                         </a>
                     </div>
 
