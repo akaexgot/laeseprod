@@ -1,0 +1,189 @@
+---
+/**
+ * Admin Dashboard
+ * Overview with stats and recent activity
+ */
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import {
+    getProjects,
+    getServices,
+    getSectors,
+    getCompanies,
+} from "../../lib/data";
+
+const projects = await getProjects();
+const services = await getServices();
+const sectors = await getSectors();
+const companies = await getCompanies();
+
+const stats = [
+    { label: "Proyectos", value: projects.length, icon: "🎬", color: "carmin" },
+    {
+        label: "Servicios",
+        value: services.length,
+        icon: "⚙️",
+        color: "blue-500",
+    },
+    {
+        label: "Sectores",
+        value: sectors.length,
+        icon: "🏢",
+        color: "green-500",
+    },
+    {
+        label: "Empresas",
+        value: companies.length,
+        icon: "🏷️",
+        color: "purple-500",
+    },
+];
+---
+
+<AdminLayout title="Dashboard" activeSection="dashboard">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {
+            stats.map((stat) => (
+                <div class="glass rounded-2xl p-6 hover:border-carmin/20 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-2xl">{stat.icon}</span>
+                        <span class="text-3xl font-[Outfit] font-bold text-white">
+                            {stat.value}
+                        </span>
+                    </div>
+                    <p class="text-light-muted text-sm">{stat.label}</p>
+                </div>
+            ))
+        }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8">
+        <h2 class="text-lg font-[Outfit] font-semibold text-white mb-4">
+            Acciones rápidas
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a
+                href="/admin/proyectos"
+                class="group glass rounded-2xl p-5 hover:border-carmin/20 transition-all duration-300 flex items-center gap-4"
+            >
+                <div
+                    class="w-10 h-10 bg-carmin/10 rounded-xl flex items-center justify-center text-lg group-hover:scale-110 transition-transform"
+                >
+                    🎬
+                </div>
+                <div>
+                    <p class="text-white font-medium text-sm">
+                        Gestionar Proyectos
+                    </p>
+                    <p class="text-light-subtle text-xs">
+                        Añadir, editar o eliminar
+                    </p>
+                </div>
+            </a>
+            <a
+                href="/admin/mensajes"
+                class="group glass rounded-2xl p-5 hover:border-carmin/20 transition-all duration-300 flex items-center gap-4"
+            >
+                <div
+                    class="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center text-lg group-hover:scale-110 transition-transform"
+                >
+                    ✉️
+                </div>
+                <div>
+                    <p class="text-white font-medium text-sm">Ver Mensajes</p>
+                    <p class="text-light-subtle text-xs">
+                        Revisar formulario contacto
+                    </p>
+                </div>
+            </a>
+            <a
+                href="/admin/ajustes"
+                class="group glass rounded-2xl p-5 hover:border-carmin/20 transition-all duration-300 flex items-center gap-4"
+            >
+                <div
+                    class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-lg group-hover:scale-110 transition-transform"
+                >
+                    🎨
+                </div>
+                <div>
+                    <p class="text-white font-medium text-sm">
+                        Ajustes Globales
+                    </p>
+                    <p class="text-light-subtle text-xs">
+                        Colores, tipografías, hero
+                    </p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Projects -->
+    <div>
+        <h2 class="text-lg font-[Outfit] font-semibold text-white mb-4">
+            Últimos proyectos
+        </h2>
+        <div class="glass rounded-2xl overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-dark-border">
+                        <th
+                            class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
+                            >Proyecto</th
+                        >
+                        <th
+                            class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider hidden sm:table-cell"
+                            >Cliente</th
+                        >
+                        <th
+                            class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider hidden md:table-cell"
+                            >Destacado</th
+                        >
+                        <th
+                            class="text-right px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
+                            >Acciones</th
+                        >
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        projects.slice(0, 5).map((project: any) => (
+                            <tr class="border-b border-dark-border/50 hover:bg-dark-hover transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="text-white text-sm font-medium">
+                                        {project.title}
+                                    </div>
+                                    <div class="text-light-subtle text-xs mt-0.5">
+                                        {project.slug}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 hidden sm:table-cell">
+                                    <span class="text-light-muted text-sm">
+                                        {project.client_name}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 hidden md:table-cell">
+                                    <span
+                                        class:list={[
+                                            "inline-flex px-2 py-1 rounded-full text-xs font-medium",
+                                            project.featured_home
+                                                ? "bg-green-500/10 text-green-400"
+                                                : "bg-dark-card text-light-subtle",
+                                        ]}
+                                    >
+                                        {project.featured_home ? "Sí" : "No"}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-light-subtle hover:text-carmin-light transition-colors text-sm">
+                                        Editar
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</AdminLayout>

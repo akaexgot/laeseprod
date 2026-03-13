@@ -1,0 +1,163 @@
+---
+/**
+ * CTA Section — Premium with gradient background and visual elements
+ */
+import { getSettings } from "../../lib/data";
+const settings = await getSettings();
+---
+
+<section id="cta-section" class="py-24 lg:py-32 relative overflow-hidden min-h-screen flex flex-col justify-center">
+    <!-- Rich background -->
+    <div
+        class="absolute inset-0 bg-gradient-to-b from-dark-surface/50 via-carmin/5 to-dark"
+    >
+    </div>
+    <div class="absolute inset-0 dot-pattern opacity-20"></div>
+    <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-carmin/10 rounded-full blur-[250px]"
+    >
+    </div>
+
+    <div class="section-container relative z-10">
+        <div class="max-w-4xl mx-auto">
+            <!-- Card wrapper -->
+            <div class="relative rounded-[2rem] overflow-hidden reveal">
+                <!-- Background -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-carmin/20 via-dark-card to-carmin/10 border border-white/5 rounded-[2rem]"
+                >
+                </div>
+                <div
+                    class="absolute inset-0 dot-pattern opacity-10 rounded-[2rem]"
+                >
+                </div>
+
+                <div class="relative p-12 lg:p-20 text-center">
+                    <!-- Badge -->
+                    <div
+                        class="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-carmin/30 bg-carmin/10 mb-8"
+                    >
+                        <span class="text-label text-carmin-light"
+                            >¿Listo para empezar?</span
+                        >
+                    </div>
+
+                    <h2
+                        class="text-editorial-lg text-white mb-8 max-w-2xl mx-auto" style="text-align: center;"
+                    >
+                        Hablemos de<br />
+                        <span class="text-gradient-carmin italic"
+                            >tu próximo proyecto</span
+                        >
+                    </h2>
+
+                    <p
+                        class="text-light-muted max-w-lg mx-auto mb-10 text-base leading-relaxed"
+                    >
+                        Cuéntanos tu idea y crearemos una propuesta audiovisual
+                        a medida. Primera consulta sin compromiso.
+                    </p>
+
+                    <!-- CTAs -->
+                    <div
+                        class="flex flex-col sm:flex-row items-center justify-center gap-4"
+                    >
+                        <a
+                            href="/contacto"
+                            class="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-carmin-light to-carmin text-white font-display font-semibold rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_0_50px_rgba(232,54,79,0.4)] hover:-translate-y-0.5"
+                        >
+                            <span class="relative z-10"
+                                >Solicitar presupuesto</span
+                            >
+                            <svg
+                                class="w-4 h-4 relative z-10 transition-transform group-hover:translate-x-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M7 17L17 7M17 7H7M17 7v10"></path></svg
+                            >
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-carmin to-carmin-light opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                            >
+                            </div>
+                        </a>
+                        <a
+                            href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20hablar%20sobre%20un%20proyecto%20audiovisual.`}
+                            target="_blank"
+                            rel="noopener"
+                            class="group inline-flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 text-white font-display font-medium rounded-2xl transition-all duration-500 hover:bg-[#25D366]/10 hover:border-[#25D366]/30 hover:-translate-y-0.5"
+                        >
+                            <svg
+                                class="w-5 h-5 text-[#25D366]"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"
+                                ></path></svg
+                            >
+                            WhatsApp directo
+                        </a>
+                    </div>
+
+                    <!-- Trust badges -->
+                    <div
+                        class="flex items-center justify-center gap-8 mt-12 pt-8 border-t border-white/5"
+                    >
+                        <div
+                            class="flex items-center gap-2 text-light-subtle text-xs"
+                        >
+                            <svg
+                                class="w-4 h-4 text-emerald-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path></svg
+                            >
+                            Respuesta en 24h
+                        </div>
+                        <div
+                            class="flex items-center gap-2 text-light-subtle text-xs"
+                        >
+                            <svg
+                                class="w-4 h-4 text-emerald-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path></svg
+                            >
+                            Sin compromiso
+                        </div>
+                        <div
+                            class="flex items-center gap-2 text-light-subtle text-xs"
+                        >
+                            <svg
+                                class="w-4 h-4 text-emerald-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path></svg
+                            >
+                            Presupuesto gratis
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,118 @@
+---
+/**
+ * Home Page
+ * VideoMarketing Sevilla — Landing page
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/home/Hero.astro";
+import CompaniesCarousel from "../components/home/CompaniesCarousel.astro";
+import FeaturedProjects from "../components/home/FeaturedProjects.astro";
+import ServicesSection from "../components/home/ServicesSection.astro";
+import SectorsSection from "../components/home/SectorsSection.astro";
+import CtaSection from "../components/home/CtaSection.astro";
+---
+
+<BaseLayout>
+	<Hero />
+	<CompaniesCarousel />
+	<FeaturedProjects />
+	<ServicesSection />
+	<SectorsSection />
+	<CtaSection />
+</BaseLayout>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		// Agrupamos visualmente 'companies-section' y 'featured-projects' en una misma pantalla (100vh)
+		// Snappea al inicio de las marcas para que los proyectos se vean justo debajo.
+		const sections = Array.from(document.querySelectorAll('section')).filter(sec => sec.id !== 'featured-projects');
+		if (sections.length === 0) return;
+
+		let isScrolling = false;
+		let scrollTimeout: ReturnType<typeof setTimeout>;
+
+		function getVisibleSectionIndex() {
+			let maxVisibleIndex = 0;
+			let maxVisibleArea = 0;
+
+			sections.forEach((sec, idx) => {
+				const rect = sec.getBoundingClientRect();
+				const visibleHeight = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0));
+				if (visibleHeight > maxVisibleArea) {
+					maxVisibleArea = visibleHeight;
+					maxVisibleIndex = idx;
+				}
+			});
+			return maxVisibleIndex;
+		}
+
+		function scrollToSection(index: number) {
+			if (index < 0 || index >= sections.length || isScrolling) return;
+			
+			isScrolling = true;
+			// Forzar que el scroll vaya al inicio de la sección destino
+			sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+			clearTimeout(scrollTimeout);
+			scrollTimeout = setTimeout(() => {
+				isScrolling = false;
+			}, 1300); // Cooldown (Debounce)
+		}
+
+		window.addEventListener('wheel', (e) => {
+			e.preventDefault();
+			if (isScrolling) return;
+
+			const currentIndex = getVisibleSectionIndex();
+			if (e.deltaY > 0) {
+				scrollToSection(currentIndex + 1);
+			} else if (e.deltaY < 0) {
+				scrollToSection(currentIndex - 1);
+			}
+		}, { passive: false });
+
+		let touchStartY = 0;
+		window.addEventListener('touchstart', (e) => {
+			touchStartY = e.changedTouches[0].screenY;
+		}, { passive: false });
+
+		window.addEventListener('touchmove', (e) => {
+			// Prevenir el scroll por defecto en táctil
+			e.preventDefault();
+		}, { passive: false });
+
+		window.addEventListener('touchend', (e) => {
+			if (isScrolling) return;
+			
+			const touchEndY = e.changedTouches[0].screenY;
+			const deltaY = touchStartY - touchEndY;
+			const currentIndex = getVisibleSectionIndex();
+
+			if (deltaY > 50) {
+				scrollToSection(currentIndex + 1); // Deslizar dedo hacia arriba -> bajar página
+			} else if (deltaY < -50) {
+				scrollToSection(currentIndex - 1); // Deslizar dedo hacia abajo -> subir página
+			}
+		}, { passive: false });
+
+		window.addEventListener('keydown', (e) => {
+			const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '];
+			if (keys.includes(e.key)) {
+				e.preventDefault();
+				if (isScrolling) return;
+
+				const currentIndex = getVisibleSectionIndex();
+
+				if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+					scrollToSection(currentIndex + 1);
+				} else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+					scrollToSection(currentIndex - 1);
+				} else if (e.key === 'Home') {
+					scrollToSection(0);
+				} else if (e.key === 'End') {
+					scrollToSection(sections.length - 1);
+				}
+			}
+		}, { passive: false });
+	});
+</script>

@@ -1,0 +1,96 @@
+---
+/**
+ * Admin - SEO Management
+ * Edit meta tags, schema, pages SEO
+ */
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="SEO" activeSection="seo">
+    <!-- SEO Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="glass rounded-2xl p-6">
+            <h3 class="text-white font-[Outfit] font-semibold mb-1">
+                Estado SEO
+            </h3>
+            <p class="text-green-400 text-sm">✓ Schema.org activo</p>
+            <p class="text-green-400 text-sm">✓ Open Graph configurado</p>
+            <p class="text-green-400 text-sm">✓ Sitemap generado</p>
+        </div>
+        <div class="glass rounded-2xl p-6">
+            <h3 class="text-white font-[Outfit] font-semibold mb-1">
+                Palabras Clave
+            </h3>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+                <span
+                    class="px-2 py-0.5 bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    >video marketing sevilla</span
+                >
+                <span
+                    class="px-2 py-0.5 bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    >productora audiovisual</span
+                >
+                <span
+                    class="px-2 py-0.5 bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    >videos para empresas</span
+                >
+            </div>
+        </div>
+        <div class="glass rounded-2xl p-6">
+            <h3 class="text-white font-[Outfit] font-semibold mb-1">URLs</h3>
+            <p class="text-light-muted text-sm">
+                Sitemap: <a
+                    href="/sitemap.xml"
+                    class="text-carmin-light hover:underline">/sitemap.xml</a>
+            </p>
+            <p class="text-light-muted text-sm">
+                Robots: <a
+                    href="/robots.txt"
+                    class="text-carmin-light hover:underline">/robots.txt</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Pages SEO Editor -->
+    <h2 class="text-lg font-[Outfit] font-semibold text-white mb-4">
+        Meta por Página
+    </h2>
+    <div class="space-y-3">
+        {
+            [
+                { path: "/", title: "Home", hasCustom: true },
+                { path: "/proyectos", title: "Proyectos", hasCustom: true },
+                { path: "/servicios", title: "Servicios", hasCustom: true },
+                { path: "/sectores", title: "Sectores", hasCustom: true },
+                {
+                    path: "/quienes-somos",
+                    title: "Quiénes Somos",
+                    hasCustom: false,
+                },
+                { path: "/contacto", title: "Contacto", hasCustom: false },
+            ].map((page) => (
+                <div class="glass rounded-2xl p-5 flex items-center justify-between hover:border-carmin/20 transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class:list={[
+                                "w-2 h-2 rounded-full",
+                                page.hasCustom
+                                    ? "bg-green-400"
+                                    : "bg-yellow-400",
+                            ]}
+                        />
+                        <div>
+                            <h3 class="text-white text-sm font-medium">
+                                {page.title}
+                            </h3>
+                            <p class="text-light-subtle text-xs">{page.path}</p>
+                        </div>
+                    </div>
+                    <button class="px-4 py-2 text-sm text-light-muted hover:text-white hover:bg-dark-card rounded-xl transition-all">
+                        Editar meta
+                    </button>
+                </div>
+            ))
+        }
+    </div>
+</AdminLayout>

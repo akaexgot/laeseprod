@@ -1,0 +1,110 @@
+---
+/**
+ * Admin - Services Management
+ */
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getServices } from "../../lib/data";
+
+const services = await getServices();
+---
+
+<AdminLayout title="Servicios" activeSection="servicios">
+    <div class="flex items-center justify-between mb-6">
+        <p class="text-light-muted text-sm">{services.length} servicios</p>
+        <button
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-carmin text-white text-sm font-semibold rounded-xl hover:shadow-glow transition-all duration-300"
+        >
+            <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"></path></svg
+            >
+            Nuevo servicio
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {
+            services.map((service: any) => (
+                <div
+                    class="glass rounded-2xl p-6 hover:border-carmin/20 transition-all duration-300"
+                    data-id={service.id}
+                >
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">{service.icon}</span>
+                            <div>
+                                <h3 class="text-white font-[Outfit] font-semibold">
+                                    {service.title}
+                                </h3>
+                                <p class="text-light-subtle text-xs">
+                                    /{service.slug}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex gap-1">
+                            <button
+                                class="p-2 hover:bg-dark-card rounded-lg transition-colors"
+                                title="Editar"
+                            >
+                                <svg
+                                    class="w-4 h-4 text-light-subtle hover:text-carmin-light"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                            </button>
+                            <button
+                                class="p-2 hover:bg-dark-card rounded-lg transition-colors"
+                                title="Eliminar"
+                            >
+                                <svg
+                                    class="w-4 h-4 text-light-subtle hover:text-red-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-light-muted text-sm line-clamp-2">
+                        {service.description}
+                    </p>
+                    <div class="flex items-center gap-4 mt-4 text-xs text-light-subtle">
+                        <span>Orden: {service.order}</span>
+                        <span
+                            class:list={[
+                                "inline-flex px-2 py-0.5 rounded-full",
+                                service.video
+                                    ? "bg-green-500/10 text-green-400"
+                                    : "bg-yellow-500/10 text-yellow-400",
+                            ]}
+                        >
+                            {service.video ? "✓ Vídeo" : "⏳ Sin vídeo"}
+                        </span>
+                    </div>
+                </div>
+            ))
+        }
+    </div>
+</AdminLayout>

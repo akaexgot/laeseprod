@@ -1,0 +1,707 @@
+PROMPT 1 — ARQUITECTURA COMPLETA DEL PROYECTO
+Actúa como arquitecto senior de software especializado en:
+
+- Astro
+- Tailwind CSS
+- arquitectura modular
+- SEO técnico
+- alto rendimiento web
+
+Debes diseñar la arquitectura completa de una web para la empresa:
+
+VideoMarketing Sevilla
+
+La web venderá servicios de video marketing para empresas en España, con prioridad SEO en:
+
+- Sevilla
+- Cádiz
+- España
+
+STACK TECNOLÓGICO OBLIGATORIO
+
+Astro  
+Tailwind CSS  
+Supabase (database + auth)  
+Cloudinary (multimedia)  
+Resend (emails)  
+
+Deploy en servidor propio usando:
+
+Coolify  
+Nixpacks
+
+La web debe ser extremadamente:
+
+- modular
+- escalable
+- rápida
+- SEO friendly
+- editable tipo CMS
+
+NUNCA debe haber contenido hardcodeado.
+
+Todo debe provenir de la base de datos.
+
+---
+
+OBJETIVOS DE LA WEB
+
+1 captar clientes
+2 mostrar proyectos audiovisuales
+3 posicionar SEO en España
+4 ofrecer portal para clientes
+5 mostrar autoridad en marketing audiovisual
+
+---
+
+REGLAS DE DESARROLLO
+
+1 Ningún archivo debe superar 300-400 líneas
+2 Todo debe ser modular
+3 Componentes reutilizables
+4 Separación clara de responsabilidades
+5 Optimización de Core Web Vitals
+
+---
+
+ESTRUCTURA DE PÁGINAS
+
+Home
+
+Hero con video fullscreen editable
+
+Navbar animado sticky
+
+Carrusel empresas con las que se ha trabajado
+
+Últimos proyectos destacados
+
+Servicios
+
+Sectores
+
+Footer grande con contacto
+
+---
+
+Proyectos
+
+Grid visual moderno
+
+Hover preview video 3 segundos
+
+Al abrir proyecto mostrar
+
+video explicativo (desktop)
+
+video explicativo (mobile)
+
+descripción
+
+video final del proyecto
+
+---
+
+Quienes somos
+
+video corporativo desktop/mobile
+
+Google Maps
+
+WhatsApp
+
+Instagram
+
+LinkedIn
+
+teléfono
+
+correo
+
+---
+
+Contacto
+
+formulario
+
+envío mediante Resend
+
+CTA principal WhatsApp
+
+---
+
+Portal Cliente
+
+Grid con clientes
+
+imagen cliente
+
+nombre cliente
+
+Al mantener pulsado 2 segundos:
+
+modal contraseña
+
+si es correcta:
+
+abrir Dropbox dentro de modal
+
+---
+
+Servicios
+
+cada servicio tendrá página propia SEO
+
+---
+
+Sectores
+
+cada sector tendrá página propia SEO
+
+---
+
+REQUISITOS DE DISEÑO
+
+El cliente odia diseños cuadrados.
+
+La web debe ser:
+
+fluida  
+orgánica  
+cinematográfica  
+dinámica  
+
+Evitar cajas rígidas.
+
+Usar:
+
+layouts asimétricos  
+degradados  
+formas orgánicas  
+motion design  
+
+---
+
+RESULTADO ESPERADO
+
+Genera:
+
+1 arquitectura completa del proyecto
+2 estructura de carpetas Astro profesional
+3 organización modular
+4 flujo de datos entre frontend y backend
+5 lista de componentes necesarios
+6 estrategia de rendimiento
+7 estrategia para vídeos
+
+Explícalo como arquitecto senior.
+PROMPT 2 — BASE DE DATOS SUPABASE
+Actúa como arquitecto de base de datos experto en Supabase.
+
+Diseña la base de datos completa para una web CMS de video marketing.
+
+Debe ser escalable para:
+
+100+ proyectos
+servicios dinámicos
+sectores dinámicos
+portal clientes
+
+Todo editable desde admin.
+
+---
+
+TABLAS NECESARIAS
+
+settings globales
+
+projects
+
+services
+
+sectors
+
+companies (logos carrusel)
+
+portal_clients
+
+contacts
+
+pages SEO
+
+navigation
+
+footer
+
+---
+
+REQUISITOS
+
+Cada proyecto tendrá:
+
+title  
+subtitle  
+slug  
+description  
+
+videos:
+
+video_project  
+video_explanation_desktop  
+video_explanation_mobile  
+
+client_name  
+client_logo  
+
+featured_home boolean
+
+---
+
+Los servicios deben permitir:
+
+titulo  
+slug  
+descripcion  
+video  
+preview_seconds  
+
+---
+
+Los sectores deben permitir:
+
+titulo  
+slug  
+descripcion  
+video  
+
+---
+
+Portal cliente:
+
+client_name  
+image  
+dropbox_link  
+password_hash  
+
+---
+
+El sistema debe permitir:
+
+edición completa CMS
+
+SEO dinámico
+
+---
+
+RESULTADO
+
+1 esquema SQL completo
+2 relaciones entre tablas
+3 índices optimizados SEO
+4 seguridad con Row Level Security
+5 sistema de slugs únicos
+PROMPT 3 — CMS EDITABLE COMPLETO
+Diseña un sistema CMS completo para una web hecha en Astro.
+
+Debe permitir editar absolutamente todo desde el panel admin.
+
+NO debe haber contenido hardcodeado.
+
+---
+
+EL CMS DEBE PERMITIR EDITAR
+
+COLORES
+
+color primario  
+color secundario  
+gradientes  
+
+---
+
+TIPOGRAFÍAS
+
+font headings  
+font body  
+
+---
+
+CONTENIDO
+
+hero video
+
+hero title
+
+hero subtitle
+
+---
+
+HOME
+
+proyectos destacados
+
+servicios
+
+sectores
+
+logos empresas
+
+---
+
+PROYECTOS
+
+CRUD completo
+
+subir vídeos o URL YouTube
+
+logos empresas
+
+descripción
+
+---
+
+SERVICIOS
+
+CRUD completo
+
+video
+
+descripción
+
+---
+
+SECTORES
+
+CRUD completo
+
+video
+
+descripción
+
+---
+
+FOOTER
+
+texto
+
+contacto
+
+redes sociales
+
+---
+
+RESULTADO
+
+Diseña:
+
+1 arquitectura del CMS
+2 sistema de edición dinámica
+3 modelo de datos
+4 API layer para Astro
+5 hooks de actualización
+PROMPT 4 — SISTEMA DE VÍDEOS
+Actúa como experto en streaming web y optimización multimedia.
+
+La web tendrá muchos vídeos.
+
+Duración media:
+
+30 segundos a 4 minutos.
+
+El sistema debe permitir:
+
+1 pegar URL YouTube
+2 subir vídeo manualmente
+
+Pero la opción preferida es YouTube.
+
+---
+
+OBJETIVOS
+
+máximo rendimiento
+
+no sobrecargar servidor
+
+lazy loading
+
+preview hover
+
+---
+
+IMPLEMENTAR
+
+preview automática 3 segundos
+
+detectar dispositivo para:
+
+video mobile
+
+video desktop
+
+---
+
+Explica cómo implementar:
+
+YouTube embed optimizado
+
+Cloudinary fallback
+
+preview thumbnails
+
+streaming eficiente
+
+---
+
+RESULTADO
+
+1 arquitectura de vídeo
+2 sistema preview hover
+3 carga optimizada
+4 estrategia CDN
+PROMPT 5 — PANEL ADMIN
+Diseña un panel de administración profesional.
+
+Ruta:
+
+/admin
+
+Autenticación con Supabase.
+
+Debe incluir:
+
+Dashboard
+
+Proyectos
+
+Servicios
+
+Sectores
+
+Empresas
+
+Portal clientes
+
+Mensajes contacto
+
+SEO
+
+Ajustes globales
+
+Contratos (futuro)
+
+Carta (futuro)
+
+---
+
+REQUISITOS
+
+UI rápida
+
+CRUD completo
+
+subida de imágenes
+
+gestión de vídeos
+
+edición SEO
+
+---
+
+ROLES
+
+admin
+
+editor (futuro)
+
+---
+
+RESULTADO
+
+1 estructura del panel
+2 componentes necesarios
+3 sistema autenticación
+4 flujos CRUD
+PROMPT 6 — PORTAL CLIENTE
+Diseña el sistema Portal Cliente.
+
+La página mostrará todos los clientes.
+
+Cada cliente tendrá:
+
+imagen
+
+nombre
+
+dropbox_link
+
+password
+
+---
+
+INTERACCIÓN
+
+usuario mantiene pulsado 2 segundos en imagen
+
+se abre modal contraseña
+
+si es correcta
+
+se abre Dropbox dentro de modal.
+
+---
+
+REQUISITOS
+
+buscador clientes en tiempo real
+
+seguridad contraseña
+
+protección anti scraping
+
+---
+
+RESULTADO
+
+1 lógica frontend
+2 lógica backend
+3 modelo datos
+4 UX optimizada
+PROMPT 7 — SEO EXTREMO
+Actúa como experto SEO técnico.
+
+El objetivo es posicionar primero en Google para:
+
+video marketing sevilla
+
+productora audiovisual sevilla
+
+videos para empresas sevilla
+
+marketing audiovisual sevilla
+
+---
+
+Diseña:
+
+arquitectura SEO completa
+
+silo SEO
+
+páginas servicios
+
+páginas sectores
+
+páginas por ciudad
+
+---
+
+IMPLEMENTAR
+
+schema.org
+
+localbusiness schema
+
+open graph
+
+metadata dinámica
+
+sitemap automático
+
+robots.txt
+
+canonical
+
+---
+
+RESULTADO
+
+1 estrategia SEO completa
+2 estructura URLs
+3 optimización para Google
+PROMPT 8 — DISEÑO UX/UI AGENCIA PREMIUM
+Actúa como diseñador UX/UI de agencias creativas premium.
+
+La web es para una productora audiovisual.
+
+El cliente odia diseños cuadrados.
+
+El diseño debe ser:
+
+cinematográfico
+
+fluido
+
+orgánico
+
+muy moderno
+
+---
+
+COLORES
+
+rojo carmín
+
+blanco
+
+degradados
+
+---
+
+Implementar:
+
+layouts asimétricos
+
+grids dinámicos
+
+motion design
+
+scroll animations
+
+parallax suave
+
+hover vídeos
+
+---
+
+RESULTADO
+
+1 diseño conceptual completo
+2 estructura visual páginas
+3 sistema de componentes
+PROMPT 9 — DEPLOY COOLIFY
+Actúa como ingeniero DevOps.
+
+El proyecto se desplegará en servidor propio usando:
+
+Coolify
+
+Nixpacks
+
+---
+
+STACK
+
+Astro
+
+Tailwind
+
+Supabase
+
+Resend
+
+Cloudinary
+
+---
+
+RESULTADO
+
+Explica:
+
+1 estructura proyecto para deploy
+2 variables entorno
+3 configuración Nixpacks
+4 optimización build
+5 pipeline deploy
+
+💡 Consejo profesional

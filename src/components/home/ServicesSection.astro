@@ -1,0 +1,178 @@
+---
+/**
+ * Services — Premium 3D iPhone Coverflow Carousel (Light Mode, CSS Framework)
+ */
+import { getServices } from '../../lib/data';
+const services = await getServices();
+
+const demoYoutubeId = 'D91q99QK11k';
+---
+
+<section id="services-section" class="py-24 lg:py-32 relative bg-gray-50 overflow-hidden text-dark min-h-screen flex flex-col justify-center">
+  <!-- Subtle pattern -->
+  <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+  <div class="section-container relative z-10 pointer-events-none">
+    <!-- Header -->
+    <div class="flex flex-col items-center w-full mb-4 lg:mb-10 reveal pointer-events-auto">
+      <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-carmin/30 bg-carmin/10 mb-6 mt-8">
+        <span class="text-label text-carmin font-semibold">Nuestros Servicios</span>
+      </div>
+      <h2 class="text-editorial-lg text-dark mb-4 drop-shadow-md" style="text-align: center;">
+        Todo lo que necesitas<br />
+        <span class="text-gradient-carmin font-italic">bajo un mismo techo</span>
+      </h2>
+      <p class="text-dark-subtle max-w-2xl text-base leading-relaxed font-medium" style="text-align: center;">
+        Soluciones audiovisuales completas para empresas que quieren destacar.
+      </p>
+    </div>
+  </div>
+
+  <!-- Premium 3D Carousel Container -->
+  <div class="relative w-full flex items-center justify-center perspective-1000 mt-8">
+    
+    <div id="services-carousel" class="relative w-full max-w-[640px] aspect-[4/3] z-20">
+      {services.slice(0, 3).map((service: any, idx: number) => {
+        const startTime = 15 + (idx * 15);
+        const endTime = startTime + 3;
+        return (
+        <div class="carousel-item-services absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" data-index={idx} data-slug={service.slug}>
+          
+          <!-- Pure Video Frame (4:3) -->
+          <div class="w-full h-full rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.3)] relative overflow-hidden group border border-white/20 bg-dark">
+            
+            <!-- Lazy loaded Video Frame -->
+            <iframe 
+              class="video-iframe absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] h-[115%] opacity-0 transition-opacity duration-700 z-10 pointer-events-none"
+              data-src={`https://www.youtube.com/embed/${demoYoutubeId}?autoplay=1&mute=1&start=${startTime}&end=${endTime}&loop=1&playlist=${demoYoutubeId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+              src=""
+              style="object-fit: cover;"
+              frameborder="0" allow="autoplay; encrypted-media" tabindex="-1" aria-hidden="true"
+            ></iframe>
+
+            <!-- Subtle protective gradient strictly for text readablity on hover -->
+            <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-dark/90 via-dark/40 to-transparent z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            <!-- Content Overlay (Title & Button) -->
+            <div class="absolute inset-x-0 bottom-0 z-30 pb-12 px-8 flex flex-col items-center justify-end text-center pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                <h3 class="text-2xl md:text-3xl font-display font-bold text-white mb-6 drop-shadow-lg leading-tight pointer-events-auto">{service.title}</h3>
+                <div class="btn-detail flex items-center justify-center gap-2 bg-carmin/90 backdrop-blur-sm px-6 py-2.5 rounded-full shadow-[0_10px_20px_rgba(230,57,70,0.4)] border border-white/10 hover:bg-carmin hover:scale-105 transition-all cursor-pointer pointer-events-auto">
+                  <span class="text-xs font-mono uppercase tracking-wider text-white font-bold">Ver Detalles</span>
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </div>
+            </div>
+            
+          </div>
+        </div>
+        );
+      })}
+    </div>
+
+    <!-- Interface Controls -->
+    <button id="btn-prev-services" class="absolute left-4 md:left-12 lg:left-32 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center justify-center text-dark hover:bg-carmin hover:border-carmin hover:text-white hover:scale-110 transition-all duration-300 z-50 shadow-xl">
+      <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button id="btn-next-services" class="absolute right-4 md:right-12 lg:right-32 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center justify-center text-dark hover:bg-carmin hover:border-carmin hover:text-white hover:scale-110 transition-all duration-300 z-50 shadow-xl">
+      <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('services-carousel');
+    if (!container) return;
+    
+    const items = container.querySelectorAll('.carousel-item-services');
+    const prevBtn = document.getElementById('btn-prev-services');
+    const nextBtn = document.getElementById('btn-next-services');
+    
+    let currentIndex = 0;
+    const total = items.length;
+
+    function updateCarousel() {
+      items.forEach((itemDom, idx) => {
+        const item = itemDom as HTMLElement;
+        const iframe = item.querySelector('.video-iframe') as HTMLIFrameElement;
+        
+        item.style.zIndex = '10';
+        item.style.transform = 'scale(0.5) translateX(0) translateZ(-500px)';
+        item.style.opacity = '0';
+        item.style.pointerEvents = 'none';
+        item.style.filter = 'blur(10px) brightness(0.5)';
+
+        if (iframe) {
+            iframe.src = iframe.dataset.src || '';
+            iframe.style.opacity = '1'; 
+        }
+
+        item.onclick = null;
+
+        if (idx === currentIndex) {
+          // Principal (Centro)
+          item.style.zIndex = '30';
+          item.style.transform = 'scale(1) translateX(0) translateZ(0)';
+          item.style.opacity = '1';
+          item.style.pointerEvents = 'auto';
+          item.style.filter = 'blur(0px) brightness(1)';
+
+          item.onclick = (e) => {
+             const target = e.target as HTMLElement;
+             const isNavButton = target.closest('.btn-detail');
+
+             if(isNavButton && idx === currentIndex) {
+                const slug = item.dataset.slug;
+                if(slug) window.location.href = `/servicios/${slug}`;
+             }
+          };
+
+        } else if (idx === (currentIndex - 1 + total) % total) {
+          // Anterior (Izquierda)
+          item.style.zIndex = '20';
+          item.style.transform = 'scale(0.75) translateX(-65%) translateZ(-200px) rotateY(15deg)';
+          item.style.opacity = '0.9';
+          item.style.pointerEvents = 'auto'; 
+          item.style.filter = 'blur(2px) brightness(0.7)';
+          item.onclick = (e) => { e.preventDefault(); currentIndex = idx; updateCarousel(); };
+
+        } else if (idx === (currentIndex + 1) % total) {
+          // Siguiente (Derecha)
+          item.style.zIndex = '20';
+          item.style.transform = 'scale(0.75) translateX(65%) translateZ(-200px) rotateY(-15deg)';
+          item.style.opacity = '0.9';
+          item.style.pointerEvents = 'auto';
+          item.style.filter = 'blur(2px) brightness(0.7)';
+          item.onclick = (e) => { e.preventDefault(); currentIndex = idx; updateCarousel(); };
+        }
+      });
+    }
+
+    if(prevBtn) prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + total) % total;
+      updateCarousel();
+    });
+
+    if(nextBtn) nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % total;
+      updateCarousel();
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    container.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+    container.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 50) { currentIndex = (currentIndex + 1) % total; updateCarousel(); }
+      if (touchEndX > touchStartX + 50) { currentIndex = (currentIndex - 1 + total) % total; updateCarousel(); }
+    }, {passive: true});
+
+    updateCarousel();
+  });
+</script>
+
+<style>
+  .perspective-1000 {
+    perspective: 1500px; /* Enhanced depth for 4:3 videos */
+    transform-style: preserve-3d;
+  }
+</style>

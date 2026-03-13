@@ -1,0 +1,91 @@
+---
+/**
+ * Admin - Sectors Management
+ */
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getSectors } from "../../lib/data";
+
+const sectors = await getSectors();
+---
+
+<AdminLayout title="Sectores" activeSection="sectores">
+    <div class="flex items-center justify-between mb-6">
+        <p class="text-light-muted text-sm">{sectors.length} sectores</p>
+        <button
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-carmin text-white text-sm font-semibold rounded-xl hover:shadow-glow transition-all duration-300"
+        >
+            <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"></path></svg
+            >
+            Nuevo sector
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {
+            sectors.map((sector: any) => (
+                <div
+                    class="glass rounded-2xl p-6 hover:border-carmin/20 transition-all duration-300"
+                    data-id={sector.id}
+                >
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-3xl">{sector.icon}</span>
+                        <div class="flex gap-1">
+                            <button
+                                class="p-1.5 hover:bg-dark-card rounded-lg transition-colors"
+                                title="Editar"
+                            >
+                                <svg
+                                    class="w-3.5 h-3.5 text-light-subtle hover:text-carmin-light"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                            </button>
+                            <button
+                                class="p-1.5 hover:bg-dark-card rounded-lg transition-colors"
+                                title="Eliminar"
+                            >
+                                <svg
+                                    class="w-3.5 h-3.5 text-light-subtle hover:text-red-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <h3 class="text-white font-[Outfit] font-semibold mb-1">
+                        {sector.title}
+                    </h3>
+                    <p class="text-light-subtle text-xs mb-3">/{sector.slug}</p>
+                    <p class="text-light-muted text-sm line-clamp-2">
+                        {sector.description}
+                    </p>
+                </div>
+            ))
+        }
+    </div>
+</AdminLayout>

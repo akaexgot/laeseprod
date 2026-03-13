@@ -1,0 +1,224 @@
+---
+/**
+ * Admin - Projects Management
+ * CRUD for projects with video management
+ */
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getProjects } from "../../lib/data";
+
+const projects = await getProjects();
+---
+
+<AdminLayout title="Proyectos" activeSection="proyectos">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <p class="text-light-muted text-sm">{projects.length} proyectos</p>
+        <button
+            id="btn-add-project"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-carmin text-white text-sm font-semibold rounded-xl hover:shadow-glow transition-all duration-300"
+        >
+            <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"></path></svg
+            >
+            Nuevo proyecto
+        </button>
+    </div>
+
+    <!-- Projects Table -->
+    <div class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full" id="projects-table">
+                <thead>
+                    <tr class="border-b border-dark-border">
+                        <th
+                            class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
+                            >Proyecto</th
+                        >
+                        <th
+                            class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider hidden sm:table-cell"
+                            >Cliente</th
+                        >
+                        <th
+                            class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider hidden md:table-cell"
+                            >Vídeo</th
+                        >
+                        <th
+                            class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider hidden lg:table-cell"
+                            >Destacado</th
+                        >
+                        <th
+                            class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider hidden lg:table-cell"
+                            >Orden</th
+                        >
+                        <th
+                            class="text-right px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
+                            >Acciones</th
+                        >
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        projects.map((project: any) => (
+                            <tr
+                                class="border-b border-dark-border/50 hover:bg-dark-hover transition-colors"
+                                data-id={project.id}
+                            >
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-dark-card rounded-xl flex items-center justify-center flex-shrink-0">
+                                            {project.thumbnail ? (
+                                                <img
+                                                    src={project.thumbnail}
+                                                    alt=""
+                                                    class="w-full h-full object-cover rounded-xl"
+                                                />
+                                            ) : (
+                                                <span class="text-carmin text-sm font-bold">
+                                                    {project.title.charAt(0)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div class="text-white text-sm font-medium">
+                                                {project.title}
+                                            </div>
+                                            <div class="text-light-subtle text-xs">
+                                                {project.subtitle}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 hidden sm:table-cell">
+                                    <span class="text-light-muted text-sm">
+                                        {project.client_name}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 hidden md:table-cell">
+                                    <span
+                                        class:list={[
+                                            "inline-flex px-2 py-1 rounded-full text-xs",
+                                            project.video_project
+                                                ? "bg-green-500/10 text-green-400"
+                                                : "bg-yellow-500/10 text-yellow-400",
+                                        ]}
+                                    >
+                                        {project.video_project
+                                            ? "✓ Sí"
+                                            : "⏳ Pendiente"}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 hidden lg:table-cell">
+                                    <span
+                                        class:list={[
+                                            "inline-flex px-2 py-1 rounded-full text-xs",
+                                            project.featured_home
+                                                ? "bg-carmin/10 text-carmin-light"
+                                                : "bg-dark-card text-light-subtle",
+                                        ]}
+                                    >
+                                        {project.featured_home
+                                            ? "⭐ Home"
+                                            : "No"}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 hidden lg:table-cell">
+                                    <span class="text-light-muted text-sm">
+                                        {project.order}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center gap-2 justify-end">
+                                        <a
+                                            href={`/proyectos/${project.slug}`}
+                                            target="_blank"
+                                            class="p-2 hover:bg-dark-card rounded-lg transition-colors"
+                                            title="Ver"
+                                        >
+                                            <svg
+                                                class="w-4 h-4 text-light-subtle hover:text-white"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                                />
+                                            </svg>
+                                        </a>
+                                        <button
+                                            class="p-2 hover:bg-dark-card rounded-lg transition-colors btn-edit"
+                                            data-id={project.id}
+                                            title="Editar"
+                                        >
+                                            <svg
+                                                class="w-4 h-4 text-light-subtle hover:text-carmin-light"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            class="p-2 hover:bg-dark-card rounded-lg transition-colors btn-delete"
+                                            data-id={project.id}
+                                            title="Eliminar"
+                                        >
+                                            <svg
+                                                class="w-4 h-4 text-light-subtle hover:text-red-400"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Empty state -->
+    {
+        projects.length === 0 && (
+            <div class="glass rounded-2xl p-12 text-center">
+                <span class="text-4xl mb-4 block">🎬</span>
+                <h3 class="text-white font-[Outfit] font-semibold mb-2">
+                    No hay proyectos
+                </h3>
+                <p class="text-light-muted text-sm mb-6">
+                    Añade tu primer proyecto para empezar
+                </p>
+                <button class="px-5 py-2.5 bg-gradient-carmin text-white text-sm font-semibold rounded-xl">
+                    Crear proyecto
+                </button>
+            </div>
+        )
+    }
+</AdminLayout>

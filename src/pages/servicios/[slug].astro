@@ -1,0 +1,186 @@
+---
+/**
+ * Service Detail Page (SEO page per service)
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getServiceBySlug, getServices } from "../../lib/data";
+
+const { slug } = Astro.params;
+const service = await getServiceBySlug(slug || "");
+
+if (!service) {
+    return Astro.redirect("/servicios");
+}
+
+// Get other services for cross-linking
+const allServices = await getServices();
+const otherServices = allServices
+    .filter((s: any) => s.slug !== slug)
+    .slice(0, 3);
+---
+
+<BaseLayout
+    title={`${service.title} en Sevilla`}
+    description={`${service.description} Servicio de ${service.title.toLowerCase()} en Sevilla, Cádiz y toda España.`}
+>
+    <!-- Header -->
+    <section class="pt-32 pb-16 relative overflow-hidden">
+        <div
+            class="absolute top-0 left-0 w-full h-full bg-gradient-radial opacity-50"
+        >
+        </div>
+        <div class="section-container relative z-10">
+            <a
+                href="/servicios"
+                class="inline-flex items-center gap-2 text-light-muted hover:text-carmin-light transition-colors duration-300 text-sm mb-8 block"
+            >
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7"></path></svg
+                >
+                Volver a servicios
+            </a>
+            <div class="flex items-center gap-4 mb-6">
+                <div
+                    class="w-16 h-16 bg-carmin/10 rounded-2xl flex items-center justify-center text-3xl animate-scale-in"
+                >
+                    {service.icon}
+                </div>
+            </div>
+            <h1
+                class="text-5xl lg:text-7xl font-[Outfit] font-bold text-white mb-6 animate-fade-up"
+            >
+                {service.title}
+            </h1>
+            <p
+                class="text-light-muted text-lg leading-relaxed max-w-2xl animate-fade-up"
+                style="animation-delay: 0.2s;"
+            >
+                {service.description}
+            </p>
+        </div>
+    </section>
+
+    <!-- Service Video -->
+    <section class="pb-16">
+        <div class="section-container">
+            <div
+                class="relative rounded-3xl overflow-hidden aspect-video bg-dark-card reveal"
+            >
+                <div
+                    class="w-full h-full bg-gradient-to-br from-dark-surface to-carmin-900/20 flex items-center justify-center"
+                >
+                    <div class="text-center">
+                        <div
+                            class="w-20 h-20 bg-carmin/20 rounded-full flex items-center justify-center mx-auto mb-6"
+                        >
+                            <svg
+                                class="w-10 h-10 text-carmin"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path d="M8 5v14l11-7z"></path></svg
+                            >
+                        </div>
+                        <p class="text-light-muted text-lg">
+                            Vídeo de servicio
+                        </p>
+                        <p class="text-light-subtle text-sm mt-2">
+                            Próximamente
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <section class="pb-16">
+        <div class="section-container">
+            <div class="max-w-3xl reveal">
+                <h2 class="text-3xl font-[Outfit] font-bold text-white mb-6">
+                    ¿Qué incluye nuestro servicio de <span
+                        class="text-gradient-carmin"
+                        >{service.title.toLowerCase()}</span
+                    >?
+                </h2>
+                <div class="text-light-muted leading-relaxed space-y-4">
+                    <p>{service.description}</p>
+                    <p>
+                        En VideoMarketing Sevilla, nuestro servicio de {
+                            service.title.toLowerCase()
+                        } está diseñado para ayudar a tu empresa a comunicar su mensaje
+                        de forma efectiva y memorable. Cada proyecto es único y se
+                        adapta a las necesidades específicas de tu marca.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="pb-16">
+        <div class="section-container">
+            <div class="glass rounded-3xl p-12 text-center reveal">
+                <h3
+                    class="text-2xl lg:text-3xl font-[Outfit] font-bold text-white mb-4"
+                >
+                    ¿Necesitas {service.title.toLowerCase()}?
+                </h3>
+                <p class="text-light-muted mb-8 max-w-xl mx-auto">
+                    Solicita tu presupuesto personalizado sin compromiso
+                </p>
+                <a
+                    href="/contacto"
+                    class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-carmin text-white font-semibold rounded-full hover:shadow-glow-strong transition-all duration-300 hover:scale-105"
+                >
+                    Solicitar presupuesto
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg
+                    >
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Other Services -->
+    <section class="pb-24">
+        <div class="section-container">
+            <h2 class="text-2xl font-[Outfit] font-bold text-white mb-8 reveal">
+                Otros servicios
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {
+                    otherServices.map((s: any) => (
+                        <a
+                            href={`/servicios/${s.slug}`}
+                            class="group glass rounded-2xl p-6 hover:border-carmin/20 transition-all duration-300 reveal"
+                        >
+                            <div class="text-2xl mb-3">{s.icon}</div>
+                            <h3 class="text-lg font-[Outfit] font-bold text-white group-hover:text-carmin-100 transition-colors">
+                                {s.title}
+                            </h3>
+                            <p class="text-light-muted text-sm mt-2 line-clamp-2">
+                                {s.description}
+                            </p>
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+</BaseLayout>

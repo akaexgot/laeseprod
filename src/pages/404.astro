@@ -1,0 +1,62 @@
+---
+/**
+ * Custom 404 Page
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+    title="Página no encontrada"
+    description="La página que buscas no existe."
+>
+    <section class="min-h-[70vh] flex items-center justify-center">
+        <div class="text-center px-4">
+            <div
+                class="text-8xl lg:text-[12rem] font-[Outfit] font-bold text-gradient-carmin leading-none mb-4 animate-fade-up"
+            >
+                404
+            </div>
+            <h1
+                class="text-2xl lg:text-3xl font-[Outfit] font-bold text-white mb-4 animate-fade-up"
+                style="animation-delay: 0.1s;"
+            >
+                Página no encontrada
+            </h1>
+            <p
+                class="text-light-muted mb-8 max-w-md mx-auto animate-fade-up"
+                style="animation-delay: 0.2s;"
+            >
+                Lo sentimos, la página que buscas no existe o ha sido movida.
+            </p>
+            <div
+                class="flex items-center justify-center gap-4 animate-fade-up"
+                style="animation-delay: 0.3s;"
+            >
+                <a
+                    href="/"
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-carmin text-white font-semibold rounded-full hover:shadow-glow-strong transition-all duration-300 hover:scale-105"
+                >
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                        ></path></svg
+                    >
+                    Volver al inicio
+                </a>
+                <a
+                    href="/contacto"
+                    class="inline-flex items-center gap-2 px-6 py-3 border border-dark-border text-white font-medium rounded-full hover:border-carmin/30 transition-all duration-300"
+                >
+                    Contacto
+                </a>
+            </div>
+        </div>
+    </section>
+</BaseLayout>

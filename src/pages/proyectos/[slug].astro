@@ -1,0 +1,158 @@
+---
+/**
+ * Project Detail Page
+ * Dynamic page for each project with videos and description
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProjectBySlug, getProjects } from '../../lib/data';
+
+const { slug } = Astro.params;
+const project = await getProjectBySlug(slug || '');
+
+if (!project) {
+  return Astro.redirect('/proyectos');
+}
+---
+
+<BaseLayout
+  title={project.title}
+  description={project.description}
+>
+  <!-- Back Navigation -->
+  <section class="pt-28 pb-8">
+    <div class="section-container">
+      <a href="/proyectos" class="inline-flex items-center gap-2 text-light-muted hover:text-carmin-light transition-colors duration-300 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7M7 7h10v10"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Volver a proyectos
+      </a>
+    </div>
+  </section>
+
+  <!-- Project Header -->
+  <section class="pb-12">
+    <div class="section-container">
+      <div class="max-w-4xl">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-carmin/20 rounded-xl flex items-center justify-center">
+            <span class="text-carmin font-bold">{project.client_name?.charAt(0)}</span>
+          </div>
+          <span class="text-light-muted">{project.client_name}</span>
+        </div>
+        <h1 class="text-4xl lg:text-6xl font-[Outfit] font-bold text-white mb-4 animate-fade-up">
+          {project.title}
+        </h1>
+        <p class="text-xl text-light-muted mb-2 animate-fade-up" style="animation-delay: 0.1s;">{project.subtitle}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Video -->
+  <section class="pb-16">
+    <div class="section-container">
+      <div class="relative rounded-3xl overflow-hidden aspect-video bg-dark-card animate-fade-up" style="animation-delay: 0.2s;">
+        {project.video_project ? (
+          project.video_project.includes('youtube') ? (
+            <iframe
+              src={project.video_project}
+              class="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+              title={project.title}
+            ></iframe>
+          ) : (
+            <video
+              src={project.video_project}
+              class="w-full h-full object-cover"
+              controls
+              preload="metadata"
+            ></video>
+          )
+        ) : (
+          <div class="w-full h-full bg-gradient-to-br from-dark-surface to-carmin-900/20 flex items-center justify-center">
+            <div class="text-center">
+              <svg class="w-16 h-16 text-carmin/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <p class="text-light-subtle">Vídeo del proyecto próximamente</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- Description -->
+  <section class="pb-16">
+    <div class="section-container">
+      <div class="max-w-3xl">
+        <h2 class="text-2xl font-[Outfit] font-bold text-white mb-6 reveal">Sobre el proyecto</h2>
+        <p class="text-light-muted leading-relaxed text-lg reveal">{project.description}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Explanation Video (if exists) -->
+  {(project.video_explanation_desktop || project.video_explanation_mobile) && (
+    <section class="pb-24">
+      <div class="section-container">
+        <h2 class="text-2xl font-[Outfit] font-bold text-white mb-8 reveal">Making of</h2>
+        <div class="relative rounded-3xl overflow-hidden aspect-video bg-dark-card reveal">
+          <!-- Desktop version -->
+          <div class="hidden md:block w-full h-full">
+            {project.video_explanation_desktop && (
+              project.video_explanation_desktop.includes('youtube') ? (
+                <iframe
+                  src={project.video_explanation_desktop}
+                  class="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  loading="lazy"
+                  title={`${project.title} - Explicación`}
+                ></iframe>
+              ) : (
+                <video src={project.video_explanation_desktop} class="w-full h-full object-cover" controls preload="metadata"></video>
+              )
+            )}
+          </div>
+          <!-- Mobile version -->
+          <div class="md:hidden w-full h-full">
+            {project.video_explanation_mobile && (
+              project.video_explanation_mobile.includes('youtube') ? (
+                <iframe
+                  src={project.video_explanation_mobile}
+                  class="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  loading="lazy"
+                  title={`${project.title} - Explicación móvil`}
+                ></iframe>
+              ) : (
+                <video src={project.video_explanation_mobile} class="w-full h-full object-cover" controls preload="metadata"></video>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA -->
+  <section class="pb-24">
+    <div class="section-container">
+      <div class="glass rounded-3xl p-12 text-center reveal">
+        <h3 class="text-2xl lg:text-3xl font-[Outfit] font-bold text-white mb-4">
+          ¿Quieres un proyecto similar?
+        </h3>
+        <p class="text-light-muted mb-8 max-w-xl mx-auto">
+          Cuéntanos tu idea y crearemos algo único para tu marca
+        </p>
+        <a
+          href="/contacto"
+          class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-carmin text-white font-semibold rounded-full hover:shadow-glow-strong transition-all duration-300 hover:scale-105"
+        >
+          Solicitar presupuesto
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

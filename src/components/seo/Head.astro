@@ -1,0 +1,108 @@
+---
+/**
+ * SEO Head Component
+ * Generates all meta tags, Open Graph, schema.org markup
+ */
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+}
+
+const siteName = 'VideoMarketing Sevilla';
+const defaultDescription = 'Productora audiovisual especializada en video marketing para empresas en Sevilla, Cádiz y toda España. Spots, vídeos corporativos y contenido para redes sociales.';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://videomarketingsevilla.es';
+
+const {
+  title,
+  description = defaultDescription,
+  image = `${siteUrl}/og-image.jpg`,
+  url = Astro.url.href,
+  type = 'website',
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = title ? `${title} | ${siteName}` : `${siteName} — Productora Audiovisual en Sevilla`;
+
+// LocalBusiness Schema
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': `${siteUrl}/#business`,
+  name: siteName,
+  description: defaultDescription,
+  url: siteUrl,
+  telephone: '+34600000000',
+  email: 'info@videomarketingsevilla.es',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Sevilla',
+    addressRegion: 'Andalucía',
+    addressCountry: 'ES',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 37.3886,
+    longitude: -5.9823,
+  },
+  areaServed: [
+    { '@type': 'City', name: 'Sevilla' },
+    { '@type': 'City', name: 'Cádiz' },
+    { '@type': 'Country', name: 'España' },
+  ],
+  priceRange: '€€€',
+  image: image,
+  sameAs: [
+    'https://instagram.com/videomarketingsevilla',
+    'https://linkedin.com/company/videomarketingsevilla',
+  ],
+};
+
+// Website Schema
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteName,
+  url: siteUrl,
+};
+---
+
+<!-- Primary Meta Tags -->
+<title>{fullTitle}</title>
+<meta name="title" content={fullTitle} />
+<meta name="description" content={description} />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+<link rel="canonical" href={url} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={url} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={image} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content="es_ES" />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={url} />
+<meta property="twitter:title" content={fullTitle} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={image} />
+
+<!-- Schema.org -->
+<script type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} />
+<script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+
+<!-- Preconnect Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />

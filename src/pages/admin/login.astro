@@ -1,0 +1,156 @@
+---
+/**
+ * Admin Login Page
+ * Supabase Auth
+ */
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="robots" content="noindex, nofollow" />
+        <title>Login | Admin - VideoMarketing Sevilla</title>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body
+        class="bg-dark text-light antialiased min-h-screen flex items-center justify-center"
+    >
+        <div class="w-full max-w-md mx-4">
+            <!-- Logo -->
+            <div class="text-center mb-10">
+                <div
+                    class="w-16 h-16 bg-gradient-carmin rounded-2xl flex items-center justify-center text-white font-bold text-2xl font-[Outfit] mx-auto mb-4"
+                >
+                    V
+                </div>
+                <h1 class="text-2xl font-[Outfit] font-bold text-white">
+                    Panel de Administración
+                </h1>
+                <p class="text-light-muted text-sm mt-2">
+                    VideoMarketing Sevilla
+                </p>
+            </div>
+
+            <!-- Login Form -->
+            <div class="glass rounded-3xl p-8">
+                <form id="login-form" class="space-y-5">
+                    <div>
+                        <label
+                            for="login-email"
+                            class="block text-sm font-medium text-light-muted mb-2"
+                            >Email</label
+                        >
+                        <input
+                            type="email"
+                            id="login-email"
+                            required
+                            class="w-full px-5 py-3.5 bg-dark-card border border-dark-border rounded-2xl text-white placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors duration-300"
+                            placeholder="admin@videomarketingsevilla.es"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            for="login-password"
+                            class="block text-sm font-medium text-light-muted mb-2"
+                            >Contraseña</label
+                        >
+                        <input
+                            type="password"
+                            id="login-password"
+                            required
+                            class="w-full px-5 py-3.5 bg-dark-card border border-dark-border rounded-2xl text-white placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors duration-300"
+                            placeholder="••••••••"
+                        />
+                    </div>
+
+                    <div
+                        id="login-error"
+                        class="hidden rounded-2xl p-3 text-sm bg-red-500/10 text-red-400 border border-red-500/20"
+                    >
+                    </div>
+
+                    <button
+                        type="submit"
+                        id="login-submit"
+                        class="w-full px-6 py-3.5 bg-gradient-carmin text-white font-semibold rounded-2xl hover:shadow-glow-strong transition-all duration-300 disabled:opacity-50"
+                    >
+                        Iniciar sesión
+                    </button>
+                </form>
+            </div>
+
+            <p class="text-center text-light-subtle text-xs mt-8">
+                <a href="/" class="hover:text-carmin-light transition-colors"
+                    >← Volver a la web</a
+                >
+            </p>
+        </div>
+
+        <script>
+            import { createClient } from "@supabase/supabase-js";
+
+            const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || "";
+            const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || "";
+
+            const form = document.getElementById(
+                "login-form",
+            ) as HTMLFormElement;
+            const errorDiv = document.getElementById("login-error")!;
+            const submitBtn = document.getElementById(
+                "login-submit",
+            ) as HTMLButtonElement;
+
+            form?.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Entrando...";
+                errorDiv.classList.add("hidden");
+
+                const email = (
+                    document.getElementById("login-email") as HTMLInputElement
+                ).value;
+                const password = (
+                    document.getElementById(
+                        "login-password",
+                    ) as HTMLInputElement
+                ).value;
+
+                if (!supabaseUrl || !supabaseKey) {
+                    // Dev mode: redirect directly
+                    window.location.href = "/admin";
+                    return;
+                }
+
+                try {
+                    const supabase = createClient(supabaseUrl, supabaseKey);
+                    const { error } = await supabase.auth.signInWithPassword({
+                        email,
+                        password,
+                    });
+
+                    if (error) {
+                        errorDiv.textContent = "Credenciales incorrectas";
+                        errorDiv.classList.remove("hidden");
+                    } else {
+                        window.location.href = "/admin";
+                    }
+                } catch {
+                    errorDiv.textContent = "Error de conexión";
+                    errorDiv.classList.remove("hidden");
+                }
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Iniciar sesión";
+            });
+        </script>
+    </body>
+</html>

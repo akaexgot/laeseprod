@@ -1,0 +1,211 @@
+---
+/**
+ * Hero Section — Fullscreen Video Background v5
+ */
+import { getSettings } from "../../lib/data";
+const settings = await getSettings();
+const youtubeId = "D91q99QK11k";
+---
+
+<section
+    id="hero"
+    class="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden"
+>
+    <!-- Fullscreen Video Background -->
+    <div
+        class="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-dark"
+    >
+        <!-- YouTube iFrame with specific aspect ratio sizing to cover screen -->
+        <iframe
+            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+            class="video-bg"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+        >
+        </iframe>
+
+        <!-- Overlays minimized to keep video clear as requested -->
+        <div class="absolute inset-0 bg-dark/10"></div>
+        <!-- Film grain texture overlay -->
+        <div
+            class="absolute inset-0"
+            style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E'); pointer-events: none;"
+        >
+        </div>
+    </div>
+
+    <!-- Content (Centered) -->
+    <div
+        class="relative z-10 w-full px-6 flex flex-col items-center justify-center text-center mt-12"
+    >
+        <!-- Badge -->
+        <div
+            class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 animate-fade-up shadow-2xl"
+        >
+            <div
+                class="w-2 h-2 bg-carmin rounded-full animate-pulse shadow-[0_0_10px_rgba(232,54,79,0.8)]"
+            >
+            </div>
+            <span class="text-label text-white tracking-widest uppercase"
+                >Productora Audiovisual</span
+            >
+        </div>
+
+        <!-- Headline -->
+        <h1
+            class="text-editorial-xl text-white text-center mb-6 uppercase tracking-tight drop-shadow-2xl overflow-hidden px-4"
+        >
+            <span
+                class="inline-block animate-slide-right-in opacity-0"
+                style="animation-fill-mode: forwards; animation-delay: 0.1s"
+                >Creamos</span
+            ><br />
+            <span
+                class="inline-block animate-slide-left-in opacity-0"
+                style="animation-fill-mode: forwards; animation-delay: 0.3s"
+            >
+                <span class="text-gradient-carmin italic pr-2">historias </span> que
+            </span><br />
+            <span
+                class="inline-block animate-slide-right-in opacity-0"
+                style="animation-fill-mode: forwards; animation-delay: 0.5s"
+                >impulsan</span
+            ><br />
+            <span
+                class="inline-block font-light animate-slide-left-in opacity-0"
+                style="animation-fill-mode: forwards; animation-delay: 0.7s"
+                >marcas</span
+            >
+        </h1>
+
+        <!-- Subtitle -->
+        <p
+            class="text-white/90 text-lg lg:text-xl text-center leading-relaxed max-w-2xl mx-auto mb-10 animate-fade-up drop-shadow-lg font-medium"
+            style="animation-delay: 0.4s"
+        >
+            Calidad cinematográfica desde Sevilla para el mundo. Transformamos
+            tu visión en contenido que conecta y convierte.
+        </p>
+
+        <!-- CTAs -->
+        <div
+            class="flex flex-col sm:flex-row items-center justify-center gap-5 animate-fade-up"
+            style="animation-delay: 0.5s"
+        >
+            <a
+                href="/contacto"
+                class="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-carmin-light to-carmin text-white font-display font-semibold rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(232,54,79,0.5)] hover:-translate-y-1"
+            >
+                <span class="relative z-10 text-base">Iniciar proyecto</span>
+                <svg
+                    class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 17L17 7M17 7H7M17 7v10"></path></svg
+                >
+            </a>
+            <a
+                href="/proyectos"
+                class="group inline-flex items-center gap-3 px-8 py-4 bg-dark-card/40 border border-white/20 text-white font-display font-medium rounded-2xl transition-all duration-500 hover:bg-white/10 hover:border-white/40 backdrop-blur-xl hover:-translate-y-1"
+            >
+                <svg
+                    class="w-5 h-5 text-white group-hover:text-carmin-light transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                    ></path></svg
+                >
+                <span class="text-base">Ver portfolio</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div
+        class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 animate-fade-up"
+        style="animation-delay: 0.8s"
+    >
+        <span
+            class="text-[10px] font-mono uppercase tracking-[0.3em] text-white/50"
+            >Explorar</span
+        >
+        <div class="w-[1px] h-16 bg-white/10 relative overflow-hidden">
+            <div
+                class="absolute top-0 left-0 w-full h-1/2 bg-carmin animate-scroll-down"
+            >
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* CSS para asegurar que el iframe cubra toda la pantalla sin bandas negras */
+    .video-bg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100vw;
+        height: 56.25vw; /* 16:9 aspect ratio */
+        min-height: 100vh;
+        min-width: 177.77vh; /* Ajuste para cuando la pantalla es más alta que ancha */
+        pointer-events: none;
+    }
+
+    @keyframes scroll-down {
+        0% {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(200%);
+            opacity: 0;
+        }
+    }
+    .animate-scroll-down {
+        animation: scroll-down 2s infinite cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    /* Nuevas animaciones laterales para el titular */
+    @keyframes slide-right-in {
+        0% {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    @keyframes slide-left-in {
+        0% {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .animate-slide-right-in {
+        animation: slide-right-in 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .animate-slide-left-in {
+        animation: slide-left-in 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+</style>

@@ -1,0 +1,91 @@
+---
+/**
+ * Services Listing Page
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getServices } from "../../lib/data";
+
+const services = await getServices();
+---
+
+<BaseLayout
+    title="Servicios"
+    description="Servicios de video marketing y producción audiovisual en Sevilla. Video corporativo, spots publicitarios, contenido para redes sociales y más."
+>
+    <!-- Header -->
+    <section class="pt-32 pb-16 relative overflow-hidden">
+        <div
+            class="absolute top-0 left-0 w-full h-full bg-gradient-radial opacity-50"
+        >
+        </div>
+        <div class="section-container relative z-10">
+            <div class="max-w-3xl">
+                <p
+                    class="text-carmin text-sm tracking-widest uppercase font-medium mb-3 animate-fade-in"
+                >
+                    Lo que hacemos
+                </p>
+                <h1
+                    class="text-5xl lg:text-7xl font-[Outfit] font-bold text-white mb-6 animate-fade-up"
+                >
+                    Nuestros <span class="text-gradient-carmin">servicios</span>
+                </h1>
+                <p
+                    class="text-light-muted text-lg leading-relaxed animate-fade-up"
+                    style="animation-delay: 0.2s;"
+                >
+                    Soluciones audiovisuales completas para impulsar tu marca en
+                    el mundo digital
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Grid -->
+    <section class="pb-24">
+        <div class="section-container">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {
+                    services.map((service: any, idx: number) => (
+                        <a
+                            href={`/servicios/${service.slug}`}
+                            class="group relative glass rounded-3xl p-10 hover:border-carmin/20 transition-all duration-500 hover:shadow-glow reveal overflow-hidden"
+                            style={`animation-delay: ${idx * 0.1}s`}
+                        >
+                            <div class="flex items-start gap-6">
+                                <div class="w-16 h-16 bg-carmin/10 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 group-hover:scale-110 group-hover:bg-carmin/20 transition-all duration-500">
+                                    {service.icon}
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-[Outfit] font-bold text-white mb-3 group-hover:text-carmin-100 transition-colors duration-300">
+                                        {service.title}
+                                    </h2>
+                                    <p class="text-light-muted text-sm leading-relaxed mb-4">
+                                        {service.description}
+                                    </p>
+                                    <span class="inline-flex items-center gap-2 text-carmin text-sm font-medium">
+                                        Ver servicio
+                                        <svg
+                                            class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                            />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-carmin/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+</BaseLayout>

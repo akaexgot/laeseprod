@@ -1,0 +1,124 @@
+---
+/**
+ * Admin - Contact Messages
+ */
+import AdminLayout from "../../layouts/AdminLayout.astro";
+
+// In production from Supabase
+const messages = [
+    {
+        id: "1",
+        name: "Juan García",
+        email: "juan@example.com",
+        company: "Hotel Royal",
+        message: "Me gustaría un presupuesto para un vídeo corporativo...",
+        is_read: false,
+        created_at: "2024-03-15T10:30:00",
+    },
+    {
+        id: "2",
+        name: "María López",
+        email: "maria@example.com",
+        company: "",
+        message: "Necesitamos contenido para redes sociales...",
+        is_read: true,
+        created_at: "2024-03-14T15:00:00",
+    },
+];
+---
+
+<AdminLayout title="Mensajes" activeSection="mensajes">
+    <div class="flex items-center gap-4 mb-6">
+        <p class="text-light-muted text-sm">{messages.length} mensajes</p>
+        <span
+            class="inline-flex items-center gap-1 px-2.5 py-1 bg-carmin/10 text-carmin-light rounded-full text-xs font-medium"
+        >
+            {messages.filter((m) => !m.is_read).length} sin leer
+        </span>
+    </div>
+
+    <div class="space-y-3">
+        {
+            messages.map((msg) => (
+                <div
+                    class:list={[
+                        "glass rounded-2xl p-6 transition-all duration-300 hover:border-carmin/20",
+                        !msg.is_read && "border-l-4 border-l-carmin",
+                    ]}
+                >
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-8 h-8 bg-carmin/10 rounded-full flex items-center justify-center">
+                                    <span class="text-carmin text-sm font-bold">
+                                        {msg.name.charAt(0)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <h3 class="text-white font-medium text-sm">
+                                        {msg.name}
+                                    </h3>
+                                    <p class="text-light-subtle text-xs">
+                                        {msg.email}
+                                        {msg.company && ` · ${msg.company}`}
+                                    </p>
+                                </div>
+                                {!msg.is_read && (
+                                    <span class="w-2 h-2 bg-carmin rounded-full flex-shrink-0" />
+                                )}
+                            </div>
+                            <p class="text-light-muted text-sm leading-relaxed">
+                                {msg.message}
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                            <span class="text-light-subtle text-xs">
+                                {new Date(msg.created_at).toLocaleDateString(
+                                    "es-ES",
+                                )}
+                            </span>
+                            <div class="flex gap-1">
+                                <button
+                                    class="p-1.5 hover:bg-dark-card rounded-lg transition-colors"
+                                    title="Responder"
+                                >
+                                    <svg
+                                        class="w-4 h-4 text-light-subtle hover:text-carmin-light"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                </button>
+                                <button
+                                    class="p-1.5 hover:bg-dark-card rounded-lg transition-colors"
+                                    title="Eliminar"
+                                >
+                                    <svg
+                                        class="w-4 h-4 text-light-subtle hover:text-red-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ))
+        }
+    </div>
+</AdminLayout>

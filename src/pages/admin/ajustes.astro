@@ -1,0 +1,273 @@
+---
+/**
+ * Admin - Global Settings
+ * Edit colors, fonts, hero, contact info, social links
+ */
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getSettings } from "../../lib/data";
+
+const settings = await getSettings();
+---
+
+<AdminLayout title="Ajustes Globales" activeSection="ajustes">
+    <form id="settings-form" class="space-y-8">
+        <!-- Brand & Colors -->
+        <section class="glass rounded-2xl p-6">
+            <h2
+                class="text-lg font-[Outfit] font-semibold text-white mb-6 flex items-center gap-2"
+            >
+                🎨 Marca y Colores
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Nombre del sitio</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.site_name}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Descripción</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.site_description}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Color primario</label
+                    >
+                    <div class="flex items-center gap-3">
+                        <input
+                            type="color"
+                            value={settings.primary_color}
+                            class="w-10 h-10 rounded-lg border-0 cursor-pointer"
+                        />
+                        <input
+                            type="text"
+                            value={settings.primary_color}
+                            class="flex-1 px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Color secundario</label
+                    >
+                    <div class="flex items-center gap-3">
+                        <input
+                            type="color"
+                            value={settings.secondary_color}
+                            class="w-10 h-10 rounded-lg border-0 cursor-pointer"
+                        />
+                        <input
+                            type="text"
+                            value={settings.secondary_color}
+                            class="flex-1 px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Font headings</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.font_heading}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Font body</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.font_body}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+            </div>
+        </section>
+
+        <!-- Hero Section -->
+        <section class="glass rounded-2xl p-6">
+            <h2
+                class="text-lg font-[Outfit] font-semibold text-white mb-6 flex items-center gap-2"
+            >
+                🎬 Hero
+            </h2>
+            <div class="space-y-5">
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Título hero</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.hero_title}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Subtítulo hero</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.hero_subtitle}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-light-muted mb-2"
+                            >Vídeo hero (desktop)</label
+                        >
+                        <input
+                            type="url"
+                            value={settings.hero_video_desktop}
+                            placeholder="URL YouTube o Cloudinary"
+                            class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-light-muted mb-2"
+                            >Vídeo hero (mobile)</label
+                        >
+                        <input
+                            type="url"
+                            value={settings.hero_video_mobile}
+                            placeholder="URL YouTube o Cloudinary"
+                            class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors text-sm"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Info -->
+        <section class="glass rounded-2xl p-6">
+            <h2
+                class="text-lg font-[Outfit] font-semibold text-white mb-6 flex items-center gap-2"
+            >
+                📞 Contacto
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Email</label
+                    >
+                    <input
+                        type="email"
+                        value={settings.email}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Teléfono</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.phone}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >WhatsApp (sin +)</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.whatsapp_number}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Dirección</label
+                    >
+                    <input
+                        type="text"
+                        value={settings.address}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Instagram</label
+                    >
+                    <input
+                        type="url"
+                        value={settings.instagram}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >LinkedIn</label
+                    >
+                    <input
+                        type="url"
+                        value={settings.linkedin}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+                <div class="sm:col-span-2">
+                    <label
+                        class="block text-sm font-medium text-light-muted mb-2"
+                        >Google Maps Embed URL</label
+                    >
+                    <input
+                        type="url"
+                        value={settings.google_maps_embed}
+                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
+                    />
+                </div>
+            </div>
+        </section>
+
+        <!-- Save -->
+        <div class="flex justify-end">
+            <button
+                type="submit"
+                class="inline-flex items-center gap-2 px-8 py-3 bg-gradient-carmin text-white font-semibold rounded-xl hover:shadow-glow-strong transition-all duration-300"
+            >
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"></path></svg
+                >
+                Guardar cambios
+            </button>
+        </div>
+    </form>
+</AdminLayout>

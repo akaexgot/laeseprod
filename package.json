@@ -1,0 +1,22 @@
+{
+  "name": "videomarketing-sevilla",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "VideoMarketing Sevilla - Productora audiovisual y video marketing en Sevilla",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.7",
+    "@astrojs/node": "^9.5.4",
+    "@supabase/supabase-js": "^2.49.4",
+    "@tailwindcss/vite": "^4.2.1",
+    "astro": "^5.17.1",
+    "resend": "^4.1.2",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3"
+  }
+}

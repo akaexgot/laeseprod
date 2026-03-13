@@ -1,0 +1,101 @@
+---
+/**
+ * Sectors Listing Page
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getSectors } from "../../lib/data";
+
+const sectors = await getSectors();
+
+const gradients = [
+    "from-carmin-900/40 to-carmin-700/10",
+    "from-carmin-800/30 to-carmin-600/10",
+    "from-dark-surface to-carmin-900/20",
+    "from-carmin-700/20 to-dark-surface",
+    "from-dark-card to-carmin-800/15",
+    "from-carmin-900/30 to-dark-card",
+];
+---
+
+<BaseLayout
+    title="Sectores"
+    description="Producción audiovisual especializada por sectores. Hostelería, inmobiliario, salud, tecnología, moda e industrial en Sevilla."
+>
+    <section class="pt-32 pb-16 relative overflow-hidden">
+        <div
+            class="absolute top-0 left-0 w-full h-full bg-gradient-radial opacity-50"
+        >
+        </div>
+        <div class="section-container relative z-10">
+            <div class="max-w-3xl">
+                <p
+                    class="text-carmin text-sm tracking-widest uppercase font-medium mb-3 animate-fade-in"
+                >
+                    Especialización
+                </p>
+                <h1
+                    class="text-5xl lg:text-7xl font-[Outfit] font-bold text-white mb-6 animate-fade-up"
+                >
+                    Nuestros <span class="text-gradient-carmin">sectores</span>
+                </h1>
+                <p
+                    class="text-light-muted text-lg leading-relaxed animate-fade-up"
+                    style="animation-delay: 0.2s;"
+                >
+                    Conocemos tu industria. Adaptamos nuestro lenguaje visual a
+                    cada sector para maximizar el impacto.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="pb-24">
+        <div class="section-container">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {
+                    sectors.map((sector: any, idx: number) => (
+                        <a
+                            href={`/sectores/${sector.slug}`}
+                            class="group relative overflow-hidden rounded-3xl h-72 reveal"
+                            style={`animation-delay: ${idx * 0.1}s`}
+                        >
+                            <div
+                                class={`absolute inset-0 bg-gradient-to-br ${gradients[idx % gradients.length]} transition-all duration-700`}
+                            />
+                            <div class="absolute inset-0 bg-carmin/0 group-hover:bg-carmin/10 transition-all duration-500" />
+                            <div class="relative z-10 h-full flex flex-col justify-between p-8">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-5xl group-hover:scale-110 transition-transform duration-500 inline-block">
+                                        {sector.icon}
+                                    </span>
+                                    <svg
+                                        class="w-5 h-5 text-light-subtle opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M7 17L17 7M17 7H7M17 7v10"
+                                        />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-[Outfit] font-bold text-white mb-2">
+                                        {sector.title}
+                                    </h2>
+                                    <p class="text-light-muted text-sm line-clamp-2">
+                                        {sector.description}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="absolute inset-0 border border-white/5 group-hover:border-carmin/20 rounded-3xl transition-colors duration-500" />
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+</BaseLayout>
