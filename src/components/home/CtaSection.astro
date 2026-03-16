@@ -1,163 +1,281 @@
----
+v---
 /**
- * CTA Section — Premium with gradient background and visual elements
+ * CTA Section — Premium redesign
  */
 import { getSettings } from "../../lib/data";
 const settings = await getSettings();
 ---
 
-<section id="cta-section" class="py-24 lg:py-32 relative overflow-hidden min-h-screen flex flex-col justify-center">
-    <!-- Rich background -->
-    <div
-        class="absolute inset-0 bg-gradient-to-b from-dark-surface/50 via-carmin/5 to-dark"
-    >
+<section id="cta-section" class="cta-section">
+
+  <!-- Fondo atmosférico -->
+  <div class="cta-bg">
+    <div class="cta-bg__gradient"></div>
+    <div class="cta-bg__glow-left"></div>
+    <div class="cta-bg__glow-right"></div>
+    <div class="cta-bg__dots"></div>
+    <!-- Líneas decorativas horizontales -->
+    <div class="cta-bg__line cta-bg__line--top"></div>
+    <div class="cta-bg__line cta-bg__line--bottom"></div>
+  </div>
+
+  <div class="section-container cta-inner reveal">
+
+    <!-- Eyebrow -->
+    <div class="cta-eyebrow">
+      <span class="cta-eyebrow__dot"></span>
+      <span class="cta-eyebrow__text">¿Listo para empezar?</span>
     </div>
-    <div class="absolute inset-0 dot-pattern opacity-20"></div>
-    <div
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-carmin/10 rounded-full blur-[250px]"
-    >
+
+    <!-- Headline -->
+    <h2 class="cta-title">
+      Hablemos de<br />
+      <span class="text-gradient-carmin italic">tu próximo proyecto</span>
+    </h2>
+
+    <!-- Subtext -->
+    <p class="cta-subtitle">
+      Cuéntanos tu idea y crearemos una propuesta audiovisual a medida.<br class="hidden md:block" />
+      Primera consulta sin compromiso.
+    </p>
+
+    <!-- Botones -->
+    <div class="cta-actions">
+      <a href="/contacto" class="cta-btn cta-btn--primary group">
+        <span>Solicitar presupuesto</span>
+        <svg class="cta-btn__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10"/>
+        </svg>
+        <!-- Shimmer -->
+        <div class="cta-btn__shimmer"></div>
+      </a>
+
+      <a
+        href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20hablar%20sobre%20un%20proyecto%20audiovisual.`}
+        target="_blank" rel="noopener"
+        class="cta-btn cta-btn--wa group"
+      >
+        <svg class="cta-btn__wa-icon" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        </svg>
+        <span>WhatsApp directo</span>
+      </a>
     </div>
 
-    <div class="section-container relative z-10">
-        <div class="max-w-4xl mx-auto">
-            <!-- Card wrapper -->
-            <div class="relative rounded-[2rem] overflow-hidden reveal">
-                <!-- Background -->
-                <div
-                    class="absolute inset-0 bg-gradient-to-br from-carmin/20 via-dark-card to-carmin/10 border border-white/5 rounded-[2rem]"
-                >
-                </div>
-                <div
-                    class="absolute inset-0 dot-pattern opacity-10 rounded-[2rem]"
-                >
-                </div>
-
-                <div class="relative p-12 lg:p-20 text-center">
-                    <!-- Badge -->
-                    <div
-                        class="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-carmin/30 bg-carmin/10 mb-8"
-                    >
-                        <span class="text-label text-carmin-light"
-                            >¿Listo para empezar?</span
-                        >
-                    </div>
-
-                    <h2
-                        class="text-editorial-lg text-white mb-8 max-w-2xl mx-auto" style="text-align: center;"
-                    >
-                        Hablemos de<br />
-                        <span class="text-gradient-carmin italic"
-                            >tu próximo proyecto</span
-                        >
-                    </h2>
-
-                    <p
-                        class="text-light-muted max-w-lg mx-auto mb-10 text-base leading-relaxed"
-                    >
-                        Cuéntanos tu idea y crearemos una propuesta audiovisual
-                        a medida. Primera consulta sin compromiso.
-                    </p>
-
-                    <!-- CTAs -->
-                    <div
-                        class="flex flex-col sm:flex-row items-center justify-center gap-4"
-                    >
-                        <a
-                            href="/contacto"
-                            class="group relative inline-flex items-center gap-4 px-12 py-5 bg-gradient-to-br from-carmin-light via-carmin to-carmin-dark text-white font-display font-bold rounded-2xl overflow-hidden shadow-[0_20px_50px_-10px_rgba(232,54,79,0.5)] transition-all duration-500 hover:shadow-[0_25px_70px_-10px_rgba(232,54,79,0.7)] hover:-translate-y-1 active:scale-95 border border-white/20"
-                        >
-                            <span class="relative z-10 uppercase tracking-wider"
-                                >Solicitar presupuesto</span
-                            >
-                            <svg
-                                class="w-5 h-5 relative z-10 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M7 17L17 7M17 7H7M17 7v10"></path></svg
-                            >
-                            <div
-                                class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
-                            >
-                            </div>
-                        </a>
-                        <a
-                            href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20hablar%20sobre%20un%20proyecto%20audiovisual.`}
-                            target="_blank"
-                            rel="noopener"
-                            class="group inline-flex items-center gap-4 px-12 py-5 bg-white/5 border border-white/20 text-white font-display font-bold rounded-2xl backdrop-blur-2xl transition-all duration-500 hover:bg-[#25D366]/10 hover:border-[#25D366]/40 hover:shadow-[0_20px_40px_-15px_rgba(37,211,102,0.3)] hover:-translate-y-1 active:scale-95"
-                        >
-                            <svg
-                                class="w-5 h-5 text-[#25D366] transition-transform duration-300 group-hover:scale-110"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"
-                                ></path></svg
-                            >
-                            <span class="uppercase tracking-wider">WhatsApp directo</span>
-                        </a>
-                    </div>
-
-                    <!-- Trust badges -->
-                    <div
-                        class="flex items-center justify-center gap-8 mt-12 pt-8 border-t border-white/5"
-                    >
-                        <div
-                            class="flex items-center gap-2 text-light-subtle text-xs"
-                        >
-                            <svg
-                                class="w-4 h-4 text-emerald-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path></svg
-                            >
-                            Respuesta en 24h
-                        </div>
-                        <div
-                            class="flex items-center gap-2 text-light-subtle text-xs"
-                        >
-                            <svg
-                                class="w-4 h-4 text-emerald-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path></svg
-                            >
-                            Sin compromiso
-                        </div>
-                        <div
-                            class="flex items-center gap-2 text-light-subtle text-xs"
-                        >
-                            <svg
-                                class="w-4 h-4 text-emerald-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path></svg
-                            >
-                            Presupuesto gratis
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Trust row -->
+    <div class="cta-trust">
+      <div class="cta-trust__item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        <span>Respuesta en 24h</span>
+      </div>
+      <div class="cta-trust__sep"></div>
+      <div class="cta-trust__item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        <span>Sin compromiso</span>
+      </div>
+      <div class="cta-trust__sep"></div>
+      <div class="cta-trust__item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        <span>Presupuesto gratis</span>
+      </div>
     </div>
+
+  </div>
 </section>
+
+<style>
+/* ── Sección ───────────────────────────────────────────── */
+.cta-section {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 0;
+  min-height: 80vh;
+}
+
+/* ── Fondo ─────────────────────────────────────────────── */
+.cta-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cta-bg__gradient {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 120% 80% at 50% 60%, rgba(155,27,48,0.12) 0%, transparent 65%),
+              linear-gradient(to bottom, #0a0a0f 0%, #08080c 100%);
+}
+.cta-bg__glow-left {
+  position: absolute;
+  top: 20%; left: -10%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(155,27,48,0.08) 0%, transparent 70%);
+  filter: blur(60px);
+}
+.cta-bg__glow-right {
+  position: absolute;
+  bottom: 10%; right: -10%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(196,40,71,0.06) 0%, transparent 70%);
+  filter: blur(60px);
+}
+.cta-bg__dots {
+  position: absolute; inset: 0; opacity: .18;
+  background-image: radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.cta-bg__line {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent);
+}
+.cta-bg__line--top    { top: 0; }
+.cta-bg__line--bottom { bottom: 0; }
+
+/* ── Contenido ─────────────────────────────────────────── */
+.cta-inner {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  gap: 0;
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Eyebrow */
+.cta-eyebrow {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .375rem 1.125rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(155,27,48,.35);
+  background: rgba(155,27,48,.1);
+  backdrop-filter: blur(8px);
+  margin-bottom: 2rem;
+}
+.cta-eyebrow__dot {
+  display: block; width: 6px; height: 6px; border-radius: 50%;
+  background: #c42847;
+  box-shadow: 0 0 8px rgba(196,40,71,.8);
+  animation: cta-pulse 2s infinite;
+}
+.cta-eyebrow__text {
+  font-size: .75rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.7);
+}
+
+/* Título */
+.cta-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2.75rem, 6vw, 5rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  margin: 0 0 1.75rem;
+}
+
+/* Subtítulo */
+.cta-subtitle {
+  font-size: 1.0625rem;
+  color: rgba(255,255,255,.45);
+  line-height: 1.7;
+  max-width: 520px;
+  margin: 0 0 3rem;
+}
+
+/* ── Botones ────────────────────────────────────────────── */
+.cta-actions {
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.cta-btn {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; gap: .75rem;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: .9375rem; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  text-decoration: none;
+  transition: transform .25s, box-shadow .25s;
+  cursor: pointer;
+}
+.cta-btn:hover { transform: translateY(-2px); }
+.cta-btn:active { transform: scale(.97); }
+
+/* Primary */
+.cta-btn--primary {
+  background: linear-gradient(135deg, #c42847 0%, #9b1b30 100%);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.15);
+  box-shadow: 0 4px 24px rgba(155,27,48,.3), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.cta-btn--primary:hover {
+  box-shadow: 0 12px 40px rgba(155,27,48,.5), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.cta-btn__icon {
+  width: 1.125rem; height: 1.125rem;
+  transition: transform .3s;
+  flex-shrink: 0;
+}
+.cta-btn--primary:hover .cta-btn__icon {
+  transform: translate(3px, -3px);
+}
+/* Shimmer sweep */
+.cta-btn__shimmer {
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.15) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform .7s;
+  pointer-events: none;
+}
+.cta-btn--primary:hover .cta-btn__shimmer { transform: translateX(100%); }
+
+/* WhatsApp */
+.cta-btn--wa {
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.85);
+  border: 1px solid rgba(255,255,255,.1);
+  backdrop-filter: blur(8px);
+}
+.cta-btn--wa:hover {
+  background: rgba(37,211,102,.1);
+  border-color: rgba(37,211,102,.3);
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(37,211,102,.12);
+}
+.cta-btn__wa-icon {
+  width: 1.125rem; height: 1.125rem; flex-shrink: 0;
+  color: #25D366;
+  transition: transform .3s;
+}
+.cta-btn--wa:hover .cta-btn__wa-icon { transform: scale(1.15); }
+
+/* ── Trust ──────────────────────────────────────────────── */
+.cta-trust {
+  display: flex; align-items: center; gap: 1.25rem;
+  flex-wrap: wrap; justify-content: center;
+}
+.cta-trust__item {
+  display: flex; align-items: center; gap: .375rem;
+  font-size: .8125rem; color: rgba(255,255,255,.35);
+}
+.cta-trust__item svg {
+  width: .875rem; height: .875rem; flex-shrink: 0;
+  color: #10b981;
+}
+.cta-trust__sep {
+  width: 1px; height: 1rem;
+  background: rgba(255,255,255,.1);
+}
+
+@keyframes cta-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .35; }
+}
+</style>

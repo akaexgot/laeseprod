@@ -1,90 +1,53 @@
 ---
 /**
- * Navbar — Editorial Minimal
- * Ultra-clean with blend mode, motion-reduced glass, word-spaced links
+ * Navbar — Estado único, sin conflictos
  */
 import { getNavigation, getSettings } from "../../lib/data";
 const navigation = await getNavigation();
 const settings = await getSettings();
 ---
 
-<nav
-    id="navbar"
-    class="fixed top-0 left-0 w-full z-50 transition-all duration-700"
-    data-theme="dark"
->
-    <!-- Degradado superior (dark pages) o fondo blanco (light pages) -->
-    <div
-        class="absolute inset-0 bg-gradient-to-b from-[rgba(5,5,8,0.9)] via-[rgba(5,5,8,0.5)] to-transparent -z-10 transition-all duration-500"
-        id="nav-gradient"
-    >
-    </div>
+<nav id="navbar" class="fixed top-0 left-0 w-full z-50">
+    <div id="nav-bg" class="absolute inset-0 -z-10"></div>
 
     <div class="section-container">
-        <div class="flex items-center justify-between h-20 lg:h-24">
-            <!-- Logo -->
-            <a href="/" class="flex items-center gap-3 group" id="nav-logo">
-                <div
-                    class="w-9 h-9 bg-gradient-carmin rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
-                >
-                    <span class="text-white font-bold text-sm font-display"
-                        >V</span
-                    >
+        <div id="nav-inner" class="flex items-center justify-between h-20 lg:h-24 transition-all duration-300">
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-9 h-9 bg-gradient-carmin rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
+                    <span class="text-white font-bold text-sm font-display">V</span>
                 </div>
                 <div class="hidden sm:block">
-                    <span
-                        class="nav-brand-text text-white font-display font-semibold text-sm tracking-tight transition-colors duration-300"
-                        >VideoMarketing</span
-                    >
+                    <span id="nav-brand" class="font-display font-semibold text-sm tracking-tight transition-colors duration-300">VideoMarketing</span>
                 </div>
             </a>
 
-            <!-- Desktop Navigation -->
             <div class="hidden lg:flex items-center gap-6">
-                {
-                    navigation.map((item: any) => (
-                        <a
-                            href={item.href}
-                            class="nav-link relative px-3 py-2 text-light-muted text-base lg:text-lg font-medium transition-all duration-300 hover:text-white line-animated tracking-wide"
-                            data-href={item.href}
-                        >
-                            {item.label}
-                        </a>
-                    ))
-                }
+                {navigation.map((item: any) => (
+                    <a
+                        href={item.href}
+                        class="nav-link relative px-3 py-2 text-base lg:text-lg font-medium transition-colors duration-300 hover:opacity-100 line-animated tracking-wide"
+                        data-href={item.href}
+                    >
+                        {item.label}
+                    </a>
+                ))}
             </div>
 
-            <!-- CTA + Mobile Toggle -->
             <div class="flex items-center gap-3">
                 <a
                     href="/portal-clientes"
-                    class="nav-cta-btn flex items-center justify-center w-11 h-11 bg-white/5 border border-white/10 text-white rounded-full hover:bg-carmin hover:border-carmin hover:text-white transition-all duration-500 shadow-lg hover:shadow-carmin/30"
                     id="nav-cta"
+                    class="flex items-center justify-center w-11 h-11 rounded-full border transition-all duration-300 hover:bg-carmin hover:border-carmin hover:text-white"
                     title="Portal de Clientes"
                 >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
                 </a>
-
-                <!-- Mobile Menu Button -->
-                <button
-                    id="mobile-menu-toggle"
-                    class="lg:hidden relative w-10 h-10 flex items-center justify-center"
-                    aria-label="Menu"
-                >
-                    <div
-                        class="space-y-1.5 transition-all duration-300"
-                        id="hamburger"
-                    >
-                        <div
-                            class="hamburger-line w-6 h-px bg-white transition-all duration-300 origin-center"
-                            id="line1"
-                        >
-                        </div>
-                        <div
-                            class="hamburger-line w-4 h-px bg-white transition-all duration-300 ml-auto"
-                            id="line2"
-                        >
-                        </div>
+                <button id="mobile-menu-toggle" class="lg:hidden relative w-10 h-10 flex items-center justify-center rounded-full border border-white/10 bg-white/5" aria-label="Menu">
+                    <div class="space-y-1.5">
+                        <div class="hamburger-line w-6 h-px transition-all duration-300 origin-center" id="line1"></div>
+                        <div class="hamburger-line w-4 h-px transition-all duration-300 ml-auto" id="line2"></div>
                     </div>
                 </button>
             </div>
@@ -92,202 +55,194 @@ const settings = await getSettings();
     </div>
 </nav>
 
-<!-- Mobile Fullscreen Menu -->
-<div
-    id="mobile-menu"
-    class="fixed inset-0 z-40 bg-dark/98 backdrop-blur-2xl flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500"
->
+<!-- Mobile menu -->
+<div id="mobile-menu" class="fixed inset-0 z-40 bg-dark/98 backdrop-blur-2xl flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
     <div class="text-center">
         <nav class="space-y-2 mb-12">
-            {
-                navigation.map((item: any, idx: number) => (
-                    <a
-                        href={item.href}
-                        class="block text-3xl font-display font-bold text-white hover:text-gradient-carmin transition-all duration-300 py-2"
-                        style={`transition-delay: ${idx * 50}ms`}
-                    >
-                        <span class="text-label-sm text-carmin/50 mr-4">
-                            {String(idx + 1).padStart(2, "0")}
-                        </span>
-                        {item.label}
-                    </a>
-                ))
-            }
+            {navigation.map((item: any, idx: number) => (
+                <a href={item.href} class="block text-3xl font-display font-bold text-white py-2 transition-all duration-300 hover:text-carmin" style={`transition-delay:${idx*50}ms`}>
+                    <span class="text-label-sm text-carmin/50 mr-4">{String(idx+1).padStart(2,"0")}</span>
+                    {item.label}
+                </a>
+            ))}
         </nav>
-        <a
-            href={`https://wa.me/${settings.whatsapp_number}`}
-            target="_blank"
-            rel="noopener"
-            class="inline-flex items-center gap-2 text-[#25D366] text-sm font-mono"
-        >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"
-                ><path
-                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"
-                ></path></svg
-            >
+        <a href={`https://wa.me/${settings.whatsapp_number}`} target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-[#25D366] text-sm font-mono">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
             WhatsApp
         </a>
     </div>
 </div>
 
 <!-- Floating WhatsApp -->
-<a
-    href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20saber%20más%20sobre%20vuestros%20servicios.`}
-    target="_blank"
-    rel="noopener"
-    class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-500 group"
-    id="whatsapp-float"
-    aria-label="WhatsApp"
->
-    <svg
-        class="w-7 h-7 text-white transition-transform duration-300 group-hover:rotate-12"
-        fill="currentColor"
-        viewBox="0 0 24 24"
-        ><path
-            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
-        ></path></svg
-    >
+<a href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20saber%20más%20sobre%20vuestros%20servicios.`} target="_blank" rel="noopener"
+   class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-500 group" aria-label="WhatsApp">
+    <svg class="w-7 h-7 text-white transition-transform duration-300 group-hover:rotate-12" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    </svg>
 </a>
 
 <script>
-    // Detect light-mode pages
-    const navbar = document.getElementById("navbar");
-    const navGradient = document.getElementById("nav-gradient");
-    const currentPath = window.location.pathname;
-    const lightPages = ["/proyectos", "/quienes-somos", "/contacto"];
-    const isLightPage = lightPages.some(p => currentPath === p || currentPath.startsWith(p + "/"));
+(function () {
+    const navbar   = document.getElementById('navbar')!;
+    const navBg    = document.getElementById('nav-bg')!;
+    const navBrand = document.getElementById('nav-brand')!;
+    const navCta   = document.getElementById('nav-cta')!;
+    const navInner = document.getElementById('nav-inner')!;
+    const links    = navbar.querySelectorAll<HTMLElement>('.nav-link');
+    const lines    = navbar.querySelectorAll<HTMLElement>('.hamburger-line');
 
-    function applyLightTheme() {
-        if (!navbar) return;
-        navbar.dataset.theme = "light";
-        // Solid white background
-        if (navGradient) {
-            navGradient.style.background = "white";
-            navGradient.style.boxShadow = "0 1px 3px rgba(0,0,0,0.08)";
-            navGradient.style.opacity = "1";
-        }
-        // Dark text for links
-        navbar.querySelectorAll(".nav-link").forEach(link => {
-            link.classList.remove("text-light-muted", "hover:text-white");
-            link.classList.add("text-dark-subtle", "hover:text-dark");
+    const path        = window.location.pathname;
+    const lightPages  = ['/proyectos', '/quienes-somos', '/contacto'];
+    const isLightPage = lightPages.some(p => path === p || path.startsWith(p + '/'));
+
+    // ── Estilos por tema ──────────────────────────────────────────────
+    // DARK TRANSPARENT: encima de video/dark section sin scroll
+    const STYLE_DARK_TRANSPARENT = {
+        bg:         'linear-gradient(to bottom, rgba(5,5,8,0.55) 0%, rgba(5,5,8,0.12) 65%, transparent 100%)',
+        bgFilter:   'none',
+        border:     'none',
+        linkColor:  'rgba(255,255,255,0.80)',
+        linkHover:  '#ffffff',
+        brand:      '#ffffff',
+        cta:        { color: '#ffffff', border: 'rgba(255,255,255,0.15)', bg: 'rgba(255,255,255,0.05)' },
+        lines:      '#ffffff',
+        height:     true,   // h-24
+    };
+
+    // DARK SOLID: scroll hacia abajo en páginas oscuras, fuera de featured
+    const STYLE_DARK_SOLID = {
+        bg:         'rgba(5,5,8,0.88)',
+        bgFilter:   'blur(14px)',
+        border:     '1px solid rgba(255,255,255,0.06)',
+        linkColor:  'rgba(255,255,255,0.75)',
+        linkHover:  '#ffffff',
+        brand:      '#ffffff',
+        cta:        { color: '#ffffff', border: 'rgba(255,255,255,0.15)', bg: 'rgba(255,255,255,0.05)' },
+        lines:      '#ffffff',
+        height:     false,  // h-18
+    };
+
+    // LIGHT: páginas blancas
+    const STYLE_LIGHT = {
+        bg:         '#ffffff',
+        bgFilter:   'none',
+        border:     '0 1px 0 0 rgba(0,0,0,0.07)',
+        linkColor:  '#6b7280',
+        linkHover:  '#111111',
+        brand:      '#111111',
+        cta:        { color: '#111111', border: 'rgba(0,0,0,0.12)', bg: 'rgba(0,0,0,0.04)' },
+        lines:      '#111111',
+        height:     false,
+    };
+
+    function applyStyle(s: typeof STYLE_DARK_TRANSPARENT) {
+        // Fondo
+        navBg.style.background       = s.bg;
+        navBg.style.backdropFilter   = s.bgFilter;
+        (navBg.style as any).webkitBackdropFilter = s.bgFilter;
+        navBg.style.boxShadow        = s.border;
+        navBg.style.opacity          = '1';   // NUNCA ocultar
+
+        // Links
+        links.forEach(l => {
+            l.style.color = s.linkColor;
+            l.onmouseenter = () => { l.style.color = s.linkHover; };
+            l.onmouseleave = () => { l.style.color = s.linkColor; };
         });
-        // Brand text
-        const brandText = navbar.querySelector(".nav-brand-text");
-        if (brandText) {
-            brandText.classList.remove("text-white");
-            brandText.classList.add("text-dark");
+
+        // Brand
+        navBrand.style.color = s.brand;
+
+        // CTA
+        navCta.style.color            = s.cta.color;
+        navCta.style.borderColor      = s.cta.border;
+        navCta.style.backgroundColor  = s.cta.bg;
+
+        // Hamburger
+        lines.forEach(l => { l.style.background = s.lines; });
+
+        // Altura
+        if (s.height) {
+            navInner.style.height = '';
+            navInner.classList.add('lg:h-24');
+            navInner.classList.remove('lg:h-18');
+        } else {
+            navInner.classList.remove('lg:h-24');
+            navInner.classList.add('lg:h-18');
         }
-        // CTA button
-        const ctaBtn = navbar.querySelector(".nav-cta-btn");
-        if (ctaBtn) {
-            ctaBtn.classList.remove("bg-white/5", "border-white/10", "text-white");
-            ctaBtn.classList.add("bg-dark/5", "border-dark/10", "text-dark");
-        }
-        // Hamburger lines
-        navbar.querySelectorAll(".hamburger-line").forEach(line => {
-            line.classList.remove("bg-white");
-            line.classList.add("bg-dark");
-        });
     }
 
-    if (isLightPage) {
-        applyLightTheme();
+    // ── Estado actual ─────────────────────────────────────────────────
+    // 'dark-transparent' | 'dark-solid' | 'light'
+    let currentState = '';
+
+    function getDesiredState(): string {
+        if (isLightPage) return 'light';
+
+        // ¿El navbar está visualmente sobre #featured-projects?
+        const fp = document.getElementById('featured-projects');
+        if (fp) {
+            const fpTop    = fp.offsetTop;
+            const fpBottom = fpTop + fp.offsetHeight;
+            const navBottom = window.scrollY + 96; // altura navbar
+            if (navBottom >= fpTop && navBottom <= fpBottom) {
+                return 'dark-transparent';
+            }
+        }
+
+        // Scroll normal en páginas oscuras
+        return window.scrollY > 80 ? 'dark-solid' : 'dark-transparent';
     }
 
-    // Navbar scroll behavior
-    window.addEventListener("scroll", () => {
-        const currentScroll = window.scrollY;
+    function update() {
+        const desired = getDesiredState();
+        if (desired === currentState) return;
+        currentState = desired;
 
-        if (currentScroll > 80) {
-            if (isLightPage) {
-                // White glass with subtle shadow
-                navbar?.classList.add("border-b", "border-gray-200");
-                if (navGradient) {
-                    navGradient.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
-                }
-            } else {
-                navbar?.classList.add("glass-strong", "border-b", "border-white/5");
-                navGradient?.classList.add("opacity-0");
-            }
-            navbar
-                ?.querySelector(".section-container div")
-                ?.classList.remove("lg:h-24");
-            navbar
-                ?.querySelector(".section-container div")
-                ?.classList.add("lg:h-18");
+        if (desired === 'dark-transparent') applyStyle(STYLE_DARK_TRANSPARENT);
+        else if (desired === 'dark-solid')  applyStyle(STYLE_DARK_SOLID);
+        else                                applyStyle(STYLE_LIGHT);
+    }
+
+    // Ejecutar en scroll y también en resize (por si cambia offsetTop)
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    // Ejecutar al cargar
+    update();
+
+    // ── Active link ───────────────────────────────────────────────────
+    links.forEach(link => {
+        const href = link.dataset.href;
+        if (href === path || (href !== '/' && path.startsWith(href ?? ''))) {
+            link.style.fontWeight = '600';
+        }
+    });
+
+    // ── Mobile menu ───────────────────────────────────────────────────
+    const toggle = document.getElementById('mobile-menu-toggle')!;
+    const menu   = document.getElementById('mobile-menu')!;
+    const line1  = document.getElementById('line1')!;
+    const line2  = document.getElementById('line2')!;
+    let open = false;
+
+    toggle.addEventListener('click', () => {
+        open = !open;
+        if (open) {
+            menu.classList.remove('opacity-0','pointer-events-none');
+            menu.classList.add('opacity-100','pointer-events-auto');
+            line1.classList.add('rotate-45','translate-y-[4px]');
+            line2.classList.add('-rotate-45','-translate-y-[3px]','w-6');
+            line1.style.background = '#fff';
+            line2.style.background = '#fff';
+            document.body.style.overflow = 'hidden';
         } else {
-            if (isLightPage) {
-                navbar?.classList.remove("border-b", "border-gray-200");
-                if (navGradient) {
-                    navGradient.style.boxShadow = "0 1px 3px rgba(0,0,0,0.08)";
-                }
-            } else {
-                navbar?.classList.remove(
-                    "glass-strong",
-                    "border-b",
-                    "border-white/5",
-                );
-                navGradient?.classList.remove("opacity-0");
-            }
-            navbar
-                ?.querySelector(".section-container div")
-                ?.classList.add("lg:h-24");
-            navbar
-                ?.querySelector(".section-container div")
-                ?.classList.remove("lg:h-18");
+            menu.classList.add('opacity-0','pointer-events-none');
+            menu.classList.remove('opacity-100','pointer-events-auto');
+            line1.classList.remove('rotate-45','translate-y-[4px]');
+            line2.classList.remove('-rotate-45','-translate-y-[3px]','w-6');
+            document.body.style.overflow = '';
+            update(); // restaurar colores correctos tras cerrar
         }
     });
-
-    // Active link
-    document.querySelectorAll(".nav-link").forEach((link) => {
-        const href = (link as HTMLElement).dataset.href;
-        if (
-            href === currentPath ||
-            (href !== "/" && currentPath.startsWith(href || ""))
-        ) {
-            if (isLightPage) {
-                link.classList.add("text-dark", "font-semibold");
-                link.classList.remove("text-dark-subtle", "text-light-muted");
-            } else {
-                link.classList.add("text-white");
-                link.classList.remove("text-light-muted");
-            }
-        }
-    });
-
-    // Mobile menu
-    const toggle = document.getElementById("mobile-menu-toggle");
-    const menu = document.getElementById("mobile-menu");
-    const line1 = document.getElementById("line1");
-    const line2 = document.getElementById("line2");
-    let menuOpen = false;
-
-    toggle?.addEventListener("click", () => {
-        menuOpen = !menuOpen;
-        if (menuOpen) {
-            menu?.classList.remove("opacity-0", "pointer-events-none");
-            menu?.classList.add("opacity-100", "pointer-events-auto");
-            line1?.classList.add("rotate-45", "translate-y-[4px]");
-            line2?.classList.add("-rotate-45", "-translate-y-[3px]", "w-6");
-            // On mobile menu open, revert hamburger to white for dark overlay
-            line1?.classList.remove("bg-dark");
-            line1?.classList.add("bg-white");
-            line2?.classList.remove("bg-dark");
-            line2?.classList.add("bg-white");
-            document.body.style.overflow = "hidden";
-        } else {
-            menu?.classList.add("opacity-0", "pointer-events-none");
-            menu?.classList.remove("opacity-100", "pointer-events-auto");
-            line1?.classList.remove("rotate-45", "translate-y-[4px]");
-            line2?.classList.remove("-rotate-45", "-translate-y-[3px]", "w-6");
-            // Restore to light-page colors if applicable
-            if (isLightPage) {
-                line1?.classList.add("bg-dark");
-                line1?.classList.remove("bg-white");
-                line2?.classList.add("bg-dark");
-                line2?.classList.remove("bg-white");
-            }
-            document.body.style.overflow = "";
-        }
-    });
+})();
 </script>
