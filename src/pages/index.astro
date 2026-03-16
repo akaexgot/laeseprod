@@ -116,3 +116,28 @@ import CtaSection from "../components/home/CtaSection.astro";
 		}, { passive: false });
 	});
 </script>
+
+<script>
+	/* ── Lazy-load YouTube iframes on section visibility ── */
+	document.addEventListener('DOMContentLoaded', () => {
+		const lazyIframes = document.querySelectorAll('iframe[data-src]');
+		if (lazyIframes.length === 0) return;
+
+		const iframeObserver = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					const iframe = entry.target as HTMLIFrameElement;
+					if (!iframe.src || iframe.src === '' || iframe.src === window.location.href) {
+						iframe.src = iframe.dataset.src || '';
+					}
+					iframe.style.opacity = '1';
+				}
+			});
+		}, {
+			threshold: 0.05,
+			rootMargin: '200px 0px 200px 0px'
+		});
+
+		lazyIframes.forEach(el => iframeObserver.observe(el));
+	});
+</script>

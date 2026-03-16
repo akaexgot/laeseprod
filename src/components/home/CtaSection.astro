@@ -22,25 +22,25 @@ const settings = await getSettings();
   <div class="section-container cta-inner reveal">
 
     <!-- Eyebrow -->
-    <div class="cta-eyebrow">
+    <div class="cta-eyebrow reveal delay-1">
       <span class="cta-eyebrow__dot"></span>
       <span class="cta-eyebrow__text">¿Listo para empezar?</span>
     </div>
 
     <!-- Headline -->
-    <h2 class="cta-title">
+    <h2 class="cta-title reveal delay-2">
       Hablemos de<br />
       <span class="text-gradient-carmin italic">tu próximo proyecto</span>
     </h2>
 
     <!-- Subtext -->
-    <p class="cta-subtitle">
+    <p class="cta-subtitle reveal delay-3">
       Cuéntanos tu idea y crearemos una propuesta audiovisual a medida.<br class="hidden md:block" />
       Primera consulta sin compromiso.
     </p>
 
     <!-- Botones -->
-    <div class="cta-actions">
+    <div class="cta-actions reveal delay-4">
       <a href="/contacto" class="cta-btn cta-btn--primary group">
         <span>Solicitar presupuesto</span>
         <svg class="cta-btn__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +63,7 @@ const settings = await getSettings();
     </div>
 
     <!-- Trust row -->
-    <div class="cta-trust">
+    <div class="cta-trust reveal delay-5">
       <div class="cta-trust__item">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
         <span>Respuesta en 24h</span>
@@ -87,12 +87,12 @@ const settings = await getSettings();
 /* ── Sección ───────────────────────────────────────────── */
 .cta-section {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8rem 0;
-  min-height: 80vh;
+  padding: 4rem 1.5rem;
+  min-height: 100vh;
 }
 
 /* ── Fondo ─────────────────────────────────────────────── */

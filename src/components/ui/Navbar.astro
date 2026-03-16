@@ -7,21 +7,18 @@ const navigation = await getNavigation();
 const settings = await getSettings();
 ---
 
-<nav id="navbar" class="fixed top-0 left-0 w-full z-50">
-    <div id="nav-bg" class="absolute inset-0 -z-10"></div>
+<nav id="navbar" class="fixed top-0 inset-x-0 z-50 transition-all duration-300">
+    <div id="nav-bg" class="absolute inset-0 -z-10 transition-all duration-300"></div>
 
-    <div class="section-container">
+    <div class="section-container relative">
         <div id="nav-inner" class="flex items-center justify-between h-20 lg:h-24 transition-all duration-300">
-            <a href="/" class="flex items-center gap-3 group">
-                <div class="w-9 h-9 bg-gradient-carmin rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
-                    <span class="text-white font-bold text-sm font-display">V</span>
-                </div>
-                <div class="hidden sm:block">
-                    <span id="nav-brand" class="font-display font-semibold text-sm tracking-tight transition-colors duration-300">VideoMarketing</span>
-                </div>
+            <!-- Izquierda: Logo -->
+            <a href="/" class="flex lg:flex-1 items-center justify-start group">
+                <img src="/logo-provisional.png" alt="VideoMarketing Sevilla Logo" class="h-8 lg:h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-110" />
             </a>
 
-            <div class="hidden lg:flex items-center gap-6">
+            <!-- Centro: Links (Absolutamente centrados) -->
+            <div class="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6">
                 {navigation.map((item: any) => (
                     <a
                         href={item.href}
@@ -33,7 +30,8 @@ const settings = await getSettings();
                 ))}
             </div>
 
-            <div class="flex items-center gap-3">
+            <!-- Derecha: CTA y Hamburger -->
+            <div class="flex lg:flex-1 items-center justify-end gap-3">
                 <a
                     href="/portal-clientes"
                     id="nav-cta"
@@ -85,7 +83,7 @@ const settings = await getSettings();
 (function () {
     const navbar   = document.getElementById('navbar')!;
     const navBg    = document.getElementById('nav-bg')!;
-    const navBrand = document.getElementById('nav-brand')!;
+    const navBrand = document.getElementById('nav-brand');
     const navCta   = document.getElementById('nav-cta')!;
     const navInner = document.getElementById('nav-inner')!;
     const links    = navbar.querySelectorAll<HTMLElement>('.nav-link');
@@ -109,21 +107,22 @@ const settings = await getSettings();
         height:     true,   // h-24
     };
 
-    // DARK SOLID: scroll hacia abajo en páginas oscuras, fuera de featured
+    // DARK SOLID: scroll hacia abajo
+    // Fondo blanco con letras rojas solicitado por el usuario
     const STYLE_DARK_SOLID = {
-        bg:         'rgba(5,5,8,0.88)',
-        bgFilter:   'blur(14px)',
-        border:     '1px solid rgba(255,255,255,0.06)',
-        linkColor:  'rgba(255,255,255,0.75)',
-        linkHover:  '#ffffff',
-        brand:      '#ffffff',
-        cta:        { color: '#ffffff', border: 'rgba(255,255,255,0.15)', bg: 'rgba(255,255,255,0.05)' },
-        lines:      '#ffffff',
+        bg:         '#ffffff', 
+        bgFilter:   'none',
+        border:     '0 1px 0 0 rgba(0,0,0,0.1)',
+        linkColor:  '#ba1929', 
+        linkHover:  '#9b1422',
+        brand:      '#ba1929',
+        cta:        { color: '#ba1929', border: 'rgba(186,25,41,0.2)', bg: 'rgba(186,25,41,0.05)' },
+        lines:      '#ba1929',
         height:     false,  // h-18
     };
 
-    // LIGHT: páginas blancas
-    const STYLE_LIGHT = {
+    // LIGHT_TOP: páginas blancas sin scroll
+    const STYLE_LIGHT_TOP = {
         bg:         '#ffffff',
         bgFilter:   'none',
         border:     '0 1px 0 0 rgba(0,0,0,0.07)',
@@ -135,13 +134,15 @@ const settings = await getSettings();
         height:     false,
     };
 
+
+
     function applyStyle(s: typeof STYLE_DARK_TRANSPARENT) {
         // Fondo
         navBg.style.background       = s.bg;
         navBg.style.backdropFilter   = s.bgFilter;
         (navBg.style as any).webkitBackdropFilter = s.bgFilter;
         navBg.style.boxShadow        = s.border;
-        navBg.style.opacity          = '1';   // NUNCA ocultar
+        navBg.style.opacity          = '1';
 
         // Links
         links.forEach(l => {
@@ -151,7 +152,7 @@ const settings = await getSettings();
         });
 
         // Brand
-        navBrand.style.color = s.brand;
+        if (navBrand) navBrand.style.color = s.brand;
 
         // CTA
         navCta.style.color            = s.cta.color;
@@ -163,7 +164,6 @@ const settings = await getSettings();
 
         // Altura
         if (s.height) {
-            navInner.style.height = '';
             navInner.classList.add('lg:h-24');
             navInner.classList.remove('lg:h-18');
         } else {
@@ -177,7 +177,9 @@ const settings = await getSettings();
     let currentState = '';
 
     function getDesiredState(): string {
-        if (isLightPage) return 'light';
+        if (isLightPage) {
+            return window.scrollY > 80 ? 'light' : 'light-top';
+        }
 
         // ¿El navbar está visualmente sobre #featured-projects?
         const fp = document.getElementById('featured-projects');
@@ -201,7 +203,8 @@ const settings = await getSettings();
 
         if (desired === 'dark-transparent') applyStyle(STYLE_DARK_TRANSPARENT);
         else if (desired === 'dark-solid')  applyStyle(STYLE_DARK_SOLID);
-        else                                applyStyle(STYLE_LIGHT);
+        else if (desired === 'light-top')   applyStyle(STYLE_LIGHT_TOP);
+        else                                applyStyle(STYLE_DARK_SOLID); // negro al scroll en light
     }
 
     // Ejecutar en scroll y también en resize (por si cambia offsetTop)

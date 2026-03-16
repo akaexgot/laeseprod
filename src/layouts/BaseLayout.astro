@@ -27,6 +27,13 @@ const { title, description, image, noindex } = Astro.props;
             image={image}
             noindex={noindex}
         />
+        <!-- Preconnect for performance -->
+        <link rel="preconnect" href="https://www.youtube.com" />
+        <link rel="preconnect" href="https://i.ytimg.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
+        <link rel="dns-prefetch" href="https://www.google.com" />
     </head>
     <body class="bg-dark text-light antialiased">
         <Navbar />
@@ -44,19 +51,20 @@ const { title, description, image, noindex } = Astro.props;
                     entries.forEach((entry) => {
                         if (entry.isIntersecting) {
                             entry.target.classList.add("is-visible");
-                            observer.unobserve(entry.target);
+                        } else {
+                            entry.target.classList.remove("is-visible");
                         }
                     });
                 },
                 {
                     threshold: 0.08,
-                    rootMargin: "0px 0px -30px 0px",
+                    rootMargin: "0px 0px -5% 0px",
                 },
             );
 
             document
                 .querySelectorAll(
-                    ".reveal, .reveal-left, .reveal-right, .stagger-children",
+                    ".reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-bottom, .reveal-zoom, .stagger-children",
                 )
                 .forEach((el) => {
                     observer.observe(el);
