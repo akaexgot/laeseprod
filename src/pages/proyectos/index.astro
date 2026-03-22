@@ -1,12 +1,44 @@
 ---
 /**
- * Projects Listing Page — Premium redesign
+ * Projects Listing Page — Fullpage Scroll Mosaic
+ * Each "page" shows 3-4 videos that fill the viewport
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import "../../styles/proyectos.css";
 import { getProjects } from '../../lib/data';
 
 const projects = await getProjects();
+
+const DEMO_IDS = new Set(['dQw4w9WgXcQ', 'D91q99QK11k']);
+const DEFAULT_VIDEO = 'n8F2cllaiN0';
+
+function getVideoId(value: string | null | undefined): string {
+  if (value) {
+    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    const id = match ? match[1] : (/^[A-Za-z0-9_-]{11}$/.test(value.trim()) ? value.trim() : null);
+    if (id && !DEMO_IDS.has(id)) return id;
+  }
+  return DEFAULT_VIDEO;
+}
+
+/**
+ * Group projects into "screens" of 3-4 items each
+ * Pattern alternates: 3, 4, 3, 4, ...
+ */
+function groupIntoScreens(projects: any[]) {
+  const screens: any[][] = [];
+  let i = 0;
+  let groupSize = 3;
+
+  while (i < projects.length) {
+    screens.push(projects.slice(i, i + groupSize));
+    i += groupSize;
+    groupSize = groupSize === 3 ? 4 : 3; // alternate
+  }
+  return screens;
+}
+
+const screens = groupIntoScreens(projects);
 ---
 
 <BaseLayout
@@ -14,106 +46,124 @@ const projects = await getProjects();
   description="Descubre nuestros proyectos de video marketing. Producción audiovisual para empresas en Sevilla, Cádiz y toda España."
 >
 
-    <!-- ═══ HERO ═══ -->
-    <section class="pj-hero">
-        <div class="pj-hero__dots"></div>
-        <div class="pj-hero__glow"></div>
-        <div class="section-container pj-hero__inner">
-            <div class="pj-hero__badge">
-                <span class="pj-hero__dot"></span>
-                <span>Portfolio</span>
-            </div>
-            <h1 class="pj-hero__title">
-                Nuestros <span class="text-gradient-carmin">proyectos</span>
-            </h1>
-            <p class="pj-hero__subtitle">
-                Cada proyecto es una historia única. Descubre cómo hemos ayudado<br class="hidden md:block" />
-                a empresas a comunicar su mensaje a través del vídeo.
-            </p>
-            <!-- Counter -->
-            <div class="pj-hero__count">
-                <span class="pj-hero__count-number">{projects.length}</span>
-                <span class="pj-hero__count-label">proyectos realizados</span>
-            </div>
-        </div>
-    </section>
+    {projects.length === 0 ? (
+        <section class="pj-screen pj-screen--empty">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <p>Próximamente nuevos proyectos</p>
+        </section>
+    ) : (
+        screens.map((group, screenIdx) => {
+            const isFirst = screenIdx === 0;
+            const count = group.length;
+            // Layout class: 3 items = split (1 big + 2 stacked), 4 items = grid 2x2
+            const layoutClass = (count === 1 || count === 2 || count === 3) ? 'pj-screen--split' : 'pj-screen--grid';
+            const flipClass = (screenIdx % 2 !== 0 && (count === 1 || count === 2 || count === 3)) ? 'pj-screen--flip' : '';
 
-    <!-- ═══ GRID ═══ -->
-    <section class="pj-grid-section">
-        <div class="pj-grid-section__dots"></div>
-        <div class="section-container pj-grid-section__inner">
-
-            {projects.length === 0 ? (
-                <div class="pj-empty">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                    </svg>
-                    <p>Próximamente nuevos proyectos</p>
-                </div>
-            ) : (
-                <div class="pj-grid">
-                    {projects.map((project: any, idx: number) => (
-                        <a
-                            href={`/proyectos/${project.slug}`}
-                            class="pj-card reveal"
-                            style={`animation-delay:${idx * 0.08}s`}
-                        >
-                            <!-- Thumbnail / video bg -->
-                            <div class="pj-card__media">
-                                {project.thumbnail ? (
-                                    <img
-                                        src={project.thumbnail}
-                                        alt={project.title}
-                                        class="pj-card__img"
+            return (
+                <section class={`pj-screen ${layoutClass} ${flipClass} ${isFirst ? 'pj-screen--first' : ''}`}>
+                    {(count === 1 || count === 2 || count === 3) ? (
+                        <>
+                            {/* Large cell */}
+                            <a href={`/proyectos/${group[0].slug}`} class="pj-cell pj-cell--large group">
+                                <div class="pj-cell__video">
+                                    <iframe
+                                        class="pj-cell__iframe"
+                                        data-src={`https://www.youtube.com/embed/${getVideoId(group[0].video_project)}?autoplay=1&mute=1&loop=1&playlist=${getVideoId(group[0].video_project)}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                        src=""
+                                        frameborder="0" allow="autoplay; encrypted-media"
                                         loading="lazy"
-                                    />
-                                ) : (
-                                    <div class="pj-card__no-thumb">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                        </svg>
+                                    ></iframe>
+                                    {group[0].thumbnail && <img src={group[0].thumbnail} alt={group[0].title} class="pj-cell__thumb" loading="lazy" />}
+                                </div>
+                                <div class="pj-cell__overlay"></div>
+                                <div class="pj-cell__info">
+                                    <span class="pj-cell__client">{group[0].client_name}</span>
+                                    <h3 class="pj-cell__title pj-cell__title--lg">{group[0].title}</h3>
+                                    {group[0].subtitle && <p class="pj-cell__subtitle">{group[0].subtitle}</p>}
+                                    <div class="pj-cell__cta">
+                                        <span>Ver proyecto</span>
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                                     </div>
-                                )}
-                                <!-- Overlay -->
-                                <div class="pj-card__overlay"></div>
-                                <!-- Play button -->
-                                <div class="pj-card__play">
-                                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 </div>
+                            </a>
+
+                            {/* Stacked cells */}
+                            <div class="pj-stack">
+                                {group.slice(1).map((item: any) => {
+                                    const vid = getVideoId(item.video_project);
+                                    return (
+                                        <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--stacked group">
+                                            <div class="pj-cell__video">
+                                                <iframe
+                                                    class="pj-cell__iframe"
+                                                    data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                                    src=""
+                                                    frameborder="0" allow="autoplay; encrypted-media"
+                                                    loading="lazy"
+                                                ></iframe>
+                                                {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                            </div>
+                                            <div class="pj-cell__overlay"></div>
+                                            <div class="pj-cell__info">
+                                                <span class="pj-cell__client">{item.client_name}</span>
+                                                <h3 class="pj-cell__title">{item.title}</h3>
+                                                <div class="pj-cell__cta">
+                                                    <span>Ver proyecto</span>
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    );
+                                })}
                             </div>
+                        </>
+                    ) : (
+                        /* 4 items: 2x2 grid */
+                        group.map((item: any) => {
+                            const vid = getVideoId(item.video_project);
+                            return (
+                                <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--quarter group">
+                                    <div class="pj-cell__video">
+                                        <iframe
+                                            class="pj-cell__iframe"
+                                            data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                            src=""
+                                            frameborder="0" allow="autoplay; encrypted-media"
+                                            loading="lazy"
+                                        ></iframe>
+                                        {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                    </div>
+                                    <div class="pj-cell__overlay"></div>
+                                    <div class="pj-cell__info">
+                                        <span class="pj-cell__client">{item.client_name}</span>
+                                        <h3 class="pj-cell__title">{item.title}</h3>
+                                        <div class="pj-cell__cta">
+                                            <span>Ver proyecto</span>
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                        </div>
+                                    </div>
+                                </a>
+                            );
+                        })
+                    )}
 
-                            <!-- Info -->
-                            <div class="pj-card__info">
-                                <div class="pj-card__client">
-                                    <span class="pj-card__client-avatar">
-                                        {project.client_name?.charAt(0) ?? '?'}
-                                    </span>
-                                    <span class="pj-card__client-name">{project.client_name}</span>
-                                </div>
-                                <h3 class="pj-card__title">{project.title}</h3>
-                                {project.subtitle && (
-                                    <p class="pj-card__subtitle">{project.subtitle}</p>
-                                )}
-                                <div class="pj-card__cta">
-                                    Ver proyecto
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                    </svg>
-                                </div>
-                            </div>
-
-                        </a>
-                    ))}
-                </div>
-            )}
-
-        </div>
-    </section>
+                    {/* Screen indicator */}
+                    <div class="pj-screen__indicator">
+                        <span>{String(screenIdx + 1).padStart(2, '0')}</span>
+                        <span class="pj-screen__indicator-sep">/</span>
+                        <span>{String(screens.length).padStart(2, '0')}</span>
+                    </div>
+                </section>
+            );
+        })
+    )}
 
     <!-- ═══ CTA BOTTOM ═══ -->
-    <section class="pj-cta">
+    <section class="pj-screen pj-cta-screen">
         <div class="pj-cta__glow"></div>
-        <div class="section-container pj-cta__inner">
+        <div class="pj-cta__inner">
             <h2 class="pj-cta__title">¿Quieres un proyecto como estos?</h2>
             <p class="pj-cta__text">Cuéntanos tu idea y creamos algo único para tu marca.</p>
             <a href="/contacto" class="pj-cta__btn">
@@ -127,6 +177,79 @@ const projects = await getProjects();
 
 </BaseLayout>
 
----existing code---
-<link rel="stylesheet" href="/src/styles/proyectos.css">
----existing code---
+<script>
+    /* ── Lazy-load YouTube iframes ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const lazyIframes = document.querySelectorAll('.pj-cell__iframe[data-src]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const iframe = entry.target as HTMLIFrameElement;
+                    if (!iframe.src || iframe.src === '' || iframe.src === window.location.href) {
+                        iframe.src = iframe.dataset.src || '';
+                    }
+                    const thumb = iframe.closest('.pj-cell__video')?.querySelector('.pj-cell__thumb') as HTMLElement;
+                    if (thumb) setTimeout(() => { thumb.style.opacity = '0'; }, 1500);
+                    observer.unobserve(iframe);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '300px 0px 300px 0px' });
+        lazyIframes.forEach(el => observer.observe(el));
+    });
+
+    /* ── Fullpage Scroll ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = Array.from(document.querySelectorAll('.pj-screen'));
+        if (sections.length === 0) return;
+
+        let isScrolling = false;
+        let scrollTimeout: ReturnType<typeof setTimeout>;
+
+        function getVisibleSectionIndex() {
+            let maxIdx = 0, maxArea = 0;
+            sections.forEach((sec, idx) => {
+                const r = sec.getBoundingClientRect();
+                const visible = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0));
+                if (visible > maxArea) { maxArea = visible; maxIdx = idx; }
+            });
+            return maxIdx;
+        }
+
+        function scrollTo(index: number) {
+            if (index < 0 || index >= sections.length || isScrolling) return;
+            isScrolling = true;
+            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => { isScrolling = false; }, 1300);
+        }
+
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (isScrolling) return;
+            const cur = getVisibleSectionIndex();
+            scrollTo(e.deltaY > 0 ? cur + 1 : cur - 1);
+        }, { passive: false });
+
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].screenY; }, { passive: false });
+        window.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+        window.addEventListener('touchend', (e) => {
+            if (isScrolling) return;
+            const delta = touchStartY - e.changedTouches[0].screenY;
+            const cur = getVisibleSectionIndex();
+            if (delta > 50) scrollTo(cur + 1);
+            else if (delta < -50) scrollTo(cur - 1);
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' '];
+            if (keys.includes(e.key)) {
+                e.preventDefault();
+                if (isScrolling) return;
+                const cur = getVisibleSectionIndex();
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollTo(cur + 1);
+                else scrollTo(cur - 1);
+            }
+        }, { passive: false });
+    });
+</script>

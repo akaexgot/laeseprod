@@ -1,0 +1,504 @@
+---
+/**
+ * Portal Cliente Page — Logo Grid Design
+ * Grid of client logos with long-press password modal → Dropbox embed
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// TODO: Replace with dynamic data from Supabase once portal_clients table is created
+const clients = [
+  { id: '1', client_name: 'Hotel Royal', logo: '', dropbox_link: 'https://www.dropbox.com/home' },
+  { id: '2', client_name: 'Restaurante La Barca', logo: '', dropbox_link: 'https://www.dropbox.com/home' },
+  { id: '3', client_name: 'Abengoa', logo: '', dropbox_link: 'https://www.dropbox.com/home' },
+  { id: '4', client_name: 'Inversiones Sur', logo: '', dropbox_link: 'https://www.dropbox.com/home' },
+];
+---
+
+<BaseLayout
+  title="Portal Cliente"
+  description="Portal exclusivo para clientes de VideoMarketing Sevilla. Accede a tus archivos y materiales audiovisuales."
+  noindex={true}
+>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="pc-hero">
+      <div class="pc-hero__dots"></div>
+      <div class="pc-hero__glow"></div>
+      <div class="section-container pc-hero__inner">
+          <div class="pc-hero__badge">
+              <span class="pc-hero__dot"></span>
+              <span>Acceso exclusivo</span>
+          </div>
+          <h1 class="pc-hero__title">
+              Portal <span class="text-gradient-carmin">cliente</span>
+          </h1>
+          <p class="pc-hero__subtitle">
+              Mantén pulsada tu tarjeta durante 2 segundos para acceder a tus archivos
+          </p>
+
+          <!-- Search -->
+          <div class="pc-search">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="client-search" placeholder="Buscar cliente..." />
+          </div>
+      </div>
+  </section>
+
+  <!-- ═══ LOGO GRID ═══ -->
+  <section class="pc-grid-section">
+      <div class="pc-grid-section__dots"></div>
+      <div class="section-container">
+          <div id="clients-grid" class="pc-grid">
+              {clients.map((client, idx) => (
+                  <div
+                      class="pc-card group"
+                      data-client-id={client.id}
+                      data-client-name={client.client_name}
+                      style={`animation-delay: ${idx * 0.1}s`}
+                  >
+                      <!-- Logo area -->
+                      <div class="pc-card__logo-area">
+                          {client.logo ? (
+                              <img src={client.logo} alt={client.client_name} class="pc-card__logo-img" loading="lazy" />
+                          ) : (
+                              <div class="pc-card__logo-placeholder">
+                                  <span class="pc-card__logo-initial">{client.client_name.charAt(0)}</span>
+                              </div>
+                          )}
+                          <!-- Long-press indicator ring -->
+                          <div class="pc-card__ring"></div>
+                          <!-- Lock icon -->
+                          <div class="pc-card__lock">
+                              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                              </svg>
+                          </div>
+                      </div>
+                      <!-- Info -->
+                      <div class="pc-card__info">
+                          <h3 class="pc-card__name">{client.client_name}</h3>
+                          <p class="pc-card__hint">Mantén pulsado para acceder</p>
+                      </div>
+                  </div>
+              ))}
+          </div>
+      </div>
+  </section>
+
+  <!-- ═══ PASSWORD MODAL ═══ -->
+  <div id="password-modal" class="pc-modal">
+      <div class="pc-modal__backdrop" id="modal-backdrop"></div>
+      <div class="pc-modal__content" id="modal-content">
+          <button id="modal-close" class="pc-modal__close">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+          <div class="pc-modal__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+          </div>
+          <h3 id="modal-title" class="pc-modal__title">Acceso cliente</h3>
+          <p class="pc-modal__subtitle">Introduce tu contraseña para acceder a tus archivos</p>
+          <form id="password-form">
+              <input type="password" id="password-input" placeholder="Contraseña" class="pc-modal__input" autocomplete="off" />
+              <div id="password-error" class="pc-modal__error hidden">Contraseña incorrecta</div>
+              <button type="submit" class="pc-modal__submit">Acceder</button>
+          </form>
+      </div>
+  </div>
+
+  <!-- ═══ DROPBOX MODAL ═══ -->
+  <div id="dropbox-modal" class="pc-modal">
+      <div class="pc-modal__backdrop" id="dropbox-backdrop"></div>
+      <div class="pc-modal__content pc-modal__content--wide" id="dropbox-content">
+          <div class="pc-modal__header">
+              <h3 id="dropbox-title" class="pc-modal__title">Archivos</h3>
+              <button id="dropbox-close" class="pc-modal__close pc-modal__close--inline">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+          </div>
+          <iframe id="dropbox-iframe" class="pc-modal__iframe" src="" title="Archivos del cliente"></iframe>
+      </div>
+  </div>
+
+</BaseLayout>
+
+<style>
+/* ── HERO ─────────────────────────────────────── */
+.pc-hero {
+    position: relative; padding-top: 9rem; padding-bottom: 3rem;
+    background: #0a0a0f; overflow: hidden; text-align: center;
+}
+.pc-hero__dots {
+    position: absolute; inset: 0; opacity: .12; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+.pc-hero__glow {
+    position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 400px; pointer-events: none;
+    background: radial-gradient(circle, rgba(155,27,48,0.1) 0%, transparent 70%);
+}
+.pc-hero__inner {
+    position: relative; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.pc-hero__badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .375rem 1rem; border-radius: 9999px;
+    border: 1px solid rgba(155,27,48,.4); background: rgba(155,27,48,.1);
+    font-size: .75rem; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: rgba(255,255,255,.7);
+    backdrop-filter: blur(8px);
+}
+.pc-hero__dot {
+    display: block; width: 7px; height: 7px; border-radius: 50%;
+    background: #c42847; animation: pc-pulse 2s infinite;
+    box-shadow: 0 0 8px rgba(196,40,71,.7);
+}
+.pc-hero__title {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 800; color: #fff;
+    line-height: 1.1; letter-spacing: -.03em; margin: 0;
+}
+.pc-hero__subtitle {
+    font-size: 1rem; color: rgba(255,255,255,.4);
+    line-height: 1.7; max-width: 440px; margin: 0;
+}
+.pc-search {
+    position: relative; margin-top: .5rem; width: 100%; max-width: 380px;
+}
+.pc-search svg {
+    position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+    width: 1.125rem; height: 1.125rem; color: rgba(255,255,255,.25);
+}
+.pc-search input {
+    width: 100%; padding: .875rem 1rem .875rem 2.75rem;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 1rem; color: #fff; font-size: .875rem;
+    outline: none; transition: border-color .2s;
+}
+.pc-search input::placeholder { color: rgba(255,255,255,.2); }
+.pc-search input:focus { border-color: rgba(155,27,48,.4); }
+
+/* ── GRID ─────────────────────────────────────── */
+.pc-grid-section {
+    position: relative; background: #0a0a0f; padding: 2rem 0 6rem;
+}
+.pc-grid-section__dots {
+    position: absolute; inset: 0; opacity: .06; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+.pc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    position: relative; z-index: 10;
+}
+@media (min-width: 640px) { .pc-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; } }
+@media (min-width: 1024px) { .pc-grid { grid-template-columns: repeat(4, 1fr); gap: 2rem; } }
+
+/* ── CARD ─────────────────────────────────────── */
+.pc-card {
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    animation: pc-fade-up 0.6s ease both;
+}
+.pc-card__logo-area {
+    position: relative;
+    width: 100%; aspect-ratio: 1;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    transition: border-color .3s, box-shadow .3s, transform .3s;
+    display: flex; align-items: center; justify-content: center;
+}
+.pc-card:hover .pc-card__logo-area {
+    border-color: rgba(155,27,48,.25);
+    box-shadow: 0 12px 40px rgba(155,27,48,.1);
+    transform: translateY(-4px);
+}
+.pc-card__logo-img {
+    width: 70%; height: 70%;
+    object-fit: contain;
+    filter: grayscale(0.3) brightness(0.9);
+    transition: filter .3s;
+}
+.pc-card:hover .pc-card__logo-img {
+    filter: grayscale(0) brightness(1);
+}
+.pc-card__logo-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(155,27,48,.08), rgba(155,27,48,.02));
+    display: flex; align-items: center; justify-content: center;
+}
+.pc-card__logo-initial {
+    font-family: 'Outfit', sans-serif;
+    font-size: 3rem; font-weight: 800;
+    color: rgba(155,27,48,.25);
+    transition: color .3s;
+}
+.pc-card:hover .pc-card__logo-initial {
+    color: rgba(155,27,48,.45);
+}
+
+/* Ring animation on long-press */
+.pc-card__ring {
+    position: absolute; inset: 0;
+    border-radius: 1.5rem;
+    border: 2px solid transparent;
+    pointer-events: none;
+    transition: border-color .3s;
+}
+.pc-card--pressing .pc-card__ring {
+    border-color: #c42847;
+    animation: pc-ring-fill 2s linear;
+}
+
+/* Lock icon */
+.pc-card__lock {
+    position: absolute; bottom: .75rem; right: .75rem;
+    width: 2rem; height: 2rem;
+    border-radius: .625rem;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: .4; transition: opacity .3s;
+}
+.pc-card__lock svg { width: 1rem; height: 1rem; color: rgba(255,255,255,.6); }
+.pc-card:hover .pc-card__lock { opacity: .8; }
+
+/* Info */
+.pc-card__info { padding: .875rem .25rem 0; }
+.pc-card__name {
+    font-family: 'Outfit', sans-serif;
+    font-size: .9375rem; font-weight: 600;
+    color: #fff; margin: 0;
+}
+.pc-card__hint {
+    font-size: .6875rem; color: rgba(255,255,255,.25);
+    margin: .25rem 0 0;
+}
+
+/* ── MODAL (shared) ───────────────────────────── */
+.pc-modal {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+}
+.pc-modal--open {
+    opacity: 1; pointer-events: auto;
+}
+.pc-modal__backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.85);
+    backdrop-filter: blur(16px);
+}
+.pc-modal__content {
+    position: relative;
+    background: #151520;
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    max-width: 420px; width: calc(100% - 2rem);
+    text-align: center;
+    transform: scale(.95);
+    transition: transform .3s;
+}
+.pc-modal--open .pc-modal__content {
+    transform: scale(1);
+}
+.pc-modal__content--wide {
+    max-width: 72rem;
+    height: 80vh;
+    padding: 0;
+    display: flex; flex-direction: column;
+    text-align: left;
+}
+.pc-modal__close {
+    position: absolute; top: 1rem; right: 1rem;
+    width: 2rem; height: 2rem;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,.35); transition: color .2s;
+}
+.pc-modal__close:hover { color: #fff; }
+.pc-modal__close svg { width: 1.25rem; height: 1.25rem; }
+.pc-modal__close--inline {
+    position: static;
+}
+.pc-modal__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.pc-modal__icon {
+    width: 3.5rem; height: 3.5rem; margin: 0 auto 1rem;
+    border-radius: 1rem;
+    background: rgba(155,27,48,.1);
+    display: flex; align-items: center; justify-content: center;
+}
+.pc-modal__icon svg { width: 1.75rem; height: 1.75rem; color: #c42847; }
+.pc-modal__title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0;
+}
+.pc-modal__subtitle {
+    font-size: .8125rem; color: rgba(255,255,255,.4);
+    margin: .375rem 0 1.5rem;
+}
+.pc-modal__input {
+    width: 100%; padding: .875rem 1rem;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: .875rem;
+    color: #fff; font-size: .9375rem;
+    outline: none; text-align: center;
+    transition: border-color .2s;
+    margin-bottom: 1rem;
+}
+.pc-modal__input:focus { border-color: rgba(155,27,48,.4); }
+.pc-modal__error {
+    font-size: .8125rem; color: #ef4444; margin-bottom: 1rem;
+}
+.pc-modal__submit {
+    width: 100%; padding: .875rem;
+    background: linear-gradient(135deg, #c42847, #9b1b30);
+    color: #fff; font-weight: 700; font-size: .9375rem;
+    border: none; border-radius: .875rem; cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+}
+.pc-modal__submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(155,27,48,.3);
+}
+.pc-modal__iframe {
+    flex: 1; width: 100%; border: 0;
+}
+
+/* ── Animations ───────────────────────────────── */
+@keyframes pc-pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: .4; }
+}
+@keyframes pc-fade-up {
+    from { opacity: 0; transform: translateY(1rem); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pc-ring-fill {
+    0%   { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%); border-color: #c42847; }
+    12.5% { clip-path: polygon(50% 0%, 50% 50%, 100% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%); }
+    25%  { clip-path: polygon(50% 0%, 50% 50%, 100% 100%, 100% 0%, 50% 0%, 50% 0%, 50% 0%); }
+    37.5% { clip-path: polygon(50% 0%, 50% 50%, 100% 100%, 100% 100%, 50% 0%, 50% 0%, 50% 0%); }
+    50%  { clip-path: polygon(50% 0%, 50% 50%, 0% 100%, 100% 100%, 100% 0%, 50% 0%, 50% 0%); }
+    100% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 0% 0%, 0% 100%, 100% 100%, 100% 0%); border-color: #c42847; }
+}
+</style>
+
+<script>
+  // Real-time search
+  const searchInput = document.getElementById('client-search') as HTMLInputElement;
+  const clientCards = document.querySelectorAll('.pc-card');
+
+  searchInput?.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase();
+    clientCards.forEach(card => {
+      const name = (card as HTMLElement).dataset.clientName?.toLowerCase() || '';
+      (card as HTMLElement).style.display = name.includes(query) ? '' : 'none';
+    });
+  });
+
+  // Long-press detection (2 seconds)
+  let pressTimer: ReturnType<typeof setTimeout>;
+  let pressedCard: HTMLElement | null = null;
+
+  clientCards.forEach(card => {
+    const startPress = (e: Event) => {
+      e.preventDefault();
+      pressedCard = card as HTMLElement;
+      card.classList.add('pc-card--pressing');
+
+      pressTimer = setTimeout(() => {
+        card.classList.remove('pc-card--pressing');
+        openPasswordModal(pressedCard!);
+      }, 2000);
+    };
+
+    const endPress = () => {
+      clearTimeout(pressTimer);
+      card.classList.remove('pc-card--pressing');
+    };
+
+    card.addEventListener('mousedown', startPress);
+    card.addEventListener('touchstart', startPress);
+    card.addEventListener('mouseup', endPress);
+    card.addEventListener('mouseleave', endPress);
+    card.addEventListener('touchend', endPress);
+    card.addEventListener('touchcancel', endPress);
+  });
+
+  // Password Modal
+  const passwordModal = document.getElementById('password-modal')!;
+  const modalTitle = document.getElementById('modal-title')!;
+  const passwordInput = document.getElementById('password-input') as HTMLInputElement;
+  const passwordError = document.getElementById('password-error')!;
+  const passwordForm = document.getElementById('password-form') as HTMLFormElement;
+  let currentClientId = '';
+
+  function openPasswordModal(card: HTMLElement) {
+    currentClientId = card.dataset.clientId || '';
+    const name = card.dataset.clientName || '';
+    modalTitle.textContent = `Acceso: ${name}`;
+    passwordInput.value = '';
+    passwordError.classList.add('hidden');
+
+    passwordModal.classList.add('pc-modal--open');
+    passwordInput.focus();
+  }
+
+  function closePasswordModal() {
+    passwordModal.classList.remove('pc-modal--open');
+  }
+
+  document.getElementById('modal-close')?.addEventListener('click', closePasswordModal);
+  document.getElementById('modal-backdrop')?.addEventListener('click', closePasswordModal);
+
+  passwordForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = passwordInput.value;
+
+    // TODO: Verify password via Supabase API
+    if (password.length > 0) {
+      closePasswordModal();
+      openDropboxModal(currentClientId);
+    } else {
+      passwordError.classList.remove('hidden');
+    }
+  });
+
+  // Dropbox Modal
+  const dropboxModal = document.getElementById('dropbox-modal')!;
+  const dropboxIframe = document.getElementById('dropbox-iframe') as HTMLIFrameElement;
+
+  function openDropboxModal(clientId: string) {
+    // TODO: Get dropbox link from data
+    dropboxIframe.src = 'https://www.dropbox.com/home';
+    document.getElementById('dropbox-title')!.textContent = 'Archivos del cliente';
+
+    dropboxModal.classList.add('pc-modal--open');
+  }
+
+  function closeDropboxModal() {
+    dropboxModal.classList.remove('pc-modal--open');
+    dropboxIframe.src = '';
+  }
+
+  document.getElementById('dropbox-close')?.addEventListener('click', closeDropboxModal);
+  document.getElementById('dropbox-backdrop')?.addEventListener('click', closeDropboxModal);
+</script>

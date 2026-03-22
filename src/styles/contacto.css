@@ -3,8 +3,10 @@
 /* ─── HERO ─────────────────────────────────────── */
 .contact-hero {
     position: relative;
-    padding-top: 9rem;
-    padding-bottom: 4rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background-color: #f9fafb;
     overflow: hidden;
     text-align: center;
@@ -79,6 +81,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-right: 0.15em; /* Prevents the 'o' from getting cut off due to italics */
 }
 
 .contact-hero__subtitle {
@@ -89,11 +92,65 @@
     margin: 0;
 }
 
+.contact-hero__buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.contact-hero__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.contact-hero__btn--primary {
+    background: linear-gradient(135deg, #c42847, #9b1b30);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 15px rgba(155,27,48,0.25);
+}
+.contact-hero__btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(155,27,48,0.35);
+}
+
+.contact-hero__btn--secondary {
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+.contact-hero__btn--secondary:hover {
+    transform: translateY(-2px);
+    border-color: #d1d5db;
+    background: #f9fafb;
+}
+
+.contact-hero__btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
 /* ─── BODY ─────────────────────────────────────── */
 .contact-body {
     position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background: #fff;
-    padding: 4rem 0 6rem;
+    padding: 2rem 0;
 }
 
 .contact-body__bg-dots {

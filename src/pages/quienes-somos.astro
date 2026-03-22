@@ -1,12 +1,15 @@
 ---
 /**
- * Quiénes Somos — Premium redesign
+ * Quiénes Somos — Fullscreen Video Hero + Fullpage Scroll
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
 import "../styles/quienes-somos.css";
 import { getSettings } from "../lib/data";
 
 const settings = await getSettings();
+
+// Video de prueba (reemplazar con el vídeo corporativo real)
+const heroVideoId = 'n8F2cllaiN0';
 ---
 
 <BaseLayout
@@ -14,54 +17,72 @@ const settings = await getSettings();
     description="Conoce a VideoMarketing Sevilla. Somos una productora audiovisual especializada en video marketing para empresas en Sevilla y toda España."
 >
 
-    <!-- ═══ HERO ═══ -->
-    <section class="qs-hero">
-        <div class="qs-hero__dots"></div>
-        <div class="qs-hero__glow"></div>
-        <div class="section-container qs-hero__inner">
-            <div class="qs-hero__badge">
-                <span class="qs-hero__dot"></span>
+    <!-- ═══ HERO VIDEO FULLSCREEN ═══ -->
+    <section class="qs-video-hero" id="qs-hero">
+        <div class="qs-video-hero__bg">
+            <iframe
+                src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&loop=1&playlist=${heroVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                class="qs-video-hero__iframe"
+                frameborder="0" allow="autoplay; encrypted-media"
+                title="Vídeo corporativo VideoMarketing Sevilla"
+            ></iframe>
+        </div>
+        <!-- Gradient overlay -->
+        <div class="qs-video-hero__overlay"></div>
+        <!-- Content -->
+        <div class="qs-video-hero__content">
+            <div class="qs-video-hero__badge">
+                <span class="qs-video-hero__dot"></span>
                 <span>Nosotros</span>
             </div>
-            <h1 class="qs-hero__title">
+            <h1 class="qs-video-hero__title">
                 Quiénes <span class="text-gradient-carmin">somos</span>
             </h1>
-            <p class="qs-hero__subtitle">
+            <p class="qs-video-hero__subtitle">
                 Somos una productora audiovisual con sede en Sevilla,<br class="hidden md:block" />
                 especializados en crear contenido que conecta marcas con personas.
             </p>
         </div>
-    </section>
-
-    <!-- ═══ STATS BAND ═══ -->
-    <section class="qs-stats">
-        <div class="section-container qs-stats__grid">
-            <div class="qs-stat">
-                <span class="qs-stat__number text-gradient-carmin">100+</span>
-                <span class="qs-stat__label">Proyectos realizados</span>
-            </div>
-            <div class="qs-stat__divider"></div>
-            <div class="qs-stat">
-                <span class="qs-stat__number text-gradient-carmin">50+</span>
-                <span class="qs-stat__label">Clientes satisfechos</span>
-            </div>
-            <div class="qs-stat__divider"></div>
-            <div class="qs-stat">
-                <span class="qs-stat__number text-gradient-carmin">6+</span>
-                <span class="qs-stat__label">Sectores</span>
-            </div>
-            <div class="qs-stat__divider"></div>
-            <div class="qs-stat">
-                <span class="qs-stat__number text-gradient-carmin">4K</span>
-                <span class="qs-stat__label">Calidad cinematográfica</span>
+        <!-- Scroll indicator -->
+        <div class="qs-video-hero__scroll">
+            <span>Descubre más</span>
+            <div class="qs-video-hero__scroll-arrow">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
             </div>
         </div>
     </section>
 
-    <!-- ═══ ABOUT ═══ -->
-    <section class="qs-about">
-        <div class="qs-about__dots"></div>
-        <div class="section-container qs-about__grid">
+    <!-- ═══ ABOUT & STATS ═══ -->
+    <section class="qs-about" id="qs-about">
+        <!-- Stats Band at the top of the About section -->
+        <div class="qs-stats-container">
+            <div class="section-container qs-stats__grid">
+                <div class="qs-stat">
+                    <span class="qs-stat__number text-gradient-carmin">100+</span>
+                    <span class="qs-stat__label">Proyectos realizados</span>
+                </div>
+                <div class="qs-stat__divider"></div>
+                <div class="qs-stat">
+                    <span class="qs-stat__number text-gradient-carmin">50+</span>
+                    <span class="qs-stat__label">Clientes satisfechos</span>
+                </div>
+                <div class="qs-stat__divider"></div>
+                <div class="qs-stat">
+                    <span class="qs-stat__number text-gradient-carmin">6+</span>
+                    <span class="qs-stat__label">Sectores</span>
+                </div>
+                <div class="qs-stat__divider"></div>
+                <div class="qs-stat">
+                    <span class="qs-stat__number text-gradient-carmin">4K</span>
+                    <span class="qs-stat__label">Calidad cinematográfica</span>
+                </div>
+            </div>
+        </div>
+        <div class="qs-about-content-wrapper">
+            <div class="qs-about__dots"></div>
+            <div class="section-container qs-about__grid">
 
             <!-- Vídeo corporativo -->
             <div class="qs-video reveal-left">
@@ -107,11 +128,12 @@ const settings = await getSettings();
                 </a>
             </div>
 
+            </div>
         </div>
     </section>
 
     <!-- ═══ ENCUENTRANOS ═══ -->
-    <section class="qs-find">
+    <section class="qs-find" id="qs-find">
         <div class="qs-find__dots"></div>
         <div class="section-container">
 
@@ -229,4 +251,93 @@ const settings = await getSettings();
 
 </BaseLayout>
 
-<link rel="stylesheet" href="/src/styles/quienes-somos.css" />
+<script>
+    /* ── Fullpage Scroll Effect ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = Array.from(document.querySelectorAll('section'));
+        if (sections.length === 0) return;
+
+        let isScrolling = false;
+        let scrollTimeout: ReturnType<typeof setTimeout>;
+
+        function getVisibleSectionIndex() {
+            let maxVisibleIndex = 0;
+            let maxVisibleArea = 0;
+
+            sections.forEach((sec, idx) => {
+                const rect = sec.getBoundingClientRect();
+                const visibleHeight = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0));
+                if (visibleHeight > maxVisibleArea) {
+                    maxVisibleArea = visibleHeight;
+                    maxVisibleIndex = idx;
+                }
+            });
+            return maxVisibleIndex;
+        }
+
+        function scrollToSection(index: number) {
+            if (index < 0 || index >= sections.length || isScrolling) return;
+
+            isScrolling = true;
+            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+            }, 1300);
+        }
+
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (isScrolling) return;
+
+            const currentIndex = getVisibleSectionIndex();
+            if (e.deltaY > 0) {
+                scrollToSection(currentIndex + 1);
+            } else if (e.deltaY < 0) {
+                scrollToSection(currentIndex - 1);
+            }
+        }, { passive: false });
+
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchend', (e) => {
+            if (isScrolling) return;
+
+            const touchEndY = e.changedTouches[0].screenY;
+            const deltaY = touchStartY - touchEndY;
+            const currentIndex = getVisibleSectionIndex();
+
+            if (deltaY > 50) {
+                scrollToSection(currentIndex + 1);
+            } else if (deltaY < -50) {
+                scrollToSection(currentIndex - 1);
+            }
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '];
+            if (keys.includes(e.key)) {
+                e.preventDefault();
+                if (isScrolling) return;
+                const currentIndex = getVisibleSectionIndex();
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+                    scrollToSection(currentIndex + 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                    scrollToSection(currentIndex - 1);
+                } else if (e.key === 'Home') {
+                    scrollToSection(0);
+                } else if (e.key === 'End') {
+                    scrollToSection(sections.length - 1);
+                }
+            }
+        }, { passive: false });
+    });
+</script>

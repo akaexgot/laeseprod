@@ -90,7 +90,7 @@ const settings = await getSettings();
     const lines    = navbar.querySelectorAll<HTMLElement>('.hamburger-line');
 
     const path        = window.location.pathname;
-    const lightPages  = ['/proyectos', '/quienes-somos', '/contacto'];
+    const lightPages  = ['/contacto'];
     const isLightPage = lightPages.some(p => path === p || path.startsWith(p + '/'));
 
     // ── Estilos por tema ──────────────────────────────────────────────

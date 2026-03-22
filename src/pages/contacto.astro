@@ -1,9 +1,10 @@
 ---
 /**
- * Contacto Page — Premium redesign
+ * Contacto Page — Premium redesign + Chat Widget
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
 import "../styles/contacto.css";
+import "../styles/contacto-chat.css";
 import { getSettings } from "../lib/data";
 
 const settings = await getSettings();
@@ -35,6 +36,23 @@ const settings = await getSettings();
                 Rellena el formulario o escríbenos por WhatsApp.<br />
                 Te respondemos en menos de 24 horas.
             </p>
+
+            <div class="contact-hero__buttons">
+                <!-- Chat realtime btn -->
+                <button type="button" class="contact-hero__btn contact-hero__btn--primary js-open-chat">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    Hablar en tiempo real
+                </button>
+                <!-- Scroll to form btn -->
+                <button type="button" class="contact-hero__btn contact-hero__btn--secondary js-scroll-form">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                    </svg>
+                    Ir al formulario
+                </button>
+            </div>
         </div>
     </section>
 
@@ -180,11 +198,61 @@ const settings = await getSettings();
         </div>
     </section>
 
+    <!-- ═══════════════════════════════════════════
+         CHAT WIDGET
+    ═══════════════════════════════════════════ -->
+
+    <!-- No floating bubble anymore, triggered via Hero Button -->
+
+    <!-- Chat panel -->
+    <div id="chat-panel" class="chat-panel">
+        <div class="chat-panel__header">
+            <div class="chat-panel__avatar">VM</div>
+            <div class="chat-panel__header-info">
+                <h3>VideoMarketing Sevilla</h3>
+                <p><span class="chat-panel__status-dot"></span>Normalmente responde en minutos</p>
+            </div>
+            <button id="chat-close" class="chat-panel__close" aria-label="Cerrar chat">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Name form (pre-chat) -->
+        <div id="chat-name-form" class="chat-panel__name-form">
+            <h4>👋 ¡Hola!</h4>
+            <p>Introduce tu nombre para iniciar el chat</p>
+            <input type="text" id="chat-name-input" placeholder="Tu nombre" maxlength="50" />
+            <button id="chat-start-btn">Iniciar chat</button>
+        </div>
+
+        <!-- Messages (hidden until chat starts) -->
+        <div id="chat-messages" class="chat-panel__messages" style="display:none">
+            <div class="chat-welcome">
+                <span class="chat-welcome__emoji">💬</span>
+                <strong>¡Bienvenido!</strong><br/>
+                Escribe tu mensaje y te responderemos lo antes posible.
+            </div>
+        </div>
+
+        <!-- Input (hidden until chat starts) -->
+        <div id="chat-input-area" class="chat-panel__input" style="display:none">
+            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." maxlength="500" />
+            <button id="chat-send" class="chat-panel__send" disabled>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
 </BaseLayout>
 
 <link rel="stylesheet" href="/src/styles/contacto.css" />
 
 <script>
+    // ── Contact form ──
     const form = document.getElementById("contact-form") as HTMLFormElement;
     const status = document.getElementById("form-status")!;
     const submitBtn = document.getElementById("contact-submit") as HTMLButtonElement;
@@ -219,6 +287,268 @@ const settings = await getSettings();
         submitBtn.disabled = false;
         submitBtn.querySelector("span")!.textContent = "Enviar mensaje";
     });
+
+    // ── Chat Widget ──
+    const chatPanel = document.getElementById('chat-panel')!;
+    const chatCloseBtn = document.getElementById('chat-close')!;
+    const chatNameForm = document.getElementById('chat-name-form')!;
+    const chatNameInput = document.getElementById('chat-name-input') as HTMLInputElement;
+    const chatStartBtn = document.getElementById('chat-start-btn')!;
+    const chatMessages = document.getElementById('chat-messages')!;
+    const chatInputArea = document.getElementById('chat-input-area')!;
+    const chatInput = document.getElementById('chat-input') as HTMLInputElement;
+    const chatSend = document.getElementById('chat-send') as HTMLButtonElement;
+
+    let chatOpen = false;
+    let conversationId: string | null = null;
+    let visitorId = localStorage.getItem('vm_visitor_id');
+    let visitorName = localStorage.getItem('vm_visitor_name');
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+    if (!visitorId) {
+        visitorId = 'v_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('vm_visitor_id', visitorId);
+    }
+
+    // Close Chat
+    chatCloseBtn.addEventListener('click', () => {
+        chatOpen = false;
+        chatPanel.classList.remove('chat-panel--open');
+    });
+
+    // Open chat from Hero
+    const btnOpenChat = document.querySelector('.js-open-chat');
+    if (btnOpenChat) {
+        btnOpenChat.addEventListener('click', () => {
+            if (!chatOpen) {
+                chatOpen = true;
+                chatPanel.classList.add('chat-panel--open');
+                if (visitorName) {
+                    startChat();
+                }
+            }
+        });
+    }
+
+    // Start chat
+    chatStartBtn.addEventListener('click', () => {
+        const name = chatNameInput.value.trim();
+        if (!name) { chatNameInput.focus(); return; }
+        visitorName = name;
+        localStorage.setItem('vm_visitor_name', name);
+        startChat();
+    });
+
+    chatNameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') chatStartBtn.click();
+    });
+
+    async function startChat() {
+        chatNameForm.style.display = 'none';
+        chatMessages.style.display = 'flex';
+        chatInputArea.style.display = 'flex';
+        chatInput.focus();
+
+        // Create or resume conversation
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'create',
+                    visitor_id: visitorId,
+                    visitor_name: visitorName,
+                }),
+            });
+            const data = await res.json();
+            conversationId = data.conversation_id;
+
+            // Load existing messages
+            await loadMessages();
+
+            // Start polling for new messages
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(loadMessages, 5000);
+        } catch (err) {
+            console.error('Chat error:', err);
+        }
+    }
+
+    async function loadMessages() {
+        if (!conversationId) return;
+        try {
+            const res = await fetch(`/api/chat?conversation_id=${conversationId}`);
+            const messages = await res.json();
+
+            // Clear welcome if there are messages
+            const welcome = chatMessages.querySelector('.chat-welcome');
+            if (messages.length > 0 && welcome) welcome.remove();
+
+            // Render messages not yet in DOM
+            const existing = chatMessages.querySelectorAll('.chat-msg');
+            const existingIds = new Set(Array.from(existing).map(el => (el as HTMLElement).dataset.id));
+
+            let hasNew = false;
+            messages.forEach((msg: any) => {
+                if (!existingIds.has(msg.id)) {
+                    const div = document.createElement('div');
+                    div.className = `chat-msg chat-msg--${msg.sender_type}`;
+                    div.dataset.id = msg.id;
+                    const time = new Date(msg.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                    div.innerHTML = `${msg.message}<span class="chat-msg__time">${time}</span>`;
+                    chatMessages.appendChild(div);
+                    hasNew = true;
+                }
+            });
+
+            if (hasNew) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        } catch (err) {
+            console.error('Load messages error:', err);
+        }
+    }
+
+    // Send message
+    chatInput.addEventListener('input', () => {
+        chatSend.disabled = !chatInput.value.trim();
+    });
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !chatSend.disabled) sendMessage();
+    });
+    chatSend.addEventListener('click', sendMessage);
+
+    async function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text || !conversationId) return;
+
+        chatInput.value = '';
+        chatSend.disabled = true;
+
+        try {
+            await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'send',
+                    conversation_id: conversationId,
+                    sender_type: 'visitor',
+                    message: text,
+                }),
+            });
+            await loadMessages();
+        } catch (err) {
+            console.error('Send error:', err);
+        }
+    }
+
+    // Auto-start if returning visitor
+    if (visitorName) {
+        chatNameForm.style.display = 'none';
+    }
 </script>
 
+<script>
+    /* ── Fullpage Scroll Effect ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = Array.from(document.querySelectorAll('section'));
+        if (sections.length === 0) return;
 
+        let isScrolling = false;
+        let scrollTimeout: ReturnType<typeof setTimeout>;
+
+        function getVisibleSectionIndex() {
+            let maxVisibleIndex = 0;
+            let maxVisibleArea = 0;
+
+            sections.forEach((sec, idx) => {
+                const rect = sec.getBoundingClientRect();
+                const visibleHeight = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0));
+                if (visibleHeight > maxVisibleArea) {
+                    maxVisibleArea = visibleHeight;
+                    maxVisibleIndex = idx;
+                }
+            });
+            return maxVisibleIndex;
+        }
+
+        function scrollToSection(index: number) {
+            if (index < 0 || index >= sections.length || isScrolling) return;
+
+            isScrolling = true;
+            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+            }, 1300);
+        }
+
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (isScrolling) return;
+
+            const currentIndex = getVisibleSectionIndex();
+            if (e.deltaY > 0) {
+                scrollToSection(currentIndex + 1);
+            } else if (e.deltaY < 0) {
+                scrollToSection(currentIndex - 1);
+            }
+        }, { passive: false });
+
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchend', (e) => {
+            if (isScrolling) return;
+
+            const touchEndY = e.changedTouches[0].screenY;
+            const deltaY = touchStartY - touchEndY;
+            const currentIndex = getVisibleSectionIndex();
+
+            if (deltaY > 50) {
+                scrollToSection(currentIndex + 1);
+            } else if (deltaY < -50) {
+                scrollToSection(currentIndex - 1);
+            }
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            // Ignore space and arrows when focused on form elements
+            if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+                return;
+            }
+
+            const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '];
+            if (keys.includes(e.key)) {
+                e.preventDefault();
+                if (isScrolling) return;
+                const currentIndex = getVisibleSectionIndex();
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+                    scrollToSection(currentIndex + 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                    scrollToSection(currentIndex - 1);
+                } else if (e.key === 'Home') {
+                    scrollToSection(0);
+                } else if (e.key === 'End') {
+                    scrollToSection(sections.length - 1);
+                }
+            }
+        }, { passive: false });
+
+        // Hero Buttons Logic
+        const btnScrollForm = document.querySelector('.js-scroll-form');
+
+        if (btnScrollForm) {
+            btnScrollForm.addEventListener('click', () => {
+                scrollToSection(1); // Scrolls to the form section
+            });
+        }
+    });
+</script>
