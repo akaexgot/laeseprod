@@ -1,29 +1,28 @@
 ---
 /**
  * Projects Listing Page — Fullpage Scroll Mosaic
- * Each "page" shows 3-4 videos that fill the viewport
+ * Only shows projects with video_project. Hides incomplete groups.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import "../../styles/proyectos.css";
 import { getProjects } from '../../lib/data';
 
-const projects = await getProjects();
+const allProjects = await getProjects();
 
-const DEMO_IDS = new Set(['dQw4w9WgXcQ', 'D91q99QK11k']);
-const DEFAULT_VIDEO = 'n8F2cllaiN0';
+// Only show projects that have a video
+const projects = allProjects.filter((p: any) => p.video_project);
 
-function getVideoId(value: string | null | undefined): string {
-  if (value) {
-    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    const id = match ? match[1] : (/^[A-Za-z0-9_-]{11}$/.test(value.trim()) ? value.trim() : null);
-    if (id && !DEMO_IDS.has(id)) return id;
-  }
-  return DEFAULT_VIDEO;
+function getVideoId(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (match) return match[1];
+  if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
+  return null;
 }
 
 /**
- * Group projects into "screens" of 3-4 items each
- * Pattern alternates: 3, 4, 3, 4, ...
+ * Group projects into "screens" of 3-4 items.
+ * Only creates complete groups — leftover projects that don't fill a screen are still shown.
  */
 function groupIntoScreens(projects: any[]) {
   const screens: any[][] = [];
@@ -31,9 +30,12 @@ function groupIntoScreens(projects: any[]) {
   let groupSize = 3;
 
   while (i < projects.length) {
-    screens.push(projects.slice(i, i + groupSize));
-    i += groupSize;
-    groupSize = groupSize === 3 ? 4 : 3; // alternate
+    const remaining = projects.length - i;
+    // If remaining items can't fill a full group, just put them all in one
+    const size = remaining < groupSize ? remaining : groupSize;
+    screens.push(projects.slice(i, i + size));
+    i += size;
+    groupSize = groupSize === 3 ? 4 : 3;
   }
   return screens;
 }
@@ -57,42 +59,49 @@ const screens = groupIntoScreens(projects);
         screens.map((group, screenIdx) => {
             const isFirst = screenIdx === 0;
             const count = group.length;
-            // Layout class: 3 items = split (1 big + 2 stacked), 4 items = grid 2x2
-            const layoutClass = (count === 1 || count === 2 || count === 3) ? 'pj-screen--split' : 'pj-screen--grid';
-            const flipClass = (screenIdx % 2 !== 0 && (count === 1 || count === 2 || count === 3)) ? 'pj-screen--flip' : '';
+            const layoutClass = count >= 3 ? 'pj-screen--split' : 'pj-screen--grid';
+            const flipClass = (screenIdx % 2 !== 0 && count > 0 && count < 4) ? 'pj-screen--flip' : '';
 
             return (
                 <section class={`pj-screen ${layoutClass} ${flipClass} ${isFirst ? 'pj-screen--first' : ''}`}>
-                    {(count === 1 || count === 2 || count === 3) ? (
-                        <>
+                    {count >= 3 ? (
+                        <Fragment>
                             {/* Large cell */}
-                            <a href={`/proyectos/${group[0].slug}`} class="pj-cell pj-cell--large group">
-                                <div class="pj-cell__video">
-                                    <iframe
-                                        class="pj-cell__iframe"
-                                        data-src={`https://www.youtube.com/embed/${getVideoId(group[0].video_project)}?autoplay=1&mute=1&loop=1&playlist=${getVideoId(group[0].video_project)}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                                        src=""
-                                        frameborder="0" allow="autoplay; encrypted-media"
-                                        loading="lazy"
-                                    ></iframe>
-                                    {group[0].thumbnail && <img src={group[0].thumbnail} alt={group[0].title} class="pj-cell__thumb" loading="lazy" />}
-                                </div>
-                                <div class="pj-cell__overlay"></div>
-                                <div class="pj-cell__info">
-                                    <span class="pj-cell__client">{group[0].client_name}</span>
-                                    <h3 class="pj-cell__title pj-cell__title--lg">{group[0].title}</h3>
-                                    {group[0].subtitle && <p class="pj-cell__subtitle">{group[0].subtitle}</p>}
-                                    <div class="pj-cell__cta">
-                                        <span>Ver proyecto</span>
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                                    </div>
-                                </div>
-                            </a>
+                            {(() => {
+                                const vid = getVideoId(group[0].video_project);
+                                if (!vid) return null;
+                                return (
+                                    <a href={`/proyectos/${group[0].slug}`} class="pj-cell pj-cell--large group">
+                                        <div class="pj-cell__video">
+                                            <iframe
+                                                class="pj-cell__iframe"
+                                                data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                                src=""
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                loading="lazy"
+                                            ></iframe>
+                                            {group[0].thumbnail && <img src={group[0].thumbnail} alt={group[0].title} class="pj-cell__thumb" loading="lazy" />}
+                                        </div>
+                                        <div class="pj-cell__overlay"></div>
+                                        <div class="pj-cell__info">
+                                            <span class="pj-cell__client">{group[0].client_name}</span>
+                                            <h3 class="pj-cell__title pj-cell__title--lg">{group[0].title}</h3>
+                                            {group[0].subtitle && <p class="pj-cell__subtitle">{group[0].subtitle}</p>}
+                                            <div class="pj-cell__cta">
+                                                <span>Ver proyecto</span>
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                            </div>
+                                        </div>
+                                    </a>
+                                );
+                            })()}
 
                             {/* Stacked cells */}
+                            {group.length > 1 && (
                             <div class="pj-stack">
                                 {group.slice(1).map((item: any) => {
                                     const vid = getVideoId(item.video_project);
+                                    if (!vid) return null;
                                     return (
                                         <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--stacked group">
                                             <div class="pj-cell__video">
@@ -118,11 +127,13 @@ const screens = groupIntoScreens(projects);
                                     );
                                 })}
                             </div>
-                        </>
+                            )}
+                        </Fragment>
                     ) : (
                         /* 4 items: 2x2 grid */
                         group.map((item: any) => {
                             const vid = getVideoId(item.video_project);
+                            if (!vid) return null;
                             return (
                                 <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--quarter group">
                                     <div class="pj-cell__video">
@@ -160,7 +171,7 @@ const screens = groupIntoScreens(projects);
         })
     )}
 
-    <!-- ═══ CTA BOTTOM ═══ -->
+    <!-- CTA BOTTOM -->
     <section class="pj-screen pj-cta-screen">
         <div class="pj-cta__glow"></div>
         <div class="pj-cta__inner">

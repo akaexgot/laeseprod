@@ -1,6 +1,7 @@
 ---
 /**
  * Admin - Companies (Logo Carousel) Management
+ * Restyled with a premium Zinc Dark Mode aesthetic natively
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getCompanies } from "../../lib/data";
@@ -9,122 +10,282 @@ const companies = await getCompanies();
 ---
 
 <AdminLayout title="Empresas" activeSection="empresas">
-    <div class="flex items-center justify-between mb-6">
-        <p class="text-light-muted text-sm">
-            {companies.length} empresas en carrusel
-        </p>
-        <button
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-carmin text-white text-sm font-semibold rounded-xl hover:shadow-glow transition-all duration-300"
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between" style="margin-bottom: 1.5rem; gap: 1rem;">
+        <div>
+            <p class="text-zinc-400 text-sm">Gestiona los logotipos. Total: <span class="text-zinc-100 font-medium">{companies.length}</span></p>
+        </div>
+        <button id="btn-add"
+            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
+            style="padding: 0.5rem 1rem; gap: 0.5rem;"
         >
-            <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4v16m8-8H4"></path></svg
-            >
-            Añadir empresa
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Añadir Logo
         </button>
     </div>
 
-    <div class="glass rounded-2xl overflow-hidden">
-        <table class="w-full">
-            <thead>
-                <tr class="border-b border-dark-border">
-                    <th
-                        class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
-                        >Logo</th
-                    >
-                    <th
-                        class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
-                        >Nombre</th
-                    >
-                    <th
-                        class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider hidden sm:table-cell"
-                        >Web</th
-                    >
-                    <th
-                        class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
-                        >Orden</th
-                    >
-                    <th
-                        class="text-right px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
-                        >Acciones</th
-                    >
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    companies.map((company: any) => (
-                        <tr class="border-b border-dark-border/50 hover:bg-dark-hover transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="w-12 h-8 bg-dark-card rounded-lg flex items-center justify-center">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left" id="companies-table">
+                <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
+                    <tr>
+                        <th class="font-semibold w-24" style="padding: 1rem 1.5rem;">Logo</th>
+                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Empresa</th>
+                        <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Sitio Web</th>
+                        <th class="font-semibold hidden md:table-cell w-24 text-center" style="padding: 1rem 1.5rem;">Orden</th>
+                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800">
+                    {companies.map((company: any) => (
+                        <tr class="hover:bg-zinc-800/30 transition-colors group" data-id={company.id}>
+                            <td style="padding: 1rem 1.5rem;">
+                                <div class="w-16 h-10 bg-zinc-950 rounded border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
                                     {company.logo_url ? (
-                                        <img
-                                            src={company.logo_url}
-                                            alt={company.name}
-                                            class="max-w-full max-h-full object-contain"
-                                        />
+                                        <img src={company.logo_url} alt={company.name} class="max-w-full max-h-full object-contain p-1" />
                                     ) : (
-                                        <span class="text-light-subtle text-xs">
-                                            Logo
-                                        </span>
+                                        <i data-lucide="image-off" class="w-4 h-4 text-zinc-600"></i>
                                     )}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-white text-sm">
-                                {company.name}
+                            <td style="padding: 1rem 1.5rem;">
+                                <span class="font-medium text-zinc-100">{company.name}</span>
                             </td>
-                            <td class="px-6 py-4 hidden sm:table-cell">
-                                <span class="text-light-muted text-sm">
-                                    {company.website || "-"}
-                                </span>
+                            <td class="hidden md:table-cell text-center" style="padding: 1rem 1.5rem;">
+                                {company.website ? (
+                                    <a href={company.website} target="_blank" class="text-zinc-400 hover:text-rose-400 text-sm hover:underline flex items-center gap-1.5 w-fit">
+                                        {company.website.replace(/^https?:\/\//, '')}
+                                        <i data-lucide="external-link" class="w-3 h-3"></i>
+                                    </a>
+                                ) : (
+                                    <span class="text-zinc-600">-</span>
+                                )}
                             </td>
-                            <td class="px-6 py-4 text-light-muted text-sm">
-                                {company.order}
+                            <td style="padding: 1rem 1.5rem;">
+                                <div class="flex items-center justify-center" style="gap: 1rem;">
+                                    <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{company.order}</span>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center gap-1 justify-end">
-                                    <button class="p-2 hover:bg-dark-card rounded-lg transition-colors">
-                                        <svg
-                                            class="w-4 h-4 text-light-subtle hover:text-carmin-light"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                            />
-                                        </svg>
+                            <td class="text-right" style="padding: 1rem 1.5rem;">
+                                <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
+                                    <button class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit"
+                                        data-id={company.id} data-name={company.name} data-logo={company.logo_url || ''} data-website={company.website || ''} data-order={company.order}
+                                        title="Editar">
+                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
                                     </button>
-                                    <button class="p-2 hover:bg-dark-card rounded-lg transition-colors">
-                                        <svg
-                                            class="w-4 h-4 text-light-subtle hover:text-red-400"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                            />
-                                        </svg>
+                                    <button class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors btn-delete" data-id={company.id} title="Eliminar">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </div>
                             </td>
                         </tr>
-                    ))
-                }
-            </tbody>
-        </table>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    {companies.length === 0 && (
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col items-center justify-center text-center" style="padding: 3rem; margin-top: 1.5rem;">
+            <div class="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center border border-zinc-800 mb-4">
+                <i data-lucide="briefcase" class="w-6 h-6 text-zinc-500"></i>
+            </div>
+            <h3 class="text-zinc-100 font-semibold mb-1">No hay empresas</h3>
+            <p class="text-zinc-400 text-sm mb-6 max-w-sm">Añade marcas clientes para mostrarlas en el carrusel animado de la página de inicio.</p>
+        </div>
+    )}
 </AdminLayout>
+
+<!-- Modal -->
+<div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
+        
+        <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
+            <h3 id="modal-title" class="text-lg font-semibold text-zinc-50 flex items-center gap-2">
+                <span id="modal-title-text">Añadir empresa</span>
+            </h3>
+            <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <input type="hidden" id="modal-id" />
+        
+        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+            <div style="margin-bottom: 0.5rem;">
+                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Nombre *</label>
+                <input type="text" id="modal-name" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="Nombre completo" />
+            </div>
+            
+            <div style="margin-bottom: 0.5rem;">
+                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Logo (URL)</label>
+                <input type="url" id="modal-logo" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://..." />
+                <div id="logo-preview" class="mt-3 h-20 bg-zinc-950 border border-zinc-800 rounded-md flex items-center justify-center overflow-hidden hidden relative" style="display: none;">
+                    <img id="logo-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2" style="display: grid; gap: 1.5rem;">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Sitio Web</label>
+                    <input type="url" id="modal-website" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://..." />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Orden</label>
+                    <input type="number" id="modal-order" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" value="0" min="0" />
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+            <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
+            <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
+            <button type="submit" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('modal-overlay')!;
+        const modalTitleText = document.getElementById('modal-title-text')!;
+        const modalId = document.getElementById('modal-id') as HTMLInputElement;
+        const modalName = document.getElementById('modal-name') as HTMLInputElement;
+        const modalLogo = document.getElementById('modal-logo') as HTMLInputElement;
+        const modalWebsite = document.getElementById('modal-website') as HTMLInputElement;
+        const modalOrder = document.getElementById('modal-order') as HTMLInputElement;
+        const modalError = document.getElementById('modal-error')!;
+        const logoPreview = document.getElementById('logo-preview')!;
+        const logoPreviewImg = document.getElementById('logo-preview-img') as HTMLImageElement;
+
+        function openModal(data?: any) {
+            if (data) {
+                modalTitleText.textContent = 'Editar empresa';
+                modalId.value = data.id || '';
+                modalName.value = data.name || '';
+                modalLogo.value = data.logo || '';
+                modalWebsite.value = data.website || '';
+                modalOrder.value = data.order || '0';
+            } else {
+                modalTitleText.textContent = 'Añadir empresa';
+                modalId.value = '';
+                modalName.value = '';
+                modalLogo.value = '';
+                modalWebsite.value = '';
+                modalOrder.value = '0';
+            }
+            updateLogoPreview();
+            modalError.classList.add('hidden');
+            overlay.classList.remove('hidden');
+        }
+
+        function closeModal() { overlay.classList.add('hidden'); }
+
+        function updateLogoPreview() {
+            if (modalLogo.value) {
+                logoPreviewImg.src = modalLogo.value;
+                logoPreview.classList.remove('hidden');
+            } else {
+                logoPreview.classList.add('hidden');
+                logoPreviewImg.src = '';
+            }
+        }
+
+        let previewDebounce: ReturnType<typeof setTimeout>;
+        modalLogo.addEventListener('input', () => {
+            clearTimeout(previewDebounce);
+            previewDebounce = setTimeout(updateLogoPreview, 500);
+        });
+
+        document.getElementById('btn-add')?.addEventListener('click', () => openModal());
+        document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
+        document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
+        
+        // Close on outside click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const el = btn as HTMLElement;
+                openModal({
+                    id: el.dataset.id,
+                    name: el.dataset.name,
+                    logo: el.dataset.logo,
+                    website: el.dataset.website,
+                    order: el.dataset.order,
+                });
+            });
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Eliminar esta empresa permanentemente?')) return;
+                
+                const icon = btn.querySelector('i')!;
+                icon.setAttribute('data-lucide', 'loader-2');
+                icon.classList.add('animate-spin');
+                // @ts-ignore
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                const id = (btn as HTMLElement).dataset.id;
+                const res = await fetch('/api/admin/companies', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id }),
+                });
+
+                if (res.ok) location.reload();
+                else alert('Error al eliminar');
+            });
+        });
+
+        // Save
+        document.getElementById('modal-save')?.addEventListener('click', async () => {
+            const name = modalName.value.trim();
+            if (!name) {
+                modalError.textContent = 'El nombre es obligatorio';
+                modalError.classList.remove('hidden');
+                return;
+            }
+
+            const saveBtn = document.getElementById('modal-save')!;
+            const oHtml = saveBtn.innerHTML;
+            saveBtn.innerHTML = 'Guardando...';
+            saveBtn.setAttribute('disabled', 'true');
+
+            const body: any = {
+                name,
+                logo_url: modalLogo.value.trim() || null,
+                website: modalWebsite.value.trim() || null,
+                order: parseInt(modalOrder.value) || 0,
+            };
+
+            const isEdit = !!modalId.value;
+            if (isEdit) body.id = modalId.value;
+
+            try {
+                const res = await fetch('/api/admin/companies', {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    modalError.textContent = err.error || 'Error al guardar';
+                    modalError.classList.remove('hidden');
+                    saveBtn.innerHTML = oHtml;
+                    saveBtn.removeAttribute('disabled');
+                }
+            } catch (e) {
+                modalError.textContent = 'Error de conexión';
+                modalError.classList.remove('hidden');
+                saveBtn.innerHTML = oHtml;
+                saveBtn.removeAttribute('disabled');
+            }
+        });
+    });
+</script>

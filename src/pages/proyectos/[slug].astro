@@ -1,158 +1,140 @@
 ---
 /**
- * Project Detail Page
- * Dynamic page for each project with videos and description
+ * Project Detail Page — Cinematic layout
+ * Shows main video, description, making-of video
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getProjectBySlug, getProjects } from '../../lib/data';
+import { getProjects } from '../../lib/data';
 
 const { slug } = Astro.params;
-const project = await getProjectBySlug(slug || '');
+const projects = await getProjects();
+const project = projects.find((p: any) => p.slug === slug);
 
 if (!project) {
-  return Astro.redirect('/proyectos');
+    return Astro.redirect('/proyectos');
 }
+
+function getVideoId(value: string | null | undefined): string | null {
+    if (!value) return null;
+    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (match) return match[1];
+    if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
+    return null;
+}
+
+const mainVideoId = getVideoId(project.video_project);
+const expDesktopId = getVideoId(project.video_explanation_desktop);
+const expMobileId = getVideoId(project.video_explanation_mobile);
 ---
 
-<BaseLayout
-  title={project.title}
-  description={project.description}
->
-  <!-- Back Navigation -->
-  <section class="pt-28 pb-8">
-    <div class="section-container">
-      <a href="/proyectos" class="inline-flex items-center gap-2 text-light-muted hover:text-carmin-light transition-colors duration-300 text-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7M7 7h10v10"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        Volver a proyectos
-      </a>
-    </div>
-  </section>
+<BaseLayout title={project.title} description={project.subtitle || project.description || ''}>
+    <article class="bg-dark text-white min-h-screen">
 
-  <!-- Project Header -->
-  <section class="pb-12">
-    <div class="section-container">
-      <div class="max-w-4xl">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 bg-carmin/20 rounded-xl flex items-center justify-center">
-            <span class="text-carmin font-bold">{project.client_name?.charAt(0)}</span>
-          </div>
-          <span class="text-light-muted">{project.client_name}</span>
-        </div>
-        <h1 class="text-4xl lg:text-6xl font-[Outfit] font-bold text-white mb-4 animate-fade-up">
-          {project.title}
-        </h1>
-        <p class="text-xl text-light-muted mb-2 animate-fade-up" style="animation-delay: 0.1s;">{project.subtitle}</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Main Video -->
-  <section class="pb-16">
-    <div class="section-container">
-      <div class="relative rounded-3xl overflow-hidden aspect-video bg-dark-card animate-fade-up" style="animation-delay: 0.2s;">
-        {project.video_project ? (
-          project.video_project.includes('youtube') ? (
-            <iframe
-              src={project.video_project}
-              class="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-              title={project.title}
-            ></iframe>
-          ) : (
-            <video
-              src={project.video_project}
-              class="w-full h-full object-cover"
-              controls
-              preload="metadata"
-            ></video>
-          )
-        ) : (
-          <div class="w-full h-full bg-gradient-to-br from-dark-surface to-carmin-900/20 flex items-center justify-center">
-            <div class="text-center">
-              <svg class="w-16 h-16 text-carmin/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-              <p class="text-light-subtle">Vídeo del proyecto próximamente</p>
+        <!-- Hero: Main Video -->
+        {mainVideoId && (
+        <section class="relative w-full h-screen min-h-[500px] max-h-[90vh] overflow-hidden">
+            <div class="absolute inset-0 bg-dark">
+                <iframe
+                    src={`https://www.youtube.com/embed/${mainVideoId}?autoplay=1&mute=1&loop=1&playlist=${mainVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                    style="width: 177.78vh; height: 56.25vw; min-width: 100%; min-height: 100%;"
+                    frameborder="0"
+                    allow="autoplay; encrypted-media"
+                ></iframe>
+                <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent"></div>
             </div>
-          </div>
+
+            <!-- Video overlay info -->
+            <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16 z-10">
+                <div class="max-w-4xl">
+                    {project.client_name && (
+                        <div class="flex items-center gap-4 mb-4">
+                            {project.client_logo && <img src={project.client_logo} alt={project.client_name} class="h-8 object-contain opacity-80" />}
+                            <span class="text-white/60 text-xs font-mono tracking-[0.2em] uppercase">{project.client_name}</span>
+                        </div>
+                    )}
+                    <h1 class="text-4xl md:text-6xl lg:text-7xl font-[Outfit] font-bold leading-[0.95] mb-3">{project.title}</h1>
+                    {project.subtitle && (
+                        <p class="text-xl md:text-2xl text-white/60 font-light italic">{project.subtitle}</p>
+                    )}
+                </div>
+            </div>
+        </section>
         )}
-      </div>
-    </div>
-  </section>
 
-  <!-- Description -->
-  <section class="pb-16">
-    <div class="section-container">
-      <div class="max-w-3xl">
-        <h2 class="text-2xl font-[Outfit] font-bold text-white mb-6 reveal">Sobre el proyecto</h2>
-        <p class="text-light-muted leading-relaxed text-lg reveal">{project.description}</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Explanation Video (if exists) -->
-  {(project.video_explanation_desktop || project.video_explanation_mobile) && (
-    <section class="pb-24">
-      <div class="section-container">
-        <h2 class="text-2xl font-[Outfit] font-bold text-white mb-8 reveal">Making of</h2>
-        <div class="relative rounded-3xl overflow-hidden aspect-video bg-dark-card reveal">
-          <!-- Desktop version -->
-          <div class="hidden md:block w-full h-full">
-            {project.video_explanation_desktop && (
-              project.video_explanation_desktop.includes('youtube') ? (
-                <iframe
-                  src={project.video_explanation_desktop}
-                  class="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                  loading="lazy"
-                  title={`${project.title} - Explicación`}
-                ></iframe>
-              ) : (
-                <video src={project.video_explanation_desktop} class="w-full h-full object-cover" controls preload="metadata"></video>
-              )
+        <!-- Info + Description -->
+        <section class="max-w-5xl mx-auto px-6 md:px-12 py-20 md:py-32">
+            {!mainVideoId && (
+                <div class="mb-12">
+                    {project.client_name && (
+                        <div class="flex items-center gap-4 mb-6">
+                            {project.client_logo && <img src={project.client_logo} alt={project.client_name} class="h-8 object-contain opacity-80" />}
+                            <span class="text-white/60 text-xs font-mono tracking-[0.2em] uppercase">{project.client_name}</span>
+                        </div>
+                    )}
+                    <h1 class="text-4xl md:text-6xl font-[Outfit] font-bold leading-tight mb-4">{project.title}</h1>
+                    {project.subtitle && <p class="text-xl text-white/60 font-light italic">{project.subtitle}</p>}
+                </div>
             )}
-          </div>
-          <!-- Mobile version -->
-          <div class="md:hidden w-full h-full">
-            {project.video_explanation_mobile && (
-              project.video_explanation_mobile.includes('youtube') ? (
-                <iframe
-                  src={project.video_explanation_mobile}
-                  class="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                  loading="lazy"
-                  title={`${project.title} - Explicación móvil`}
-                ></iframe>
-              ) : (
-                <video src={project.video_explanation_mobile} class="w-full h-full object-cover" controls preload="metadata"></video>
-              )
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
-  )}
 
-  <!-- CTA -->
-  <section class="pb-24">
-    <div class="section-container">
-      <div class="glass rounded-3xl p-12 text-center reveal">
-        <h3 class="text-2xl lg:text-3xl font-[Outfit] font-bold text-white mb-4">
-          ¿Quieres un proyecto similar?
-        </h3>
-        <p class="text-light-muted mb-8 max-w-xl mx-auto">
-          Cuéntanos tu idea y crearemos algo único para tu marca
-        </p>
-        <a
-          href="/contacto"
-          class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-carmin text-white font-semibold rounded-full hover:shadow-glow-strong transition-all duration-300 hover:scale-105"
-        >
-          Solicitar presupuesto
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-        </a>
-      </div>
-    </div>
-  </section>
+            {project.description && (
+                <div class="prose prose-invert prose-lg max-w-none">
+                    <p class="text-light-muted text-lg md:text-xl leading-relaxed whitespace-pre-line">{project.description}</p>
+                </div>
+            )}
+
+            <!-- Playable version -->
+            {mainVideoId && (
+                <div class="mt-16">
+                    <h3 class="text-sm font-mono tracking-[0.2em] uppercase text-white/40 mb-6">Reproducir vídeo</h3>
+                    <div class="aspect-video rounded-2xl overflow-hidden bg-dark-card border border-dark-border shadow-2xl">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1`}
+                            class="w-full h-full"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                </div>
+            )}
+        </section>
+
+        <!-- Making Of / Explanation Video -->
+        {(expDesktopId || expMobileId) && (
+            <section class="max-w-5xl mx-auto px-6 md:px-12 pb-20 md:pb-32">
+                <h3 class="text-sm font-mono tracking-[0.2em] uppercase text-white/40 mb-6">Making Of</h3>
+                <div class="aspect-video rounded-2xl overflow-hidden bg-dark-card border border-dark-border shadow-2xl">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${expDesktopId || expMobileId}?rel=0&modestbranding=1`}
+                        class="w-full h-full"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                    ></iframe>
+                </div>
+            </section>
+        )}
+
+        <!-- CTA -->
+        <section class="border-t border-dark-border">
+            <div class="max-w-5xl mx-auto px-6 md:px-12 py-20 md:py-32">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-[Outfit] font-bold mb-3">¿Te gustaría un proyecto así?</h2>
+                        <p class="text-light-muted text-lg">Cuéntanos tu idea y lo hacemos realidad.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="/contacto" class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-carmin text-white font-semibold rounded-xl hover:shadow-glow-strong transition-all duration-300 text-sm">
+                            Solicitar presupuesto
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                        <a href="/proyectos" class="inline-flex items-center gap-2 px-6 py-4 border border-dark-border text-white/80 hover:text-white hover:border-white/30 rounded-xl transition-all duration-300 text-sm">
+                            Ver más proyectos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </article>
 </BaseLayout>

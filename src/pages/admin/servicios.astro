@@ -1,6 +1,7 @@
 ---
 /**
  * Admin - Services Management
+ * Restyled with a premium Zinc Dark Mode aesthetic natively
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getServices } from "../../lib/data";
@@ -9,102 +10,251 @@ const services = await getServices();
 ---
 
 <AdminLayout title="Servicios" activeSection="servicios">
-    <div class="flex items-center justify-between mb-6">
-        <p class="text-light-muted text-sm">{services.length} servicios</p>
-        <button
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-carmin text-white text-sm font-semibold rounded-xl hover:shadow-glow transition-all duration-300"
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between" style="margin-bottom: 1.5rem; gap: 1rem;">
+        <div>
+            <p class="text-zinc-400 text-sm">Gestiona los servicios que ofreces. Total: <span class="text-zinc-100 font-medium">{services.length}</span></p>
+        </div>
+        <button id="btn-add"
+            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
+            style="padding: 0.5rem 1rem; gap: 0.5rem;"
         >
-            <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4v16m8-8H4"></path></svg
-            >
+            <i data-lucide="plus" class="w-4 h-4"></i>
             Nuevo servicio
         </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {
-            services.map((service: any) => (
-                <div
-                    class="glass rounded-2xl p-6 hover:border-carmin/20 transition-all duration-300"
-                    data-id={service.id}
-                >
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">{service.icon}</span>
-                            <div>
-                                <h3 class="text-white font-[Outfit] font-semibold">
-                                    {service.title}
-                                </h3>
-                                <p class="text-light-subtle text-xs">
-                                    /{service.slug}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex gap-1">
-                            <button
-                                class="p-2 hover:bg-dark-card rounded-lg transition-colors"
-                                title="Editar"
-                            >
-                                <svg
-                                    class="w-4 h-4 text-light-subtle hover:text-carmin-light"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    />
-                                </svg>
-                            </button>
-                            <button
-                                class="p-2 hover:bg-dark-card rounded-lg transition-colors"
-                                title="Eliminar"
-                            >
-                                <svg
-                                    class="w-4 h-4 text-light-subtle hover:text-red-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left" id="services-table">
+                <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
+                    <tr>
+                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Servicio</th>
+                        <th class="font-semibold hidden sm:table-cell w-32" style="padding: 1rem 1.5rem;">Vídeo</th>
+                        <th class="font-semibold hidden md:table-cell w-24 text-center" style="padding: 1rem 1.5rem;">Orden</th>
+                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800">
+                    {services.map((service: any) => (
+                        <tr class="hover:bg-zinc-800/30 transition-colors group" data-id={service.id}>
+                            <td style="padding: 1rem 1.5rem;">
+                                <div class="flex items-start" style="gap: 0.75rem;">
+                                    <div class="w-8 h-8 rounded bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5 text-zinc-400">
+                                        <i data-lucide="layers" class="w-4 h-4"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-medium text-zinc-100 mb-0.5">{service.title}</div>
+                                        <div class="text-xs text-zinc-500 line-clamp-1">{service.description}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
+                                {service.video_url ? (
+                                    <span class="inline-flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 w-fit">
+                                        <i data-lucide="check" class="w-3 h-3"></i> Listo
+                                    </span>
+                                ) : (
+                                    <span class="inline-flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium bg-amber-400/10 text-amber-400 border border-amber-400/20 w-fit">
+                                        <i data-lucide="alert-circle" class="w-3 h-3"></i> Faltan
+                                    </span>
+                                )}
+                            </td>
+                            <td class="hidden md:table-cell text-center" style="padding: 1rem 1.5rem;">
+                                <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{service.order}</span>
+                            </td>
+                            <td class="text-right" style="padding: 1rem 1.5rem;">
+                                <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
+                                    <button class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" data-service={JSON.stringify(service)} title="Editar">
+                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                    </button>
+                                    <button class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors btn-delete" data-id={service.id} title="Eliminar">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {services.length === 0 && (
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col items-center justify-center text-center" style="padding: 3rem; margin-top: 1.5rem;">
+            <div class="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center border border-zinc-800 mb-4">
+                <i data-lucide="layers" class="w-6 h-6 text-zinc-500"></i>
+            </div>
+            <h3 class="text-zinc-100 font-semibold mb-1">No hay servicios</h3>
+            <p class="text-zinc-400 text-sm mb-6 max-w-sm">Añade tu primer servicio para mostrar a tus clientes lo que ofreces.</p>
+            <button onclick="document.getElementById('btn-add').click()" class="inline-flex items-center gap-2 px-4 py-2 bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm font-medium rounded-md hover:bg-zinc-800 hover:text-white transition-all">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Crear servicio
+            </button>
+        </div>
+    )}
+</AdminLayout>
+
+<!-- Modal -->
+<div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
+            <h3 id="modal-title" class="text-lg font-semibold text-zinc-50 flex items-center gap-2">
+                <span>Nuevo servicio</span>
+            </h3>
+            <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div style="padding: 1.5rem;">
+            <div id="m-id" style="display: none;"></div>
+
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1.5rem;">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Título *</label>
+                        <input type="text" id="m-title" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="Título del servicio" />
                     </div>
-                    <p class="text-light-muted text-sm line-clamp-2">
-                        {service.description}
-                    </p>
-                    <div class="flex items-center gap-4 mt-4 text-xs text-light-subtle">
-                        <span>Orden: {service.order}</span>
-                        <span
-                            class:list={[
-                                "inline-flex px-2 py-0.5 rounded-full",
-                                service.video
-                                    ? "bg-green-500/10 text-green-400"
-                                    : "bg-yellow-500/10 text-yellow-400",
-                            ]}
-                        >
-                            {service.video ? "✓ Vídeo" : "⏳ Sin vídeo"}
-                        </span>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Slug (auto-generado si vacío)</label>
+                        <input type="text" id="m-slug" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="mi-servicio" />
                     </div>
                 </div>
-            ))
-        }
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Descripción</label>
+                    <textarea id="m-description" rows="3" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1.5rem;">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">URL del vídeo (YouTube)</label>
+                        <input type="url" id="m-video" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://..." />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Orden</label>
+                        <input type="number" id="m-order" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" value="0" min="0" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+            <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
+            <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
+            <button type="submit" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
+        </div>
     </div>
-</AdminLayout>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('modal-overlay')!;
+        const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+        const errEl = document.getElementById('modal-error')!;
+
+        function openModal(service?: any) {
+            const isEdit = !!service;
+            const titleSpan = overlay.querySelector('#modal-title span')!;
+            titleSpan.textContent = isEdit ? 'Editar servicio' : 'Nuevo servicio';
+            
+            $('m-id').value = service?.id || '';
+            $('m-title').value = service?.title || '';
+            $('m-slug').value = service?.slug || '';
+            ($('m-description') as unknown as HTMLTextAreaElement).value = service?.description || '';
+            $('m-video').value = service?.video_url || '';
+            $('m-order').value = String(service?.order ?? 0);
+            
+            errEl.classList.add('hidden');
+            overlay.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            overlay.classList.add('hidden');
+        }
+
+        document.getElementById('btn-add')?.addEventListener('click', () => openModal());
+        document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
+        document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
+
+        // Close on outside click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const service = JSON.parse((btn as HTMLElement).dataset.service || '{}');
+                openModal(service);
+            });
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Eliminar permanente?')) return;
+                
+                const icon = btn.querySelector('i')!;
+                icon.setAttribute('data-lucide', 'loader-2');
+                icon.classList.add('animate-spin');
+                // @ts-ignore
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                const res = await fetch('/api/admin/services', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: (btn as HTMLElement).dataset.id }),
+                });
+                if (res.ok) location.reload();
+                else alert('Error');
+            });
+        });
+
+        document.getElementById('modal-save')?.addEventListener('click', async () => {
+            const title = $('m-title').value.trim();
+            if (!title) {
+                errEl.textContent = 'El título es obligatorio';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            const btn = document.getElementById('modal-save')!;
+            const oHtml = btn.innerHTML;
+            btn.innerHTML = 'Guardando...';
+            btn.setAttribute('disabled', 'true');
+
+            const body: any = {
+                title,
+                slug: $('m-slug').value.trim() || null,
+                description: ($('m-description') as unknown as HTMLTextAreaElement).value.trim() || null,
+                video_url: $('m-video').value.trim() || null,
+                order: parseInt($('m-order').value) || 0,
+            };
+
+            const isEdit = !!$('m-id').value;
+            if (isEdit) body.id = $('m-id').value;
+
+            try {
+                const res = await fetch('/api/admin/services', {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    errEl.textContent = err.error || 'Error';
+                    errEl.classList.remove('hidden');
+                    btn.innerHTML = oHtml;
+                    btn.removeAttribute('disabled');
+                }
+            } catch (e) {
+                errEl.textContent = 'Error conexión';
+                errEl.classList.remove('hidden');
+                btn.innerHTML = oHtml;
+                btn.removeAttribute('disabled');
+            }
+        });
+    });
+</script>

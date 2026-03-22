@@ -1,273 +1,313 @@
 ---
 /**
- * Admin - Global Settings
- * Edit colors, fonts, hero, contact info, social links
+ * Admin - Global Website Settings
+ * Restyled with a premium Zinc Dark Mode aesthetic natively
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getSettings } from "../../lib/data";
 
 const settings = await getSettings();
+// Helper stringifier para rellenar
+const getVal = (key: string) => settings[key] || '';
 ---
 
-<AdminLayout title="Ajustes Globales" activeSection="ajustes">
-    <form id="settings-form" class="space-y-8">
-        <!-- Brand & Colors -->
-        <section class="glass rounded-2xl p-6">
-            <h2
-                class="text-lg font-[Outfit] font-semibold text-white mb-6 flex items-center gap-2"
-            >
-                🎨 Marca y Colores
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Nombre del sitio</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.site_name}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Descripción</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.site_description}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Color primario</label
-                    >
-                    <div class="flex items-center gap-3">
-                        <input
-                            type="color"
-                            value={settings.primary_color}
-                            class="w-10 h-10 rounded-lg border-0 cursor-pointer"
-                        />
-                        <input
-                            type="text"
-                            value={settings.primary_color}
-                            class="flex-1 px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                        />
-                    </div>
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Color secundario</label
-                    >
-                    <div class="flex items-center gap-3">
-                        <input
-                            type="color"
-                            value={settings.secondary_color}
-                            class="w-10 h-10 rounded-lg border-0 cursor-pointer"
-                        />
-                        <input
-                            type="text"
-                            value={settings.secondary_color}
-                            class="flex-1 px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                        />
-                    </div>
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Font headings</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.font_heading}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Font body</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.font_body}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-            </div>
-        </section>
-
-        <!-- Hero Section -->
-        <section class="glass rounded-2xl p-6">
-            <h2
-                class="text-lg font-[Outfit] font-semibold text-white mb-6 flex items-center gap-2"
-            >
-                🎬 Hero
-            </h2>
-            <div class="space-y-5">
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Título hero</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.hero_title}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Subtítulo hero</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.hero_subtitle}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-light-muted mb-2"
-                            >Vídeo hero (desktop)</label
-                        >
-                        <input
-                            type="url"
-                            value={settings.hero_video_desktop}
-                            placeholder="URL YouTube o Cloudinary"
-                            class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-light-muted mb-2"
-                            >Vídeo hero (mobile)</label
-                        >
-                        <input
-                            type="url"
-                            value={settings.hero_video_mobile}
-                            placeholder="URL YouTube o Cloudinary"
-                            class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors text-sm"
-                        />
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Info -->
-        <section class="glass rounded-2xl p-6">
-            <h2
-                class="text-lg font-[Outfit] font-semibold text-white mb-6 flex items-center gap-2"
-            >
-                📞 Contacto
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Email</label
-                    >
-                    <input
-                        type="email"
-                        value={settings.email}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Teléfono</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.phone}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >WhatsApp (sin +)</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.whatsapp_number}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Dirección</label
-                    >
-                    <input
-                        type="text"
-                        value={settings.address}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Instagram</label
-                    >
-                    <input
-                        type="url"
-                        value={settings.instagram}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >LinkedIn</label
-                    >
-                    <input
-                        type="url"
-                        value={settings.linkedin}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-                <div class="sm:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-light-muted mb-2"
-                        >Google Maps Embed URL</label
-                    >
-                    <input
-                        type="url"
-                        value={settings.google_maps_embed}
-                        class="w-full px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white focus:outline-none focus:border-carmin transition-colors text-sm"
-                    />
-                </div>
-            </div>
-        </section>
-
-        <!-- Save -->
-        <div class="flex justify-end">
-            <button
-                type="submit"
-                class="inline-flex items-center gap-2 px-8 py-3 bg-gradient-carmin text-white font-semibold rounded-xl hover:shadow-glow-strong transition-all duration-300"
-            >
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5 13l4 4L19 7"></path></svg
-                >
-                Guardar cambios
-            </button>
+<AdminLayout title="Ajustes Generales" activeSection="ajustes">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between" style="margin-bottom: 1.5rem; gap: 1rem;">
+        <div>
+            <p class="text-zinc-400 text-sm">Gestiona la configuración global de la web y datos de contacto.</p>
         </div>
-    </form>
+        <button id="btn-save-all"
+            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
+            style="padding: 0.5rem 1rem; gap: 0.5rem;"
+        >
+            <i data-lucide="save" class="w-4 h-4"></i>
+            Guardar cambios
+        </button>
+    </div>
+
+    <div id="status-message" class="hidden mb-6 p-4 rounded-md text-sm font-medium border"></div>
+
+    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <!-- Tabs Navigation -->
+        <ol class="w-full lg:w-64 flex flex-col shrink-0" style="gap: 0.25rem;">
+            <li>
+                <button type="button" class="tab-btn w-full flex items-center rounded-lg text-sm font-medium transition-colors bg-zinc-800 text-zinc-50" style="padding: 0.75rem 1rem; gap: 0.75rem;" data-target="tab-general">
+                    <i data-lucide="settings-2" class="w-5 h-5 text-rose-500"></i>
+                    General
+                </button>
+            </li>
+            <li>
+                <button type="button" class="tab-btn w-full flex items-center rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50" style="padding: 0.75rem 1rem; gap: 0.75rem;" data-target="tab-hero">
+                    <i data-lucide="monitor-play" class="w-5 h-5 text-zinc-500"></i>
+                    Sección Inicio
+                </button>
+            </li>
+            <li>
+                <button type="button" class="tab-btn w-full flex items-center rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50" style="padding: 0.75rem 1rem; gap: 0.75rem;" data-target="tab-contact">
+                    <i data-lucide="at-sign" class="w-5 h-5 text-zinc-500"></i>
+                    Contacto y Redes
+                </button>
+            </li>
+        </ol>
+
+        <!-- Settings Form Area -->
+        <div class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+            <form id="settings-form" style="padding: 1.5rem 2rem;">
+                
+                <!-- Tab: General -->
+                <div id="tab-general" class="tab-content space-y-8">
+                    <div>
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Información de la Marca</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 mt-6" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Nombre de la Empresa</label>
+                                <input type="text" name="site_name" value={getVal('site_name')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Descripción Corta (Footer)</label>
+                                <input type="text" name="site_description" value={getVal('site_description')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Personalización Global</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 mt-6" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Color Principal (Botones, detalles)</label>
+                                <div class="flex gap-2">
+                                    <input type="color" id="primary_color_picker" value={getVal('primary_color') || '#e8364f'} class="w-10 h-10 rounded border border-zinc-800 cursor-pointer bg-zinc-950 p-1" />
+                                    <input type="text" name="primary_color" id="primary_color_input" value={getVal('primary_color')} placeholder="#e8364f" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm uppercase" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Color Secundario</label>
+                                <div class="flex gap-2">
+                                    <input type="color" id="secondary_color_picker" value={getVal('secondary_color') || '#ffffff'} class="w-10 h-10 rounded border border-zinc-800 cursor-pointer bg-zinc-950 p-1" />
+                                    <input type="text" name="secondary_color" id="secondary_color_input" value={getVal('secondary_color')} placeholder="#ffffff" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm uppercase" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Hero Section -->
+                <div id="tab-hero" class="tab-content hidden space-y-8">
+                    <div>
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Vídeo Principal de Inicio</h2>
+                        <p class="text-sm text-zinc-400 mt-2 mb-6">El vídeo enorme que se reproduce en bucle en la página principal.</p>
+                        
+                        <div class="grid grid-cols-1" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo de Youtube (Hero)</label>
+                                <input type="url" name="hero_video_url" id="hero_video_url" value={getVal('hero_video_url')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                            
+                            <!-- Video Preview Box -->
+                            <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-3">
+                                <p class="text-xs font-medium text-zinc-500 mb-2 uppercase tracking-wide">Vista previa en directo</p>
+                                <div class="aspect-video bg-black rounded-md overflow-hidden relative shadow-inner ring-1 ring-white/10" id="hero-preview-container">
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center text-zinc-600">
+                                        <i data-lucide="youtube" class="w-12 h-12 mb-2 opacity-50"></i>
+                                        <span class="text-sm font-medium">Introduce un enlace válido de YouTube</span>
+                                    </div>
+                                    <iframe id="hero-preview-iframe" class="absolute inset-0 w-full h-full hidden" src="" title="Previsualización" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Textos del Hero</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 mt-6" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Claim Principal (H1)</label>
+                                <textarea name="hero_title" rows="2" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm resize-none" placeholder="Productora Audiovisual en Sevilla">{getVal('hero_title')}</textarea>
+                                <p class="text-[10px] text-zinc-500 mt-1">Soporta negritas con **texto** si has activado Markdown en el renderizador.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Subtítulo Descriptivo</label>
+                                <textarea name="hero_subtitle" rows="3" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm resize-none">{getVal('hero_subtitle')}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Contact -->
+                <div id="tab-contact" class="tab-content hidden space-y-8">
+                    <div>
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Información de Contacto</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 mt-6" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Email Público</label>
+                                <input type="email" name="contact_email" value={getVal('contact_email')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Teléfono</label>
+                                <input type="text" name="contact_phone" value={getVal('contact_phone')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Dirección Física</label>
+                                <input type="text" name="contact_address" value={getVal('contact_address')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Redes Sociales</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 mt-6" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Instagram (URL)</label>
+                                <input type="url" name="social_instagram" value={getVal('social_instagram')} placeholder="https://instagram.com/..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">LinkedIn (URL)</label>
+                                <input type="url" name="social_linkedin" value={getVal('social_linkedin')} placeholder="https://linkedin.com/..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Vimeo (URL)</label>
+                                <input type="url" name="social_vimeo" value={getVal('social_vimeo')} placeholder="https://vimeo.com/..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">WhatsApp (Opcional, formato internacional +34)</label>
+                                <input type="text" name="social_whatsapp" value={getVal('social_whatsapp')} placeholder="+34 600..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
 </AdminLayout>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs Logic
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Reset all buttons
+                tabBtns.forEach(b => {
+                    b.classList.remove('bg-zinc-800', 'text-zinc-50');
+                    b.classList.add('text-zinc-400');
+                    b.querySelector('i')?.classList.replace('text-rose-500', 'text-zinc-500');
+                });
+                // Hide all contents
+                tabContents.forEach(c => c.classList.add('hidden'));
+
+                // Activate clicked
+                const targetId = (btn as HTMLElement).dataset.target;
+                btn.classList.add('bg-zinc-800', 'text-zinc-50');
+                btn.classList.remove('text-zinc-400');
+                btn.querySelector('i')?.classList.replace('text-zinc-500', 'text-rose-500');
+                document.getElementById(targetId!)?.classList.remove('hidden');
+            });
+        });
+
+        // Color Sync Logic
+function syncColor(pickerId: string, inputId: string) {
+            const picker = document.getElementById(pickerId) as HTMLInputElement;
+            const input = document.getElementById(inputId) as HTMLInputElement;
+            if (picker && input) {
+                picker.addEventListener('input', (e) => {
+                    input.value = (e.target as HTMLInputElement).value;
+                });
+                input.addEventListener('input', (e) => {
+                    const val = (e.target as HTMLInputElement).value;
+                    if (/^#[0-9A-F]{6}$/i.test(val)) {
+                        picker.value = val;
+                    }
+                });
+            }
+        };
+        syncColor('primary_color_picker', 'primary_color_input');
+        syncColor('secondary_color_picker', 'secondary_color_input');
+
+        // YouTube Preview Logic
+        const heroUrlInput = document.getElementById('hero_video_url') as HTMLInputElement;
+        const heroIframe = document.getElementById('hero-preview-iframe') as HTMLIFrameElement;
+        
+        const updateYoutubePreview = (url: string) => {
+            let videoId = '';
+            if (url.includes('youtube.com/watch?v=')) {
+                videoId = url.split('v=')[1].split('&')[0];
+            } else if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1].split('?')[0];
+            }
+            
+            if (videoId) {
+                heroIframe.src = `https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&mute=1&controls=0`;
+                heroIframe.classList.remove('hidden');
+            } else {
+                heroIframe.classList.add('hidden');
+                heroIframe.src = '';
+            }
+        };
+
+        // Initialize preview if exists
+        if (heroUrlInput?.value) updateYoutubePreview(heroUrlInput.value);
+
+        // Debounce for URL input
+        let previewTimeout: ReturnType<typeof setTimeout>;
+        heroUrlInput?.addEventListener('input', (e) => {
+            clearTimeout(previewTimeout);
+            const url = (e.target as HTMLInputElement).value;
+            previewTimeout = setTimeout(() => {
+                updateYoutubePreview(url);
+            }, 600);
+        });
+
+        // Form Submit
+        const saveBtn = document.getElementById('btn-save-all');
+        const form = document.getElementById('settings-form') as HTMLFormElement;
+        const statusMsg = document.getElementById('status-message')!;
+
+        saveBtn?.addEventListener('click', async () => {
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Guardando...';
+            // @ts-ignore
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            saveBtn.setAttribute('disabled', 'true');
+            statusMsg.classList.add('hidden');
+
+            const formData = new FormData(form);
+            const data: Record<string, string> = {};
+            formData.forEach((value, key) => {
+                data[key] = value.toString();
+            });
+
+            try {
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    statusMsg.className = 'mb-6 p-4 rounded-md text-sm font-medium border bg-emerald-500/10 border-emerald-500/20 text-emerald-400';
+                    statusMsg.innerHTML = '<div class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Ajustes guardados correctamente.</div>';
+                    statusMsg.classList.remove('hidden');
+                    // @ts-ignore
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                } else {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Error al guardar');
+                }
+            } catch (err: any) {
+                statusMsg.className = 'mb-6 p-4 rounded-md text-sm font-medium border bg-rose-500/10 border-rose-500/20 text-rose-400';
+                statusMsg.innerHTML = `<div class="flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4"></i> ${err.message || 'Error de conexión'}</div>`;
+                statusMsg.classList.remove('hidden');
+                // @ts-ignore
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } finally {
+                saveBtn.innerHTML = originalText;
+                saveBtn.removeAttribute('disabled');
+                // @ts-ignore
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        });
+    });
+</script>

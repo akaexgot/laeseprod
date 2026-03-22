@@ -1,45 +1,44 @@
 ---
 /**
- * Services — Premium 3D iPhone Coverflow Carousel (Light Mode, CSS Framework)
+ * Services — Premium 3D Coverflow Carousel
+ * Renders ALL services that have a video dynamically from DB
  */
 import { getServices } from '../../lib/data';
-const services = await getServices();
+const allServices = await getServices();
 
-const demoYoutubeId = 'D91q99QK11k';
+// Only show services that have a video URL
+const services = allServices.filter((s: any) => s.video);
+
+function extractYouTubeId(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (m) return m[1];
+  if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim();
+  return null;
+}
 ---
 
+{services.length > 0 && (
 <section id="services-section" class="relative bg-gray-50 overflow-hidden text-dark min-h-screen flex flex-col justify-center pt-32 pb-20 px-6 lg:px-10">
-  <!-- Subtle pattern -->
   <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
 
-  <!-- Premium 3D Carousel Container -->
   <div class="relative w-full flex items-center justify-center perspective-2000">
     
     <div id="services-carousel" class="relative w-full max-w-[900px] aspect-[16/9] md:aspect-[4/3] z-20 reveal-scale">
-      {services.slice(0, 3).map((service: any, idx: number) => {
-        const startTime = 15 + (idx * 15);
-        const endTime = startTime + 3;
+      {services.map((service: any, idx: number) => {
+        const videoId = extractYouTubeId(service.video);
+        if (!videoId) return null;
         return (
         <div class="carousel-item-services absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" data-index={idx} data-slug={service.slug}>
-          
-          <!-- Pure Video Frame (4:3) -->
           <div class="w-full h-full rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.3)] relative overflow-hidden group border border-white/20 bg-dark">
-            
-
-            
-            <!-- Lazy loaded Video Frame -->
             <iframe 
               class="video-iframe absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] h-[115%] opacity-0 transition-opacity duration-700 z-10 pointer-events-none"
-              data-src={`https://www.youtube.com/embed/${demoYoutubeId}?autoplay=1&mute=1&start=${startTime}&end=${endTime}&loop=1&playlist=${demoYoutubeId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+              data-src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
               src=""
               style="object-fit: cover;"
               frameborder="0" allow="autoplay; encrypted-media" tabindex="-1" aria-hidden="true"
             ></iframe>
-
-            <!-- Subtle protective gradient strictly for text readablity on hover -->
             <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-dark/90 via-dark/40 to-transparent z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-            <!-- Content Overlay (Title & Button) -->
             <div class="absolute inset-0 z-30 flex flex-col items-center justify-center text-center p-8 pointer-events-none transition-all duration-700">
                 <div class="transform translate-y-8 group-hover:translate-y-0 transition-transform duration-700 ease-out">
                     <h3 class="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-8 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] leading-tight pointer-events-auto uppercase tracking-tighter">{service.title}</h3>
@@ -51,14 +50,12 @@ const demoYoutubeId = 'D91q99QK11k';
                     </div>
                 </div>
             </div>
-            
           </div>
         </div>
         );
       })}
     </div>
 
-    <!-- Interface Controls -->
     <button id="btn-prev-services" class="btn btn-circle absolute left-4 md:left-12 lg:left-32 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center justify-center text-dark hover:bg-carmin hover:border-carmin hover:text-white hover:scale-110 transition-all duration-300 z-50 shadow-xl reveal-left delay-3">
       <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
     </button>
@@ -67,6 +64,7 @@ const demoYoutubeId = 'D91q99QK11k';
     </button>
   </div>
 </section>
+)}
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -76,6 +74,8 @@ const demoYoutubeId = 'D91q99QK11k';
     const items = container.querySelectorAll('.carousel-item-services');
     const prevBtn = document.getElementById('btn-prev-services');
     const nextBtn = document.getElementById('btn-next-services');
+    
+    if (items.length === 0) return;
     
     let currentIndex = 0;
     const total = items.length;
@@ -99,7 +99,6 @@ const demoYoutubeId = 'D91q99QK11k';
         item.onclick = null;
 
         if (idx === currentIndex) {
-          // Principal (Centro)
           item.style.zIndex = '30';
           item.style.transform = 'scale(1) translateX(0) translateZ(0)';
           item.style.opacity = '1';
@@ -109,7 +108,6 @@ const demoYoutubeId = 'D91q99QK11k';
           item.onclick = (e) => {
              const target = e.target as HTMLElement;
              const isNavButton = target.closest('.btn-detail');
-
              if(isNavButton && idx === currentIndex) {
                 const slug = item.dataset.slug;
                 if(slug) window.location.href = `/servicios/${slug}`;
@@ -117,7 +115,6 @@ const demoYoutubeId = 'D91q99QK11k';
           };
 
         } else if (idx === (currentIndex - 1 + total) % total) {
-          // Anterior (Izquierda)
           item.style.zIndex = '20';
           item.style.transform = 'scale(0.8) translateX(-50%) translateZ(-300px) rotateY(20deg)';
           item.style.opacity = '0.6';
@@ -126,7 +123,6 @@ const demoYoutubeId = 'D91q99QK11k';
           item.onclick = (e) => { e.preventDefault(); currentIndex = idx; updateCarousel(); };
 
         } else if (idx === (currentIndex + 1) % total) {
-          // Siguiente (Derecha)
           item.style.zIndex = '20';
           item.style.transform = 'scale(0.8) translateX(50%) translateZ(-300px) rotateY(-20deg)';
           item.style.opacity = '0.6';
@@ -162,7 +158,7 @@ const demoYoutubeId = 'D91q99QK11k';
 
 <style>
   .perspective-2000 {
-    perspective: 2000px; /* Enhanced depth for large 4:3 videos */
+    perspective: 2000px;
     transform-style: preserve-3d;
   }
 </style>

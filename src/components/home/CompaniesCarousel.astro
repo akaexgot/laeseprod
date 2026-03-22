@@ -1,6 +1,7 @@
 ---
 /**
  * Companies — Clean Infinite Marquee with logos
+ * Uses actual logo_url from DB when available
  */
 import { getCompanies } from "../../lib/data";
 const companies = await getCompanies();
@@ -28,7 +29,7 @@ const companies = await getCompanies();
                     (company: any) => (
                         <div class="flex items-center justify-center px-10 lg:px-16 flex-shrink-0 cursor-default">
                             <img
-                                src={`https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
+                                src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
                                 alt={company.name}
                                 class="h-7 lg:h-9 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
                             />

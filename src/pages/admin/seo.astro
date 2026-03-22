@@ -8,36 +8,39 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 
 <AdminLayout title="SEO" activeSection="seo">
     <!-- SEO Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div class="glass rounded-2xl p-6">
-            <h3 class="text-white font-[Outfit] font-semibold mb-1">
+    <div class="grid grid-cols-1 md:grid-cols-3" style="gap: 1rem; margin-bottom: 2rem;">
+        <div class="glass rounded-2xl" style="padding: 1.5rem;">
+            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">
                 Estado SEO
             </h3>
             <p class="text-green-400 text-sm">✓ Schema.org activo</p>
             <p class="text-green-400 text-sm">✓ Open Graph configurado</p>
             <p class="text-green-400 text-sm">✓ Sitemap generado</p>
         </div>
-        <div class="glass rounded-2xl p-6">
-            <h3 class="text-white font-[Outfit] font-semibold mb-1">
+        <div class="glass rounded-2xl" style="padding: 1.5rem;">
+            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">
                 Palabras Clave
             </h3>
-            <div class="flex flex-wrap gap-1.5 mt-2">
+            <div class="flex flex-wrap" style="gap: 0.375rem; margin-top: 0.5rem;">
                 <span
-                    class="px-2 py-0.5 bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    class="bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    style="padding: 0.125rem 0.5rem;"
                     >video marketing sevilla</span
                 >
                 <span
-                    class="px-2 py-0.5 bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    class="bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    style="padding: 0.125rem 0.5rem;"
                     >productora audiovisual</span
                 >
                 <span
-                    class="px-2 py-0.5 bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    class="bg-carmin/10 text-carmin-light rounded-full text-xs"
+                    style="padding: 0.125rem 0.5rem;"
                     >videos para empresas</span
                 >
             </div>
         </div>
-        <div class="glass rounded-2xl p-6">
-            <h3 class="text-white font-[Outfit] font-semibold mb-1">URLs</h3>
+        <div class="glass rounded-2xl" style="padding: 1.5rem;">
+            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">URLs</h3>
             <p class="text-light-muted text-sm">
                 Sitemap: <a
                     href="/sitemap.xml"
@@ -52,10 +55,10 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
     </div>
 
     <!-- Pages SEO Editor -->
-    <h2 class="text-lg font-[Outfit] font-semibold text-white mb-4">
+    <h2 class="text-lg font-[Outfit] font-semibold text-white" style="margin-bottom: 1rem;">
         Meta por Página
     </h2>
-    <div class="space-y-3">
+    <div class="flex flex-col" style="gap: 0.75rem;">
         {
             [
                 { path: "/", title: "Home", hasCustom: true },
@@ -69,8 +72,8 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
                 },
                 { path: "/contacto", title: "Contacto", hasCustom: false },
             ].map((page) => (
-                <div class="glass rounded-2xl p-5 flex items-center justify-between hover:border-carmin/20 transition-all duration-300">
-                    <div class="flex items-center gap-3">
+                <div class="glass rounded-2xl flex items-center justify-between hover:border-carmin/20 transition-all duration-300" style="padding: 1.25rem;">
+                    <div class="flex items-center" style="gap: 0.75rem;">
                         <span
                             class:list={[
                                 "w-2 h-2 rounded-full",
@@ -86,7 +89,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
                             <p class="text-light-subtle text-xs">{page.path}</p>
                         </div>
                     </div>
-                    <button class="px-4 py-2 text-sm text-light-muted hover:text-white hover:bg-dark-card rounded-xl transition-all">
+                    <button class="text-sm text-light-muted hover:text-white hover:bg-dark-card rounded-xl transition-all" style="padding: 0.5rem 1rem;">
                         Editar meta
                     </button>
                 </div>

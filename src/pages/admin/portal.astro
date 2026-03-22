@@ -30,128 +30,199 @@ const clients = [
 ---
 
 <AdminLayout title="Portal Clientes" activeSection="portal">
-    <div class="flex items-center justify-between mb-6">
-        <p class="text-light-muted text-sm">{clients.length} clientes</p>
-        <button
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-carmin text-white text-sm font-semibold rounded-xl hover:shadow-glow transition-all duration-300"
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between" style="margin-bottom: 1.5rem; gap: 1rem;">
+        <div>
+            <p class="text-zinc-400 text-sm">Gestiona el portal. Total: <span class="text-zinc-100 font-medium">{clients.length}</span></p>
+        </div>
+        <button id="btn-add-client"
+            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
+            style="padding: 0.5rem 1rem; gap: 0.5rem;"
         >
-            <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4v16m8-8H4"></path></svg
-            >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Nuevo cliente
         </button>
     </div>
 
-    <div class="glass rounded-2xl overflow-hidden">
-        <table class="w-full">
-            <thead>
-                <tr class="border-b border-dark-border">
-                    <th
-                        class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
-                        >Cliente</th
-                    >
-                    <th
-                        class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider hidden sm:table-cell"
-                        >Dropbox</th
-                    >
-                    <th
-                        class="text-left px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
-                        >Estado</th
-                    >
-                    <th
-                        class="text-right px-6 py-3 text-light-subtle text-xs font-medium uppercase tracking-wider"
-                        >Acciones</th
-                    >
-                </tr>
-            </thead>
-            <tbody>
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
+                    <tr>
+                        <th class="font-semibold w-64" style="padding: 1rem 1.5rem;">Cliente</th>
+                        <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Dropbox</th>
+                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Estado</th>
+                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800">
                 {
                     clients.map((client) => (
-                        <tr class="border-b border-dark-border/50 hover:bg-dark-hover transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-carmin/10 rounded-full flex items-center justify-center">
-                                        <span class="text-carmin font-bold text-sm">
-                                            {client.client_name.charAt(0)}
-                                        </span>
+                        <tr class="transition-colors group hover:bg-zinc-800/30">
+                            <td class="align-top" style="padding: 1rem 1.5rem;">
+                                <div class="font-medium text-zinc-100 flex items-center" style="gap: 0.75rem;">
+                                    <div class="w-8 h-8 rounded bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5 text-zinc-400 overflow-hidden">
+                                        {client.image ? (
+                                            <img src={client.image} alt={client.client_name} class="w-full h-full object-cover" />
+                                        ) : (
+                                            <span class="text-rose-400 font-bold text-sm">
+                                                {client.client_name.charAt(0)}
+                                            </span>
+                                        )}
                                     </div>
-                                    <span class="text-white text-sm font-medium">
+                                    <span class="text-zinc-100 text-sm font-medium">
                                         {client.client_name}
                                     </span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 hidden sm:table-cell">
-                                <span
-                                    class:list={[
-                                        "text-sm",
-                                        client.dropbox_link
-                                            ? "text-light-muted"
-                                            : "text-yellow-400",
-                                    ]}
-                                >
-                                    {client.dropbox_link
-                                        ? "✓ Configurado"
-                                        : "⚠ Sin enlace"}
-                                </span>
+                            <td class="hidden sm:table-cell align-top" style="padding: 1rem 1.5rem;">
+                                {client.dropbox_link ? (
+                                    <span class="text-sm text-zinc-400">✓ Configurado</span>
+                                ) : (
+                                    <span class="text-sm text-amber-400">⚠ Sin enlace</span>
+                                )}
                             </td>
-                            <td class="px-6 py-4">
-                                <span
-                                    class:list={[
-                                        "inline-flex px-2.5 py-1 rounded-full text-xs font-medium",
-                                        client.is_active
-                                            ? "bg-green-500/10 text-green-400"
-                                            : "bg-red-500/10 text-red-400",
-                                    ]}
-                                >
-                                    {client.is_active ? "Activo" : "Inactivo"}
-                                </span>
+                            <td class="align-top" style="padding: 1rem 1.5rem;">
+                                {client.is_active ? (
+                                    <div class="flex items-center" title="Activo" style="height: 1.5rem;">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                    </div>
+                                ) : (
+                                    <div class="flex items-center" title="Inactivo" style="height: 1.5rem;">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
+                                    </div>
+                                )}
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center gap-1 justify-end">
-                                    <button class="p-2 hover:bg-dark-card rounded-lg transition-colors">
-                                        <svg
-                                            class="w-4 h-4 text-light-subtle hover:text-carmin-light"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                            />
-                                        </svg>
+                            <td class="align-top text-right" style="padding: 1rem 1.5rem;">
+                                <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
+                                    <button 
+                                        class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" 
+                                        title="Editar"
+                                        data-client={JSON.stringify(client)}
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <button class="p-2 hover:bg-dark-card rounded-lg transition-colors">
-                                        <svg
-                                            class="w-4 h-4 text-light-subtle hover:text-red-400"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                            />
-                                        </svg>
+                                    <button class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors btn-delete" title="Eliminar">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     ))
                 }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 </AdminLayout>
+
+<!-- Modal -->
+<div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
+            <h3 class="text-lg font-semibold text-white" id="modal-title">Nuevo cliente</h3>
+            <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 1.5rem;">
+            <form id="client-form" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <input type="hidden" id="client-id" />
+                
+                <div style="margin-bottom: 0.5rem;">
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Nombre del Cliente *</label>
+                    <input type="text" id="c-name" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="Ej: Hotel Hilton" />
+                </div>
+
+                <div style="margin-bottom: 0.5rem;">
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Dropbox Link</label>
+                    <input type="url" id="c-dropbox" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="https://dropbox.com/..." />
+                </div>
+
+                <div style="margin-bottom: 0.5rem;">
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Logo (URL)</label>
+                    <input type="url" id="c-image" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="https://..." />
+                    <div id="logo-preview" class="mt-3 h-20 bg-zinc-950 border border-zinc-800 rounded-md flex items-center justify-center overflow-hidden hidden">
+                        <img id="logo-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 0.5rem;">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="c-active" class="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-rose-500 focus:ring-rose-500" checked />
+                        <span class="text-sm font-medium text-zinc-300">Cuenta activa</span>
+                    </label>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+            <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
+            <button type="button" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('modal-overlay')!;
+        const modalTitle = document.getElementById('modal-title')!;
+        
+        const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+
+        function openModal(data?: any) {
+            modalTitle.textContent = data ? 'Editar cliente' : 'Nuevo cliente';
+            $('client-id').value = data?.id || '';
+            $('c-name').value = data?.client_name || '';
+            $('c-dropbox').value = data?.dropbox_link || '';
+            $('c-image').value = data?.image || '';
+            $('c-active').checked = data ? !!data.is_active : true;
+            
+            updateLogoPreview();
+            overlay.classList.remove('hidden');
+        }
+
+        function updateLogoPreview() {
+            const url = $('c-image').value.trim();
+            const preview = document.getElementById('logo-preview')!;
+            const img = document.getElementById('logo-preview-img') as HTMLImageElement;
+            
+            if (url) {
+                img.src = url;
+                preview.classList.remove('hidden');
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
+
+        $('c-image').addEventListener('input', updateLogoPreview);
+
+        function closeModal() {
+            overlay.classList.add('hidden');
+        }
+
+        document.getElementById('btn-add-client')?.addEventListener('click', () => openModal());
+        document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
+        document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
+
+        // Close on outside click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const data = JSON.parse((btn as HTMLElement).dataset.client || '{}');
+                openModal(data);
+            });
+        });
+
+        document.getElementById('modal-save')?.addEventListener('click', () => {
+            alert('Funcionalidad de guardado no implementada (datos estáticos)');
+            closeModal();
+        });
+    });
+</script>

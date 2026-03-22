@@ -1,10 +1,21 @@
 ---
 /**
- * Hero Section — Fullscreen Video Background v5
+ * Hero Section — Fullscreen Video Background
+ * Uses dynamic video from settings DB
  */
 import { getSettings } from "../../lib/data";
 const settings = await getSettings();
-const youtubeId = "D91q99QK11k";
+
+// Extract YouTube ID from any URL format
+function extractYouTubeId(url: string | null | undefined): string | null {
+    if (!url) return null;
+    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (m) return m[1];
+    if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim();
+    return null;
+}
+
+const youtubeId = extractYouTubeId(settings.hero_video_desktop) || 'D91q99QK11k';
 ---
 
 <section
@@ -15,7 +26,6 @@ const youtubeId = "D91q99QK11k";
     <div
         class="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-dark"
     >
-        <!-- YouTube iFrame with specific aspect ratio sizing to cover screen -->
         <iframe
             src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
             class="video-bg"
@@ -25,9 +35,7 @@ const youtubeId = "D91q99QK11k";
         >
         </iframe>
 
-        <!-- Overlays minimized to keep video clear as requested -->
         <div class="absolute inset-0 bg-dark/10"></div>
-        <!-- Film grain texture overlay -->
         <div
             class="absolute inset-0"
             style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E'); pointer-events: none;"
@@ -101,16 +109,15 @@ const youtubeId = "D91q99QK11k";
 </section>
 
 <style>
-    /* CSS para asegurar que el iframe cubra toda la pantalla sin bandas negras */
     .video-bg {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         width: 100vw;
-        height: 56.25vw; /* 16:9 aspect ratio */
+        height: 56.25vw;
         min-height: 100vh;
-        min-width: 177.77vh; /* Ajuste para cuando la pantalla es más alta que ancha */
+        min-width: 177.77vh;
         pointer-events: none;
     }
 
@@ -131,7 +138,6 @@ const youtubeId = "D91q99QK11k";
         animation: scroll-down 2s infinite cubic-bezier(0.65, 0, 0.35, 1);
     }
 
-    /* Nuevas animaciones laterales para el titular */
     @keyframes slide-right-in {
         0% {
             transform: translateX(-100%);

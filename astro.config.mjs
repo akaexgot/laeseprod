@@ -16,3 +16,5 @@ export default defineConfig({
     mode: 'standalone'
   })
 });
+
+// Force restart to rebuild Tailwind CSS cache
