@@ -6,6 +6,7 @@
 import Head from "../components/seo/Head.astro";
 import Navbar from "../components/ui/Navbar.astro";
 import Footer from "../components/ui/Footer.astro";
+import ProjectModal from "../components/ui/ProjectModal.astro";
 import "../styles/global.css";
 
 interface Props {
@@ -43,6 +44,7 @@ const { title, description, image, noindex } = Astro.props;
         </main>
 
         <Footer />
+        <ProjectModal />
 
         <!-- Scroll Reveal Observer -->
         <script>

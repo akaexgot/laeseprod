@@ -1,91 +1,285 @@
 ---
 /**
- * Services Listing Page
+ * Services Listing Page — Fullpage Scroll Mosaic
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import "../../styles/proyectos.css";
 import { getServices } from "../../lib/data";
 
 const services = await getServices();
+
+function getVideoId(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (match) return match[1];
+  if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
+  return null;
+}
+
+function groupIntoScreens(items: any[]) {
+  const screens: any[][] = [];
+  let i = 0;
+  let groupSize = 3;
+
+  while (i < items.length) {
+    const remaining = items.length - i;
+    const size = remaining < groupSize ? remaining : groupSize;
+    screens.push(items.slice(i, i + size));
+    i += size;
+    groupSize = groupSize === 3 ? 4 : 3;
+  }
+  return screens;
+}
+
+const screens = groupIntoScreens(services);
+
+const gradients = [
+    "from-carmin-900/40 to-carmin-700/10",
+    "from-carmin-800/30 to-carmin-600/10",
+    "from-dark-surface to-carmin-900/20",
+    "from-carmin-700/20 to-dark-surface",
+    "from-dark-card to-carmin-800/15",
+    "from-carmin-900/30 to-dark-card",
+];
 ---
 
 <BaseLayout
-    title="Servicios"
-    description="Servicios de video marketing y producción audiovisual en Sevilla. Video corporativo, spots publicitarios, contenido para redes sociales y más."
+  title="Servicios"
+  description="Soluciones audiovisuales completas para impulsar tu marca en el mundo digital."
 >
-    <!-- Header -->
-    <section class="pt-32 pb-16 relative overflow-hidden">
-        <div
-            class="absolute top-0 left-0 w-full h-full bg-gradient-radial opacity-50"
-        >
-        </div>
-        <div class="section-container relative z-10">
-            <div class="max-w-3xl">
-                <p
-                    class="text-carmin text-sm tracking-widest uppercase font-medium mb-3 animate-fade-in"
-                >
-                    Lo que hacemos
-                </p>
-                <h1
-                    class="text-5xl lg:text-7xl font-[Outfit] font-bold text-white mb-6 animate-fade-up"
-                >
-                    Nuestros <span class="text-gradient-carmin">servicios</span>
-                </h1>
-                <p
-                    class="text-light-muted text-lg leading-relaxed animate-fade-up"
-                    style="animation-delay: 0.2s;"
-                >
-                    Soluciones audiovisuales completas para impulsar tu marca en
-                    el mundo digital
-                </p>
-            </div>
+
+    {services.length === 0 ? (
+        <section class="pj-screen pj-screen--empty">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <p>Próximamente nuevos servicios</p>
+        </section>
+    ) : (
+        screens.map((group, screenIdx) => {
+            const isFirst = screenIdx === 0;
+            const count = group.length;
+            const layoutClass = count >= 3 ? 'pj-screen--split' : 'pj-screen--grid';
+            const flipClass = (screenIdx % 2 !== 0 && count > 0 && count < 4) ? 'pj-screen--flip' : '';
+
+            return (
+                <section class={`pj-screen ${layoutClass} ${flipClass} ${isFirst ? 'pj-screen--first' : ''}`}>
+                    {count >= 3 ? (
+                        <Fragment>
+                            {/* Large cell */}
+                            {(() => {
+                                const item = group[0];
+                                const vid = getVideoId(item.video);
+                                const gradient = gradients[0 % gradients.length];
+                                return (
+                                    <a href={`/servicios/${item.slug}`} class="pj-cell pj-cell--large group">
+                                        <div class={`pj-cell__video ${vid ? '' : `bg-gradient-to-br ${gradient}`}`}>
+                                            {vid ? (
+                                                <iframe
+                                                    class="pj-cell__iframe"
+                                                    data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                                    src=""
+                                                    frameborder="0" allow="autoplay; encrypted-media"
+                                                    loading="lazy"
+                                                ></iframe>
+                                            ) : (
+                                                <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8rem] opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700">
+                                                    {item.icon}
+                                                </span>
+                                            )}
+                                            {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                        </div>
+                                        <div class="pj-cell__overlay"></div>
+                                        <div class="pj-cell__info">
+                                            <span class="pj-cell__client">Servicio</span>
+                                            <h3 class="pj-cell__title pj-cell__title--lg">{item.title}</h3>
+                                            <p class="pj-cell__subtitle">{item.description}</p>
+                                            <div class="pj-cell__cta">
+                                                <span>Ver servicio</span>
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                            </div>
+                                        </div>
+                                    </a>
+                                );
+                            })()}
+
+                            {/* Stacked cells */}
+                            {group.length > 1 && (
+                            <div class="pj-stack">
+                                {group.slice(1).map((item: any, idx: number) => {
+                                    const vid = getVideoId(item.video);
+                                    const gradient = gradients[(idx + 1) % gradients.length];
+                                    return (
+                                        <a href={`/servicios/${item.slug}`} class="pj-cell pj-cell--stacked group">
+                                            <div class={`pj-cell__video ${vid ? '' : `bg-gradient-to-br ${gradient}`}`}>
+                                                {vid ? (
+                                                    <iframe
+                                                        class="pj-cell__iframe"
+                                                        data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                                        src=""
+                                                        frameborder="0" allow="autoplay; encrypted-media"
+                                                        loading="lazy"
+                                                    ></iframe>
+                                                ) : (
+                                                    <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-7xl opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700">
+                                                        {item.icon}
+                                                    </span>
+                                                )}
+                                                {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                            </div>
+                                            <div class="pj-cell__overlay"></div>
+                                            <div class="pj-cell__info">
+                                                <span class="pj-cell__client">Servicio</span>
+                                                <h3 class="pj-cell__title">{item.title}</h3>
+                                                <div class="pj-cell__cta">
+                                                    <span>Ver servicio</span>
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                            )}
+                        </Fragment>
+                    ) : (
+                        /* 4 items: 2x2 grid */
+                        group.map((item: any, idx: number) => {
+                            const vid = getVideoId(item.video);
+                            const gradient = gradients[idx % gradients.length];
+                            return (
+                                <a href={`/servicios/${item.slug}`} class="pj-cell pj-cell--quarter group">
+                                    <div class={`pj-cell__video ${vid ? '' : `bg-gradient-to-br ${gradient}`}`}>
+                                        {vid ? (
+                                            <iframe
+                                                class="pj-cell__iframe"
+                                                data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                                src=""
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                loading="lazy"
+                                            ></iframe>
+                                        ) : (
+                                            <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-7xl opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700">
+                                                {item.icon}
+                                            </span>
+                                        )}
+                                        {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                    </div>
+                                    <div class="pj-cell__overlay"></div>
+                                    <div class="pj-cell__info">
+                                        <span class="pj-cell__client">Servicio</span>
+                                        <h3 class="pj-cell__title">{item.title}</h3>
+                                        <div class="pj-cell__cta">
+                                            <span>Ver servicio</span>
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                        </div>
+                                    </div>
+                                </a>
+                            );
+                        })
+                    )}
+
+                    {/* Screen indicator */}
+                    <div class="pj-screen__indicator">
+                        <span>{String(screenIdx + 1).padStart(2, '0')}</span>
+                        <span class="pj-screen__indicator-sep">/</span>
+                        <span>{String(screens.length).padStart(2, '0')}</span>
+                    </div>
+                </section>
+            );
+        })
+    )}
+
+    <!-- CTA BOTTOM -->
+    <section class="pj-screen pj-cta-screen">
+        <div class="pj-cta__glow"></div>
+        <div class="pj-cta__inner">
+            <h2 class="pj-cta__title">Impulsa tu marca</h2>
+            <p class="pj-cta__text">Seleccionamos las mejores estrategias visuales para tu negocio.</p>
+            <a href="/contacto" class="pj-cta__btn">
+                Solicitar presupuesto
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+            </a>
         </div>
     </section>
 
-    <!-- Services Grid -->
-    <section class="pb-24">
-        <div class="section-container">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {
-                    services.map((service: any, idx: number) => (
-                        <a
-                            href={`/servicios/${service.slug}`}
-                            class="group relative glass rounded-3xl p-10 hover:border-carmin/20 transition-all duration-500 hover:shadow-glow reveal overflow-hidden"
-                            style={`animation-delay: ${idx * 0.1}s`}
-                        >
-                            <div class="flex items-start gap-6">
-                                <div class="w-16 h-16 bg-carmin/10 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 group-hover:scale-110 group-hover:bg-carmin/20 transition-all duration-500">
-                                    {service.icon}
-                                </div>
-                                <div>
-                                    <h2 class="text-2xl font-[Outfit] font-bold text-white mb-3 group-hover:text-carmin-100 transition-colors duration-300">
-                                        {service.title}
-                                    </h2>
-                                    <p class="text-light-muted text-sm leading-relaxed mb-4">
-                                        {service.description}
-                                    </p>
-                                    <span class="inline-flex items-center gap-2 text-carmin text-sm font-medium">
-                                        Ver servicio
-                                        <svg
-                                            class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M17 8l4 4m0 0l-4 4m4-4H3"
-                                            />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-carmin/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                        </a>
-                    ))
-                }
-            </div>
-        </div>
-    </section>
 </BaseLayout>
+
+<script>
+    /* ── Lazy-load YouTube iframes ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const lazyIframes = document.querySelectorAll('.pj-cell__iframe[data-src]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const iframe = entry.target as HTMLIFrameElement;
+                    if (!iframe.src || iframe.src === '' || iframe.src === window.location.href) {
+                        iframe.src = iframe.dataset.src || '';
+                    }
+                    const thumb = iframe.closest('.pj-cell__video')?.querySelector('.pj-cell__thumb') as HTMLElement;
+                    if (thumb) setTimeout(() => { thumb.style.opacity = '0'; }, 1500);
+                    observer.unobserve(iframe);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '300px 0px 300px 0px' });
+        lazyIframes.forEach(el => observer.observe(el));
+    });
+
+    /* ── Fullpage Scroll ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = Array.from(document.querySelectorAll('.pj-screen'));
+        if (sections.length === 0) return;
+
+        let isScrolling = false;
+        let scrollTimeout: ReturnType<typeof setTimeout>;
+
+        function getVisibleSectionIndex() {
+            let maxIdx = 0, maxArea = 0;
+            sections.forEach((sec, idx) => {
+                const r = sec.getBoundingClientRect();
+                const visible = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0));
+                if (visible > maxArea) { maxArea = visible; maxIdx = idx; }
+            });
+            return maxIdx;
+        }
+
+        function scrollTo(index: number) {
+            if (index < 0 || index >= sections.length || isScrolling) return;
+            isScrolling = true;
+            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => { isScrolling = false; }, 1300);
+        }
+
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (isScrolling) return;
+            const cur = getVisibleSectionIndex();
+            scrollTo(e.deltaY > 0 ? cur + 1 : cur - 1);
+        }, { passive: false });
+
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].screenY; }, { passive: false });
+        window.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+        window.addEventListener('touchend', (e) => {
+            if (isScrolling) return;
+            const delta = touchStartY - e.changedTouches[0].screenY;
+            const cur = getVisibleSectionIndex();
+            if (delta > 50) scrollTo(cur + 1);
+            else if (delta < -50) scrollTo(cur - 1);
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' '];
+            if (keys.includes(e.key)) {
+                e.preventDefault();
+                if (isScrolling) return;
+                const cur = getVisibleSectionIndex();
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollTo(cur + 1);
+                else scrollTo(cur - 1);
+            }
+        }, { passive: false });
+    });
+</script>

@@ -147,6 +147,26 @@ const services = await getServices();
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
+        <div class="text-center" style="padding: 2rem 1.5rem 1rem;">
+            <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-red-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">¿Eliminar permanentemente?</h3>
+            <p class="text-sm text-zinc-400">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="flex justify-end border-t border-zinc-800 bg-zinc-950" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+            <button id="confirm-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
+            <button id="confirm-yes" class="bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-all" style="padding: 0.5rem 1rem;">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-4 right-4 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('modal-overlay')!;
@@ -189,25 +209,59 @@ const services = await getServices();
             });
         });
 
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                if (!confirm('¿Eliminar permanente?')) return;
-                
-                const icon = btn.querySelector('i')!;
-                icon.setAttribute('data-lucide', 'loader-2');
-                icon.classList.add('animate-spin');
-                // @ts-ignore
-                if (typeof lucide !== 'undefined') lucide.createIcons();
+        // Confirm modal logic
+        const confirmOverlay = document.getElementById('confirm-overlay')!;
+        const confirmYes = document.getElementById('confirm-yes')!;
+        const confirmCancel = document.getElementById('confirm-cancel')!;
+        let pendingDeleteId: string | null = null;
 
-                const res = await fetch('/api/admin/services', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: (btn as HTMLElement).dataset.id }),
-                });
-                if (res.ok) location.reload();
-                else alert('Error');
+        function openConfirm(id: string) {
+            pendingDeleteId = id;
+            confirmOverlay.classList.remove('hidden');
+        }
+        function closeConfirm() {
+            pendingDeleteId = null;
+            confirmOverlay.classList.add('hidden');
+        }
+        confirmCancel.addEventListener('click', closeConfirm);
+        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+
+        confirmYes.addEventListener('click', async () => {
+            if (!pendingDeleteId) return;
+            confirmYes.textContent = 'Eliminando...';
+            (confirmYes as HTMLButtonElement).disabled = true;
+            const res = await fetch('/api/admin/services', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: pendingDeleteId }),
+            });
+            if (res.ok) location.reload();
+            else {
+                showToast('Error al eliminar', 'error');
+                closeConfirm();
+                confirmYes.textContent = 'Eliminar';
+                (confirmYes as HTMLButtonElement).disabled = false;
+            }
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                openConfirm((btn as HTMLElement).dataset.id!);
             });
         });
+
+        // Toast notification
+        function showToast(message: string, type: 'error' | 'success' = 'error') {
+            const container = document.getElementById('toast-container')!;
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border text-sm font-medium pointer-events-auto ${
+                type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            }`;
+            toast.style.cssText = 'backdrop-filter:blur(12px); animation: toast-in 0.3s ease-out;';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
 
         document.getElementById('modal-save')?.addEventListener('click', async () => {
             const title = $('m-title').value.trim();

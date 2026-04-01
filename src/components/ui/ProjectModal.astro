@@ -1,0 +1,217 @@
+---
+/**
+ * ProjectModal — Preview modal for projects
+ * Opens from portfolio/home clicks. Shows vertical making-of video + info.
+ * Button to navigate to full project page.
+ */
+---
+
+<!-- Project Preview Modal -->
+<div class="pm-overlay" id="projectModal" role="dialog" aria-modal="true" aria-label="Previsualización del proyecto">
+    <div class="pm-backdrop" id="pmBackdrop"></div>
+
+    <div class="pm-modal">
+        <button class="pm-close" id="pmClose" aria-label="Cerrar">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <div class="pm-body">
+            <!-- Vertical Video (left) -->
+            <div class="pm-video" id="pmVideoWrap">
+                <iframe
+                    id="pmIframe"
+                    class="pm-video__iframe"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                ></iframe>
+            </div>
+
+            <!-- Info (right) -->
+            <div class="pm-info">
+                <div class="pm-info__top">
+                    <span class="pm-info__client" id="pmClient"></span>
+                    <h2 class="pm-info__title" id="pmTitle"></h2>
+                    <p class="pm-info__subtitle" id="pmSubtitle"></p>
+                </div>
+                <p class="pm-info__description" id="pmDescription"></p>
+                <div class="pm-info__actions">
+                    <a href="#" class="btn btn-primary btn-xl pm-info__cta" id="pmLink">
+                        Ver proyecto completo
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pm-overlay {
+        position: fixed; inset: 0; z-index: 9990;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
+    }
+    .pm-overlay.is-open { opacity: 1; pointer-events: all; }
+
+    .pm-backdrop {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.88);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    }
+
+    .pm-modal {
+        position: relative; z-index: 10;
+        width: 92%; max-width: 950px; max-height: 90vh;
+        overflow-y: auto;
+        background: var(--color-dark-surface, #0a0a0f);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 1.5rem;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 80px rgba(155,27,48,0.08);
+        transform: scale(0.92) translateY(20px);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pm-overlay.is-open .pm-modal { transform: scale(1) translateY(0); }
+
+    .pm-modal::-webkit-scrollbar { width: 4px; }
+    .pm-modal::-webkit-scrollbar-track { background: transparent; }
+    .pm-modal::-webkit-scrollbar-thumb { background: rgba(155,27,48,0.3); border-radius: 2px; }
+
+    .pm-close {
+        position: absolute; top: 1rem; right: 1rem; z-index: 20;
+        width: 44px; height: 44px; border-radius: 50%;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.6); cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s, color 0.2s;
+    }
+    .pm-close svg { width: 1.125rem; height: 1.125rem; }
+    .pm-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* Body: side-by-side layout */
+    .pm-body {
+        display: flex; flex-direction: column;
+    }
+    @media (min-width: 768px) {
+        .pm-body { flex-direction: row; }
+    }
+
+    /* Vertical video */
+    .pm-video {
+        flex-shrink: 0;
+        aspect-ratio: 9 / 16;
+        width: 100%;
+        max-width: 260px;
+        background: #000;
+        border-radius: 1.5rem 0 0 1.5rem;
+        overflow: hidden;
+        margin: 0 auto;
+    }
+    @media (max-width: 767px) {
+        .pm-video {
+            max-width: 200px;
+            border-radius: 1.5rem 1.5rem 0 0;
+            margin: 1.5rem auto 0;
+        }
+    }
+    @media (min-width: 768px) {
+        .pm-video { max-width: 280px; }
+    }
+
+    .pm-video__iframe {
+        width: 100%; height: 100%; border: 0; display: block;
+    }
+
+    /* Info panel */
+    .pm-info {
+        padding: 2rem 2.5rem 2.5rem;
+        display: flex; flex-direction: column; gap: 1.25rem;
+        flex: 1; justify-content: center;
+    }
+    @media (max-width: 640px) { .pm-info { padding: 1.5rem; } }
+
+    .pm-info__top { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .pm-info__client {
+        font-family: 'Space Grotesk', monospace;
+        font-size: 0.65rem; font-weight: 600; letter-spacing: 0.2em;
+        text-transform: uppercase; color: var(--color-carmin-light, #E8364F);
+    }
+    .pm-info__title {
+        font-family: 'Outfit', sans-serif; font-size: clamp(1.5rem, 3vw, 2rem);
+        font-weight: 800; color: #fff; margin: 0; line-height: 1.15;
+    }
+    .pm-info__subtitle {
+        font-size: 0.9375rem; color: rgba(255,255,255,0.45); font-style: italic; margin: 0;
+    }
+    .pm-info__description {
+        font-size: 0.9rem; color: rgba(255,255,255,0.35); line-height: 1.7; margin: 0;
+        white-space: pre-line;
+        display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .pm-info__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('projectModal');
+        const backdrop = document.getElementById('pmBackdrop');
+        const closeBtn = document.getElementById('pmClose');
+        const iframe = document.getElementById('pmIframe') as HTMLIFrameElement;
+        const titleEl = document.getElementById('pmTitle');
+        const subtitleEl = document.getElementById('pmSubtitle');
+        const descriptionEl = document.getElementById('pmDescription');
+        const clientEl = document.getElementById('pmClient');
+        const linkEl = document.getElementById('pmLink') as HTMLAnchorElement;
+
+        if (!modal || !iframe || !titleEl || !subtitleEl || !descriptionEl || !clientEl || !linkEl) return;
+
+        function openModal(data: {
+            title: string; subtitle: string; description: string;
+            makingOfId: string; slug: string; clientName: string;
+        }) {
+            titleEl!.textContent = data.title;
+            subtitleEl!.textContent = data.subtitle || '';
+            subtitleEl!.style.display = data.subtitle ? '' : 'none';
+            descriptionEl!.textContent = data.description || '';
+            descriptionEl!.style.display = data.description ? '' : 'none';
+            clientEl!.textContent = data.clientName || '';
+            clientEl!.style.display = data.clientName ? '' : 'none';
+            linkEl!.href = `/proyectos/${data.slug}`;
+
+            if (data.makingOfId) {
+                iframe!.src = `https://www.youtube.com/embed/${data.makingOfId}?rel=0&modestbranding=1&autoplay=1`;
+            }
+
+            modal!.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal!.classList.remove('is-open');
+            document.body.style.overflow = '';
+            setTimeout(() => { iframe!.src = ''; }, 350);
+        }
+
+        // Attach to all project links with data-pm attribute
+        document.querySelectorAll('[data-pm-title]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal({
+                    title: el.getAttribute('data-pm-title') || '',
+                    subtitle: el.getAttribute('data-pm-subtitle') || '',
+                    description: el.getAttribute('data-pm-description') || '',
+                    makingOfId: el.getAttribute('data-pm-makingof') || el.getAttribute('data-pm-video') || '',
+                    slug: el.getAttribute('data-pm-slug') || '',
+                    clientName: el.getAttribute('data-pm-client') || '',
+                });
+            });
+        });
+
+        closeBtn?.addEventListener('click', closeModal);
+        backdrop?.addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+        });
+    });
+</script>

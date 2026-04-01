@@ -1,6 +1,6 @@
 ---
 /**
- * CTA Section — Premium redesign
+ * CTA Section — Premium White Design
  */
 import { getSettings } from "../../lib/data";
 const settings = await getSettings();
@@ -8,13 +8,13 @@ const settings = await getSettings();
 
 <section id="cta-section" class="cta-section">
 
-  <!-- Fondo atmosférico -->
+  <!-- Fondo claro -->
   <div class="cta-bg">
     <div class="cta-bg__gradient"></div>
     <div class="cta-bg__glow-left"></div>
     <div class="cta-bg__glow-right"></div>
     <div class="cta-bg__dots"></div>
-    <!-- Líneas decorativas horizontales -->
+    <!-- Líneas decorativas horizontales tenues -->
     <div class="cta-bg__line cta-bg__line--top"></div>
     <div class="cta-bg__line cta-bg__line--bottom"></div>
   </div>
@@ -30,7 +30,7 @@ const settings = await getSettings();
     <!-- Headline -->
     <h2 class="cta-title reveal delay-2">
       Hablemos de<br />
-      <span class="text-gradient-carmin italic">tu próximo proyecto</span>
+      <span class="text-gradient-carmin italic inline-block pr-2 pb-1">tu próximo proyecto</span>
     </h2>
 
     <!-- Subtext -->
@@ -93,6 +93,7 @@ const settings = await getSettings();
   justify-content: center;
   padding: 4rem 1.5rem;
   min-height: 100vh;
+  background-color: #ffffff; /* Fondo blanco */
 }
 
 /* ── Fondo ─────────────────────────────────────────────── */
@@ -103,31 +104,31 @@ const settings = await getSettings();
 }
 .cta-bg__gradient {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 120% 80% at 50% 60%, rgba(155,27,48,0.12) 0%, transparent 65%),
-              linear-gradient(to bottom, #0a0a0f 0%, #08080c 100%);
+  background: radial-gradient(ellipse 120% 80% at 50% 100%, rgba(155,27,48,0.06) 0%, transparent 50%),
+              linear-gradient(to bottom, #f9fafb 0%, #ffffff 100%);
 }
 .cta-bg__glow-left {
   position: absolute;
-  top: 20%; left: -10%;
+  top: 10%; left: -10%;
   width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(155,27,48,0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(155,27,48,0.04) 0%, transparent 70%);
   filter: blur(60px);
 }
 .cta-bg__glow-right {
   position: absolute;
   bottom: 10%; right: -10%;
   width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(196,40,71,0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(196,40,71,0.04) 0%, transparent 70%);
   filter: blur(60px);
 }
 .cta-bg__dots {
-  position: absolute; inset: 0; opacity: .18;
-  background-image: radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1px);
+  position: absolute; inset: 0; opacity: .4;
+  background-image: radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 .cta-bg__line {
   position: absolute; left: 0; right: 0; height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent);
+  background: linear-gradient(to right, transparent, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.05) 70%, transparent);
 }
 .cta-bg__line--top    { top: 0; }
 .cta-bg__line--bottom { bottom: 0; }
@@ -148,21 +149,21 @@ const settings = await getSettings();
   display: inline-flex; align-items: center; gap: .5rem;
   padding: .375rem 1.125rem;
   border-radius: 9999px;
-  border: 1px solid rgba(155,27,48,.35);
-  background: rgba(155,27,48,.1);
+  border: 1px solid rgba(155,27,48,.15);
+  background: rgba(155,27,48,.03);
   backdrop-filter: blur(8px);
   margin-bottom: 2rem;
 }
 .cta-eyebrow__dot {
   display: block; width: 6px; height: 6px; border-radius: 50%;
   background: #c42847;
-  box-shadow: 0 0 8px rgba(196,40,71,.8);
+  box-shadow: 0 0 8px rgba(196,40,71,.4);
   animation: cta-pulse 2s infinite;
 }
 .cta-eyebrow__text {
-  font-size: .75rem; font-weight: 600;
+  font-size: .75rem; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
-  color: rgba(255,255,255,.7);
+  color: #9b1422;
 }
 
 /* Título */
@@ -170,19 +171,19 @@ const settings = await getSettings();
   font-family: 'Outfit', sans-serif;
   font-size: clamp(2.75rem, 6vw, 5rem);
   font-weight: 800;
-  color: #fff;
-  line-height: 1.2;
+  color: #111827; /* Texto oscuro */
+  line-height: 1.1;
   letter-spacing: -.03em;
-  margin: 0 0 1.75rem;
+  margin: 0 0 1.5rem;
 }
-
 /* Subtítulo */
 .cta-subtitle {
-  font-size: 1.0625rem;
-  color: rgba(255,255,255,.45);
+  font-size: 1.125rem;
+  color: #4b5563; /* Gris oscuro para lectura */
   line-height: 1.7;
   max-width: 520px;
   margin: 0 0 3rem;
+  font-weight: 400;
 }
 
 /* ── Botones ────────────────────────────────────────────── */
@@ -196,7 +197,7 @@ const settings = await getSettings();
 .cta-btn {
   position: relative; overflow: hidden;
   display: inline-flex; align-items: center; gap: .75rem;
-  padding: 1rem 2rem;
+  padding: 1.125rem 2.25rem;
   border-radius: 1rem;
   font-family: 'Outfit', sans-serif;
   font-size: .9375rem; font-weight: 700;
@@ -212,11 +213,10 @@ const settings = await getSettings();
 .cta-btn--primary {
   background: linear-gradient(135deg, #c42847 0%, #9b1b30 100%);
   color: #fff;
-  border: 1px solid rgba(255,255,255,.15);
-  box-shadow: 0 4px 24px rgba(155,27,48,.3), inset 0 1px 0 rgba(255,255,255,.12);
+  box-shadow: 0 10px 30px rgba(155,27,48,.25), inset 0 1px 0 rgba(255,255,255,.12);
 }
 .cta-btn--primary:hover {
-  box-shadow: 0 12px 40px rgba(155,27,48,.5), inset 0 1px 0 rgba(255,255,255,.12);
+  box-shadow: 0 16px 40px rgba(155,27,48,.35), inset 0 1px 0 rgba(255,255,255,.12);
 }
 .cta-btn__icon {
   width: 1.125rem; height: 1.125rem;
@@ -238,19 +238,19 @@ const settings = await getSettings();
 
 /* WhatsApp */
 .cta-btn--wa {
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.85);
-  border: 1px solid rgba(255,255,255,.1);
-  backdrop-filter: blur(8px);
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 .cta-btn--wa:hover {
-  background: rgba(37,211,102,.1);
+  background: #f8fafc;
   border-color: rgba(37,211,102,.3);
-  color: #fff;
-  box-shadow: 0 8px 32px rgba(37,211,102,.12);
+  color: #111827;
+  box-shadow: 0 8px 25px rgba(37,211,102,.12);
 }
 .cta-btn__wa-icon {
-  width: 1.125rem; height: 1.125rem; flex-shrink: 0;
+  width: 1.25rem; height: 1.25rem; flex-shrink: 0;
   color: #25D366;
   transition: transform .3s;
 }
@@ -263,15 +263,16 @@ const settings = await getSettings();
 }
 .cta-trust__item {
   display: flex; align-items: center; gap: .375rem;
-  font-size: .8125rem; color: rgba(255,255,255,.35);
+  font-size: .875rem; color: #6b7280;
+  font-weight: 500;
 }
 .cta-trust__item svg {
-  width: .875rem; height: .875rem; flex-shrink: 0;
+  width: 1rem; height: 1rem; flex-shrink: 0;
   color: #10b981;
 }
 .cta-trust__sep {
   width: 1px; height: 1rem;
-  background: rgba(255,255,255,.1);
+  background: rgba(0,0,0,.1);
 }
 
 @keyframes cta-pulse {

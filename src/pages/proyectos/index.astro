@@ -69,9 +69,17 @@ const screens = groupIntoScreens(projects);
                             {/* Large cell */}
                             {(() => {
                                 const vid = getVideoId(group[0].video_project);
+                                const makingOfId = getVideoId(group[0].video_explanation_mobile) || getVideoId(group[0].video_explanation_desktop) || vid;
                                 if (!vid) return null;
                                 return (
-                                    <a href={`/proyectos/${group[0].slug}`} class="pj-cell pj-cell--large group">
+                                    <a href={`/proyectos/${group[0].slug}`} class="pj-cell pj-cell--large group"
+                                       data-pm-title={group[0].title}
+                                       data-pm-subtitle={group[0].subtitle || ''}
+                                       data-pm-description={group[0].description || ''}
+                                       data-pm-video={vid}
+                                       data-pm-makingof={makingOfId}
+                                       data-pm-slug={group[0].slug}
+                                       data-pm-client={group[0].client_name || ''}>
                                         <div class="pj-cell__video">
                                             <iframe
                                                 class="pj-cell__iframe"
@@ -101,9 +109,17 @@ const screens = groupIntoScreens(projects);
                             <div class="pj-stack">
                                 {group.slice(1).map((item: any) => {
                                     const vid = getVideoId(item.video_project);
+                                    const makingOfId = getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop) || vid;
                                     if (!vid) return null;
                                     return (
-                                        <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--stacked group">
+                                        <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--stacked group"
+                                           data-pm-title={item.title}
+                                           data-pm-subtitle={item.subtitle || ''}
+                                           data-pm-description={item.description || ''}
+                                           data-pm-video={vid}
+                                           data-pm-makingof={makingOfId}
+                                           data-pm-slug={item.slug}
+                                           data-pm-client={item.client_name || ''}>
                                             <div class="pj-cell__video">
                                                 <iframe
                                                     class="pj-cell__iframe"
@@ -133,9 +149,17 @@ const screens = groupIntoScreens(projects);
                         /* 4 items: 2x2 grid */
                         group.map((item: any) => {
                             const vid = getVideoId(item.video_project);
+                            const makingOfId = getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop) || vid;
                             if (!vid) return null;
                             return (
-                                <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--quarter group">
+                                <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--quarter group"
+                                   data-pm-title={item.title}
+                                   data-pm-subtitle={item.subtitle || ''}
+                                   data-pm-description={item.description || ''}
+                                   data-pm-video={vid}
+                                   data-pm-makingof={makingOfId}
+                                   data-pm-slug={item.slug}
+                                   data-pm-client={item.client_name || ''}>
                                     <div class="pj-cell__video">
                                         <iframe
                                             class="pj-cell__iframe"

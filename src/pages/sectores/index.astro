@@ -1,11 +1,37 @@
 ---
 /**
- * Sectors Listing Page
+ * Sectors Listing Page — Fullpage Scroll Mosaic
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import "../../styles/proyectos.css";
 import { getSectors } from "../../lib/data";
 
 const sectors = await getSectors();
+
+function getVideoId(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (match) return match[1];
+  if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
+  return null;
+}
+
+function groupIntoScreens(items: any[]) {
+  const screens: any[][] = [];
+  let i = 0;
+  let groupSize = 3;
+
+  while (i < items.length) {
+    const remaining = items.length - i;
+    const size = remaining < groupSize ? remaining : groupSize;
+    screens.push(items.slice(i, i + size));
+    i += size;
+    groupSize = groupSize === 3 ? 4 : 3;
+  }
+  return screens;
+}
+
+const screens = groupIntoScreens(sectors);
 
 const gradients = [
     "from-carmin-900/40 to-carmin-700/10",
@@ -18,84 +44,242 @@ const gradients = [
 ---
 
 <BaseLayout
-    title="Sectores"
-    description="Producción audiovisual especializada por sectores. Hostelería, inmobiliario, salud, tecnología, moda e industrial en Sevilla."
+  title="Sectores"
+  description="Conocemos tu industria. Adaptamos nuestro lenguaje visual a cada sector para maximizar el impacto."
 >
-    <section class="pt-32 pb-16 relative overflow-hidden">
-        <div
-            class="absolute top-0 left-0 w-full h-full bg-gradient-radial opacity-50"
-        >
-        </div>
-        <div class="section-container relative z-10">
-            <div class="max-w-3xl">
-                <p
-                    class="text-carmin text-sm tracking-widest uppercase font-medium mb-3 animate-fade-in"
-                >
-                    Especialización
-                </p>
-                <h1
-                    class="text-5xl lg:text-7xl font-[Outfit] font-bold text-white mb-6 animate-fade-up"
-                >
-                    Nuestros <span class="text-gradient-carmin">sectores</span>
-                </h1>
-                <p
-                    class="text-light-muted text-lg leading-relaxed animate-fade-up"
-                    style="animation-delay: 0.2s;"
-                >
-                    Conocemos tu industria. Adaptamos nuestro lenguaje visual a
-                    cada sector para maximizar el impacto.
-                </p>
-            </div>
+
+    {sectors.length === 0 ? (
+        <section class="pj-screen pj-screen--empty">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            <p>Próximamente nuevos sectores</p>
+        </section>
+    ) : (
+        screens.map((group, screenIdx) => {
+            const isFirst = screenIdx === 0;
+            const count = group.length;
+            const layoutClass = count >= 3 ? 'pj-screen--split' : 'pj-screen--grid';
+            const flipClass = (screenIdx % 2 !== 0 && count > 0 && count < 4) ? 'pj-screen--flip' : '';
+
+            return (
+                <section class={`pj-screen ${layoutClass} ${flipClass} ${isFirst ? 'pj-screen--first' : ''}`}>
+                    {count >= 3 ? (
+                        <Fragment>
+                            {/* Large cell */}
+                            {(() => {
+                                const item = group[0];
+                                const vid = getVideoId(item.video);
+                                const gradient = gradients[0 % gradients.length];
+                                return (
+                                    <a href={`/sectores/${item.slug}`} class="pj-cell pj-cell--large group">
+                                        <div class={`pj-cell__video ${vid ? '' : `bg-gradient-to-br ${gradient}`}`}>
+                                            {vid ? (
+                                                <iframe
+                                                    class="pj-cell__iframe"
+                                                    data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                                    src=""
+                                                    frameborder="0" allow="autoplay; encrypted-media"
+                                                    loading="lazy"
+                                                ></iframe>
+                                            ) : (
+                                                <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8rem] opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700">
+                                                    {item.icon}
+                                                </span>
+                                            )}
+                                            {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                        </div>
+                                        <div class="pj-cell__overlay"></div>
+                                        <div class="pj-cell__info">
+                                            <span class="pj-cell__client">Sector</span>
+                                            <h3 class="pj-cell__title pj-cell__title--lg">{item.title}</h3>
+                                            <p class="pj-cell__subtitle">{item.description}</p>
+                                            <div class="pj-cell__cta">
+                                                <span>Ver sector</span>
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                            </div>
+                                        </div>
+                                    </a>
+                                );
+                            })()}
+
+                            {/* Stacked cells */}
+                            {group.length > 1 && (
+                            <div class="pj-stack">
+                                {group.slice(1).map((item: any, idx: number) => {
+                                    const vid = getVideoId(item.video);
+                                    const gradient = gradients[(idx + 1) % gradients.length];
+                                    return (
+                                        <a href={`/sectores/${item.slug}`} class="pj-cell pj-cell--stacked group">
+                                            <div class={`pj-cell__video ${vid ? '' : `bg-gradient-to-br ${gradient}`}`}>
+                                                {vid ? (
+                                                    <iframe
+                                                        class="pj-cell__iframe"
+                                                        data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                                        src=""
+                                                        frameborder="0" allow="autoplay; encrypted-media"
+                                                        loading="lazy"
+                                                    ></iframe>
+                                                ) : (
+                                                    <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-7xl opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700">
+                                                        {item.icon}
+                                                    </span>
+                                                )}
+                                                {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                            </div>
+                                            <div class="pj-cell__overlay"></div>
+                                            <div class="pj-cell__info">
+                                                <span class="pj-cell__client">Sector</span>
+                                                <h3 class="pj-cell__title">{item.title}</h3>
+                                                <div class="pj-cell__cta">
+                                                    <span>Ver sector</span>
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                            )}
+                        </Fragment>
+                    ) : (
+                        /* 4 items: 2x2 grid */
+                        group.map((item: any, idx: number) => {
+                            const vid = getVideoId(item.video);
+                            const gradient = gradients[idx % gradients.length];
+                            return (
+                                <a href={`/sectores/${item.slug}`} class="pj-cell pj-cell--quarter group">
+                                    <div class={`pj-cell__video ${vid ? '' : `bg-gradient-to-br ${gradient}`}`}>
+                                        {vid ? (
+                                            <iframe
+                                                class="pj-cell__iframe"
+                                                data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                                src=""
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                loading="lazy"
+                                            ></iframe>
+                                        ) : (
+                                            <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-7xl opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700">
+                                                {item.icon}
+                                            </span>
+                                        )}
+                                        {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                    </div>
+                                    <div class="pj-cell__overlay"></div>
+                                    <div class="pj-cell__info">
+                                        <span class="pj-cell__client">Sector</span>
+                                        <h3 class="pj-cell__title">{item.title}</h3>
+                                        <div class="pj-cell__cta">
+                                            <span>Ver sector</span>
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                        </div>
+                                    </div>
+                                </a>
+                            );
+                        })
+                    )}
+
+                    {/* Screen indicator */}
+                    <div class="pj-screen__indicator">
+                        <span>{String(screenIdx + 1).padStart(2, '0')}</span>
+                        <span class="pj-screen__indicator-sep">/</span>
+                        <span>{String(screens.length).padStart(2, '0')}</span>
+                    </div>
+                </section>
+            );
+        })
+    )}
+
+    <!-- CTA BOTTOM -->
+    <section class="pj-screen pj-cta-screen">
+        <div class="pj-cta__glow"></div>
+        <div class="pj-cta__inner">
+            <h2 class="pj-cta__title">¿Hablamos?</h2>
+            <p class="pj-cta__text">Solicita presupuesto sin compromiso y te asesoramos para tu sector.</p>
+            <a href="/contacto" class="pj-cta__btn">
+                Contactar
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+            </a>
         </div>
     </section>
 
-    <section class="pb-24">
-        <div class="section-container">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {
-                    sectors.map((sector: any, idx: number) => (
-                        <a
-                            href={`/sectores/${sector.slug}`}
-                            class="group relative overflow-hidden rounded-3xl h-72 reveal"
-                            style={`animation-delay: ${idx * 0.1}s`}
-                        >
-                            <div
-                                class={`absolute inset-0 bg-gradient-to-br ${gradients[idx % gradients.length]} transition-all duration-700`}
-                            />
-                            <div class="absolute inset-0 bg-carmin/0 group-hover:bg-carmin/10 transition-all duration-500" />
-                            <div class="relative z-10 h-full flex flex-col justify-between p-8">
-                                <div class="flex justify-between items-start">
-                                    <span class="text-5xl group-hover:scale-110 transition-transform duration-500 inline-block">
-                                        {sector.icon}
-                                    </span>
-                                    <svg
-                                        class="w-5 h-5 text-light-subtle opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M7 17L17 7M17 7H7M17 7v10"
-                                        />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h2 class="text-2xl font-[Outfit] font-bold text-white mb-2">
-                                        {sector.title}
-                                    </h2>
-                                    <p class="text-light-muted text-sm line-clamp-2">
-                                        {sector.description}
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="absolute inset-0 border border-white/5 group-hover:border-carmin/20 rounded-3xl transition-colors duration-500" />
-                        </a>
-                    ))
-                }
-            </div>
-        </div>
-    </section>
 </BaseLayout>
+
+<script>
+    /* ── Lazy-load YouTube iframes ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const lazyIframes = document.querySelectorAll('.pj-cell__iframe[data-src]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const iframe = entry.target as HTMLIFrameElement;
+                    if (!iframe.src || iframe.src === '' || iframe.src === window.location.href) {
+                        iframe.src = iframe.dataset.src || '';
+                    }
+                    const thumb = iframe.closest('.pj-cell__video')?.querySelector('.pj-cell__thumb') as HTMLElement;
+                    if (thumb) setTimeout(() => { thumb.style.opacity = '0'; }, 1500);
+                    observer.unobserve(iframe);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '300px 0px 300px 0px' });
+        lazyIframes.forEach(el => observer.observe(el));
+    });
+
+    /* ── Fullpage Scroll ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = Array.from(document.querySelectorAll('.pj-screen'));
+        if (sections.length === 0) return;
+
+        let isScrolling = false;
+        let scrollTimeout: ReturnType<typeof setTimeout>;
+
+        function getVisibleSectionIndex() {
+            let maxIdx = 0, maxArea = 0;
+            sections.forEach((sec, idx) => {
+                const r = sec.getBoundingClientRect();
+                const visible = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0));
+                if (visible > maxArea) { maxArea = visible; maxIdx = idx; }
+            });
+            return maxIdx;
+        }
+
+        function scrollTo(index: number) {
+            if (index < 0 || index >= sections.length || isScrolling) return;
+            isScrolling = true;
+            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => { isScrolling = false; }, 1300);
+        }
+
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (isScrolling) return;
+            const cur = getVisibleSectionIndex();
+            scrollTo(e.deltaY > 0 ? cur + 1 : cur - 1);
+        }, { passive: false });
+
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].screenY; }, { passive: false });
+        window.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+        window.addEventListener('touchend', (e) => {
+            if (isScrolling) return;
+            const delta = touchStartY - e.changedTouches[0].screenY;
+            const cur = getVisibleSectionIndex();
+            if (delta > 50) scrollTo(cur + 1);
+            else if (delta < -50) scrollTo(cur - 1);
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' '];
+            if (keys.includes(e.key)) {
+                e.preventDefault();
+                if (isScrolling) return;
+                const cur = getVisibleSectionIndex();
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollTo(cur + 1);
+                else scrollTo(cur - 1);
+            }
+        }, { passive: false });
+    });
+</script>

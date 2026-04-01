@@ -1,7 +1,6 @@
 ---
 /**
- * Footer — Editorial Minimal
- * Clean grid with large branding and minimal links
+ * Footer — Premium Split-Screen with Elegant Right Grid
  */
 import {
     getNavigation,
@@ -9,212 +8,405 @@ import {
     getSettings,
     getFooterData,
 } from "../../lib/data";
+
 const navigation = await getNavigation();
 const services = await getServices();
 const settings = await getSettings();
 const footerData = await getFooterData();
 ---
 
-<footer class="border-t border-dark-border bg-dark-surface/50 relative">
-    <!-- Main Footer -->
-    <div class="section-container py-16 lg:py-24">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
-            <!-- Brand Column -->
-            <div class="lg:col-span-5">
-                <a href="/" class="flex items-center gap-3 mb-6">
-                    <div
-                        class="w-10 h-10 bg-gradient-carmin rounded-xl flex items-center justify-center"
-                    >
-                        <span class="text-white font-bold text-lg font-display"
-                            >V</span
-                        >
+<section id="site-footer" class="footer-screen">
+    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
+    <div class="f-split">
+        
+        <!-- ═══════════════════════════════════════════════════════
+             LEFT HALF: Pure Brand Experience
+             ═══════════════════════════════════════════════════════ -->
+        <div class="f-left group">
+            <div class="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+            
+            <div class="f-brand-seal relative z-10 transition-transform duration-1000 group-hover:scale-105">
+                <div class="f-spin-ring">
+                    <svg viewBox="0 0 200 200" class="f-spin-svg">
+                        <defs>
+                            <path id="textCircle" d="M 100, 100 m -75, 0 a 75,75 0 1,1 150,0 a 75,75 0 1,1 -150,0" />
+                        </defs>
+                        <text class="f-spin-text" textLength="430" lengthAdjust="spacing">
+                            <textPath href="#textCircle" startOffset="0%">
+                                PRODUCTORA AUDIOVISUAL • 
+                            </textPath>
+                        </text>
+                    </svg>
+                </div>
+                <div class="f-logo-center">
+                    <img src="/logo-provisional.png" alt="VideoMarketing Sevilla" class="w-full h-auto object-contain" />
+                </div>
+            </div>
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="hidden lg:block w-px bg-black/8"></div>
+        <div class="block lg:hidden h-px w-full bg-black/8"></div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             RIGHT HALF: Elegant Navigation & Info
+             ═══════════════════════════════════════════════════════ -->
+        <div class="f-right">
+            <div class="f-right-inner">
+                
+                <!-- Top Section: Pages as elegant stacked rows -->
+                <div class="f-nav-section">
+                    <p class="f-section-label">Explora</p>
+                    <nav class="f-nav-stack">
+                        {navigation.map((item: any, i: number) => (
+                            <a href={item.href} class="f-nav-row group" style={`transition-delay: ${i * 50}ms`}>
+                                <span class="f-nav-number">{String(i + 1).padStart(2, '0')}</span>
+                                <span class="f-nav-label">{item.label}</span>
+                                <span class="f-nav-arrow">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </span>
+                            </a>
+                        ))}
+                    </nav>
+                </div>
+
+                <!-- Bottom Section: Contact + Social in elegant grid -->
+                <div class="f-info-section">
+                    <div class="f-info-grid">
+                        <!-- Contact -->
+                        <div class="f-info-col">
+                            <p class="f-section-label">Contacto</p>
+                            <div class="f-info-items">
+                                <a href={`mailto:${settings.email}`} class="f-info-link">{settings.email}</a>
+                                <a href={`tel:${settings.phone}`} class="f-info-link">{settings.phone}</a>
+                                <span class="f-info-muted">{settings.address}</span>
+                            </div>
+                        </div>
+                        <!-- Social -->
+                        <div class="f-info-col">
+                            <p class="f-section-label">Síguenos</p>
+                            <div class="f-info-items">
+                                <a href={settings.instagram} target="_blank" rel="noopener" class="f-social-link">
+                                    <span class="f-social-dot" style="background:#E1306C"></span>
+                                    Instagram
+                                </a>
+                                <a href={settings.linkedin} target="_blank" rel="noopener" class="f-social-link">
+                                    <span class="f-social-dot" style="background:#0A66C2"></span>
+                                    LinkedIn
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <span
-                        class="font-display font-bold text-lg text-white tracking-tight"
-                        >VideoMarketing</span
-                    >
-                </a>
-                <p
-                    class="text-light-subtle text-sm leading-relaxed max-w-sm mb-8"
-                >
-                    {footerData.description}
-                </p>
-                <div class="flex items-center gap-4">
-                    <a
-                        href={settings.instagram}
-                        target="_blank"
-                        rel="noopener"
-                        class="w-10 h-10 border border-dark-border rounded-full flex items-center justify-center text-light-subtle hover:text-white hover:border-white/20 transition-all duration-300"
-                        aria-label="Instagram"
-                    >
-                        <svg
-                            class="w-4 h-4"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-                            ></path></svg
-                        >
-                    </a>
-                    <a
-                        href={settings.linkedin}
-                        target="_blank"
-                        rel="noopener"
-                        class="w-10 h-10 border border-dark-border rounded-full flex items-center justify-center text-light-subtle hover:text-white hover:border-white/20 transition-all duration-300"
-                        aria-label="LinkedIn"
-                    >
-                        <svg
-                            class="w-4 h-4"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
-                            ></path></svg
-                        >
-                    </a>
-                    <a
-                        href={`https://wa.me/${settings.whatsapp_number}`}
-                        target="_blank"
-                        rel="noopener"
-                        class="w-10 h-10 border border-dark-border rounded-full flex items-center justify-center text-light-subtle hover:text-[#25D366] hover:border-[#25D366]/30 transition-all duration-300"
-                        aria-label="WhatsApp"
-                    >
-                        <svg
-                            class="w-4 h-4"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"
-                            ></path></svg
-                        >
-                    </a>
                 </div>
+
             </div>
 
-            <!-- Navigation -->
-            <div class="lg:col-span-2">
-                <h4 class="text-label text-light-subtle mb-5">Navegación</h4>
-                <nav class="space-y-3">
-                    {
-                        navigation.map((item: any) => (
-                            <a
-                                href={item.href}
-                                class="block text-sm text-light-muted hover:text-white transition-colors duration-300 line-animated w-fit"
-                            >
-                                {item.label}
-                            </a>
-                        ))
-                    }
-                </nav>
-            </div>
-
-            <!-- Services -->
-            <div class="lg:col-span-2">
-                <h4 class="text-label text-light-subtle mb-5">Servicios</h4>
-                <nav class="space-y-3">
-                    {
-                        services.slice(0, 5).map((service: any) => (
-                            <a
-                                href={`/servicios/${service.slug}`}
-                                class="block text-sm text-light-muted hover:text-white transition-colors duration-300 line-animated w-fit"
-                            >
-                                {service.title}
-                            </a>
-                        ))
-                    }
-                </nav>
-            </div>
-
-            <!-- Contact -->
-            <div class="lg:col-span-3">
-                <h4 class="text-label text-light-subtle mb-5">Contacto</h4>
-                <div class="space-y-3 text-sm text-light-muted">
-                    <p class="flex items-start gap-2">
-                        <svg
-                            class="w-4 h-4 text-carmin mt-0.5 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                            ></path><path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                            ></path></svg
-                        >
-                        {settings.address}
-                    </p>
-                    <p class="flex items-center gap-2">
-                        <svg
-                            class="w-4 h-4 text-carmin flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                            ></path></svg
-                        >
-                        <a
-                            href={`tel:${settings.phone}`}
-                            class="hover:text-white transition-colors"
-                            >{settings.phone}</a
-                        >
-                    </p>
-                    <p class="flex items-center gap-2">
-                        <svg
-                            class="w-4 h-4 text-carmin flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            ></path></svg
-                        >
-                        <a
-                            href={`mailto:${settings.email}`}
-                            class="hover:text-white transition-colors"
-                            >{settings.email}</a
-                        >
-                    </p>
+            <!-- Legal footer pinned to bottom -->
+            <div class="f-legal-bar">
+                <p>© 2026 VideoMarketing Sevilla</p>
+                <div class="f-legal-links">
+                    <a href="/privacidad">Privacidad</a>
+                    <a href="/aviso-legal">Aviso Legal</a>
+                    <a href="/cookies">Cookies</a>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Bottom Bar -->
-    <div class="border-t border-dark-border">
-        <div
-            class="section-container py-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-        >
-            <p class="text-light-subtle text-xs">{footerData.copyright}</p>
-            <div class="flex items-center gap-6">
-                <a
-                    href="/privacidad"
-                    class="text-light-subtle text-xs hover:text-white transition-colors line-animated"
-                    >Privacidad</a
-                >
-                <a
-                    href="/aviso-legal"
-                    class="text-light-subtle text-xs hover:text-white transition-colors line-animated"
-                    >Legal</a
-                >
-                <a
-                    href="/cookies"
-                    class="text-light-subtle text-xs hover:text-white transition-colors line-animated"
-                    >Cookies</a
-                >
-            </div>
-        </div>
     </div>
-</footer>
+</section>
+
+<style>
+/* ═══════════════════════════════════════════════════════════
+   FOOTER: Split-Screen Premium Layout
+   ═══════════════════════════════════════════════════════════ */
+
+.footer-screen {
+    width: 100%;
+    background: #FAFAFA;
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.f-split {
+    display: flex;
+    flex-direction: column;
+    min-height: 90vh;
+}
+@media (min-width: 1024px) {
+    .f-split { flex-direction: row; }
+}
+
+/* ── LEFT HALF ─────────────────────────────────────────── */
+.f-left {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5rem 3rem;
+    position: relative;
+    overflow: hidden;
+}
+@media (min-width: 1024px) {
+    .f-left {
+        width: 45%;
+        padding: 6rem;
+    }
+}
+
+/* ── Brand Seal ────────────────────────────────────────── */
+.f-brand-seal {
+    position: relative;
+    width: clamp(280px, 30vw, 420px);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.f-spin-ring {
+    position: absolute;
+    inset: 0;
+    animation: spin 40s linear infinite;
+    opacity: 0.9;
+}
+
+.f-spin-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.f-spin-text {
+    font-size: 18.5px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    fill: #1a1a2e;
+    letter-spacing: 2px;
+}
+
+.f-logo-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 58%;
+    height: 58%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ── RIGHT HALF ────────────────────────────────────────── */
+.f-right {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    padding: 0;
+}
+@media (min-width: 1024px) {
+    .f-right { width: 55%; }
+}
+
+.f-right-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 2rem 3rem;
+}
+@media (min-width: 1024px) {
+    .f-right-inner {
+        padding: 7rem 5rem 4rem;
+    }
+}
+
+/* ── Section Labels ────────────────────────────────────── */
+.f-section-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 1.5rem;
+}
+
+/* ── Navigation Stack ──────────────────────────────────── */
+.f-nav-section {
+    margin-bottom: 3.5rem;
+}
+
+.f-nav-stack {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+.f-nav-row {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.1rem 0.75rem;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    border-radius: 0;
+}
+.f-nav-row:hover {
+    background: rgba(186, 25, 41, 0.03);
+    padding-left: 1.25rem;
+}
+
+.f-nav-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #ba1929;
+    opacity: 0.5;
+    min-width: 1.5rem;
+    transition: opacity 0.3s ease;
+}
+.f-nav-row:hover .f-nav-number {
+    opacity: 1;
+}
+
+.f-nav-label {
+    font-family: var(--ff-display, 'Outfit', sans-serif);
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 600;
+    color: #111827;
+    letter-spacing: -0.01em;
+    transition: color 0.3s ease;
+    flex: 1;
+}
+.f-nav-row:hover .f-nav-label {
+    color: #ba1929;
+}
+
+.f-nav-arrow {
+    color: #ba1929;
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.f-nav-row:hover .f-nav-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ── Info Section ──────────────────────────────────────── */
+.f-info-section {
+    padding-top: 2rem;
+}
+
+.f-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+}
+@media (min-width: 640px) {
+    .f-info-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.f-info-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.f-info-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.f-info-link {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #111827;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    width: fit-content;
+}
+.f-info-link:hover {
+    color: #ba1929;
+}
+
+.f-info-muted {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* ── Social Links ──────────────────────────────────────── */
+.f-social-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #111827;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    width: fit-content;
+}
+.f-social-link:hover {
+    color: #ba1929;
+}
+
+.f-social-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ── Legal Bar ─────────────────────────────────────────── */
+.f-legal-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #9ca3af;
+}
+@media (min-width: 768px) {
+    .f-legal-bar {
+        flex-direction: row;
+        padding: 1.5rem 5rem;
+    }
+}
+
+.f-legal-bar p { margin: 0; }
+
+.f-legal-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+.f-legal-links a {
+    color: #9ca3af;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+.f-legal-links a:hover {
+    color: #111827;
+}
+</style>

@@ -221,7 +221,17 @@ const clients = [
         });
 
         document.getElementById('modal-save')?.addEventListener('click', () => {
-            alert('Funcionalidad de guardado no implementada (datos estáticos)');
+            // Toast notification
+            const container = document.createElement('div');
+            container.className = 'fixed top-4 right-4 z-[70]';
+            container.style.pointerEvents = 'none';
+            const toast = document.createElement('div');
+            toast.className = 'flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border text-sm font-medium pointer-events-auto bg-amber-500/10 border-amber-500/20 text-amber-400';
+            toast.style.cssText = 'backdrop-filter:blur(12px);';
+            toast.textContent = 'Funcionalidad de guardado no implementada (datos estáticos)';
+            container.appendChild(toast);
+            document.body.appendChild(container);
+            setTimeout(() => container.remove(), 4000);
             closeModal();
         });
     });

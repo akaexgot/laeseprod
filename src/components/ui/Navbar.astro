@@ -3,7 +3,8 @@
  * Navbar — Estado único, sin conflictos
  */
 import { getNavigation, getSettings } from "../../lib/data";
-const navigation = await getNavigation();
+const allNavigation = await getNavigation();
+const navigation = allNavigation.filter((item: any) => !['Servicios', 'Sectores'].includes(item.label));
 const settings = await getSettings();
 ---
 
