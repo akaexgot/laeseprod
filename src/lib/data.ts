@@ -2,7 +2,7 @@
  * Data fetching layer
  * Tries Supabase first, falls back to static data for development
  */
-import { supabase } from './supabase';
+import { supabase, getServiceSupabase } from './supabase';
 import * as fallback from '../data/fallback';
 
 /** Fetch site settings */
@@ -149,5 +149,32 @@ export async function getFooterData() {
         .single();
 
     if (error || !data) return fallback.footerData;
+    return data;
+}
+
+/** Fetch portal clients (public — RLS filters active only) */
+export async function getPortalClients() {
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from('portal_clients')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+    if (error || !data) return [];
+    return data;
+}
+
+/** Fetch ALL portal clients (admin — bypasses RLS) */
+export async function getPortalClientsAdmin() {
+    const sb = getServiceSupabase();
+    if (!sb) return [];
+
+    const { data, error } = await sb
+        .from('portal_clients')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+    if (error || !data) return [];
     return data;
 }

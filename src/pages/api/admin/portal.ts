@@ -1,6 +1,6 @@
 /**
- * Admin API — Sectors
- * POST / PUT / DELETE /api/admin/sectors
+ * Admin API — Portal Clients
+ * POST / PUT / DELETE /api/admin/portal
  */
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
@@ -11,22 +11,17 @@ export const POST: APIRoute = async ({ request }) => {
 
     try {
         const body = await request.json();
-        
-        // Whitelist valid columns
-        const allowed = ['title', 'slug', 'description', 'video', 'order'];
+
+        const allowed = ['client_name', 'image', 'dropbox_link', 'password_hash', 'is_active'];
         const filteredBody: any = {};
         for (const key of allowed) {
             if (key in body) filteredBody[key] = body[key];
         }
 
-        if (!filteredBody.slug && filteredBody.title) {
-            filteredBody.slug = filteredBody.title
-                .toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '');
-        }
-        const { data, error } = await sb.from('sectors').insert(filteredBody).select().single();
+        // password_hash is required
+        if (!filteredBody.password_hash) filteredBody.password_hash = '';
+
+        const { data, error } = await sb.from('portal_clients').insert(filteredBody).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
         return new Response(JSON.stringify(data), { status: 201 });
     } catch (e: any) {
@@ -43,14 +38,13 @@ export const PUT: APIRoute = async ({ request }) => {
         const { id } = body;
         if (!id) return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
 
-        // Whitelist valid columns
-        const allowed = ['title', 'slug', 'description', 'video', 'order'];
+        const allowed = ['client_name', 'image', 'dropbox_link', 'password_hash', 'is_active'];
         const updates: any = {};
         for (const key of allowed) {
             if (key in body) updates[key] = body[key];
         }
 
-        const { data, error } = await sb.from('sectors').update(updates).eq('id', id).select().single();
+        const { data, error } = await sb.from('portal_clients').update(updates).eq('id', id).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
         return new Response(JSON.stringify(data), { status: 200 });
     } catch (e: any) {
@@ -66,7 +60,7 @@ export const DELETE: APIRoute = async ({ request }) => {
         const { id } = await request.json();
         if (!id) return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
 
-        const { error } = await sb.from('sectors').delete().eq('id', id);
+        const { error } = await sb.from('portal_clients').delete().eq('id', id);
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
         return new Response(JSON.stringify({ ok: true }), { status: 200 });
     } catch (e: any) {

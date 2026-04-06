@@ -12,7 +12,6 @@ const companies = await getCompanies();
     class="bg-white border-b border-black/5 relative overflow-hidden z-10"
     style="padding-top: 64px;"
 >
-    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
     <!-- Label -->
     <div class="flex items-center justify-center gap-4 py-3 invisible">
         <div class="h-px w-16 bg-gradient-to-r from-transparent to-black/10"></div>
@@ -23,17 +22,33 @@ const companies = await getCompanies();
     </div>
 
     <!-- Marquee -->
-    <div class="overflow-hidden pb-3">
-        <div class="marquee-track flex items-center">
+    <div class="overflow-hidden pb-8">
+        <div class="marquee-track flex items-center gap-3 lg:gap-5">
             {
                 [...companies, ...companies, ...companies, ...companies].map(
                     (company: any) => (
-                        <div class="flex items-center justify-center px-10 lg:px-16 flex-shrink-0 cursor-default">
-                            <img
-                                src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
-                                alt={company.name}
-                                class="h-7 lg:h-9 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
-                            />
+                        <div class="flex items-center justify-center min-w-[100px] lg:min-w-[120px] flex-shrink-0">
+                            {company.website ? (
+                                <a 
+                                    href={company.website} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    class="block transition-all duration-500 hover:scale-110"
+                                    title={`Visitar web de ${company.name}`}
+                                >
+                                    <img
+                                        src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
+                                        alt={company.name}
+                                        class="h-7 lg:h-9 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
+                                    />
+                                </a>
+                            ) : (
+                                <img
+                                    src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
+                                    alt={company.name}
+                                    class="h-7 lg:h-9 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                />
+                            )}
                         </div>
                     )
                 )

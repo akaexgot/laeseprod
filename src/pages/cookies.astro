@@ -1,8 +1,8 @@
 ---
-/**
- * Política de Cookies
- */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSettings } from "../lib/data";
+
+const settings = await getSettings();
 ---
 
 <BaseLayout
@@ -64,7 +64,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                     </h2>
                     <p>
                         Para más información sobre nuestra política de cookies,
-                        puedes contactarnos en info@videomarketingsevilla.es
+                        puedes contactarnos en {settings.email}
                     </p>
                 </div>
             </div>

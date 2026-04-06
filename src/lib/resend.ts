@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
-const fromEmail = import.meta.env.RESEND_FROM_EMAIL || 'info@videomarketingsevilla.es';
+const defaultFromEmail = import.meta.env.RESEND_FROM_EMAIL || 'info@videomarketingsevilla.es';
 
 export interface ContactFormData {
     name: string;
@@ -9,15 +9,17 @@ export interface ContactFormData {
     phone?: string;
     company?: string;
     message: string;
+    adminEmail?: string; // Optional override from settings
 }
 
 /** Send contact form notification to admin */
 export async function sendContactNotification(data: ContactFormData) {
-    const { name, email, phone, company, message } = data;
+    const { name, email, phone, company, message, adminEmail } = data;
+    const toEmail = adminEmail || defaultFromEmail;
 
     return resend.emails.send({
-        from: fromEmail,
-        to: fromEmail,
+        from: defaultFromEmail,
+        to: toEmail,
         replyTo: email,
         subject: `Nuevo contacto: ${name}${company ? ` - ${company}` : ''}`,
         html: `
@@ -41,7 +43,7 @@ export async function sendContactNotification(data: ContactFormData) {
 /** Send auto-reply to contact */
 export async function sendContactAutoReply(data: ContactFormData) {
     return resend.emails.send({
-        from: fromEmail,
+        from: defaultFromEmail,
         to: data.email,
         subject: 'Hemos recibido tu mensaje - VideoMarketing Sevilla',
         html: `

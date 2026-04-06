@@ -12,8 +12,12 @@ interface Props {
   noindex?: boolean;
 }
 
-const siteName = 'VideoMarketing Sevilla';
-const defaultDescription = 'Productora audiovisual especializada en video marketing para empresas en Sevilla, Cádiz y toda España. Spots, vídeos corporativos y contenido para redes sociales.';
+import { getSettings } from "../../lib/data";
+
+const settings = await getSettings();
+
+const siteName = settings.site_name || 'VideoMarketing Sevilla';
+const defaultDescription = settings.site_description || 'Productora audiovisual especializada en video marketing para empresas en Sevilla, Cádiz y toda España. Spots, vídeos corporativos y contenido para redes sociales.';
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://videomarketingsevilla.es';
 
 const {
@@ -35,8 +39,8 @@ const localBusinessSchema = {
   name: siteName,
   description: defaultDescription,
   url: siteUrl,
-  telephone: '+34600000000',
-  email: 'info@videomarketingsevilla.es',
+  telephone: settings.phone || '+34600000000',
+  email: settings.email || 'info@videomarketingsevilla.es',
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Sevilla',
@@ -56,9 +60,9 @@ const localBusinessSchema = {
   priceRange: '€€€',
   image: image,
   sameAs: [
-    'https://instagram.com/videomarketingsevilla',
-    'https://linkedin.com/company/videomarketingsevilla',
-  ],
+    settings.instagram,
+    settings.linkedin,
+  ].filter(Boolean),
 };
 
 // Website Schema

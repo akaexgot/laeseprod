@@ -16,6 +16,11 @@ function extractYouTubeId(url: string | null | undefined): string | null {
 }
 
 const youtubeId = extractYouTubeId(settings.hero_video_desktop) || 'D91q99QK11k';
+
+// Prepare dynamic title lines (split by newlines)
+const defaultTitle = 'Creamos\n**historias** que\nimpulsan\nmarcas';
+const titleLines = (settings.hero_title || defaultTitle).split('\n');
+const heroSubtitle = settings.hero_subtitle || '';
 ---
 
 <section
@@ -36,11 +41,6 @@ const youtubeId = extractYouTubeId(settings.hero_video_desktop) || 'D91q99QK11k'
         </iframe>
 
         <div class="absolute inset-0 bg-dark/10"></div>
-        <div
-            class="absolute inset-0"
-            style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E'); pointer-events: none;"
-        >
-        </div>
     </div>
 
     <!-- Content (Centered) -->
@@ -62,31 +62,42 @@ const youtubeId = extractYouTubeId(settings.hero_video_desktop) || 'D91q99QK11k'
 
         <!-- Headline -->
         <h1
-            class="text-editorial-lg text-white text-center mb-16 uppercase tracking-tight drop-shadow-2xl overflow-hidden px-4"
+            class="text-editorial-lg text-white text-center mb-12 uppercase tracking-tight drop-shadow-2xl overflow-hidden px-4"
         >
-            <span
-                class="inline-block animate-slide-right-in opacity-0"
-                style="animation-fill-mode: forwards; animation-delay: 0.1s"
-                >Creamos</span
-            ><br />
-            <span
-                class="inline-block animate-slide-left-in opacity-0"
-                style="animation-fill-mode: forwards; animation-delay: 0.3s"
-            >
-                <span class="text-gradient-carmin italic pr-2">historias </span> que
-            </span><br />
-            <span
-                class="inline-block animate-slide-right-in opacity-0"
-                style="animation-fill-mode: forwards; animation-delay: 0.5s"
-                >impulsan</span
-            ><br />
-            <span
-                class="inline-block font-light animate-slide-left-in opacity-0"
-                style="animation-fill-mode: forwards; animation-delay: 0.7s"
-                >marcas</span
-            >
+            {titleLines.map((line: string, idx: number) => {
+                const isLeft = idx % 2 !== 0;
+                const animClass = isLeft ? 'animate-slide-left-in' : 'animate-slide-right-in';
+                const delay = (0.1 + idx * 0.2).toFixed(1) + 's';
+                
+                // Process **text** into styled spans
+                const parts = line.split(/(\*\*.*?\*\*)/g);
+                
+                return (
+                    <div class="mb-2 last:mb-0">
+                        <span 
+                            class={`inline-block ${animClass} opacity-0`}
+                            style={`animation-fill-mode: forwards; animation-delay: ${delay}`}
+                        >
+                            {parts.map((part: string) => {
+                                if (part.startsWith('**') && part.endsWith('**')) {
+                                    return <span class="text-gradient-carmin italic pr-2">{part.slice(2, -2)}</span>;
+                                }
+                                return part;
+                            })}
+                        </span>
+                    </div>
+                );
+            })}
         </h1>
 
+        {heroSubtitle && (
+            <p 
+                class="text-zinc-400 text-lg md:text-xl max-w-2xl animate-fade-up opacity-0"
+                style={`animation-fill-mode: forwards; animation-delay: ${(0.3 + titleLines.length * 0.2).toFixed(1)}s`}
+            >
+                {heroSubtitle}
+            </p>
+        )}
     </div>
 </section>
 

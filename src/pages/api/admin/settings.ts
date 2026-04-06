@@ -1,16 +1,37 @@
 /**
  * Admin API — Settings
- * PUT /api/admin/settings
+ * POST /api/admin/settings
  */
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
 
-export const PUT: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request }) => {
     const sb = getServiceSupabase();
     if (!sb) return new Response(JSON.stringify({ error: 'DB not configured' }), { status: 500 });
 
     try {
         const body = await request.json();
+
+        const allowedKeys = [
+            'site_name', 'site_description', 'logo_url', 'primary_color', 'secondary_color',
+            'font_heading', 'font_body', 'whatsapp_number', 'phone', 'email', 'address',
+            'instagram', 'linkedin', 'google_maps_embed', 'hero_title', 'hero_subtitle',
+            'hero_video_desktop', 'hero_video_mobile', 'about_hero_video', 'contact_hero_video',
+            'about_corporate_video'
+        ];
+
+        const updates: Record<string, any> = {};
+        Object.keys(body).forEach(key => {
+            if (allowedKeys.includes(key)) {
+                let value = body[key];
+                // Auto-extract src from iframe if user pastes the whole html tag
+                if (key === 'google_maps_embed' && typeof value === 'string' && value.includes('<iframe')) {
+                    const match = value.match(/src="([^"]+)"/);
+                    if (match) value = match[1];
+                }
+                updates[key] = value;
+            }
+        });
 
         // Get existing settings row id
         const { data: existing } = await sb.from('settings').select('id').single();
@@ -20,7 +41,7 @@ export const PUT: APIRoute = async ({ request }) => {
 
         const { data, error } = await sb
             .from('settings')
-            .update(body)
+            .update(updates)
             .eq('id', existing.id)
             .select()
             .single();

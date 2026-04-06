@@ -11,7 +11,15 @@ export const POST: APIRoute = async ({ request }) => {
 
     try {
         const body = await request.json();
-        const { data, error } = await sb.from('companies').insert(body).select().single();
+        
+        // Whitelist valid columns
+        const allowed = ['name', 'logo_url', 'website', 'order'];
+        const filteredBody: any = {};
+        for (const key of allowed) {
+            if (key in body) filteredBody[key] = body[key];
+        }
+
+        const { data, error } = await sb.from('companies').insert(filteredBody).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
         return new Response(JSON.stringify(data), { status: 201 });
     } catch (e: any) {
@@ -25,8 +33,15 @@ export const PUT: APIRoute = async ({ request }) => {
 
     try {
         const body = await request.json();
-        const { id, ...updates } = body;
+        const { id } = body;
         if (!id) return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
+
+        // Whitelist valid columns
+        const allowed = ['name', 'logo_url', 'website', 'order'];
+        const updates: any = {};
+        for (const key of allowed) {
+            if (key in body) updates[key] = body[key];
+        }
 
         const { data, error } = await sb.from('companies').update(updates).eq('id', id).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
