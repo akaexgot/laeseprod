@@ -31,21 +31,24 @@ const sectors = await getSectors();
                         <th class="font-semibold" style="padding: 1rem 1.5rem;">Sector</th>
                         <th class="font-semibold hidden sm:table-cell w-32" style="padding: 1rem 1.5rem;">Vídeo</th>
                         <th class="font-semibold hidden md:table-cell w-24 text-center" style="padding: 1rem 1.5rem;">Orden</th>
-                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {sectors.map((sector: any) => (
-                        <tr class="hover:bg-zinc-800/30 transition-colors group" data-id={sector.id}>
+                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={sector.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
                             <td style="padding: 1rem 1.5rem;">
-                                <div class="flex items-start" style="gap: 0.75rem;">
-                                    <div class="w-8 h-8 rounded bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5 text-zinc-400">
-                                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-start" style="gap: 0.75rem;">
+                                        <div class="w-8 h-8 rounded bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5 text-zinc-400">
+                                            <i data-lucide="building-2" class="w-4 h-4"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="font-medium text-zinc-100 mb-0.5">{sector.title}</div>
+                                            <div class="text-xs text-zinc-500 line-clamp-1">{sector.description}</div>
+                                        </div>
                                     </div>
-                                    <div class="min-w-0">
-                                        <div class="font-medium text-zinc-100 mb-0.5">{sector.title}</div>
-                                        <div class="text-xs text-zinc-500 line-clamp-1">{sector.description}</div>
-                                    </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                 </div>
                             </td>
                             <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
@@ -59,10 +62,10 @@ const sectors = await getSectors();
                                     </span>
                                 )}
                             </td>
-                            <td class="hidden md:table-cell text-center" style="padding: 1rem 1.5rem;">
+                            <td class="hidden md:table-cell" style="padding: 1rem 1.5rem;">
                                 <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{sector.order}</span>
                             </td>
-                            <td class="text-right" style="padding: 1rem 1.5rem;">
+                            <td class="hidden sm:table-cell text-right" style="padding: 1rem 1.5rem;">
                                 <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
                                     <button class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" data-sector={JSON.stringify(sector)} title="Editar">
                                         <i data-lucide="edit-2" class="w-4 h-4"></i>
@@ -95,7 +98,7 @@ const sectors = await getSectors();
 </AdminLayout>
 
 <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-2xl shadow-2xl overflow-hidden">
         <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
             <h3 id="modal-title" class="text-lg font-semibold text-zinc-50 flex items-center gap-2">
                 <span>Nuevo sector</span>
@@ -147,6 +150,7 @@ const sectors = await getSectors();
 
         <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
             <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
+            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
             <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
             <button type="submit" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
         </div>
@@ -155,7 +159,7 @@ const sectors = await getSectors();
 
 <!-- Delete Confirmation Modal -->
 <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
         <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
             <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
@@ -179,6 +183,7 @@ const sectors = await getSectors();
         const overlay = document.getElementById('modal-overlay')!;
         const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
         const errEl = document.getElementById('modal-error')!;
+        const modalDeleteBtn = document.getElementById('modal-delete')!;
 
         function openModal(sector?: any) {
             const isEdit = !!sector;
@@ -192,6 +197,9 @@ const sectors = await getSectors();
             $('m-video').value = sector?.video || '';
             $('m-video-vertical').value = sector?.video_vertical || '';
             $('m-order').value = String(sector?.order ?? 0);
+            
+            if (isEdit) modalDeleteBtn.classList.remove('hidden');
+            else modalDeleteBtn.classList.add('hidden');
             
             errEl.classList.add('hidden');
             overlay.classList.remove('hidden');
@@ -215,6 +223,15 @@ const sectors = await getSectors();
                 const sector = JSON.parse((btn as HTMLElement).dataset.sector || '{}');
                 openModal(sector);
             });
+        });
+
+        modalDeleteBtn.addEventListener('click', () => {
+            closeModal();
+            const id = $('m-id').value;
+            if (id) {
+                const deleteBtn = document.querySelector(`.btn-delete[data-id="${id}"]`) as HTMLButtonElement;
+                if (deleteBtn) deleteBtn.click();
+            }
         });
 
         // Confirm modal logic

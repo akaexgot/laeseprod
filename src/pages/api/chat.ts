@@ -23,6 +23,7 @@ export const GET: APIRoute = async ({ url }) => {
         const { data, error } = await supabase
             .from('chat_conversations')
             .select('*, chat_messages(message, created_at, sender_type)')
+            .eq('status', 'active')
             .order('updated_at', { ascending: false });
 
         if (error) {
@@ -51,6 +52,20 @@ export const GET: APIRoute = async ({ url }) => {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
+    }
+
+    // Check conversation status (for visitor widget)
+    const statusCheck = url.searchParams.get('status');
+    if (statusCheck) {
+        const { data, error } = await supabase
+            .from('chat_conversations')
+            .select('status')
+            .eq('id', statusCheck)
+            .single();
+        if (error || !data) {
+            return new Response(JSON.stringify({ status: 'not_found' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+        return new Response(JSON.stringify({ status: data.status }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
     if (conversationId) {
@@ -128,6 +143,20 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 });
         }
 
+        // Before doing anything, check if the conversation is currently closed
+        const { data: convCheck } = await supabase
+            .from('chat_conversations')
+            .select('status, visitor_name, updated_at')
+            .eq('id', conversation_id)
+            .single();
+
+        const wasClosed = convCheck?.status === 'closed';
+
+        // Check time since last update to auto-notify if it's been a long time (e.g., > 12 hours)
+        const hoursSinceLastUpdate = convCheck?.updated_at ? 
+            (new Date().getTime() - new Date(convCheck.updated_at).getTime()) / (1000 * 60 * 60) : 0;
+        const beenLongTime = hoursSinceLastUpdate > 12;
+
         const { data, error } = await supabase
             .from('chat_messages')
             .insert({ conversation_id, sender_type, message })
@@ -138,14 +167,52 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ error: error.message }), { status: 500 });
         }
 
-        // Update conversation timestamp
+        // Update conversation timestamp and automatically re-open if it was closed
         await supabase
             .from('chat_conversations')
-            .update({ updated_at: new Date().toISOString() })
+            .update({ status: 'active', updated_at: new Date().toISOString() })
             .eq('id', conversation_id);
+
+        // SEND EMAIL NOTIFICATION
+        if (sender_type === 'visitor' && import.meta.env.RESEND_API_KEY) {
+            const { count } = await supabase
+                .from('chat_messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('conversation_id', conversation_id)
+                .eq('sender_type', 'visitor');
+
+            // Send notification if it's the very first message, OR the conversation was previously closed, OR it's been >12h
+            if (count === 1 || wasClosed || beenLongTime) {
+                const { getSettings } = await import('../../lib/data');
+                const settings = await getSettings();
+                const { sendChatNotification } = await import('../../lib/resend');
+                
+                if (settings.email) {
+                    sendChatNotification(convCheck?.visitor_name || 'Visitante', message, settings.email).catch(err => console.error('Error sending chat notification:', err));
+                }
+            }
+        }
 
         return new Response(JSON.stringify(data), {
             status: 201,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    if (action === 'close') {
+        // Mark conversation as closed
+        const { conversation_id } = body;
+        if (!conversation_id) return new Response(JSON.stringify({ error: 'Missing conversation_id' }), { status: 400 });
+
+        const { error } = await supabase
+            .from('chat_conversations')
+            .update({ status: 'closed' })
+            .eq('id', conversation_id);
+
+        if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+        
+        return new Response(JSON.stringify({ success: true }), {
+            status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
     }

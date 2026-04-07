@@ -28,11 +28,10 @@ const clients = await getPortalClientsAdmin();
             <table class="w-full text-sm text-left" id="clients-table">
                 <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
                     <tr>
-                        <th class="font-semibold w-24" style="padding: 1rem 1.5rem;">Logo</th>
                         <th class="font-semibold" style="padding: 1rem 1.5rem;">Cliente</th>
                         <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Dropbox</th>
-                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Estado</th>
-                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                        <th class="font-semibold hidden md:table-cell" style="padding: 1rem 1.5rem;">Estado</th>
+                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
@@ -45,20 +44,23 @@ const clients = await getPortalClientsAdmin();
                         </tr>
                     ) : (
                         clients.map((client: any) => (
-                            <tr class="transition-colors group hover:bg-zinc-800/30" data-id={client.id}>
+                            <tr class="transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default" data-id={client.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button') && !event.target.closest('a')) btn.click();">
                                 <td style="padding: 0.75rem 1.5rem;">
-                                    <div class="w-14 h-14 bg-zinc-950 rounded-xl border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                                        {client.image ? (
-                                            <img src={client.image} alt={client.client_name} class="w-full h-full object-cover rounded-xl" />
-                                        ) : (
-                                            <span class="text-rose-400 font-bold text-xl">
-                                                {client.client_name.charAt(0)}
-                                            </span>
-                                        )}
+                                    <div class="flex items-center justify-between">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <div class="w-10 h-10 bg-zinc-950 rounded-xl border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                                                {client.image ? (
+                                                    <img src={client.image} alt={client.client_name} class="w-full h-full object-cover rounded-xl" />
+                                                ) : (
+                                                    <span class="text-rose-400 font-bold text-lg">
+                                                        {client.client_name.charAt(0)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span class="font-medium text-zinc-100">{client.client_name}</span>
+                                        </div>
+                                        <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                     </div>
-                                </td>
-                                <td style="padding: 1rem 1.5rem;">
-                                    <span class="font-medium text-zinc-100">{client.client_name}</span>
                                 </td>
                                 <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
                                     {client.dropbox_link ? (
@@ -70,18 +72,20 @@ const clients = await getPortalClientsAdmin();
                                         <span class="text-sm text-amber-400">⚠ Sin enlace</span>
                                     )}
                                 </td>
-                                <td style="padding: 1rem 1.5rem;">
+                                <td class="hidden md:table-cell" style="padding: 1rem 1.5rem;">
                                     {client.is_active ? (
-                                        <div class="flex items-center" title="Activo" style="height: 1.5rem;">
+                                        <div class="flex items-center gap-2" title="Activo">
                                             <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                            <span class="text-xs text-emerald-400">Activo</span>
                                         </div>
                                     ) : (
-                                        <div class="flex items-center" title="Inactivo" style="height: 1.5rem;">
+                                        <div class="flex items-center gap-2" title="Inactivo">
                                             <div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
+                                            <span class="text-xs text-rose-400">Inactivo</span>
                                         </div>
                                     )}
                                 </td>
-                                <td class="text-right" style="padding: 1rem 1.5rem;">
+                                <td class="hidden sm:table-cell text-right" style="padding: 1rem 1.5rem;">
                                     <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
                                         <button 
                                             class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" 
@@ -116,7 +120,7 @@ const clients = await getPortalClientsAdmin();
 
 <!-- Create/Edit Modal -->
 <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-lg shadow-2xl overflow-hidden">
         <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
             <h3 id="modal-title" class="text-lg font-semibold text-white">Nuevo cliente</h3>
             <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
@@ -197,6 +201,7 @@ const clients = await getPortalClientsAdmin();
 
         <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
             <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
+            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
             <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
             <button type="button" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
         </div>
@@ -212,7 +217,7 @@ const clients = await getPortalClientsAdmin();
 
 <!-- Delete Confirmation Modal -->
 <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
         <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
             <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
@@ -236,6 +241,7 @@ const clients = await getPortalClientsAdmin();
         const overlay = document.getElementById('modal-overlay')!;
         const modalTitle = document.getElementById('modal-title')!;
         const modalError = document.getElementById('modal-error')!;
+        const modalDeleteBtn = document.getElementById('modal-delete')!;
         
         const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
 
@@ -252,8 +258,10 @@ const clients = await getPortalClientsAdmin();
             const pwHint = document.getElementById('pw-hint')!;
             if (data) {
                 pwHint.textContent = data.password ? 'Déjalo vacío para mantener la actual' : 'Se pedirá al cliente para acceder al Dropbox';
+                modalDeleteBtn.classList.remove('hidden');
             } else {
                 pwHint.textContent = 'Se pedirá al cliente para acceder al Dropbox';
+                modalDeleteBtn.classList.add('hidden');
             }
             
             updateLogoPreview();
@@ -395,6 +403,15 @@ const clients = await getPortalClientsAdmin();
                     active: el.dataset.active,
                 });
             });
+        });
+
+        modalDeleteBtn.addEventListener('click', () => {
+            closeModal();
+            const id = $('client-id').value;
+            if (id) {
+                const deleteBtn = document.querySelector(`.btn-delete[data-id="${id}"]`) as HTMLButtonElement;
+                if (deleteBtn) deleteBtn.click();
+            }
         });
 
         // Confirm delete modal
