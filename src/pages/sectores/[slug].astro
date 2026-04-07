@@ -20,13 +20,14 @@ const otherSectors = allSectors.filter((s: any) => s.slug !== slug).slice(0, 3);
 
 function getVideoId(value: string | null | undefined): string | null {
     if (!value) return null;
-    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
     if (match) return match[1];
     if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
     return null;
 }
 
 const videoId = getVideoId(sector.video);
+const videoVerticalId = getVideoId(sector.video_vertical);
 ---
 
 <BaseLayout
@@ -90,31 +91,48 @@ const videoId = getVideoId(sector.video);
         <div class="detail-content__dots"></div>
         <div class="detail-content__inner">
 
-            <!-- Description -->
+            <!-- Description with optional vertical video -->
             <div class="detail-desc reveal">
-                <h2 class="detail-desc__heading">
-                    Producción audiovisual para el sector
-                    <span class="detail-desc__heading-accent">{sector.title.toLowerCase()}</span>
-                </h2>
-                <div class="detail-desc__body">
-                    <p>{sector.description}</p>
-                    <p>
-                        Conocemos las particularidades del sector {sector.title.toLowerCase()} y sabemos cómo comunicar tu propuesta de valor a tu público objetivo. Nuestro equipo produce contenido audiovisual que habla el lenguaje de tu industria.
-                    </p>
+                <div class={`detail-desc__layout ${videoVerticalId ? 'detail-desc__layout--with-video' : ''}`}>
+                    {videoVerticalId && (
+                        <div class="detail-vertical-video">
+                            <div class="detail-vertical-video__frame">
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${videoVerticalId}?autoplay=0&mute=1&loop=1&playlist=${videoVerticalId}&controls=1&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                    class="detail-vertical-video__iframe"
+                                    frameborder="0"
+                                    allow="autoplay; encrypted-media"
+                                    title={`Vídeo vertical de ${sector.title}`}
+                                ></iframe>
+                            </div>
+                        </div>
+                    )}
+                    <div class="detail-desc__text">
+                        <h2 class="detail-desc__heading">
+                            Producción audiovisual para el sector
+                            <span class="detail-desc__heading-accent">{sector.title.toLowerCase()}</span>
+                        </h2>
+                        <div class="detail-desc__body">
+                            <p>{sector.description}</p>
+                            <p>
+                                Conocemos las particularidades del sector {sector.title.toLowerCase()} y sabemos cómo comunicar tu propuesta de valor a tu público objetivo. Nuestro equipo produce contenido audiovisual que habla el lenguaje de tu industria.
+                            </p>
+                        </div>
+                        <!-- CTA -->
+                        <div class="detail-cta reveal" style="margin-top: 2rem;">
+                            <h3 class="detail-cta__title">¿Necesitas vídeo para {sector.title.toLowerCase()}?</h3>
+                            <p class="detail-cta__text">Solicita tu presupuesto personalizado sin compromiso</p>
+                            <a href="/contacto" class="detail-cta__btn">
+                                Solicitar presupuesto
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- CTA -->
-            <div class="detail-cta reveal">
-                <h3 class="detail-cta__title">¿Necesitas vídeo para {sector.title.toLowerCase()}?</h3>
-                <p class="detail-cta__text">Solicita tu presupuesto personalizado sin compromiso</p>
-                <a href="/contacto" class="detail-cta__btn">
-                    Solicitar presupuesto
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
-                </a>
-            </div>
 
             <!-- Related Sectors -->
             <div class="detail-related reveal">
@@ -148,6 +166,8 @@ const videoId = getVideoId(sector.video);
 
         let isScrolling = false;
         let scrollTimeout: ReturnType<typeof setTimeout>;
+        let accumulatedDelta = 0;
+        let deltaTimeout: ReturnType<typeof setTimeout> | null = null;
 
         function getVisibleSectionIndex() {
             let maxIdx = 0, maxArea = 0;
@@ -164,14 +184,22 @@ const videoId = getVideoId(sector.video);
             isScrolling = true;
             sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
             clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => { isScrolling = false; }, 1300);
+            scrollTimeout = setTimeout(() => { isScrolling = false; }, 1600);
         }
 
         window.addEventListener('wheel', (e) => {
             e.preventDefault();
             if (isScrolling) return;
-            const cur = getVisibleSectionIndex();
-            scrollTo(e.deltaY > 0 ? cur + 1 : cur - 1);
+
+            accumulatedDelta += e.deltaY;
+            if (deltaTimeout) clearTimeout(deltaTimeout);
+            deltaTimeout = setTimeout(() => {
+                if (isScrolling) { accumulatedDelta = 0; return; }
+                const cur = getVisibleSectionIndex();
+                if (accumulatedDelta > 25) scrollTo(cur + 1);
+                else if (accumulatedDelta < -25) scrollTo(cur - 1);
+                accumulatedDelta = 0;
+            }, 120);
         }, { passive: false });
 
         let touchStartY = 0;

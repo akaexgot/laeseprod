@@ -128,9 +128,16 @@ const services = await getServices();
 
                 <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1.5rem;">
                     <div>
-                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">URL del vídeo (YouTube)</label>
-                        <input type="url" id="m-video" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://..." />
+                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">URL del vídeo horizontal (YouTube)</label>
+                        <input type="url" id="m-video" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://youtube.com/watch?v=..." />
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">URL del vídeo vertical (YouTube)</label>
+                        <input type="url" id="m-video-vertical" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://youtube.com/watch?v=..." />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1.5rem;">
                     <div>
                         <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Orden</label>
                         <input type="number" id="m-order" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" value="0" min="0" />
@@ -184,6 +191,7 @@ const services = await getServices();
             $('m-slug').value = service?.slug || '';
             ($('m-description') as unknown as HTMLTextAreaElement).value = service?.description || '';
             $('m-video').value = service?.video || '';
+            $('m-video-vertical').value = service?.video_vertical || '';
             $('m-order').value = String(service?.order ?? 0);
             
             errEl.classList.add('hidden');
@@ -286,6 +294,7 @@ const services = await getServices();
                 slug: $('m-slug').value.trim() || null,
                 description: ($('m-description') as unknown as HTMLTextAreaElement).value.trim() || null,
                 video: $('m-video').value.trim() || null,
+                video_vertical: $('m-video-vertical').value.trim() || null,
                 order: parseInt($('m-order').value) || 0,
             };
 

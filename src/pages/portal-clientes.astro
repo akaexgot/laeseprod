@@ -29,7 +29,7 @@ const clients = allClients.filter((c: any) => c.is_active);
               Portal <span class="text-gradient-carmin">cliente</span>
           </h1>
           <p class="pc-hero__subtitle">
-              Mantén pulsada tu tarjeta durante 2 segundos para acceder a tus archivos
+              Pulsa tu tarjeta para acceder a tus archivos
           </p>
 
           <!-- Search -->
@@ -74,7 +74,7 @@ const clients = allClients.filter((c: any) => c.is_active);
                       <!-- Info -->
                       <div class="pc-card__info">
                           <h3 class="pc-card__name">{client.client_name}</h3>
-                          <p class="pc-card__hint">Mantén pulsado para acceder</p>
+                          <p class="pc-card__hint">Pulsa para acceder</p>
                       </div>
                   </div>
               ))}
@@ -422,6 +422,31 @@ const clients = allClients.filter((c: any) => c.is_active);
     50%  { clip-path: polygon(50% 0%, 50% 50%, 0% 100%, 100% 100%, 100% 0%, 50% 0%, 50% 0%); }
     100% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 0% 0%, 0% 100%, 100% 100%, 100% 0%); border-color: #c42847; }
 }
+@keyframes pc-click-bounce {
+    0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(155,27,48,0); }
+    20%  { transform: scale(0.93); }
+    40%  { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(155,27,48,.15); }
+    60%  { transform: scale(0.98); box-shadow: 0 0 0 12px rgba(155,27,48,.08); }
+    80%  { transform: scale(1.02); box-shadow: 0 0 0 16px rgba(155,27,48,.03); }
+    100% { transform: scale(1); box-shadow: 0 0 0 20px rgba(155,27,48,0); }
+}
+@keyframes pc-lock-unlock {
+    0%   { transform: rotate(0deg); color: rgba(0,0,0,.6); }
+    30%  { transform: rotate(-15deg); color: #c42847; }
+    60%  { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); color: #c42847; }
+}
+.pc-card--clicked .pc-card__logo-area {
+    animation: pc-click-bounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-color: rgba(155,27,48,.4);
+    background: linear-gradient(135deg, rgba(155,27,48,.03), rgba(155,27,48,.01));
+}
+.pc-card--clicked .pc-card__lock {
+    opacity: 1;
+}
+.pc-card--clicked .pc-card__lock svg {
+    animation: pc-lock-unlock 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 </style>
 
 <script>
@@ -437,33 +462,17 @@ const clients = allClients.filter((c: any) => c.is_active);
     });
   });
 
-  // Long-press detection (2 seconds)
-  let pressTimer: ReturnType<typeof setTimeout>;
-  let pressedCard: HTMLElement | null = null;
-
+  // Click detection (simple click)
   clientCards.forEach(card => {
-    const startPress = (e: Event) => {
+    card.addEventListener('click', (e) => {
       e.preventDefault();
-      pressedCard = card as HTMLElement;
-      card.classList.add('pc-card--pressing');
-
-      pressTimer = setTimeout(() => {
-        card.classList.remove('pc-card--pressing');
-        openPasswordModal(pressedCard!);
-      }, 2000);
-    };
-
-    const endPress = () => {
-      clearTimeout(pressTimer);
-      card.classList.remove('pc-card--pressing');
-    };
-
-    card.addEventListener('mousedown', startPress);
-    card.addEventListener('touchstart', startPress);
-    card.addEventListener('mouseup', endPress);
-    card.addEventListener('mouseleave', endPress);
-    card.addEventListener('touchend', endPress);
-    card.addEventListener('touchcancel', endPress);
+      const el = card as HTMLElement;
+      el.classList.add('pc-card--clicked');
+      setTimeout(() => {
+        el.classList.remove('pc-card--clicked');
+        openPasswordModal(el);
+      }, 450);
+    });
   });
 
   // Password Modal

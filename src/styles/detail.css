@@ -157,7 +157,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 4rem 0;
+    padding: clamp(4rem, 6vh, 6rem) 0 clamp(2rem, 5vh, 4rem) 0;
 }
 .detail-content__dots {
     position: absolute;
@@ -177,7 +177,7 @@
 
 /* Description block */
 .detail-desc {
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
 }
 .detail-desc__heading {
     font-family: 'Outfit', sans-serif;
@@ -192,6 +192,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-right: 0.1em;
 }
 .detail-desc__body {
     display: flex;
@@ -202,14 +203,66 @@
     line-height: 1.75;
 }
 
+/* Layout for vertical video + text */
+.detail-desc__layout {
+    display: flex;
+    flex-direction: column;
+}
+.detail-desc__layout--with-video {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+@media (min-width: 768px) {
+    .detail-desc__layout--with-video {
+        grid-template-columns: 240px 1fr;
+        gap: 2rem;
+    }
+}
+@media (min-width: 1024px) {
+    .detail-desc__layout--with-video {
+        grid-template-columns: 300px 1fr;
+        gap: 2.5rem;
+    }
+}
+
+/* Vertical video */
+.detail-vertical-video {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+@media (min-width: 768px) {
+    .detail-vertical-video {
+        margin: 0;
+        position: sticky;
+        top: 2rem;
+    }
+}
+.detail-vertical-video__frame {
+    border-radius: 1.25rem;
+    overflow: hidden;
+    aspect-ratio: 9 / 16;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+}
+.detail-vertical-video__iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
 /* CTA block */
 .detail-cta {
     background: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 1.5rem;
-    padding: 2.5rem;
+    padding: 1.5rem;
     text-align: center;
-    margin-bottom: 3.5rem;
+    margin-bottom: 1.5rem;
 }
 .detail-cta__title {
     font-family: 'Outfit', sans-serif;
@@ -221,7 +274,7 @@
 .detail-cta__text {
     color: #6b7280;
     font-size: 0.9375rem;
-    margin: 0 0 1.5rem;
+    margin: 0 0 1.25rem;
 }
 .detail-cta__btn {
     display: inline-flex;
@@ -248,7 +301,7 @@
     font-size: 1.25rem;
     font-weight: 700;
     color: #111;
-    margin: 0 0 1.5rem;
+    margin: 0 0 1rem;
 }
 .detail-related__grid {
     display: grid;

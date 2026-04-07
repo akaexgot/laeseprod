@@ -5,6 +5,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import "../../styles/proyectos.css";
+import ContactFormBlock from '../../components/ui/ContactFormBlock.astro';
 import { getProjects } from '../../lib/data';
 
 const allProjects = await getProjects();
@@ -195,18 +196,10 @@ const screens = groupIntoScreens(projects);
         })
     )}
 
-    <!-- CTA BOTTOM -->
-    <section class="pj-screen pj-cta-screen">
-        <div class="pj-cta__glow"></div>
-        <div class="pj-cta__inner">
-            <h2 class="pj-cta__title">¿Quieres un proyecto como estos?</h2>
-            <p class="pj-cta__text">Cuéntanos tu idea y creamos algo único para tu marca.</p>
-            <a href="/contacto" class="pj-cta__btn">
-                Solicitar presupuesto
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                </svg>
-            </a>
+    <!-- CONTACT FORM (Replaces Empty CTA) -->
+    <section class="pj-screen" style="height: 100svh; overflow-y: auto; display: flex; align-items: center; justify-content: center; background: #fff;">
+        <div style="width: 100%;">
+            <ContactFormBlock />
         </div>
     </section>
 
@@ -234,11 +227,13 @@ const screens = groupIntoScreens(projects);
 
     /* ── Fullpage Scroll ── */
     document.addEventListener('DOMContentLoaded', () => {
-        const sections = Array.from(document.querySelectorAll('.pj-screen'));
+        const sections = Array.from(document.querySelectorAll('.pj-screen, footer'));
         if (sections.length === 0) return;
 
         let isScrolling = false;
         let scrollTimeout: ReturnType<typeof setTimeout>;
+        let accumulatedDelta = 0;
+        let deltaTimeout: ReturnType<typeof setTimeout> | null = null;
 
         function getVisibleSectionIndex() {
             let maxIdx = 0, maxArea = 0;
@@ -259,21 +254,35 @@ const screens = groupIntoScreens(projects);
         }
 
         window.addEventListener('wheel', (e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest('.contact-body') || target.closest('footer')) return;
+
             e.preventDefault();
             if (isScrolling) return;
-            const cur = getVisibleSectionIndex();
-            scrollTo(e.deltaY > 0 ? cur + 1 : cur - 1);
+
+            accumulatedDelta += e.deltaY;
+            if (deltaTimeout) clearTimeout(deltaTimeout);
+            deltaTimeout = setTimeout(() => {
+                if (isScrolling) { accumulatedDelta = 0; return; }
+                const cur = getVisibleSectionIndex();
+                if (accumulatedDelta > 25) scrollTo(cur + 1);
+                else if (accumulatedDelta < -25) scrollTo(cur - 1);
+                accumulatedDelta = 0;
+            }, 120);
         }, { passive: false });
 
         let touchStartY = 0;
         window.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].screenY; }, { passive: false });
         window.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
         window.addEventListener('touchend', (e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest('.contact-body') || target.closest('footer')) return;
+
             if (isScrolling) return;
             const delta = touchStartY - e.changedTouches[0].screenY;
             const cur = getVisibleSectionIndex();
-            if (delta > 50) scrollTo(cur + 1);
-            else if (delta < -50) scrollTo(cur - 1);
+            if (delta > 25) scrollTo(cur + 1);
+            else if (delta < -25) scrollTo(cur - 1);
         }, { passive: false });
 
         window.addEventListener('keydown', (e) => {
