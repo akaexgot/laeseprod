@@ -2,10 +2,10 @@ import type { APIRoute } from 'astro';
 
 async function handleSessionRequest(request: Request) {
   try {
-    const body = await request.json();
-    const access_token = body?.access_token || null;
-    const refresh_token = body?.refresh_token || null;
-    const expires_in = body?.expires_in || null;
+    const payload = await request.json();
+    const access_token = payload?.access_token || null;
+    const refresh_token = payload?.refresh_token || null;
+    const expires_in = payload?.expires_in || null;
 
     if (!access_token || !refresh_token) {
       return new Response(JSON.stringify({ error: 'missing_tokens' }), { status: 400 });
@@ -36,8 +36,8 @@ async function handleSessionRequest(request: Request) {
     }
 
     // In development return cookies array in the response body for debugging
-    const body = !isProd ? { ok: true, cookies } : { ok: true };
-    return new Response(JSON.stringify(body), { status: 200, headers });
+    const respBody = !isProd ? { ok: true, cookies } : { ok: true };
+    return new Response(JSON.stringify(respBody), { status: 200, headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400 });
   }
