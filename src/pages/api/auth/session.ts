@@ -29,6 +29,12 @@ async function handleSessionRequest(request: Request) {
     // Append multiple Set-Cookie headers
     cookies.forEach(c => headers.append('Set-Cookie', c));
 
+    // In development, also set a non-HttpOnly debug cookie so the client can inspect it
+    if (!isProd) {
+      const debugCookie = `sb-access-token-debug=${encodeURIComponent(access_token)}; Path=/; SameSite=Lax; Max-Age=${maxAge}`;
+      headers.append('Set-Cookie', debugCookie);
+    }
+
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400 });

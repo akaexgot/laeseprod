@@ -159,6 +159,11 @@ import "../../styles/global.css";
                                     expires_in: data.session.expires_in || null,
                                 }),
                             });
+
+                            // DEV: print document.cookie so we can see debug cookie set by server
+                            if (import.meta.env.DEV) {
+                                console.log('document.cookie after /api/auth/session ->', document.cookie);
+                            }
                         } catch (err) {
                             console.error('Failed to persist session on server', err);
                         }
