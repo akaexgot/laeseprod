@@ -1,9 +1,11 @@
 ---
 /**
  * Admin - Portal Clients Management
+ * Full CRUD with Cloudinary drag-and-drop image upload
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { supabase, getServiceSupabase } from "../../lib/supabase";
+import { getPortalClientsAdmin } from "../../lib/data";
 
 const cookie = Astro.request?.headers.get("cookie") || "";
 if (!Astro.request) return Astro.redirect('/admin/login');
@@ -16,29 +18,7 @@ if (!serviceSupabase) return Astro.redirect('/admin/login');
 const { data: profile } = await serviceSupabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
 if (!profile?.is_admin) return Astro.redirect('/admin/login');
 
-const clients = [
-    {
-        id: "1",
-        client_name: "Hotel Royal",
-        image: "",
-        dropbox_link: "https://dropbox.com/home",
-        is_active: true,
-    },
-    {
-        id: "2",
-        client_name: "Restaurante La Barca",
-        image: "",
-        dropbox_link: "https://dropbox.com/home",
-        is_active: true,
-    },
-    {
-        id: "3",
-        client_name: "Abengoa",
-        image: "",
-        dropbox_link: "",
-        is_active: false,
-    },
-];
+const clients = await getPortalClientsAdmin();
 ---
 
 <AdminLayout title="Portal Clientes" activeSection="portal">
@@ -57,69 +37,92 @@ const clients = [
 
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
+            <table class="w-full text-sm text-left" id="clients-table">
                 <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
                     <tr>
-                        <th class="font-semibold w-64" style="padding: 1rem 1.5rem;">Cliente</th>
+                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Cliente</th>
                         <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Dropbox</th>
-                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Estado</th>
-                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                        <th class="font-semibold hidden md:table-cell" style="padding: 1rem 1.5rem;">Estado</th>
+                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                 {
-                    clients.map((client) => (
-                        <tr class="transition-colors group hover:bg-zinc-800/30">
-                            <td class="align-top" style="padding: 1rem 1.5rem;">
-                                <div class="font-medium text-zinc-100 flex items-center" style="gap: 0.75rem;">
-                                    <div class="w-8 h-8 rounded bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5 text-zinc-400 overflow-hidden">
-                                        {client.image ? (
-                                            <img src={client.image} alt={client.client_name} class="w-full h-full object-cover" />
-                                        ) : (
-                                            <span class="text-rose-400 font-bold text-sm">
-                                                {client.client_name.charAt(0)}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span class="text-zinc-100 text-sm font-medium">
-                                        {client.client_name}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="hidden sm:table-cell align-top" style="padding: 1rem 1.5rem;">
-                                {client.dropbox_link ? (
-                                    <span class="text-sm text-zinc-400">✓ Configurado</span>
-                                ) : (
-                                    <span class="text-sm text-amber-400">⚠ Sin enlace</span>
-                                )}
-                            </td>
-                            <td class="align-top" style="padding: 1rem 1.5rem;">
-                                {client.is_active ? (
-                                    <div class="flex items-center" title="Activo" style="height: 1.5rem;">
-                                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                                    </div>
-                                ) : (
-                                    <div class="flex items-center" title="Inactivo" style="height: 1.5rem;">
-                                        <div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
-                                    </div>
-                                )}
-                            </td>
-                            <td class="align-top text-right" style="padding: 1rem 1.5rem;">
-                                <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
-                                    <button 
-                                        class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" 
-                                        title="Editar"
-                                        data-client={JSON.stringify(client)}
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                    </button>
-                                    <button class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors btn-delete" title="Eliminar">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
+                    clients.length === 0 ? (
+                        <tr>
+                            <td colspan="5" class="text-center text-zinc-500 py-12">
+                                No hay clientes aún. Pulsa "Nuevo cliente" para empezar.
                             </td>
                         </tr>
-                    ))
+                    ) : (
+                        clients.map((client: any) => (
+                            <tr class="transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default" data-id={client.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button') && !event.target.closest('a')) btn.click();">
+                                <td style="padding: 0.75rem 1.5rem;">
+                                    <div class="flex items-center justify-between">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <div class="w-10 h-10 bg-zinc-950 rounded-xl border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                                                {client.image ? (
+                                                    <img src={client.image} alt={client.client_name} class="w-full h-full object-cover rounded-xl" />
+                                                ) : (
+                                                    <span class="text-rose-400 font-bold text-lg">
+                                                        {client.client_name.charAt(0)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span class="font-medium text-zinc-100">{client.client_name}</span>
+                                        </div>
+                                        <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
+                                    </div>
+                                </td>
+                                <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
+                                    {client.dropbox_link ? (
+                                        <a href={client.dropbox_link} target="_blank" class="text-sm text-zinc-400 hover:text-rose-400 hover:underline flex items-center gap-1">
+                                            ✓ Configurado
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                        </a>
+                                    ) : (
+                                        <span class="text-sm text-amber-400">⚠ Sin enlace</span>
+                                    )}
+                                </td>
+                                <td class="hidden md:table-cell" style="padding: 1rem 1.5rem;">
+                                    {client.is_active ? (
+                                        <div class="flex items-center gap-2" title="Activo">
+                                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                            <span class="text-xs text-emerald-400">Activo</span>
+                                        </div>
+                                    ) : (
+                                        <div class="flex items-center gap-2" title="Inactivo">
+                                            <div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
+                                            <span class="text-xs text-rose-400">Inactivo</span>
+                                        </div>
+                                    )}
+                                </td>
+                                <td class="hidden sm:table-cell text-right" style="padding: 1rem 1.5rem;">
+                                    <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
+                                        <button 
+                                            class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" 
+                                            title="Editar"
+                                            data-id={client.id}
+                                            data-name={client.client_name}
+                                            data-image={client.image || ''}
+                                            data-dropbox={client.dropbox_link || ''}
+                                            data-password={client.password_hash || ''}
+                                            data-active={client.is_active ? 'true' : 'false'}
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        </button>
+                                        <button 
+                                            class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors btn-delete" 
+                                            title="Eliminar"
+                                            data-id={client.id}
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    )
                 }
                 </tbody>
             </table>
@@ -127,124 +130,429 @@ const clients = [
     </div>
 </AdminLayout>
 
-<!-- Modal -->
+<!-- Create/Edit Modal -->
 <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
-        <!-- Header -->
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-lg shadow-2xl overflow-hidden">
         <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
-            <h3 class="text-lg font-semibold text-white" id="modal-title">Nuevo cliente</h3>
+            <h3 id="modal-title" class="text-lg font-semibold text-white">Nuevo cliente</h3>
             <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 
-        <!-- Body -->
-        <div style="padding: 1.5rem;">
-            <form id="client-form" style="display: flex; flex-direction: column; gap: 1.25rem;">
-                <input type="hidden" id="client-id" />
+        <input type="hidden" id="client-id" />
+
+        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+            <div style="margin-bottom: 0.5rem;">
+                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Nombre del Cliente *</label>
+                <input type="text" id="c-name" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="Ej: Hotel Hilton" />
+            </div>
+
+            <div style="margin-bottom: 0.5rem;">
+                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Logo del Cliente</label>
                 
-                <div style="margin-bottom: 0.5rem;">
-                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Nombre del Cliente *</label>
-                    <input type="text" id="c-name" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="Ej: Hotel Hilton" />
-                </div>
+                <!-- Drag & Drop Zone -->
+                <div id="drop-zone" class="relative group cursor-pointer drop-zone">
+                    <input type="file" id="file-input" class="hidden" accept="image/*" />
+                    <div class="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 bg-zinc-950/50 hover:bg-zinc-800/20 hover:border-rose-500/50 transition-all duration-300 drop-zone-content">
+                        
+                        <div id="upload-idle" class="flex flex-col items-center gap-3 text-center">
+                            <div class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-rose-400 group-hover:scale-110 transition-all duration-300">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-zinc-200">Pulsa o arrastra el logo</p>
+                                <p class="text-xs text-zinc-500 mt-1">PNG, JPG, SVG o WebP (máx. 2MB)</p>
+                            </div>
+                        </div>
 
-                <div style="margin-bottom: 0.5rem;">
-                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Dropbox Link</label>
-                    <input type="url" id="c-dropbox" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="https://dropbox.com/..." />
-                </div>
+                        <div id="upload-loading" class="hidden flex flex-col items-center gap-3 text-center">
+                            <div class="w-10 h-10 border-2 border-rose-500/30 border-t-rose-500 rounded-full animate-spin"></div>
+                            <p class="text-sm font-medium text-rose-400">Subiendo imagen...</p>
+                        </div>
 
-                <div style="margin-bottom: 0.5rem;">
-                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Logo (URL)</label>
-                    <input type="url" id="c-image" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="https://..." />
-                    <div id="logo-preview" class="mt-3 h-20 bg-zinc-950 border border-zinc-800 rounded-md flex items-center justify-center overflow-hidden hidden">
-                        <img id="logo-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
+                        <div id="upload-preview" class="hidden relative w-full h-32 flex items-center justify-center rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden group/preview">
+                            <img id="logo-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
+                            <div class="absolute inset-0 bg-zinc-950/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                                <button type="button" id="btn-remove-logo" class="bg-rose-600 text-white p-2 rounded-full hover:bg-rose-500 transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div style="margin-bottom: 0.5rem;">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="c-active" class="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-rose-500 focus:ring-rose-500" checked />
-                        <span class="text-sm font-medium text-zinc-300">Cuenta activa</span>
-                    </label>
+                <input type="hidden" id="c-image" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1rem; margin-bottom: 0.5rem;">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Contraseña de acceso *</label>
+                    <div class="relative">
+                        <input type="password" id="c-password" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm pr-10" placeholder="Contraseña del cliente" />
+                        <button type="button" id="btn-toggle-pw" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors">
+                            <svg class="w-4 h-4" id="pw-icon-eye" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <svg class="w-4 h-4 hidden" id="pw-icon-eyeoff" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-zinc-500 mt-1" id="pw-hint">Se pedirá al cliente para acceder al Dropbox</p>
                 </div>
-            </form>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Dropbox Link</label>
+                    <input type="url" id="c-dropbox" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="https://dropbox.com/..." />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 0.5rem;">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="c-active" class="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-rose-500 focus:ring-rose-500" checked />
+                    <span class="text-sm font-medium text-zinc-300">Cuenta activa</span>
+                </label>
+            </div>
         </div>
 
-        <!-- Footer -->
-        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+            <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
+            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
             <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
             <button type="button" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
         </div>
     </div>
 </div>
 
+<style>
+    .drop-zone.ready .drop-zone-content {
+        border-color: #e11d48;
+        background-color: rgba(225, 29, 72, 0.05);
+    }
+</style>
+
+<!-- Delete Confirmation Modal -->
+<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
+            <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
+        </div>
+        <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+            <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('modal-overlay')!;
         const modalTitle = document.getElementById('modal-title')!;
+        const modalError = document.getElementById('modal-error')!;
+        const modalDeleteBtn = document.getElementById('modal-delete')!;
         
         const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
 
         function openModal(data?: any) {
             modalTitle.textContent = data ? 'Editar cliente' : 'Nuevo cliente';
             $('client-id').value = data?.id || '';
-            $('c-name').value = data?.client_name || '';
-            $('c-dropbox').value = data?.dropbox_link || '';
+            $('c-name').value = data?.name || '';
             $('c-image').value = data?.image || '';
-            $('c-active').checked = data ? !!data.is_active : true;
+            $('c-dropbox').value = data?.dropbox || '';
+            $('c-password').value = data?.password || '';
+            $('c-active').checked = data ? data.active === 'true' : true;
+
+            // Update password hint
+            const pwHint = document.getElementById('pw-hint')!;
+            if (data) {
+                pwHint.textContent = data.password ? 'Déjalo vacío para mantener la actual' : 'Se pedirá al cliente para acceder al Dropbox';
+                modalDeleteBtn.classList.remove('hidden');
+            } else {
+                pwHint.textContent = 'Se pedirá al cliente para acceder al Dropbox';
+                modalDeleteBtn.classList.add('hidden');
+            }
             
             updateLogoPreview();
+            modalError.classList.add('hidden');
             overlay.classList.remove('hidden');
         }
-
-        function updateLogoPreview() {
-            const url = $('c-image').value.trim();
-            const preview = document.getElementById('logo-preview')!;
-            const img = document.getElementById('logo-preview-img') as HTMLImageElement;
-            
-            if (url) {
-                img.src = url;
-                preview.classList.remove('hidden');
-            } else {
-                preview.classList.add('hidden');
-            }
-        }
-
-        $('c-image').addEventListener('input', updateLogoPreview);
 
         function closeModal() {
             overlay.classList.add('hidden');
         }
 
+        function updateLogoPreview() {
+            const url = $('c-image').value;
+            const idle = document.getElementById('upload-idle')!;
+            const preview = document.getElementById('upload-preview')!;
+            const loading = document.getElementById('upload-loading')!;
+            const img = document.getElementById('logo-preview-img') as HTMLImageElement;
+            
+            if (url) {
+                img.src = url;
+                preview.classList.remove('hidden');
+                idle.classList.add('hidden');
+            } else {
+                preview.classList.add('hidden');
+                idle.classList.remove('hidden');
+                img.src = '';
+            }
+            loading.classList.add('hidden');
+        }
+
+        // Drag and Drop Logic
+        const dropZone = document.getElementById('drop-zone')!;
+        const fileInput = document.getElementById('file-input') as HTMLInputElement;
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('ready');
+        });
+
+        ['dragleave', 'dragend'].forEach(type => {
+            dropZone.addEventListener(type, () => dropZone.classList.remove('ready'));
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('ready');
+            const file = e.dataTransfer?.files[0];
+            if (file) handleUpload(file);
+        });
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files?.[0];
+            if (file) handleUpload(file);
+        });
+
+        async function handleUpload(file: File) {
+            if (!file.type.startsWith('image/')) {
+                showToast('El archivo debe ser una imagen', 'error');
+                return;
+            }
+
+            const idle = document.getElementById('upload-idle')!;
+            const loading = document.getElementById('upload-loading')!;
+            const preview = document.getElementById('upload-preview')!;
+
+            idle.classList.add('hidden');
+            preview.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'portal');
+
+            try {
+                const res = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    $('c-image').value = data.url;
+                    updateLogoPreview();
+                    showToast('Logo subido correctamente', 'success');
+                } else {
+                    const err = await res.json();
+                    showToast(err.error || 'Error al subir', 'error');
+                    updateLogoPreview();
+                }
+            } catch (error) {
+                showToast('Error de conexión al subir', 'error');
+                updateLogoPreview();
+            }
+        }
+
+        document.getElementById('btn-remove-logo')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            $('c-image').value = '';
+            updateLogoPreview();
+        });
+
+        // Open modal buttons
         document.getElementById('btn-add-client')?.addEventListener('click', () => openModal());
         document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
         document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
-
-        // Close on outside click
+        
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) closeModal();
         });
 
+        // Edit buttons
+        // Toggle password visibility
+        document.getElementById('btn-toggle-pw')?.addEventListener('click', () => {
+            const pwInput = $('c-password');
+            const eyeIcon = document.getElementById('pw-icon-eye')!;
+            const eyeOffIcon = document.getElementById('pw-icon-eyeoff')!;
+            if (pwInput.type === 'password') {
+                pwInput.type = 'text';
+                eyeIcon.classList.add('hidden');
+                eyeOffIcon.classList.remove('hidden');
+            } else {
+                pwInput.type = 'password';
+                eyeIcon.classList.remove('hidden');
+                eyeOffIcon.classList.add('hidden');
+            }
+        });
+
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', () => {
-                const data = JSON.parse((btn as HTMLElement).dataset.client || '{}');
-                openModal(data);
+                const el = btn as HTMLElement;
+                openModal({
+                    id: el.dataset.id,
+                    name: el.dataset.name,
+                    image: el.dataset.image,
+                    dropbox: el.dataset.dropbox,
+                    password: el.dataset.password,
+                    active: el.dataset.active,
+                });
             });
         });
 
-        document.getElementById('modal-save')?.addEventListener('click', () => {
-            // Toast notification
-            const container = document.createElement('div');
-            container.className = 'fixed top-4 right-4 z-[70]';
-            container.style.pointerEvents = 'none';
-            const toast = document.createElement('div');
-            toast.className = 'flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border text-sm font-medium pointer-events-auto bg-amber-500/10 border-amber-500/20 text-amber-400';
-            toast.style.cssText = 'backdrop-filter:blur(12px);';
-            toast.textContent = 'Funcionalidad de guardado no implementada (datos estáticos)';
-            container.appendChild(toast);
-            document.body.appendChild(container);
-            setTimeout(() => container.remove(), 4000);
+        modalDeleteBtn.addEventListener('click', () => {
             closeModal();
+            const id = $('client-id').value;
+            if (id) {
+                const deleteBtn = document.querySelector(`.btn-delete[data-id="${id}"]`) as HTMLButtonElement;
+                if (deleteBtn) deleteBtn.click();
+            }
+        });
+
+        // Confirm delete modal
+        const confirmOverlay = document.getElementById('confirm-overlay')!;
+        const confirmYes = document.getElementById('confirm-yes')!;
+        const confirmCancel = document.getElementById('confirm-cancel')!;
+        let pendingDeleteId: string | null = null;
+
+        function openConfirm(id: string) {
+            pendingDeleteId = id;
+            confirmOverlay.classList.remove('hidden');
+        }
+        function closeConfirm() {
+            pendingDeleteId = null;
+            confirmOverlay.classList.add('hidden');
+        }
+        confirmCancel.addEventListener('click', closeConfirm);
+        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+
+        confirmYes.addEventListener('click', async () => {
+            if (!pendingDeleteId) return;
+            confirmYes.textContent = 'Eliminando...';
+            (confirmYes as HTMLButtonElement).disabled = true;
+            const id = pendingDeleteId;
+            
+            try {
+                const res = await fetch('/api/admin/portal', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id }),
+                });
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    showToast('Error al eliminar', 'error');
+                    closeConfirm();
+                    confirmYes.textContent = 'Eliminar';
+                    (confirmYes as HTMLButtonElement).disabled = false;
+                }
+            } catch {
+                showToast('Error de conexión', 'error');
+                closeConfirm();
+                confirmYes.textContent = 'Eliminar';
+                (confirmYes as HTMLButtonElement).disabled = false;
+            }
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                openConfirm((btn as HTMLElement).dataset.id!);
+            });
+        });
+
+        // Toast notification
+                                function showToast(message: string, type: 'error' | 'success' = 'error') {
+            const container = document.getElementById('toast-container')!;
+            const toast = document.createElement('div');
+            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
+            }`;
+            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
+            if (type === 'success') {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`;
+            } else {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
+            }
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        // Save
+        document.getElementById('modal-save')?.addEventListener('click', async () => {
+            const name = $('c-name').value.trim();
+            if (!name) {
+                modalError.textContent = 'El nombre es obligatorio';
+                modalError.classList.remove('hidden');
+                return;
+            }
+
+            const saveBtn = document.getElementById('modal-save')!;
+            const oHtml = saveBtn.innerHTML;
+            saveBtn.innerHTML = 'Guardando...';
+            saveBtn.setAttribute('disabled', 'true');
+
+            const password = $('c-password').value;
+            const isEdit = !!$('client-id').value;
+
+            const body: any = {
+                client_name: name,
+                image: $('c-image').value.trim() || null,
+                dropbox_link: $('c-dropbox').value.trim() || null,
+                is_active: $('c-active').checked,
+            };
+
+            // Only include password if provided (on edit, empty = keep existing)
+            if (password) {
+                body.password_hash = password;
+            } else if (!isEdit) {
+                modalError.textContent = 'La contraseña es obligatoria';
+                modalError.classList.remove('hidden');
+                saveBtn.innerHTML = oHtml;
+                saveBtn.removeAttribute('disabled');
+                return;
+            }
+
+            if (isEdit) body.id = $('client-id').value;
+
+            try {
+                const res = await fetch('/api/admin/portal', {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    modalError.textContent = err.error || 'Error al guardar';
+                    modalError.classList.remove('hidden');
+                    saveBtn.innerHTML = oHtml;
+                    saveBtn.removeAttribute('disabled');
+                }
+            } catch (e) {
+                modalError.textContent = 'Error de conexión';
+                modalError.classList.remove('hidden');
+                saveBtn.innerHTML = oHtml;
+                saveBtn.removeAttribute('disabled');
+            }
         });
     });
 </script>

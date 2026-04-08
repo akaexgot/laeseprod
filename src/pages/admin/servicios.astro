@@ -43,25 +43,28 @@ const services = await getServices();
                         <th class="font-semibold" style="padding: 1rem 1.5rem;">Servicio</th>
                         <th class="font-semibold hidden sm:table-cell w-32" style="padding: 1rem 1.5rem;">Vídeo</th>
                         <th class="font-semibold hidden md:table-cell w-24 text-center" style="padding: 1rem 1.5rem;">Orden</th>
-                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {services.map((service: any) => (
-                        <tr class="hover:bg-zinc-800/30 transition-colors group" data-id={service.id}>
+                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={service.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
                             <td style="padding: 1rem 1.5rem;">
-                                <div class="flex items-start" style="gap: 0.75rem;">
-                                    <div class="w-8 h-8 rounded bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5 text-zinc-400">
-                                        <i data-lucide="layers" class="w-4 h-4"></i>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-start" style="gap: 0.75rem;">
+                                        <div class="w-8 h-8 rounded bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5 text-zinc-400">
+                                            <i data-lucide="layers" class="w-4 h-4"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="font-medium text-zinc-100 mb-0.5">{service.title}</div>
+                                            <div class="text-xs text-zinc-500 line-clamp-1">{service.description}</div>
+                                        </div>
                                     </div>
-                                    <div class="min-w-0">
-                                        <div class="font-medium text-zinc-100 mb-0.5">{service.title}</div>
-                                        <div class="text-xs text-zinc-500 line-clamp-1">{service.description}</div>
-                                    </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                 </div>
                             </td>
                             <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
-                                {service.video_url ? (
+                                {service.video ? (
                                     <span class="inline-flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 w-fit">
                                         <i data-lucide="check" class="w-3 h-3"></i> Listo
                                     </span>
@@ -71,10 +74,10 @@ const services = await getServices();
                                     </span>
                                 )}
                             </td>
-                            <td class="hidden md:table-cell text-center" style="padding: 1rem 1.5rem;">
+                            <td class="hidden md:table-cell" style="padding: 1rem 1.5rem;">
                                 <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{service.order}</span>
                             </td>
-                            <td class="text-right" style="padding: 1rem 1.5rem;">
+                            <td class="hidden sm:table-cell text-right" style="padding: 1rem 1.5rem;">
                                 <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
                                     <button class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" data-service={JSON.stringify(service)} title="Editar">
                                         <i data-lucide="edit-2" class="w-4 h-4"></i>
@@ -108,7 +111,7 @@ const services = await getServices();
 
 <!-- Modal -->
 <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-2xl shadow-2xl overflow-hidden">
         <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
             <h3 id="modal-title" class="text-lg font-semibold text-zinc-50 flex items-center gap-2">
                 <span>Nuevo servicio</span>
@@ -140,9 +143,16 @@ const services = await getServices();
 
                 <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1.5rem;">
                     <div>
-                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">URL del vídeo (YouTube)</label>
-                        <input type="url" id="m-video" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://..." />
+                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">URL del vídeo horizontal (YouTube)</label>
+                        <input type="url" id="m-video" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://youtube.com/watch?v=..." />
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">URL del vídeo vertical (YouTube)</label>
+                        <input type="url" id="m-video-vertical" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://youtube.com/watch?v=..." />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1.5rem;">
                     <div>
                         <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Orden</label>
                         <input type="number" id="m-order" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" value="0" min="0" />
@@ -153,6 +163,7 @@ const services = await getServices();
 
         <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
             <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
+            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
             <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
             <button type="submit" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
         </div>
@@ -160,30 +171,32 @@ const services = await getServices();
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
-        <div class="text-center" style="padding: 2rem 1.5rem 1rem;">
-            <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6 text-red-400"></i>
+<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             </div>
-            <h3 class="text-lg font-semibold text-white mb-2">¿Eliminar permanentemente?</h3>
-            <p class="text-sm text-zinc-400">Esta acción no se puede deshacer.</p>
+            <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
+            <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
         </div>
-        <div class="flex justify-end border-t border-zinc-800 bg-zinc-950" style="padding: 1rem 1.5rem; gap: 0.75rem;">
-            <button id="confirm-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
-            <button id="confirm-yes" class="bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-all" style="padding: 0.5rem 1rem;">Eliminar</button>
+        <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+            <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
         </div>
     </div>
 </div>
+</div>
 
 <!-- Toast Container -->
-<div id="toast-container" class="fixed top-4 right-4 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+<div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('modal-overlay')!;
         const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
         const errEl = document.getElementById('modal-error')!;
+        const modalDeleteBtn = document.getElementById('modal-delete')!;
 
         function openModal(service?: any) {
             const isEdit = !!service;
@@ -194,8 +207,12 @@ const services = await getServices();
             $('m-title').value = service?.title || '';
             $('m-slug').value = service?.slug || '';
             ($('m-description') as unknown as HTMLTextAreaElement).value = service?.description || '';
-            $('m-video').value = service?.video_url || '';
+            $('m-video').value = service?.video || '';
+            $('m-video-vertical').value = service?.video_vertical || '';
             $('m-order').value = String(service?.order ?? 0);
+            
+            if (isEdit) modalDeleteBtn.classList.remove('hidden');
+            else modalDeleteBtn.classList.add('hidden');
             
             errEl.classList.add('hidden');
             overlay.classList.remove('hidden');
@@ -219,6 +236,15 @@ const services = await getServices();
                 const service = JSON.parse((btn as HTMLElement).dataset.service || '{}');
                 openModal(service);
             });
+        });
+
+        modalDeleteBtn.addEventListener('click', () => {
+            closeModal();
+            const id = $('m-id').value;
+            if (id) {
+                const deleteBtn = document.querySelector(`.btn-delete[data-id="${id}"]`) as HTMLButtonElement;
+                if (deleteBtn) deleteBtn.click();
+            }
         });
 
         // Confirm modal logic
@@ -263,14 +289,18 @@ const services = await getServices();
         });
 
         // Toast notification
-        function showToast(message: string, type: 'error' | 'success' = 'error') {
+                                function showToast(message: string, type: 'error' | 'success' = 'error') {
             const container = document.getElementById('toast-container')!;
             const toast = document.createElement('div');
-            toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border text-sm font-medium pointer-events-auto ${
-                type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
             }`;
-            toast.style.cssText = 'backdrop-filter:blur(12px); animation: toast-in 0.3s ease-out;';
-            toast.textContent = message;
+            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
+            if (type === 'success') {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`;
+            } else {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
+            }
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
         }
@@ -292,7 +322,8 @@ const services = await getServices();
                 title,
                 slug: $('m-slug').value.trim() || null,
                 description: ($('m-description') as unknown as HTMLTextAreaElement).value.trim() || null,
-                video_url: $('m-video').value.trim() || null,
+                video: $('m-video').value.trim() || null,
+                video_vertical: $('m-video-vertical').value.trim() || null,
                 order: parseInt($('m-order').value) || 0,
             };
 

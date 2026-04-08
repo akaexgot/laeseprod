@@ -11,14 +11,22 @@ export const POST: APIRoute = async ({ request }) => {
 
     try {
         const body = await request.json();
-        if (!body.slug && body.title) {
-            body.slug = body.title
+        
+        // Whitelist valid columns
+        const allowed = ['title', 'slug', 'description', 'video', 'video_vertical', 'order'];
+        const filteredBody: any = {};
+        for (const key of allowed) {
+            if (key in body) filteredBody[key] = body[key];
+        }
+
+        if (!filteredBody.slug && filteredBody.title) {
+            filteredBody.slug = filteredBody.title
                 .toLowerCase()
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/(^-|-$)/g, '');
         }
-        const { data, error } = await sb.from('sectors').insert(body).select().single();
+        const { data, error } = await sb.from('sectors').insert(filteredBody).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
         return new Response(JSON.stringify(data), { status: 201 });
     } catch (e: any) {
@@ -32,8 +40,15 @@ export const PUT: APIRoute = async ({ request }) => {
 
     try {
         const body = await request.json();
-        const { id, ...updates } = body;
+        const { id } = body;
         if (!id) return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
+
+        // Whitelist valid columns
+        const allowed = ['title', 'slug', 'description', 'video', 'video_vertical', 'order'];
+        const updates: any = {};
+        for (const key of allowed) {
+            if (key in body) updates[key] = body[key];
+        }
 
         const { data, error } = await sb.from('sectors').update(updates).eq('id', id).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });

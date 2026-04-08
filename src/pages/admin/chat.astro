@@ -20,56 +20,67 @@ if (!profile?.is_admin) return Astro.redirect('/admin/login');
 
 <AdminLayout title="Chat en Vivo" activeSection="chat">
 
-    <div class="flex gap-4 h-[calc(100vh-10rem)]">
+    <div class="chat-layout flex" style="gap: 1.5rem; height: calc(100vh - 8rem); padding-top: 0.5rem;">
 
         <!-- LEFT: Conversation List -->
-        <div class="w-80 flex-shrink-0 flex flex-col glass rounded-2xl overflow-hidden">
-            <div class="p-4 border-b border-dark-border">
-                <h3 class="text-white font-[Outfit] font-bold text-sm">Conversaciones</h3>
-                <p class="text-light-subtle text-xs mt-1" id="conv-count">Cargando...</p>
+        <div id="chat-conv-panel" class="chat-conv-panel flex-shrink-0 flex flex-col bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden shadow-sm" style="width: 20rem;">
+            <div class="border-b border-zinc-800 bg-zinc-900/50" style="padding: 1rem;">
+                <h3 class="text-zinc-100 font-medium text-sm">Conversaciones</h3>
+                <p class="text-zinc-400 text-xs mt-1" id="conv-count">Cargando...</p>
             </div>
-            <div id="conv-list" class="flex-1 overflow-y-auto divide-y divide-dark-border/50">
+            <div id="conv-list" class="flex-1 overflow-y-auto divide-y divide-zinc-800">
                 <!-- Conversations loaded dynamically -->
-                <div class="p-4 text-center text-light-subtle text-xs">Cargando conversaciones...</div>
+                <div class="text-center text-zinc-500 text-xs" style="padding: 1rem;">Cargando conversaciones...</div>
             </div>
         </div>
 
         <!-- RIGHT: Chat Area -->
-        <div class="flex-1 flex flex-col glass rounded-2xl overflow-hidden">
+        <div id="chat-messages-panel" class="chat-messages-panel flex-1 flex flex-col bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
             <!-- Header -->
-            <div class="p-4 border-b border-dark-border flex items-center gap-3" id="chat-header">
-                <div class="w-9 h-9 bg-carmin/10 rounded-full flex items-center justify-center">
-                    <span class="text-carmin text-sm font-bold" id="chat-avatar">?</span>
+            <div class="border-b border-zinc-800 bg-zinc-900/50 flex items-center" id="chat-header" style="padding: 1rem; gap: 0.75rem;">
+                <button id="chat-back-btn" class="chat-back-btn hidden p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors" style="margin-right: 0.25rem;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div class="flex items-center justify-center bg-zinc-900 border border-zinc-800 rounded-full" style="width: 2.25rem; height: 2.25rem;">
+                    <span class="text-rose-500 text-sm font-bold" id="chat-avatar">?</span>
                 </div>
-                <div>
-                    <h3 class="text-white font-medium text-sm" id="chat-name">Selecciona una conversación</h3>
-                    <p class="text-light-subtle text-xs" id="chat-status">Haz clic en una conversación para empezar</p>
+                <div class="flex-1">
+                    <h3 class="text-zinc-100 font-medium text-sm" id="chat-name">Selecciona una conversación</h3>
+                    <p class="text-zinc-400 text-xs" id="chat-status">Haz clic en una conversación para empezar</p>
                 </div>
+                <button
+                    id="close-conv-btn"
+                    style="display: none; padding: 0.5rem 1rem; gap: 0.4rem;"
+                    class="flex items-center bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-medium rounded-lg hover:bg-red-900/30 hover:border-red-700 hover:text-red-400 transition-all"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Cerrar chat
+                </button>
             </div>
 
             <!-- Messages -->
-            <div id="admin-messages" class="flex-1 overflow-y-auto p-4 space-y-3">
-                <div class="text-center text-light-subtle text-sm py-8">
-                    <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            <div id="admin-messages" class="flex-1 overflow-y-auto" style="padding: 1.25rem; gap: 1rem; display: flex; flex-direction: column;">
+                <div class="text-center text-zinc-500 text-sm py-12 flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
-                    Selecciona una conversación para ver los mensajes
+                    <span>Selecciona una conversación para ver los mensajes</span>
                 </div>
             </div>
 
             <!-- Input -->
-            <div class="p-4 border-t border-dark-border flex gap-3" id="admin-input-area" style="display:none">
+            <div class="border-t border-zinc-800 bg-zinc-900/50 flex" id="admin-input-area" style="display:none; padding: 1rem; gap: 0.75rem;">
                 <input
                     type="text"
                     id="admin-input"
                     placeholder="Escribe una respuesta..."
-                    class="flex-1 px-4 py-3 bg-dark-card border border-dark-border rounded-xl text-white text-sm placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors"
+                    class="flex-1 px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 text-sm placeholder-zinc-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all shadow-sm"
                     maxlength="500"
                 />
                 <button
                     id="admin-send"
                     disabled
-                    class="px-5 py-3 bg-gradient-carmin text-white font-semibold text-sm rounded-xl hover:shadow-glow-strong transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                    class="px-5 py-2.5 bg-rose-600 text-white font-medium text-sm rounded-lg hover:bg-rose-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
                     Enviar
                 </button>
@@ -77,6 +88,55 @@ if (!profile?.is_admin) return Astro.redirect('/admin/login');
         </div>
     </div>
 
+    <!-- Chat responsive styles -->
+    <style>
+        @media (max-width: 768px) {
+            .chat-layout {
+                flex-direction: column !important;
+                height: calc(100vh - 6rem) !important;
+                gap: 0 !important;
+                padding-top: 0 !important;
+            }
+            .chat-conv-panel {
+                width: 100% !important;
+                flex: 1;
+                border-radius: 12px !important;
+            }
+            .chat-messages-panel {
+                display: none !important;
+                width: 100% !important;
+                flex: 1;
+                border-radius: 12px !important;
+            }
+            /* When a conversation is selected on mobile */
+            .chat-layout.chat-active .chat-conv-panel {
+                display: none !important;
+            }
+            .chat-layout.chat-active .chat-messages-panel {
+                display: flex !important;
+            }
+            .chat-layout.chat-active .chat-back-btn {
+                display: flex !important;
+            }
+        }
+    </style>
+
+    <!-- Cerrar Conversación Confirmation Modal -->
+    <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                    <svg class="w-7 h-7 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Cerrar conversación?</h3>
+                <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">La conversación se cerrará. Si el visitante vuelve a escribir en unas horas, la conversación se reactivará y te notificará.</p>
+            </div>
+            <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+                <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+                <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Cerrar Chat</button>
+            </div>
+        </div>
+    </div>
 </AdminLayout>
 
 <script>
@@ -100,13 +160,19 @@ if (!profile?.is_admin) return Astro.redirect('/admin/login');
             const res = await fetch('/api/chat?list=1');
             const conversations = await res.json();
 
+            if (!Array.isArray(conversations)) {
+                convCount.textContent = 'Error al cargar';
+                convList.innerHTML = `<div class="text-center text-zinc-500 text-xs" style="padding: 1rem;">No se encontraron tablas de chat ('chat_conversations') en la base de datos de Supabase.</div>`;
+                return;
+            }
+
             convCount.textContent = `${conversations.length} conversación${conversations.length !== 1 ? 'es' : ''}`;
 
             if (conversations.length === 0) {
                 convList.innerHTML = `
-                    <div class="p-6 text-center text-light-subtle text-xs">
+                    <div class="p-6 text-center text-zinc-500 text-xs flex flex-col items-center">
+                        <svg class="w-8 h-8 mb-3 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
                         <p>No hay conversaciones aún</p>
-                        <p class="mt-1 opacity-50">Los visitantes pueden escribirte desde /contacto</p>
                     </div>
                 `;
                 return;
@@ -122,20 +188,21 @@ if (!profile?.is_admin) return Astro.redirect('/admin/login');
 
                 return `
                     <button
-                        class="w-full p-4 text-left hover:bg-white/[0.02] transition-colors ${isActive ? 'bg-carmin/5 border-l-2 border-l-carmin' : ''}"
+                        class="w-full text-left hover:bg-zinc-800/30 transition-colors ${isActive ? 'bg-zinc-800/50 border-l-2 border-l-rose-500' : ''}"
                         data-conv-id="${conv.id}"
                         data-conv-name="${conv.visitor_name}"
+                        style="padding: 1rem;"
                     >
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 bg-carmin/10 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span class="text-carmin text-xs font-bold">${conv.visitor_name.charAt(0).toUpperCase()}</span>
+                        <div class="flex items-center" style="gap: 0.75rem;">
+                            <div class="bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center flex-shrink-0" style="width: 2.5rem; height: 2.5rem;">
+                                <span class="text-rose-400 text-sm font-bold">${conv.visitor_name.charAt(0).toUpperCase()}</span>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-2">
-                                    <span class="text-white text-sm font-medium truncate">${conv.visitor_name}</span>
-                                    <span class="text-light-subtle text-[10px] flex-shrink-0">${date}</span>
+                                    <span class="text-zinc-100 text-sm font-medium truncate">${conv.visitor_name}</span>
+                                    <span class="text-zinc-500 text-[10px] flex-shrink-0">${date}</span>
                                 </div>
-                                <p class="text-light-subtle text-xs mt-0.5 truncate">${senderIcon}${lastText}</p>
+                                <p class="text-zinc-400 text-xs mt-0.5 truncate">${senderIcon}${lastText}</p>
                             </div>
                         </div>
                     </button>
@@ -155,13 +222,26 @@ if (!profile?.is_admin) return Astro.redirect('/admin/login');
         }
     }
 
+    const closeConvBtn = document.getElementById('close-conv-btn') as HTMLButtonElement;
+    const chatLayout = document.querySelector('.chat-layout') as HTMLElement;
+    const chatBackBtn = document.getElementById('chat-back-btn') as HTMLButtonElement;
+
+    // Mobile back button handler
+    chatBackBtn?.addEventListener('click', () => {
+        chatLayout?.classList.remove('chat-active');
+    });
+
     function selectConversation(id: string, name: string) {
         activeConversationId = id;
         chatName.textContent = name;
         chatAvatar.textContent = name.charAt(0).toUpperCase();
         chatStatus.textContent = 'Conversación activa';
         adminInputArea.style.display = 'flex';
+        closeConvBtn.style.display = 'flex';
         adminInput.focus();
+
+        // Mobile: activate chat view
+        chatLayout?.classList.add('chat-active');
 
         // Highlight active in list
         loadConversations();
@@ -174,6 +254,55 @@ if (!profile?.is_admin) return Astro.redirect('/admin/login');
         msgPollInterval = setInterval(loadAdminMessages, 3000);
     }
 
+    // Modal elements
+    const confirmOverlay = document.getElementById('confirm-overlay')!;
+    const confirmCancel = document.getElementById('confirm-cancel')!;
+    const confirmYes = document.getElementById('confirm-yes')!;
+
+    // Close conversation handler
+    closeConvBtn.addEventListener('click', () => {
+        if (!activeConversationId) return;
+        confirmOverlay.classList.remove('hidden');
+    });
+
+    confirmCancel.addEventListener('click', () => {
+        confirmOverlay.classList.add('hidden');
+    });
+
+    confirmYes.addEventListener('click', async () => {
+        if (!activeConversationId) return;
+        confirmOverlay.classList.add('hidden');
+
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'close', conversation_id: activeConversationId }),
+            });
+            if (res.ok) {
+                // Reset UI
+                activeConversationId = null;
+                chatName.textContent = 'Conversación cerrada';
+                chatStatus.textContent = 'Selecciona otra conversación';
+                chatAvatar.textContent = '✓';
+                adminInputArea.style.display = 'none';
+                closeConvBtn.style.display = 'none';
+                chatLayout?.classList.remove('chat-active');
+                adminMessages.innerHTML = `
+                    <div class="text-center text-zinc-500 text-sm py-12 flex flex-col items-center">
+                        <svg class="w-10 h-10 mb-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>Conversación cerrada correctamente.</span>
+                        <span class="text-zinc-600 text-xs mt-1">El visitante podrá iniciar una nueva conversación más adelante.</span>
+                    </div>
+                `;
+                if (msgPollInterval) clearInterval(msgPollInterval);
+                await loadConversations();
+            }
+        } catch (err) {
+            console.error('Error closing conversation:', err);
+        }
+    });
+
     async function loadAdminMessages() {
         if (!activeConversationId) return;
         try {
@@ -182,8 +311,8 @@ if (!profile?.is_admin) return Astro.redirect('/admin/login');
 
             if (messages.length === 0) {
                 adminMessages.innerHTML = `
-                    <div class="text-center text-light-subtle text-sm py-8">
-                        No hay mensajes aún
+                    <div class="text-center text-zinc-500 text-sm py-12">
+                        No hay mensajes registrados aún en esta conversación.
                     </div>
                 `;
                 return;
@@ -209,12 +338,12 @@ if (!profile?.is_admin) return Astro.redirect('/admin/login');
                     div.dataset.msgId = msg.id;
                     div.className = `flex ${isAdmin ? 'justify-end' : 'justify-start'}`;
                     div.innerHTML = `
-                        <div class="max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${isAdmin
-                            ? 'bg-gradient-to-r from-carmin to-carmin-900 text-white rounded-br-sm'
-                            : 'glass text-light-muted rounded-bl-sm'
+                        <div class="max-w-[75%] px-4 py-2.5 shadow-sm text-sm ${isAdmin
+                            ? 'bg-rose-600 text-white rounded-2xl rounded-tr-sm'
+                            : 'bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-2xl rounded-tl-sm'
                         }">
-                            <p>${msg.message}</p>
-                            <span class="text-[10px] ${isAdmin ? 'text-white/50' : 'text-light-subtle'} mt-1 block">${time}</span>
+                            <p class="whitespace-pre-wrap ${isAdmin ? '' : 'leading-relaxed'}">${msg.message}</p>
+                            <span class="text-[10px] flex justify-end ${isAdmin ? 'text-rose-200' : 'text-zinc-500'} mt-1.5 block">${time}</span>
                         </div>
                     `;
                     adminMessages.appendChild(div);

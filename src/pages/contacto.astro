@@ -8,6 +8,16 @@ import "../styles/contacto-chat.css";
 import { getSettings } from "../lib/data";
 
 const settings = await getSettings();
+
+function extractYouTubeId(url: string | null | undefined): string | null {
+    if (!url) return null;
+    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (m) return m[1];
+    if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim();
+    return null;
+}
+
+const contactHeroVideoId = extractYouTubeId(settings.contact_hero_video);
 ---
 
 <BaseLayout
@@ -18,43 +28,87 @@ const settings = await getSettings();
     <!-- ═══════════════════════════════════════════
          HERO HEADER
     ═══════════════════════════════════════════ -->
-    <section class="contact-hero">
-        <div class="contact-hero__bg-dots"></div>
-        <div class="contact-hero__glow"></div>
-
-        <div class="section-container contact-hero__inner">
-            <div class="contact-hero__badge">
-                <span class="contact-hero__badge-dot"></span>
-                <span>Hablemos</span>
+    {contactHeroVideoId ? (
+        <section id="video-hero" class="relative min-h-[600px] h-screen flex flex-col items-center justify-center text-center overflow-hidden w-full">
+            <div class="absolute inset-0 z-0 overflow-hidden bg-black pointer-events-none">
+                <iframe
+                    src={`https://www.youtube.com/embed/${contactHeroVideoId}?autoplay=1&mute=1&loop=1&playlist=${contactHeroVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; transform: translate(-50%, -50%);"
+                    frameborder="0" allow="autoplay; encrypted-media"
+                    title="Vídeo de fondo de contacto"
+                ></iframe>
             </div>
+            <div class="absolute inset-0 z-10 bg-black/50 pointer-events-none"></div>
 
-            <h1 class="contact-hero__title">
-                Cuéntanos tu <span class="contact-hero__title--accent">proyecto</span>
-            </h1>
+            <div class="relative z-20 section-container contact-hero__inner">
+                <div class="contact-hero__badge" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;">
+                    <span class="contact-hero__badge-dot" style="background: #e11d48;"></span>
+                    <span>Hablemos</span>
+                </div>
 
-            <p class="contact-hero__subtitle">
-                Rellena el formulario o escríbenos por WhatsApp.<br />
-                Te respondemos en menos de 24 horas.
-            </p>
+                <h1 class="contact-hero__title" style="color: white; margin-bottom: 1.5rem; line-height: 1.1;">
+                    Cuéntanos tu <span class="text-rose-500" style="color: #e11d48;">proyecto</span>
+                </h1>
 
-            <div class="contact-hero__buttons">
-                <!-- Chat realtime btn -->
-                <button type="button" class="contact-hero__btn contact-hero__btn--primary js-open-chat">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                    </svg>
-                    Hablar en tiempo real
-                </button>
-                <!-- Scroll to form btn -->
-                <button type="button" class="contact-hero__btn contact-hero__btn--secondary js-scroll-form">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                    </svg>
-                    Ir al formulario
-                </button>
+                <p class="contact-hero__subtitle" style="color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto 2.5rem; font-size: 1.125rem;">
+                    Rellena el formulario o escríbenos por WhatsApp.<br />
+                    Te respondemos en menos de 24 horas.
+                </p>
+
+                <div class="contact-hero__buttons" style="justify-content: center;">
+                    <button type="button" class="contact-hero__btn contact-hero__btn--primary js-open-chat" style="background: #e11d48; color: white; border: none; box-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.4);">
+                        <svg fill="none" class="w-5 h-5 mr-2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        Hablar en tiempo real
+                    </button>
+                    <button type="button" class="contact-hero__btn contact-hero__btn--secondary js-scroll-form" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                        <svg fill="none" class="w-5 h-5 mr-2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                        Ir al formulario
+                    </button>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    ) : (
+        <section class="contact-hero mb-0">
+            <div class="contact-hero__glow"></div>
+
+            <div class="section-container contact-hero__inner">
+                <div class="contact-hero__badge">
+                    <span class="contact-hero__badge-dot"></span>
+                    <span>Hablemos</span>
+                </div>
+
+                <h1 class="contact-hero__title">
+                    Cuéntanos tu <span class="contact-hero__title--accent">proyecto</span>
+                </h1>
+
+                <p class="contact-hero__subtitle">
+                    Rellena el formulario o escríbenos por WhatsApp.<br />
+                    Te respondemos en menos de 24 horas.
+                </p>
+
+                <div class="contact-hero__buttons">
+                    <!-- Chat realtime btn -->
+                    <button type="button" class="contact-hero__btn contact-hero__btn--primary js-open-chat">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        Hablar en tiempo real
+                    </button>
+                    <!-- Scroll to form btn -->
+                    <button type="button" class="contact-hero__btn contact-hero__btn--secondary js-scroll-form">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                        Ir al formulario
+                    </button>
+                </div>
+            </div>
+        </section>
+    )}
 
     <!-- ═══════════════════════════════════════════
          FORM + SIDEBAR

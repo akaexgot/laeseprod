@@ -37,7 +37,7 @@ const getVal = (key: string) => settings[key] || '';
         </button>
     </div>
 
-    <div id="status-message" class="hidden mb-6 p-4 rounded-md text-sm font-medium border"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
 
     <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
         <!-- Tabs Navigation -->
@@ -57,14 +57,26 @@ const getVal = (key: string) => settings[key] || '';
             <li>
                 <button type="button" class="tab-btn w-full flex items-center rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50" style="padding: 0.75rem 1rem; gap: 0.75rem;" data-target="tab-contact">
                     <i data-lucide="at-sign" class="w-5 h-5 text-zinc-500"></i>
-                    Contacto y Redes
+                    Datos de Contacto
+                </button>
+            </li>
+            <li>
+                <button type="button" class="tab-btn w-full flex items-center rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50" style="padding: 0.75rem 1rem; gap: 0.75rem;" data-target="tab-about">
+                    <i data-lucide="users" class="w-5 h-5 text-zinc-500"></i>
+                    Sección Quiénes Somos
+                </button>
+            </li>
+            <li>
+                <button type="button" class="tab-btn w-full flex items-center rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50" style="padding: 0.75rem 1rem; gap: 0.75rem;" data-target="tab-contact-page">
+                    <i data-lucide="image" class="w-5 h-5 text-zinc-500"></i>
+                    Sección Contacto
                 </button>
             </li>
         </ol>
 
         <!-- Settings Form Area -->
         <div class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-            <form id="settings-form" style="padding: 1.5rem 2rem;">
+            <form id="settings-form" class="settings-form-content" style="padding: 1.5rem 2rem;">
                 
                 <!-- Tab: General -->
                 <div id="tab-general" class="tab-content space-y-8">
@@ -112,7 +124,7 @@ const getVal = (key: string) => settings[key] || '';
                         <div class="grid grid-cols-1" style="gap: 1.5rem;">
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo de Youtube (Hero)</label>
-                                <input type="url" name="hero_video_url" id="hero_video_url" value={getVal('hero_video_url')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                <input type="url" name="hero_video_desktop" id="hero_video_url" value={getVal('hero_video_desktop')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                             </div>
                             
                             <!-- Video Preview Box -->
@@ -152,15 +164,20 @@ const getVal = (key: string) => settings[key] || '';
                         <div class="grid grid-cols-1 md:grid-cols-2 mt-6" style="gap: 1.5rem;">
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">Email Público</label>
-                                <input type="email" name="contact_email" value={getVal('contact_email')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                <input type="email" name="email" value={getVal('email')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">Teléfono</label>
-                                <input type="text" name="contact_phone" value={getVal('contact_phone')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                <input type="text" name="phone" value={getVal('phone')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">Dirección Física</label>
-                                <input type="text" name="contact_address" value={getVal('contact_address')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                <input type="text" name="address" value={getVal('address')} class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Ubicación Google Maps (URL iframe src)</label>
+                                <input type="url" name="google_maps_embed" value={getVal('google_maps_embed')} placeholder="https://www.google.com/maps/embed?pb=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                <p class="text-xs text-zinc-500 mt-2">Pega la URL (el contenido del "src") de compartir mapa en Google Maps. Esta ubicación se mostrará en el mapa de Quiénes Somos.</p>
                             </div>
                         </div>
                     </div>
@@ -170,19 +187,54 @@ const getVal = (key: string) => settings[key] || '';
                         <div class="grid grid-cols-1 md:grid-cols-2 mt-6" style="gap: 1.5rem;">
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">Instagram (URL)</label>
-                                <input type="url" name="social_instagram" value={getVal('social_instagram')} placeholder="https://instagram.com/..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                <input type="url" name="instagram" value={getVal('instagram')} placeholder="https://instagram.com/..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">LinkedIn (URL)</label>
-                                <input type="url" name="social_linkedin" value={getVal('social_linkedin')} placeholder="https://linkedin.com/..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Vimeo (URL)</label>
-                                <input type="url" name="social_vimeo" value={getVal('social_vimeo')} placeholder="https://vimeo.com/..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                <input type="url" name="linkedin" value={getVal('linkedin')} placeholder="https://linkedin.com/..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">WhatsApp (Opcional, formato internacional +34)</label>
-                                <input type="text" name="social_whatsapp" value={getVal('social_whatsapp')} placeholder="+34 600..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                <input type="text" name="whatsapp_number" value={getVal('whatsapp_number')} placeholder="+34 600..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: About Section -->
+                <div id="tab-about" class="tab-content hidden space-y-8">
+                    <div>
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Fondo de Quiénes Somos</h2>
+                        <p class="text-sm text-zinc-400 mt-2 mb-6">Si introduces un vídeo, ocupará la pantalla completa y hará el menú transparente de forma automática.</p>
+                        <div class="grid grid-cols-1" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Fondo (YouTube)</label>
+                                <input type="url" name="about_hero_video" value={getVal('about_hero_video')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-zinc-800">
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Vídeo Corporativo (Contenido)</h2>
+                        <p class="text-sm text-zinc-400 mt-2 mb-6">Este vídeo aparecerá junto al texto explicativo "Transformamos ideas en contenido", en la segunda pantalla de la página de Quiénes Somos.</p>
+                        <div class="grid grid-cols-1" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Corporativo (YouTube)</label>
+                                <input type="url" name="about_corporate_video" value={getVal('about_corporate_video')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Contact Page Section -->
+                <div id="tab-contact-page" class="tab-content hidden space-y-8">
+                    <div>
+                        <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Fondo de la Página de Contacto</h2>
+                        <p class="text-sm text-zinc-400 mt-2 mb-6">Si introduces un vídeo, ocupará la portada completa (diseño oscuro). Si lo dejas vacío, se usará el fondo blanco y elegante con puntos por defecto.</p>
+                        <div class="grid grid-cols-1" style="gap: 1.5rem;">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo (YouTube)</label>
+                                <input type="url" name="contact_hero_video" value={getVal('contact_hero_video')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                             </div>
                         </div>
                     </div>
@@ -275,7 +327,6 @@ function syncColor(pickerId: string, inputId: string) {
         // Form Submit
         const saveBtn = document.getElementById('btn-save-all');
         const form = document.getElementById('settings-form') as HTMLFormElement;
-        const statusMsg = document.getElementById('status-message')!;
 
         saveBtn?.addEventListener('click', async () => {
             const originalText = saveBtn.innerHTML;
@@ -283,13 +334,29 @@ function syncColor(pickerId: string, inputId: string) {
             // @ts-ignore
             if (typeof lucide !== 'undefined') lucide.createIcons();
             saveBtn.setAttribute('disabled', 'true');
-            statusMsg.classList.add('hidden');
 
             const formData = new FormData(form);
             const data: Record<string, string> = {};
             formData.forEach((value, key) => {
                 data[key] = value.toString();
             });
+
+            // Toast implementation
+                                    const showToast = (msg: string, type: 'success'|'error') => {
+                const container = document.getElementById('toast-container')!;
+                const toast = document.createElement('div');
+                toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'}`;
+                toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
+                
+                if (type === 'success') {
+                    toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${msg}</span>`;
+                } else {
+                    toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${msg}</span>`;
+                }
+                
+                container.appendChild(toast);
+                setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
+            };
 
             try {
                 const res = await fetch('/api/admin/settings', {
@@ -299,21 +366,13 @@ function syncColor(pickerId: string, inputId: string) {
                 });
 
                 if (res.ok) {
-                    statusMsg.className = 'mb-6 p-4 rounded-md text-sm font-medium border bg-emerald-500/10 border-emerald-500/20 text-emerald-400';
-                    statusMsg.innerHTML = '<div class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Ajustes guardados correctamente.</div>';
-                    statusMsg.classList.remove('hidden');
-                    // @ts-ignore
-                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    showToast('Ajustes guardados correctamente.', 'success');
                 } else {
                     const err = await res.json();
                     throw new Error(err.error || 'Error al guardar');
                 }
             } catch (err: any) {
-                statusMsg.className = 'mb-6 p-4 rounded-md text-sm font-medium border bg-rose-500/10 border-rose-500/20 text-rose-400';
-                statusMsg.innerHTML = `<div class="flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4"></i> ${err.message || 'Error de conexión'}</div>`;
-                statusMsg.classList.remove('hidden');
-                // @ts-ignore
-                if (typeof lucide !== 'undefined') lucide.createIcons();
+                showToast(err.message || 'Error de conexión', 'error');
             } finally {
                 saveBtn.innerHTML = originalText;
                 saveBtn.removeAttribute('disabled');

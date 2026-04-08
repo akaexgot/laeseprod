@@ -8,8 +8,28 @@ import { getSettings } from "../lib/data";
 
 const settings = await getSettings();
 
-// Video de prueba (reemplazar con el vídeo corporativo real)
-const heroVideoId = 'n8F2cllaiN0';
+import "../styles/contacto.css";
+
+function extractYouTubeId(url: string | null | undefined): string | null {
+    if (!url) return null;
+    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (m) return m[1];
+    if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim();
+    return null;
+}
+
+// Extraer video hero
+const heroVideoId = extractYouTubeId(settings.about_hero_video);
+
+// Extraer video corporativo de contenido
+const corporateVideoId = extractYouTubeId(settings.about_corporate_video);
+
+// Extraer URL limpia de mapa si el usuario pegó el iframe completo en ajustes
+let cleanMapUrl = settings.google_maps_embed;
+if (cleanMapUrl && cleanMapUrl.includes('<iframe')) {
+    const match = cleanMapUrl.match(/src="([^"]+)"/);
+    if (match) cleanMapUrl = match[1];
+}
 ---
 
 <BaseLayout
@@ -17,42 +37,69 @@ const heroVideoId = 'n8F2cllaiN0';
     description="Conoce a VideoMarketing Sevilla. Somos una productora audiovisual especializada en video marketing para empresas en Sevilla y toda España."
 >
 
-    <!-- ═══ HERO VIDEO FULLSCREEN ═══ -->
-    <section class="qs-video-hero" id="qs-hero">
-        <div class="qs-video-hero__bg">
-            <iframe
-                src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&loop=1&playlist=${heroVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                class="qs-video-hero__iframe"
-                frameborder="0" allow="autoplay; encrypted-media"
-                title="Vídeo corporativo VideoMarketing Sevilla"
-            ></iframe>
-        </div>
-        <!-- Gradient overlay -->
-        <div class="qs-video-hero__overlay"></div>
-        <!-- Content -->
-        <div class="qs-video-hero__content">
-            <div class="qs-video-hero__badge">
-                <span class="qs-video-hero__dot"></span>
-                <span>Nosotros</span>
+    <!-- ═══ HERO CONDICIONAL ═══ -->
+    {heroVideoId ? (
+        <>
+            <section id="video-hero" class="qs-video-hero">
+                <div class="qs-video-hero__bg">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&loop=1&playlist=${heroVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                        class="qs-video-hero__iframe"
+                        frameborder="0" allow="autoplay; encrypted-media"
+                        title="Vídeo corporativo VideoMarketing Sevilla"
+                    ></iframe>
+                </div>
+                <!-- Gradient overlay -->
+                <div class="qs-video-hero__overlay"></div>
+                <!-- Content -->
+                <div class="qs-video-hero__content">
+                    <div class="qs-video-hero__badge">
+                        <span class="qs-video-hero__dot"></span>
+                        <span>Nosotros</span>
+                    </div>
+                    <h1 class="qs-video-hero__title">
+                        Quiénes <span class="text-gradient-carmin">somos</span>
+                    </h1>
+                    <p class="qs-video-hero__subtitle">
+                        Somos una productora audiovisual con sede en Sevilla,<br class="hidden md:block" />
+                        especializados en crear contenido que conecta marcas con personas.
+                    </p>
+                </div>
+                <!-- Scroll indicator -->
+                <div class="qs-video-hero__scroll">
+                    <span>Descubre más</span>
+                    <div class="qs-video-hero__scroll-arrow">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+        </>
+    ) : (
+        <section class="contact-hero" style="padding-bottom: 2rem;">
+            <div class="contact-hero__glow"></div>
+            <div class="section-container contact-hero__inner">
+                <div class="contact-hero__badge">
+                    <span class="contact-hero__badge-dot"></span>
+                    <span>Nosotros</span>
+                </div>
+                <h1 class="contact-hero__title" style="color: #18181b;">
+                    Quiénes <span class="contact-hero__title--accent" style="color: #c42847;">somos</span>
+                </h1>
+                <p class="contact-hero__subtitle" style="color: rgba(0,0,0,0.6); margin-bottom: 0;">
+                    Somos una productora audiovisual con sede en Sevilla,<br class="hidden md:block" />
+                    especializados en crear contenido que conecta marcas con personas.
+                </p>
             </div>
-            <h1 class="qs-video-hero__title">
-                Quiénes <span class="text-gradient-carmin">somos</span>
-            </h1>
-            <p class="qs-video-hero__subtitle">
-                Somos una productora audiovisual con sede en Sevilla,<br class="hidden md:block" />
-                especializados en crear contenido que conecta marcas con personas.
-            </p>
-        </div>
-        <!-- Scroll indicator -->
-        <div class="qs-video-hero__scroll">
-            <span>Descubre más</span>
-            <div class="qs-video-hero__scroll-arrow">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </div>
-        </div>
-    </section>
+        </section>
+        <style is:global>
+            body, main { background-color: #ffffff !important; }
+            .navbar { background: rgba(255, 255, 255, 0.9) !important; border-bottom: 1px solid rgba(0,0,0,0.05); }
+            .nav-link { color: #c42847 !important; font-weight: 500; }
+            .nav-link:hover, .nav-link.active { color: #9b1b30 !important; }
+        </style>
+    )}
 
     <!-- ═══ ABOUT & STATS ═══ -->
     <section class="qs-about" id="qs-about">
@@ -73,11 +120,6 @@ const heroVideoId = 'n8F2cllaiN0';
                     <span class="qs-stat__number text-gradient-carmin">6+</span>
                     <span class="qs-stat__label">Sectores</span>
                 </div>
-                <div class="qs-stat__divider"></div>
-                <div class="qs-stat">
-                    <span class="qs-stat__number text-gradient-carmin">4K</span>
-                    <span class="qs-stat__label">Calidad cinematográfica</span>
-                </div>
             </div>
         </div>
         <div class="qs-about-content-wrapper">
@@ -87,13 +129,21 @@ const heroVideoId = 'n8F2cllaiN0';
             <!-- Vídeo corporativo -->
             <div class="qs-video reveal-left">
                 <div class="qs-video__frame">
-                    <div class="qs-video__placeholder">
-                        <div class="qs-video__play">
-                            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    {corporateVideoId ? (
+                        <iframe
+                            src={`https://www.youtube.com/embed/${corporateVideoId}?rel=0`}
+                            class="w-full h-full object-cover"
+                            style="border:none;"
+                            allowfullscreen></iframe>
+                    ) : (
+                        <div class="qs-video__placeholder">
+                            <div class="qs-video__play">
+                                <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
+                            <p class="qs-video__label">Vídeo corporativo</p>
+                            <p class="qs-video__sublabel">Próximamente</p>
                         </div>
-                        <p class="qs-video__label">Vídeo corporativo</p>
-                        <p class="qs-video__sublabel">Próximamente</p>
-                    </div>
+                    )}
                 </div>
             </div>
 
@@ -146,9 +196,9 @@ const heroVideoId = 'n8F2cllaiN0';
 
                 <!-- Mapa -->
                 <div class="qs-map reveal-left">
-                    {settings.google_maps_embed ? (
+                    {cleanMapUrl ? (
                         <iframe
-                            src={settings.google_maps_embed}
+                            src={cleanMapUrl}
                             class="qs-map__iframe"
                             allowfullscreen
                             loading="lazy"
@@ -252,13 +302,14 @@ const heroVideoId = 'n8F2cllaiN0';
 </BaseLayout>
 
 <script>
-    /* ── Fullpage Scroll Effect ── */
+    /* ── Fullpage Scroll Effect (improved sensitivity) ── */
     document.addEventListener('DOMContentLoaded', () => {
         const sections = Array.from(document.querySelectorAll('section'));
         if (sections.length === 0) return;
 
         let isScrolling = false;
         let scrollTimeout: ReturnType<typeof setTimeout>;
+        
 
         function getVisibleSectionIndex() {
             let maxVisibleIndex = 0;

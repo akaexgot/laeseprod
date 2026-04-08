@@ -35,9 +35,7 @@ function getVideoId(value: string | null | undefined): string | null {
       </svg>
     </a>
   </div>
-
-  <div class="w-full h-[90vh] flex flex-col lg:flex-row relative">
-
+  <div class="w-full h-[93vh] flex flex-col lg:flex-row relative">
     <!-- Slot 0 — Left large -->
     {projects[0] && (() => {
       const videoId = getVideoId(projects[0].video_project);
@@ -128,6 +126,7 @@ function getVideoId(value: string | null | undefined): string | null {
     </div>
     )}
   </div>
+  <slot />
 </section>
 )}
 

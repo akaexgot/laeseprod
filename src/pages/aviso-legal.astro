@@ -1,8 +1,8 @@
 ---
-/**
- * Aviso Legal
- */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSettings } from "../lib/data";
+
+const settings = await getSettings();
 ---
 
 <BaseLayout
@@ -27,10 +27,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                     </h2>
                     <p>
                         <strong class="text-white"
-                            >VideoMarketing Sevilla</strong
+                            >{settings.site_name}</strong
                         ><br />
-                        Dirección: Sevilla, España<br />
-                        Email: info@videomarketingsevilla.es
+                        Dirección: {settings.address}<br />
+                        Email: {settings.email}
                     </p>
 
                     <h2

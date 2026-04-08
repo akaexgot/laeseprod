@@ -4,14 +4,10 @@
  * Grid of client logos with long-press password modal → Dropbox embed
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPortalClients } from '../lib/data';
 
-// TODO: Replace with dynamic data from Supabase once portal_clients table is created
-const clients = [
-  { id: '1', client_name: 'Hotel Royal', logo: '', dropbox_link: 'https://www.dropbox.com/home' },
-  { id: '2', client_name: 'Restaurante La Barca', logo: '', dropbox_link: 'https://www.dropbox.com/home' },
-  { id: '3', client_name: 'Abengoa', logo: '', dropbox_link: 'https://www.dropbox.com/home' },
-  { id: '4', client_name: 'Inversiones Sur', logo: '', dropbox_link: 'https://www.dropbox.com/home' },
-];
+const allClients = await getPortalClients();
+const clients = allClients.filter((c: any) => c.is_active);
 ---
 
 <BaseLayout
@@ -33,7 +29,7 @@ const clients = [
               Portal <span class="text-gradient-carmin">cliente</span>
           </h1>
           <p class="pc-hero__subtitle">
-              Mantén pulsada tu tarjeta durante 2 segundos para acceder a tus archivos
+              Pulsa tu tarjeta para acceder a tus archivos
           </p>
 
           <!-- Search -->
@@ -54,12 +50,13 @@ const clients = [
                       class="pc-card group"
                       data-client-id={client.id}
                       data-client-name={client.client_name}
+                      data-dropbox={client.dropbox_link || ''}
                       style={`animation-delay: ${idx * 0.1}s`}
                   >
                       <!-- Logo area -->
                       <div class="pc-card__logo-area">
-                          {client.logo ? (
-                              <img src={client.logo} alt={client.client_name} class="pc-card__logo-img" loading="lazy" />
+                          {client.image ? (
+                              <img src={client.image} alt={client.client_name} class="pc-card__logo-img" loading="lazy" />
                           ) : (
                               <div class="pc-card__logo-placeholder">
                                   <span class="pc-card__logo-initial">{client.client_name.charAt(0)}</span>
@@ -77,7 +74,7 @@ const clients = [
                       <!-- Info -->
                       <div class="pc-card__info">
                           <h3 class="pc-card__name">{client.client_name}</h3>
-                          <p class="pc-card__hint">Mantén pulsado para acceder</p>
+                          <p class="pc-card__hint">Pulsa para acceder</p>
                       </div>
                   </div>
               ))}
@@ -110,28 +107,53 @@ const clients = [
   <!-- ═══ DROPBOX MODAL ═══ -->
   <div id="dropbox-modal" class="pc-modal">
       <div class="pc-modal__backdrop" id="dropbox-backdrop"></div>
-      <div class="pc-modal__content pc-modal__content--wide" id="dropbox-content">
-          <div class="pc-modal__header">
-              <h3 id="dropbox-title" class="pc-modal__title">Archivos</h3>
-              <button id="dropbox-close" class="pc-modal__close pc-modal__close--inline">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
+      <div class="pc-modal__content" id="dropbox-content">
+          <button id="dropbox-close" class="pc-modal__close">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+          
+          <div class="pc-modal__icon" style="background: rgba(16, 185, 129, 0.1);">
+              <svg fill="none" stroke="#10b981" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
           </div>
-          <iframe id="dropbox-iframe" class="pc-modal__iframe" src="" title="Archivos del cliente"></iframe>
+          
+          <h3 id="dropbox-title" class="pc-modal__title" style="margin-bottom: 0.5rem;">Acceso verificado</h3>
+          <p class="pc-modal__subtitle">Tu conexión es segura. Haz clic en el botón para acceder a la carpeta compartida con tus archivos.</p>
+          
+          <a id="dropbox-link-btn" href="#" target="_blank" class="pc-modal__submit" style="display: inline-block; text-decoration: none; box-sizing: border-box; background: linear-gradient(135deg, #0061FE, #004ecc);">
+              Abrir archivos de cliente
+          </a>
       </div>
   </div>
 
 </BaseLayout>
 
 <style>
+/* ── GLOBAL OVERRIDES PARA LIGHT THEME ── */
+:global(body), :global(main) {
+    background-color: #ffffff !important;
+}
+:global(.nav-link) {
+    color: #c42847 !important;
+    font-weight: 500;
+}
+:global(.nav-link:hover), :global(.nav-link.active) {
+    color: #9b1b30 !important;
+}
+:global(.navbar) {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 /* ── HERO ─────────────────────────────────────── */
 .pc-hero {
     position: relative; padding-top: 9rem; padding-bottom: 3rem;
-    background: #0a0a0f; overflow: hidden; text-align: center;
+    background: #ffffff; overflow: hidden; text-align: center;
 }
 .pc-hero__dots {
     position: absolute; inset: 0; opacity: .12; pointer-events: none;
-    background-image: radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px);
     background-size: 28px 28px;
 }
 .pc-hero__glow {
@@ -147,9 +169,9 @@ const clients = [
 .pc-hero__badge {
     display: inline-flex; align-items: center; gap: .5rem;
     padding: .375rem 1rem; border-radius: 9999px;
-    border: 1px solid rgba(155,27,48,.4); background: rgba(155,27,48,.1);
+    border: 1px solid rgba(155,27,48,.3); background: rgba(155,27,48,.05);
     font-size: .75rem; font-weight: 600; letter-spacing: .08em;
-    text-transform: uppercase; color: rgba(255,255,255,.7);
+    text-transform: uppercase; color: #c42847;
     backdrop-filter: blur(8px);
 }
 .pc-hero__dot {
@@ -160,11 +182,11 @@ const clients = [
 .pc-hero__title {
     font-family: 'Outfit', sans-serif;
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-weight: 800; color: #fff;
+    font-weight: 800; color: #18181b;
     line-height: 1.1; letter-spacing: -.03em; margin: 0;
 }
 .pc-hero__subtitle {
-    font-size: 1rem; color: rgba(255,255,255,.4);
+    font-size: 1rem; color: rgba(0,0,0,.6);
     line-height: 1.7; max-width: 440px; margin: 0;
 }
 .pc-search {
@@ -172,24 +194,25 @@ const clients = [
 }
 .pc-search svg {
     position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
-    width: 1.125rem; height: 1.125rem; color: rgba(255,255,255,.25);
+    width: 1.125rem; height: 1.125rem; color: rgba(0,0,0,.4);
 }
 .pc-search input {
     width: 100%; padding: .875rem 1rem .875rem 2.75rem;
-    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
-    border-radius: 1rem; color: #fff; font-size: .875rem;
+    background: #ffffff; border: 1px solid rgba(0,0,0,.1);
+    border-radius: 1rem; color: #18181b; font-size: .875rem;
     outline: none; transition: border-color .2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,.03);
 }
-.pc-search input::placeholder { color: rgba(255,255,255,.2); }
+.pc-search input::placeholder { color: rgba(0,0,0,.4); }
 .pc-search input:focus { border-color: rgba(155,27,48,.4); }
 
 /* ── GRID ─────────────────────────────────────── */
 .pc-grid-section {
-    position: relative; background: #0a0a0f; padding: 2rem 0 6rem;
+    position: relative; background: #ffffff; padding: 2rem 0 6rem;
 }
 .pc-grid-section__dots {
-    position: absolute; inset: 0; opacity: .06; pointer-events: none;
-    background-image: radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px);
+    position: absolute; inset: 0; opacity: .08; pointer-events: none;
+    background-image: radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px);
     background-size: 28px 28px;
 }
 .pc-grid {
@@ -214,14 +237,14 @@ const clients = [
     width: 100%; aspect-ratio: 1;
     border-radius: 1.5rem;
     overflow: hidden;
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.06);
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,.08);
     transition: border-color .3s, box-shadow .3s, transform .3s;
     display: flex; align-items: center; justify-content: center;
 }
 .pc-card:hover .pc-card__logo-area {
     border-color: rgba(155,27,48,.25);
-    box-shadow: 0 12px 40px rgba(155,27,48,.1);
+    box-shadow: 0 16px 40px rgba(0,0,0,.08);
     transform: translateY(-4px);
 }
 .pc-card__logo-img {
@@ -235,7 +258,7 @@ const clients = [
 }
 .pc-card__logo-placeholder {
     width: 100%; height: 100%;
-    background: linear-gradient(135deg, rgba(155,27,48,.08), rgba(155,27,48,.02));
+    background: linear-gradient(135deg, rgba(155,27,48,.03), rgba(155,27,48,.01));
     display: flex; align-items: center; justify-content: center;
 }
 .pc-card__logo-initial {
@@ -266,12 +289,12 @@ const clients = [
     position: absolute; bottom: .75rem; right: .75rem;
     width: 2rem; height: 2rem;
     border-radius: .625rem;
-    background: rgba(0,0,0,.5);
-    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,.9);
+    border: 1px solid rgba(0,0,0,.05);
     display: flex; align-items: center; justify-content: center;
     opacity: .4; transition: opacity .3s;
 }
-.pc-card__lock svg { width: 1rem; height: 1rem; color: rgba(255,255,255,.6); }
+.pc-card__lock svg { width: 1rem; height: 1rem; color: rgba(0,0,0,.6); }
 .pc-card:hover .pc-card__lock { opacity: .8; }
 
 /* Info */
@@ -279,10 +302,10 @@ const clients = [
 .pc-card__name {
     font-family: 'Outfit', sans-serif;
     font-size: .9375rem; font-weight: 600;
-    color: #fff; margin: 0;
+    color: #18181b; margin: 0;
 }
 .pc-card__hint {
-    font-size: .6875rem; color: rgba(255,255,255,.25);
+    font-size: .6875rem; color: rgba(0,0,0,.5);
     margin: .25rem 0 0;
 }
 
@@ -399,6 +422,31 @@ const clients = [
     50%  { clip-path: polygon(50% 0%, 50% 50%, 0% 100%, 100% 100%, 100% 0%, 50% 0%, 50% 0%); }
     100% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 0% 0%, 0% 100%, 100% 100%, 100% 0%); border-color: #c42847; }
 }
+@keyframes pc-click-bounce {
+    0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(155,27,48,0); }
+    20%  { transform: scale(0.93); }
+    40%  { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(155,27,48,.15); }
+    60%  { transform: scale(0.98); box-shadow: 0 0 0 12px rgba(155,27,48,.08); }
+    80%  { transform: scale(1.02); box-shadow: 0 0 0 16px rgba(155,27,48,.03); }
+    100% { transform: scale(1); box-shadow: 0 0 0 20px rgba(155,27,48,0); }
+}
+@keyframes pc-lock-unlock {
+    0%   { transform: rotate(0deg); color: rgba(0,0,0,.6); }
+    30%  { transform: rotate(-15deg); color: #c42847; }
+    60%  { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); color: #c42847; }
+}
+.pc-card--clicked .pc-card__logo-area {
+    animation: pc-click-bounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-color: rgba(155,27,48,.4);
+    background: linear-gradient(135deg, rgba(155,27,48,.03), rgba(155,27,48,.01));
+}
+.pc-card--clicked .pc-card__lock {
+    opacity: 1;
+}
+.pc-card--clicked .pc-card__lock svg {
+    animation: pc-lock-unlock 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 </style>
 
 <script>
@@ -414,33 +462,17 @@ const clients = [
     });
   });
 
-  // Long-press detection (2 seconds)
-  let pressTimer: ReturnType<typeof setTimeout>;
-  let pressedCard: HTMLElement | null = null;
-
+  // Click detection (simple click)
   clientCards.forEach(card => {
-    const startPress = (e: Event) => {
+    card.addEventListener('click', (e) => {
       e.preventDefault();
-      pressedCard = card as HTMLElement;
-      card.classList.add('pc-card--pressing');
-
-      pressTimer = setTimeout(() => {
-        card.classList.remove('pc-card--pressing');
-        openPasswordModal(pressedCard!);
-      }, 2000);
-    };
-
-    const endPress = () => {
-      clearTimeout(pressTimer);
-      card.classList.remove('pc-card--pressing');
-    };
-
-    card.addEventListener('mousedown', startPress);
-    card.addEventListener('touchstart', startPress);
-    card.addEventListener('mouseup', endPress);
-    card.addEventListener('mouseleave', endPress);
-    card.addEventListener('touchend', endPress);
-    card.addEventListener('touchcancel', endPress);
+      const el = card as HTMLElement;
+      el.classList.add('pc-card--clicked');
+      setTimeout(() => {
+        el.classList.remove('pc-card--clicked');
+        openPasswordModal(el);
+      }, 450);
+    });
   });
 
   // Password Modal
@@ -469,34 +501,64 @@ const clients = [
   document.getElementById('modal-close')?.addEventListener('click', closePasswordModal);
   document.getElementById('modal-backdrop')?.addEventListener('click', closePasswordModal);
 
+  const submitBtn = passwordForm.querySelector('.pc-modal__submit') as HTMLButtonElement;
+
   passwordForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const password = passwordInput.value;
 
-    // TODO: Verify password via Supabase API
-    if (password.length > 0) {
-      closePasswordModal();
-      openDropboxModal(currentClientId);
-    } else {
+    if (!password) {
+      passwordError.textContent = 'Introduce tu contraseña';
       passwordError.classList.remove('hidden');
+      return;
+    }
+
+    const oHtml = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Verificando...';
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch('/api/portal/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: currentClientId, password })
+      });
+
+      if (res.ok) {
+        closePasswordModal();
+        openDropboxModal(currentClientId);
+      } else {
+        const err = await res.json();
+        passwordError.textContent = err.error || 'Contraseña incorrecta';
+        passwordError.classList.remove('hidden');
+      }
+    } catch (error) {
+      passwordError.textContent = 'Error de conexión. Inténtalo de nuevo.';
+      passwordError.classList.remove('hidden');
+    } finally {
+      submitBtn.innerHTML = oHtml;
+      submitBtn.disabled = false;
     }
   });
 
   // Dropbox Modal
   const dropboxModal = document.getElementById('dropbox-modal')!;
-  const dropboxIframe = document.getElementById('dropbox-iframe') as HTMLIFrameElement;
+  const dropboxLinkBtn = document.getElementById('dropbox-link-btn') as HTMLAnchorElement;
 
   function openDropboxModal(clientId: string) {
-    // TODO: Get dropbox link from data
-    dropboxIframe.src = 'https://www.dropbox.com/home';
-    document.getElementById('dropbox-title')!.textContent = 'Archivos del cliente';
+    const card = document.querySelector(`.pc-card[data-client-id="${clientId}"]`) as HTMLElement;
+    const dropboxLink = card?.dataset.dropbox || '';
+    const clientName = card?.dataset.clientName || 'Cliente';
+    
+    dropboxLinkBtn.href = dropboxLink;
+    dropboxLinkBtn.textContent = `Abrir archivos de ${clientName}`;
 
     dropboxModal.classList.add('pc-modal--open');
   }
 
   function closeDropboxModal() {
     dropboxModal.classList.remove('pc-modal--open');
-    dropboxIframe.src = '';
+    dropboxLinkBtn.href = '#';
   }
 
   document.getElementById('dropbox-close')?.addEventListener('click', closeDropboxModal);

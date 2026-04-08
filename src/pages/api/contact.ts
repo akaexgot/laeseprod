@@ -40,9 +40,15 @@ export const POST: APIRoute = async ({ request }) => {
 
         // Send email notifications (if Resend is configured)
         if (import.meta.env.RESEND_API_KEY) {
+            const { getSettings } = await import('../../lib/data');
+            const settings = await getSettings();
             const { sendContactNotification, sendContactAutoReply } = await import('../../lib/resend');
+            
             await Promise.allSettled([
-                sendContactNotification({ name, email, phone, company, message }),
+                sendContactNotification({ 
+                    name, email, phone, company, message, 
+                    adminEmail: settings.email 
+                }),
                 sendContactAutoReply({ name, email, phone, company, message }),
             ]);
         }

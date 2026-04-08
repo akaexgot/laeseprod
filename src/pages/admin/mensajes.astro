@@ -61,39 +61,47 @@ if (serviceSupabase) {
                 <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
                     <tr>
                         <th class="font-semibold w-64" style="padding: 1rem 1.5rem;">De / Empresa</th>
-                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Mensaje</th>
-                        <th class="font-semibold w-40" style="padding: 1rem 1.5rem;">Fecha</th>
-                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                        <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Mensaje</th>
+                        <th class="font-semibold hidden md:table-cell w-40" style="padding: 1rem 1.5rem;">Fecha</th>
+                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {messages.map((msg) => (
-                        <tr class={`transition-colors group hover:bg-zinc-800/30 ${msg.status === 'nuevo' ? 'bg-zinc-800/20' : ''}`} data-id={msg.id}>
+                        <tr class={`transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default ${msg.status === 'nuevo' ? 'bg-zinc-800/20' : ''}`} data-id={msg.id} onclick="const btn = this.querySelector('.btn-view'); if(btn && !event.target.closest('button')) btn.click();">
                             <td class="align-top" style="padding: 1rem 1.5rem;">
-                                <div class="font-medium text-zinc-100 flex items-center" style="gap: 0.5rem; margin-bottom: 0.125rem;">
-                                    {msg.name}
-                                    {msg.status === 'nuevo' && <span class="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>}
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <div class="font-medium text-zinc-100 flex items-center" style="gap: 0.5rem; margin-bottom: 0.125rem;">
+                                            {msg.name}
+                                            {msg.status === 'nuevo' && <span class="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>}
+                                        </div>
+                                        <div class="text-xs text-zinc-400">
+                                            <a href={`mailto:${msg.email}`} class="hover:text-rose-400 transition-colors" onclick="event.stopPropagation()">{msg.email}</a>
+                                        </div>
+                                        {msg.company && (
+                                            <span class="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-zinc-700 mt-1">
+                                                {msg.company}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0 mt-1"></i>
                                 </div>
-                                <div class="text-xs text-zinc-400 mb-1">
-                                    <a href={`mailto:${msg.email}`} class="hover:text-rose-400 transition-colors">{msg.email}</a>
-                                </div>
-                                {msg.company && (
-                                    <span class="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-zinc-700 mt-1">
-                                        <i data-lucide="briefcase" class="w-3 h-3 mr-1 inline"></i> {msg.company}
-                                    </span>
-                                )}
                             </td>
-                            <td class="align-top" style="padding: 1rem 1.5rem;">
-                                <p class="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed">{msg.message}</p>
+                            <td class="hidden sm:table-cell align-top" style="padding: 1rem 1.5rem;">
+                                <p class="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed line-clamp-2">{msg.message}</p>
                             </td>
-                            <td class="align-top text-xs text-zinc-500" style="padding: 1rem 1.5rem;">
-                                {new Date(msg.created_at).toLocaleDateString('es-ES', { 
-                                    year: 'numeric', month: 'short', day: 'numeric',
-                                    hour: '2-digit', minute:'2-digit'
-                                })}
+                            <td class="hidden md:table-cell align-top" style="padding: 1rem 1.5rem;">
+                                <span class="text-xs text-zinc-500">
+                                    {new Date(msg.created_at).toLocaleDateString('es-ES', { 
+                                        year: 'numeric', month: 'short', day: 'numeric',
+                                        hour: '2-digit', minute:'2-digit'
+                                    })}
+                                </span>
                             </td>
-                            <td class="align-top text-right" style="padding: 1rem 1.5rem;">
+                            <td class="hidden sm:table-cell align-top text-right" style="padding: 1rem 1.5rem;">
                                 <div class="flex flex-col items-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
+                                    <button class="btn-view hidden" data-msg={JSON.stringify(msg)}></button>
                                     {msg.status === 'nuevo' && (
                                         <button 
                                             class="btn-mark-read inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-medium text-zinc-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-md transition-colors w-full justify-end border border-transparent hover:border-emerald-400/20" 
@@ -130,41 +138,123 @@ if (serviceSupabase) {
     )}
 </AdminLayout>
 
-<!-- Delete Confirmation Modal -->
-<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
-        <div class="text-center" style="padding: 2rem 1.5rem 1rem;">
-            <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6 text-red-400"></i>
-            </div>
-            <h3 class="text-lg font-semibold text-white mb-2">¿Eliminar este mensaje?</h3>
-            <p class="text-sm text-zinc-400">Esta acción no se puede deshacer.</p>
+<div id="modal-view" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+        <div class="flex flex-shrink-0 items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
+            <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                Consulta de Contacto
+            </h3>
+            <button id="modal-view-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
-        <div class="flex justify-end border-t border-zinc-800 bg-zinc-950" style="padding: 1rem 1.5rem; gap: 0.75rem;">
-            <button id="confirm-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
-            <button id="confirm-yes" class="bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-all" style="padding: 0.5rem 1rem;">Eliminar</button>
+        <div class="overflow-y-auto" style="padding: 1.5rem;">
+            <div class="mb-5 bg-zinc-950 p-4 border border-zinc-800/50 rounded-lg">
+                <p id="view-name" class="text-zinc-200 font-medium"></p>
+                <div class="flex items-center gap-3 mt-1 opacity-80">
+                    <a id="view-email" href="#" class="text-rose-400 text-sm hover:underline"></a>
+                    <span id="view-company" class="text-zinc-500 text-sm"></span>
+                </div>
+            </div>
+            <div>
+                <span class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Mensaje</span>
+                <div id="view-message" class="text-zinc-300 mt-2 whitespace-pre-wrap leading-relaxed text-sm"></div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <span id="view-date" class="text-xs text-zinc-600"></span>
+            </div>
+        </div>
+        <div class="border-t border-zinc-800 bg-zinc-950 flex flex-shrink-0 justify-end rounded-b-xl" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+            <button type="button" id="modal-view-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
+            <button type="button" id="modal-view-close" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md bg-zinc-900" style="padding: 0.5rem 1rem;">Cerrar</button>
         </div>
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
+            <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
+        </div>
+        <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+            <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+        </div>
+    </div>
+</div>
+</div>
+
 <!-- Toast Container -->
-<div id="toast-container" class="fixed top-4 right-4 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+<div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
         // Toast notification
-        function showToast(message: string, type: 'error' | 'success' = 'error') {
+                                function showToast(message: string, type: 'error' | 'success' = 'error') {
             const container = document.getElementById('toast-container')!;
             const toast = document.createElement('div');
-            toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border text-sm font-medium pointer-events-auto ${
-                type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
             }`;
-            toast.style.cssText = 'backdrop-filter:blur(12px); animation: toast-in 0.3s ease-out;';
-            toast.textContent = message;
+            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
+            if (type === 'success') {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`;
+            } else {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
+            }
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
         }
+
+        // View Modal logic
+        const modalView = document.getElementById('modal-view')!;
+        let currentMsgId: string | null = null;
+        
+        document.querySelectorAll('.btn-view').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const msg = JSON.parse((btn as HTMLElement).dataset.msg || '{}');
+                currentMsgId = msg.id;
+                
+                document.getElementById('view-name')!.textContent = msg.name || 'Sin nombre';
+                const elEmail = document.getElementById('view-email') as HTMLAnchorElement;
+                elEmail.textContent = msg.email;
+                elEmail.href = `mailto:${msg.email}`;
+                document.getElementById('view-company')!.textContent = msg.company ? `| ${msg.company}` : '';
+                document.getElementById('view-message')!.textContent = msg.message;
+                
+                const d = new Date(msg.created_at);
+                document.getElementById('view-date')!.textContent = d.toLocaleDateString('es-ES', { 
+                    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit'
+                });
+                
+                modalView.classList.remove('hidden');
+            });
+        });
+
+        const closeViewModal = () => {
+            modalView.classList.add('hidden');
+            currentMsgId = null;
+        };
+        
+        document.getElementById('modal-view-close')?.addEventListener('click', closeViewModal);
+        document.getElementById('modal-view-close-icon')?.addEventListener('click', closeViewModal);
+        modalView.addEventListener('click', (e) => {
+            if (e.target === modalView) closeViewModal();
+        });
+
+        document.getElementById('modal-view-delete')?.addEventListener('click', () => {
+            if (currentMsgId) {
+                closeViewModal();
+                openConfirm(currentMsgId);
+            }
+        });
 
         // Marcar como leído
         document.querySelectorAll('.btn-mark-read').forEach(btn => {

@@ -1,8 +1,8 @@
 ---
-/**
- * Política de Privacidad
- */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSettings } from "../lib/data";
+
+const settings = await getSettings();
 ---
 
 <BaseLayout
@@ -71,7 +71,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                     <p>
                         Puedes ejercer tus derechos de acceso, rectificación,
                         supresión, oposición y portabilidad enviando un email a
-                        info@videomarketingsevilla.es
+                        {settings.email}
                     </p>
 
                     <h2

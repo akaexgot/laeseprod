@@ -40,44 +40,44 @@ const companies = await getCompanies();
             <table class="w-full text-sm text-left" id="companies-table">
                 <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
                     <tr>
-                        <th class="font-semibold w-24" style="padding: 1rem 1.5rem;">Logo</th>
                         <th class="font-semibold" style="padding: 1rem 1.5rem;">Empresa</th>
                         <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Sitio Web</th>
                         <th class="font-semibold hidden md:table-cell w-24 text-center" style="padding: 1rem 1.5rem;">Orden</th>
-                        <th class="font-semibold text-right w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {companies.map((company: any) => (
-                        <tr class="hover:bg-zinc-800/30 transition-colors group" data-id={company.id}>
+                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={company.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
                             <td style="padding: 1rem 1.5rem;">
-                                <div class="w-16 h-10 bg-zinc-950 rounded border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                                    {company.logo_url ? (
-                                        <img src={company.logo_url} alt={company.name} class="max-w-full max-h-full object-contain p-1" />
-                                    ) : (
-                                        <i data-lucide="image-off" class="w-4 h-4 text-zinc-600"></i>
-                                    )}
+                                <div class="flex items-center justify-between">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="w-10 h-10 bg-zinc-950 rounded border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                                            {company.logo_url ? (
+                                                <img src={company.logo_url} alt={company.name} class="max-w-full max-h-full object-contain p-1" />
+                                            ) : (
+                                                <i data-lucide="image-off" class="w-4 h-4 text-zinc-600"></i>
+                                            )}
+                                        </div>
+                                        <span class="font-medium text-zinc-100">{company.name}</span>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                 </div>
                             </td>
-                            <td style="padding: 1rem 1.5rem;">
-                                <span class="font-medium text-zinc-100">{company.name}</span>
-                            </td>
-                            <td class="hidden md:table-cell text-center" style="padding: 1rem 1.5rem;">
+                            <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
                                 {company.website ? (
                                     <a href={company.website} target="_blank" class="text-zinc-400 hover:text-rose-400 text-sm hover:underline flex items-center gap-1.5 w-fit">
                                         {company.website.replace(/^https?:\/\//, '')}
                                         <i data-lucide="external-link" class="w-3 h-3"></i>
                                     </a>
                                 ) : (
-                                    <span class="text-zinc-600">-</span>
+                                    <span class="text-zinc-600">Sin sitio web</span>
                                 )}
                             </td>
-                            <td style="padding: 1rem 1.5rem;">
-                                <div class="flex items-center justify-center" style="gap: 1rem;">
-                                    <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{company.order}</span>
-                                </div>
+                            <td class="hidden md:table-cell" style="padding: 1rem 1.5rem;">
+                                <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{company.order}</span>
                             </td>
-                            <td class="text-right" style="padding: 1rem 1.5rem;">
+                            <td class="hidden sm:table-cell text-right" style="padding: 1rem 1.5rem;">
                                 <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
                                     <button class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit"
                                         data-id={company.id} data-name={company.name} data-logo={company.logo_url || ''} data-website={company.website || ''} data-order={company.order}
@@ -109,7 +109,7 @@ const companies = await getCompanies();
 
 <!-- Modal -->
 <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-md shadow-2xl overflow-hidden">
         
         <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
             <h3 id="modal-title" class="text-lg font-semibold text-zinc-50 flex items-center gap-2">
@@ -129,11 +129,40 @@ const companies = await getCompanies();
             </div>
             
             <div style="margin-bottom: 0.5rem;">
-                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Logo (URL)</label>
-                <input type="url" id="modal-logo" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://..." />
-                <div id="logo-preview" class="mt-3 h-20 bg-zinc-950 border border-zinc-800 rounded-md flex items-center justify-center overflow-hidden hidden relative" style="display: none;">
-                    <img id="logo-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
+                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Logotipo de la Empresa</label>
+                
+                <!-- Drag & Drop Zone -->
+                <div id="drop-zone" class="relative group cursor-pointer drop-zone">
+                    <input type="file" id="file-input" class="hidden" accept="image/*" />
+                    <div class="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 bg-zinc-950/50 hover:bg-zinc-800/20 hover:border-rose-500/50 transition-all duration-300 drop-zone-content">
+                        
+                        <div id="upload-idle" class="flex flex-col items-center gap-3 text-center">
+                            <div class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-rose-400 group-hover:scale-110 transition-all duration-300">
+                                <i data-lucide="upload" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-zinc-200">Pulsa o arrastra el logo</p>
+                                <p class="text-xs text-zinc-500 mt-1">PNG, JPG, SVG o WebP (máx. 2MB)</p>
+                            </div>
+                        </div>
+
+                        <div id="upload-loading" class="hidden flex flex-col items-center gap-3 text-center">
+                            <div class="w-10 h-10 border-2 border-rose-500/30 border-t-rose-500 rounded-full animate-spin"></div>
+                            <p class="text-sm font-medium text-rose-400">Subiendo imagen...</p>
+                        </div>
+
+                        <div id="upload-preview" class="hidden relative w-full h-32 flex items-center justify-center rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden group/preview">
+                            <img id="logo-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
+                            <div class="absolute inset-0 bg-zinc-950/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                                <button type="button" id="btn-remove-logo" class="bg-rose-600 text-white p-2 rounded-full hover:bg-rose-500 transition-all">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <input type="url" id="modal-logo" class="hidden" />
             </div>
 
             <div class="grid grid-cols-2" style="display: grid; gap: 1.5rem;">
@@ -150,31 +179,40 @@ const companies = await getCompanies();
 
         <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
             <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
+            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
             <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
             <button type="submit" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
         </div>
     </div>
 </div>
 
+<style>
+    .drop-zone.ready .drop-zone-content {
+        border-color: #e11d48; /* rose-600 */
+        background-color: rgba(225, 29, 72, 0.05);
+    }
+</style>
+
 <!-- Delete Confirmation Modal -->
-<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
-        <div class="text-center" style="padding: 2rem 1.5rem 1rem;">
-            <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6 text-red-400"></i>
+<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             </div>
-            <h3 class="text-lg font-semibold text-white mb-2">¿Eliminar permanentemente?</h3>
-            <p class="text-sm text-zinc-400">Esta acción no se puede deshacer.</p>
+            <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
+            <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
         </div>
-        <div class="flex justify-end border-t border-zinc-800 bg-zinc-950" style="padding: 1rem 1.5rem; gap: 0.75rem;">
-            <button id="confirm-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
-            <button id="confirm-yes" class="bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-all" style="padding: 0.5rem 1rem;">Eliminar</button>
+        <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+            <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
         </div>
     </div>
 </div>
+</div>
 
 <!-- Toast Container -->
-<div id="toast-container" class="fixed top-4 right-4 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+<div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -186,6 +224,7 @@ const companies = await getCompanies();
         const modalWebsite = document.getElementById('modal-website') as HTMLInputElement;
         const modalOrder = document.getElementById('modal-order') as HTMLInputElement;
         const modalError = document.getElementById('modal-error')!;
+        const modalDeleteBtn = document.getElementById('modal-delete')!;
         const logoPreview = document.getElementById('logo-preview')!;
         const logoPreviewImg = document.getElementById('logo-preview-img') as HTMLImageElement;
 
@@ -197,6 +236,7 @@ const companies = await getCompanies();
                 modalLogo.value = data.logo || '';
                 modalWebsite.value = data.website || '';
                 modalOrder.value = data.order || '0';
+                modalDeleteBtn.classList.remove('hidden');
             } else {
                 modalTitleText.textContent = 'Añadir empresa';
                 modalId.value = '';
@@ -204,6 +244,7 @@ const companies = await getCompanies();
                 modalLogo.value = '';
                 modalWebsite.value = '';
                 modalOrder.value = '0';
+                modalDeleteBtn.classList.add('hidden');
             }
             updateLogoPreview();
             modalError.classList.add('hidden');
@@ -213,19 +254,94 @@ const companies = await getCompanies();
         function closeModal() { overlay.classList.add('hidden'); }
 
         function updateLogoPreview() {
-            if (modalLogo.value) {
-                logoPreviewImg.src = modalLogo.value;
-                logoPreview.classList.remove('hidden');
+            const url = modalLogo.value;
+            const idle = document.getElementById('upload-idle')!;
+            const preview = document.getElementById('upload-preview')!;
+            const loading = document.getElementById('upload-loading')!;
+            
+            if (url) {
+                logoPreviewImg.src = url;
+                preview.classList.remove('hidden');
+                idle.classList.add('hidden');
             } else {
-                logoPreview.classList.add('hidden');
+                preview.classList.add('hidden');
+                idle.classList.remove('hidden');
                 logoPreviewImg.src = '';
+            }
+            loading.classList.add('hidden');
+        }
+
+        // Drag and Drop Logic
+        const dropZone = document.getElementById('drop-zone')!;
+        const fileInput = document.getElementById('file-input') as HTMLInputElement;
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('ready');
+        });
+
+        ['dragleave', 'dragend'].forEach(type => {
+            dropZone.addEventListener(type, () => dropZone.classList.remove('ready'));
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('ready');
+            const file = e.dataTransfer?.files[0];
+            if (file) handleUpload(file);
+        });
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files?.[0];
+            if (file) handleUpload(file);
+        });
+
+        async function handleUpload(file: File) {
+            if (!file.type.startsWith('image/')) {
+                showToast('El archivo debe ser una imagen', 'error');
+                return;
+            }
+
+            const idle = document.getElementById('upload-idle')!;
+            const loading = document.getElementById('upload-loading')!;
+            const preview = document.getElementById('upload-preview')!;
+
+            idle.classList.add('hidden');
+            preview.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'logos');
+
+            try {
+                const res = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    modalLogo.value = data.url;
+                    updateLogoPreview();
+                    showToast('Logo subido correctamente', 'success');
+                } else {
+                    const err = await res.json();
+                    showToast(err.error || 'Error al subir', 'error');
+                    updateLogoPreview();
+                }
+            } catch (error) {
+                showToast('Error de conexión al subir', 'error');
+                updateLogoPreview();
             }
         }
 
-        let previewDebounce: ReturnType<typeof setTimeout>;
-        modalLogo.addEventListener('input', () => {
-            clearTimeout(previewDebounce);
-            previewDebounce = setTimeout(updateLogoPreview, 500);
+        document.getElementById('btn-remove-logo')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            modalLogo.value = '';
+            updateLogoPreview();
         });
 
         document.getElementById('btn-add')?.addEventListener('click', () => openModal());
@@ -238,16 +354,25 @@ const companies = await getCompanies();
         });
 
         document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const el = btn as HTMLElement;
+            btn.addEventListener('click', (e) => {
+                const b = e.currentTarget as HTMLElement;
                 openModal({
-                    id: el.dataset.id,
-                    name: el.dataset.name,
-                    logo: el.dataset.logo,
-                    website: el.dataset.website,
-                    order: el.dataset.order,
+                    id: b.dataset.id,
+                    name: b.dataset.name,
+                    logo: b.dataset.logo,
+                    website: b.dataset.website,
+                    order: b.dataset.order
                 });
             });
+        });
+
+        modalDeleteBtn.addEventListener('click', () => {
+            closeModal();
+            const id = modalId.value;
+            if (id) {
+                const deleteBtn = document.querySelector(`.btn-delete[data-id="${id}"]`) as HTMLButtonElement;
+                if (deleteBtn) deleteBtn.click();
+            }
         });
 
         // Confirm modal logic
@@ -293,14 +418,18 @@ const companies = await getCompanies();
         });
 
         // Toast notification
-        function showToast(message: string, type: 'error' | 'success' = 'error') {
+                                function showToast(message: string, type: 'error' | 'success' = 'error') {
             const container = document.getElementById('toast-container')!;
             const toast = document.createElement('div');
-            toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border text-sm font-medium pointer-events-auto ${
-                type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
             }`;
-            toast.style.cssText = 'backdrop-filter:blur(12px); animation: toast-in 0.3s ease-out;';
-            toast.textContent = message;
+            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
+            if (type === 'success') {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`;
+            } else {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
+            }
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
         }

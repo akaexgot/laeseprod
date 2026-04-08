@@ -34,13 +34,13 @@ const menuGroups = [
         name: "Comunicación",
         items: [
             { label: "Portal Clientes", href: "/admin/portal", icon: "users", id: "portal" },
-            { label: "Mensajes", href: "/admin/mensajes", icon: "mail", id: "mensajes" }
+            { label: "Mensajes", href: "/admin/mensajes", icon: "mail", id: "mensajes" },
+            { label: "Chat en Vivo", href: "/admin/chat", icon: "message-circle", id: "chat" }
         ]
     },
     {
         name: "Configuración",
         items: [
-            { label: "SEO / Metadatos", href: "/admin/seo", icon: "search", id: "seo" },
             { label: "Ajustes Generales", href: "/admin/ajustes", icon: "settings", id: "ajustes" }
         ]
     }
@@ -54,7 +54,7 @@ const menuGroups = [
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="robots" content="noindex, nofollow" />
         <title>{title} | Admin Panel</title>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/logo2.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -108,7 +108,7 @@ const menuGroups = [
         checkSession();
         </script>
         <!-- Foolproof explicitly styled wrapper to guarantee padding/width constraints -->
-        <div style="display: flex; height: 100vh; width: 100vw; background-color: #09090b; overflow: hidden;">
+        <div class="admin-layout" style="display: flex; height: 100vh; width: 100vw; background-color: #09090b; overflow: hidden;">
             
             <!-- Sidebar (Fixed Width, Flex-shrink 0) -->
             <aside
@@ -263,6 +263,93 @@ const menuGroups = [
             .hidden-scrollbar:hover::-webkit-scrollbar-thumb {
                 background: rgba(255,255,255,0.2);
             }
+
+            @media (max-width: 768px) {
+                /* Reduce main content padding on mobile */
+                .admin-layout main {
+                    padding: 1rem !important;
+                }
+
+
+                /* Mobile table interaction hint - rows are clickable */
+                .mobile-row-click {
+                    cursor: pointer;
+                }
+                .mobile-row-click:active {
+                    background-color: rgba(63, 63, 70, 0.4);
+                }
+
+                /* Remove divide lines between rows (cards have own borders) */
+                .admin-responsive-table .divide-y > * + * {
+                    border-top-width: 0 !important;
+                }
+
+                /* Toast container: position bottom-center on mobile */
+                #toast-container {
+                    left: 1rem !important;
+                    right: 1rem !important;
+                    bottom: 1rem !important;
+                }
+                #toast-container > div {
+                    font-size: 14px !important;
+                    padding: 12px 16px !important;
+                }
+
+                /* Modal improvements for mobile */
+                .fixed.inset-0.flex.items-center.justify-center {
+                    align-items: flex-end !important;
+                }
+                .fixed.inset-0.flex.items-center.justify-center > div {
+                    max-height: 92vh !important;
+                    overflow-y: auto !important;
+                    border-bottom-left-radius: 0 !important;
+                    border-bottom-right-radius: 0 !important;
+                }
+
+                /* Reduce form padding on mobile */
+                .settings-form-content {
+                    padding: 1rem !important;
+                }
+            }
+
+            /* Tablet adjustments */
+            @media (min-width: 769px) and (max-width: 1024px) {
+                .admin-layout main {
+                    padding: 1.5rem !important;
+                }
+            }
         </style>
+
+        <!-- Responsive Table Accordion Script -->
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Only apply on mobile
+            function initResponsiveTables() {
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                const tables = document.querySelectorAll('.admin-responsive-table');
+
+                tables.forEach(tableWrapper => {
+                    const rows = tableWrapper.querySelectorAll('tbody tr');
+                    rows.forEach(row => {
+                        if (isMobile) {
+                            // Find the card-header-cell and add click handler
+                            const headerCell = row.querySelector('.card-header-cell');
+                            if (headerCell && !headerCell.hasAttribute('data-accordion-init')) {
+                                headerCell.setAttribute('data-accordion-init', '1');
+                                headerCell.addEventListener('click', (e) => {
+                                    // Don't toggle if clicking a button inside
+                                    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) return;
+                                    row.classList.toggle('card-expanded');
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+
+            initResponsiveTables();
+            window.addEventListener('resize', initResponsiveTables);
+        });
+        </script>
     </body>
 </html>
