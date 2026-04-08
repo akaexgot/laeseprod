@@ -30,13 +30,16 @@ const heroSubtitle = settings.hero_subtitle || '';
     <!-- Fullscreen Video Background -->
     <div
         class="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-dark"
+        style={`background-image: url(https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg); background-size: cover; background-position: center;`}
     >
         <iframe
+            id="hero-video-iframe"
             src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-            class="video-bg"
+            class="video-bg opacity-0 transition-opacity duration-1000"
             frameborder="0"
             allow="autoplay; encrypted-media"
             allowfullscreen
+            onload="this.style.opacity='1'"
         >
         </iframe>
 
@@ -101,7 +104,7 @@ const heroSubtitle = settings.hero_subtitle || '';
 
         {/* CTA Buttons */}
         <div 
-            class="flex flex-wrap items-center justify-center gap-4 mt-16 animate-fade-up opacity-0"
+            class="flex flex-wrap items-center justify-center gap-4 mt-36 animate-fade-up opacity-0"
             style={`animation-fill-mode: forwards; animation-delay: ${(0.5 + titleLines.length * 0.2).toFixed(1)}s`}
         >
             <button type="button" class="js-open-chat hero-cta hero-cta--primary group">
@@ -118,7 +121,6 @@ const heroSubtitle = settings.hero_subtitle || '';
             </a>
         </div>
     </div>
-</section>
 
     <!-- Scroll Indicator -->
     <div

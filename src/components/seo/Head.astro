@@ -29,6 +29,8 @@ const {
   noindex = false,
 } = Astro.props;
 
+const youtubeId = settings.hero_video_desktop?.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/)?.[1] || 'D91q99QK11k';
+
 const fullTitle = title ? `${title} | ${siteName}` : `${siteName} — Productora Audiovisual en Sevilla`;
 
 // LocalBusiness Schema
@@ -103,9 +105,16 @@ const websiteSchema = {
 <script type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} />
 <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 
-<!-- Preconnect Google Fonts -->
+<!-- Preload Critical Assets -->
+<link rel="preload" href="https://fonts.gstatic.com/s/outfit/v11/QGYqz_NIveBy4dfCdA9u68nv7V0.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={`https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`} as="image" fetchpriority="high" />
+
+<!-- Preconnect Google Fonts & YouTube -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://www.youtube.com" />
+<link rel="preconnect" href="https://i.ytimg.com" />
+
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
 <!-- Favicon -->

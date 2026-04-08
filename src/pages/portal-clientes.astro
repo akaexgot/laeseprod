@@ -18,7 +18,6 @@ const clients = allClients.filter((c: any) => c.is_active);
 
   <!-- ═══ HERO ═══ -->
   <section class="pc-hero">
-      <div class="pc-hero__dots"></div>
       <div class="pc-hero__glow"></div>
       <div class="section-container pc-hero__inner">
           <div class="pc-hero__badge">
@@ -42,7 +41,6 @@ const clients = allClients.filter((c: any) => c.is_active);
 
   <!-- ═══ LOGO GRID ═══ -->
   <section class="pc-grid-section">
-      <div class="pc-grid-section__dots"></div>
       <div class="section-container">
           <div id="clients-grid" class="pc-grid">
               {clients.map((client, idx) => (
@@ -151,11 +149,6 @@ const clients = allClients.filter((c: any) => c.is_active);
     position: relative; padding-top: 9rem; padding-bottom: 3rem;
     background: #ffffff; overflow: hidden; text-align: center;
 }
-.pc-hero__dots {
-    position: absolute; inset: 0; opacity: .12; pointer-events: none;
-    background-image: radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px);
-    background-size: 28px 28px;
-}
 .pc-hero__glow {
     position: absolute; top: 0; left: 50%;
     transform: translateX(-50%);
@@ -209,11 +202,6 @@ const clients = allClients.filter((c: any) => c.is_active);
 /* ── GRID ─────────────────────────────────────── */
 .pc-grid-section {
     position: relative; background: #ffffff; padding: 2rem 0 6rem;
-}
-.pc-grid-section__dots {
-    position: absolute; inset: 0; opacity: .08; pointer-events: none;
-    background-image: radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px);
-    background-size: 28px 28px;
 }
 .pc-grid {
     display: grid;

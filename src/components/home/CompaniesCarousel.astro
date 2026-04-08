@@ -32,7 +32,9 @@ const companies = await getCompanies();
                                     <img
                                         src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
                                         alt={company.name}
-                                        class="h-8 lg:h-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
+                                        class="h-8 lg:h-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                 </a>
                             ) : (

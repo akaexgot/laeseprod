@@ -95,7 +95,7 @@ const settings = await getSettings();
     const lines    = navbar.querySelectorAll<HTMLElement>('.hamburger-line');
 
     const path        = window.location.pathname;
-    const lightPages  = ['/contacto'];
+    const lightPages  = ['/contacto', '/portal-clientes'];
     const isLightPage = lightPages.some(p => path === p || path.startsWith(p + '/'));
 
     // ── Estilos por tema ──────────────────────────────────────────────
@@ -128,9 +128,9 @@ const settings = await getSettings();
 
     // LIGHT_TOP: páginas blancas sin scroll
     const STYLE_LIGHT_TOP = {
-        bg:         '#ffffff',
+        bg:         'transparent',
         bgFilter:   'none',
-        border:     '0 1px 0 0 rgba(0,0,0,0.07)',
+        border:     'none',
         linkColor:  '#6b7280',
         linkHover:  '#111111',
         brand:      '#111111',
@@ -174,10 +174,16 @@ const settings = await getSettings();
             }
         }
 
-        // CTA
-        navCta.style.color            = s.cta.color;
-        navCta.style.borderColor      = s.cta.border;
-        navCta.style.backgroundColor  = s.cta.bg;
+        // CTA: Rojo solo en /portal-clientes, de lo contrario lo que venga del estilo
+        if (path === '/portal-clientes') {
+            navCta.style.color            = '#c42847';
+            navCta.style.borderColor      = 'rgba(196,40,71,0.2)';
+            navCta.style.backgroundColor  = 'rgba(196,40,71,0.05)';
+        } else {
+            navCta.style.color            = s.cta.color;
+            navCta.style.borderColor      = s.cta.border;
+            navCta.style.backgroundColor  = s.cta.bg;
+        }
 
         // Hamburger
         lines.forEach(l => { l.style.background = s.lines; });

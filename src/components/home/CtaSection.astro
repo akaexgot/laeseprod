@@ -13,7 +13,6 @@ const settings = await getSettings();
     <div class="cta-bg__gradient"></div>
     <div class="cta-bg__glow-left"></div>
     <div class="cta-bg__glow-right"></div>
-    <div class="cta-bg__dots"></div>
     <!-- Líneas decorativas horizontales tenues -->
     <div class="cta-bg__line cta-bg__line--top"></div>
     <div class="cta-bg__line cta-bg__line--bottom"></div>
@@ -120,11 +119,6 @@ const settings = await getSettings();
   width: 400px; height: 400px;
   background: radial-gradient(circle, rgba(196,40,71,0.04) 0%, transparent 70%);
   filter: blur(60px);
-}
-.cta-bg__dots {
-  position: absolute; inset: 0; opacity: .4;
-  background-image: radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
 }
 .cta-bg__line {
   position: absolute; left: 0; right: 0; height: 1px;

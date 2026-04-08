@@ -146,14 +146,6 @@
     padding: 2rem 0;
 }
 
-.contact-body__bg-dots {
-    position: absolute;
-    inset: 0;
-    opacity: 0.04;
-    pointer-events: none;
-    background-image: radial-gradient(#000 1px, transparent 1px);
-    background-size: 22px 22px;
-}
 
 .contact-body__grid {
     position: relative;

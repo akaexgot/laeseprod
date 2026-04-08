@@ -29,15 +29,73 @@ const { title, description, image, noindex } = Astro.props;
             image={image}
             noindex={noindex}
         />
-        <!-- Preconnect for performance -->
-        <link rel="preconnect" href="https://www.youtube.com" />
-        <link rel="preconnect" href="https://i.ytimg.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link rel="dns-prefetch" href="https://www.youtube.com" />
-        <link rel="dns-prefetch" href="https://www.google.com" />
     </head>
     <body class="bg-dark text-light antialiased">
+        <!-- ── PRELOADER ── -->
+        <div id="site-preloader" class="fixed inset-0 z-[9999] bg-[#0a0a0f] flex items-center justify-center transition-all duration-700 ease-in-out">
+            <div class="relative flex flex-col items-center gap-8">
+                <div class="preloader-logo-container relative w-32 h-32 lg:w-40 lg:h-40">
+                    <img src="/logo-blanco-web.png" alt="Cargando..." class="w-full h-full object-contain animate-preloader-spin" />
+                    <div class="absolute inset-0 rounded-full border-2 border-carmin/20 border-t-carmin animate-spin duration-500"></div>
+                </div>
+                <div class="h-1 w-24 bg-white/10 rounded-full overflow-hidden">
+                    <div id="preloader-bar" class="h-full bg-carmin transition-all duration-300 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            #site-preloader.fade-out {
+                opacity: 0;
+                pointer-events: none;
+                visibility: hidden;
+            }
+            .animate-preloader-spin {
+                animation: preloader-pulse 2s ease-in-out infinite;
+            }
+            @keyframes preloader-pulse {
+                0%, 100% { transform: scale(0.98); opacity: 0.9; }
+                50% { transform: scale(1.02); opacity: 1; }
+            }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const preloader = document.getElementById('site-preloader');
+                const bar = document.getElementById('preloader-bar');
+                if (!preloader || !bar) return;
+
+                // Speed up progress simulation
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 25;
+                    if (progress > 98) progress = 98;
+                    bar.style.width = `${progress}%`;
+                }, 80);
+
+                window.addEventListener('load', () => {
+                    clearInterval(interval);
+                    bar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        preloader.classList.add('fade-out');
+                        setTimeout(() => {
+                            preloader.remove();
+                        }, 700);
+                    }, 100);
+                });
+
+                // Safety timeout - reduced for faster experience
+                setTimeout(() => {
+                    const p = document.getElementById('site-preloader');
+                    if (p) {
+                        p.classList.add('fade-out');
+                        setTimeout(() => p.remove(), 700);
+                    }
+                }, 3000);
+            });
+        </script>
+
         <Navbar />
 
         <main>
