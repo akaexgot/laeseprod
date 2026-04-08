@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.7",
@@ -18,5 +19,9 @@
     "resend": "^4.1.2",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
+  }
+  ,
+  "devDependencies": {
+    "vitest": "^1.0.0"
   }
 }
