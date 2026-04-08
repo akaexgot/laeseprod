@@ -132,18 +132,35 @@ import "../../styles/global.css";
 
                 try {
                     const supabase = createClient(supabaseUrl, supabaseKey);
-                    const { error } = await supabase.auth.signInWithPassword({
+                    const { data, error } = await supabase.auth.signInWithPassword({
                         email,
                         password,
                     });
 
-                    if (error) {
+                    if (error || !data?.session) {
                         errorDiv.textContent = "Credenciales incorrectas";
                         errorDiv.classList.remove("hidden");
                     } else {
+                        // Send session tokens to server to set HttpOnly cookies
+                        try {
+                            await fetch('/api/auth/session', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    access_token: data.session.access_token,
+                                    refresh_token: data.session.refresh_token,
+                                    expires_in: data.session.expires_in || null,
+                                }),
+                            });
+                        } catch (err) {
+                            console.error('Failed to persist session on server', err);
+                        }
+
+                        // Redirect to admin; server-side pages will read cookies
                         window.location.href = "/admin";
                     }
-                } catch {
+                } catch (e) {
+                    console.error(e);
                     errorDiv.textContent = "Error de conexión";
                     errorDiv.classList.remove("hidden");
                 }
