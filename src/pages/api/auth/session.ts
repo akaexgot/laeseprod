@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 
-// POST /api/auth/session
-export const post: APIRoute = async ({ request }) => {
+async function handleSessionRequest(request: Request) {
   try {
     const body = await request.json();
     const access_token = body?.access_token || null;
@@ -25,14 +24,17 @@ export const post: APIRoute = async ({ request }) => {
       `sb-refresh-token=${encodeURIComponent(refresh_token)}; ${cookieAttrs}`,
     ];
 
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Set-Cookie': cookies.join('\n'),
-      },
-    });
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+    // Append multiple Set-Cookie headers
+    cookies.forEach(c => headers.append('Set-Cookie', c));
+
+    return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400 });
   }
-};
+}
+
+// Export both lowercase and uppercase to satisfy different dev servers
+export const post: APIRoute = async ({ request }) => handleSessionRequest(request);
+export const POST: APIRoute = async ({ request }) => handleSessionRequest(request);
