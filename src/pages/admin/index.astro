@@ -1,7 +1,21 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getProjects, getServices, getSectors, getCompanies } from "../../lib/data";
-import { getServiceSupabase } from "../../lib/supabase";
+import { supabase, getServiceSupabase } from "../../lib/supabase";
+
+// SSR auth + admin check
+const cookie = Astro.request?.headers.get("cookie") || "";
+if (!Astro.request) {
+    return Astro.redirect("/admin/login");
+}
+if (!supabase) return Astro.redirect("/admin/login");
+const { data: userData } = await supabase.auth.getUser({ cookie });
+const user = userData?.user;
+if (!user) return Astro.redirect("/admin/login");
+const serviceSupabase = getServiceSupabase();
+if (!serviceSupabase) return Astro.redirect("/admin/login");
+const { data: profile } = await serviceSupabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
+if (!profile?.is_admin) return Astro.redirect('/admin/login');
 
 const projects = await getProjects();
 const services = await getServices();
@@ -9,10 +23,9 @@ const sectors = await getSectors();
 const companies = await getCompanies();
 
 // Get recent messages from the contacts table
-const supabase = getServiceSupabase();
 let recentMessages: any[] = [];
-if (supabase) {
-    const { data } = await supabase
+if (serviceSupabase) {
+    const { data } = await serviceSupabase
         .from('contacts')
         .select('*')
         .order('created_at', { ascending: false })

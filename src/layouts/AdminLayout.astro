@@ -4,6 +4,7 @@
  * Clean, professional sidebar + main content area
  * Restyled with a premium Zinc Dark Mode aesthetic natively
  */
+
 import "../styles/global.css";
 
 interface Props {
@@ -92,6 +93,20 @@ const menuGroups = [
         </style>
     </head>
     <body class="bg-zinc-950 text-zinc-100 antialiased overflow-hidden selection:bg-rose-500/30 selection:text-white admin-layout" style="font-family: 'Inter', sans-serif;">
+        <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+        const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+        const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+        const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
+        async function checkSession() {
+            if (!supabase) return window.location.href = '/admin/login';
+            const { data } = await supabase.auth.getUser();
+            if (!data?.user && window.location.pathname !== '/admin/login') {
+                window.location.href = '/admin/login';
+            }
+        }
+        checkSession();
+        </script>
         <!-- Foolproof explicitly styled wrapper to guarantee padding/width constraints -->
         <div style="display: flex; height: 100vh; width: 100vw; background-color: #09090b; overflow: hidden;">
             
