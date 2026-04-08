@@ -145,6 +145,7 @@ import "../../styles/global.css";
                         try {
                             await fetch('/api/auth/session', {
                                 method: 'POST',
+                                credentials: 'include',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     access_token: data.session.access_token,
