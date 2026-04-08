@@ -166,8 +166,7 @@ const videoVerticalId = getVideoId(sector.video_vertical);
 
         let isScrolling = false;
         let scrollTimeout: ReturnType<typeof setTimeout>;
-        let accumulatedDelta = 0;
-        let deltaTimeout: ReturnType<typeof setTimeout> | null = null;
+        
 
         function getVisibleSectionIndex() {
             let maxIdx = 0, maxArea = 0;
@@ -179,27 +178,26 @@ const videoVerticalId = getVideoId(sector.video_vertical);
             return maxIdx;
         }
 
-        function scrollTo(index: number) {
+        function scrollToSection(index: number) {
             if (index < 0 || index >= sections.length || isScrolling) return;
             isScrolling = true;
             sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
             clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => { isScrolling = false; }, 1600);
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+            }, 1300);
         }
 
         window.addEventListener('wheel', (e) => {
             e.preventDefault();
             if (isScrolling) return;
 
-            accumulatedDelta += e.deltaY;
-            if (deltaTimeout) clearTimeout(deltaTimeout);
-            deltaTimeout = setTimeout(() => {
-                if (isScrolling) { accumulatedDelta = 0; return; }
-                const cur = getVisibleSectionIndex();
-                if (accumulatedDelta > 25) scrollTo(cur + 1);
-                else if (accumulatedDelta < -25) scrollTo(cur - 1);
-                accumulatedDelta = 0;
-            }, 120);
+            const currentIndex = getVisibleSectionIndex();
+            if (e.deltaY > 0) {
+                scrollToSection(currentIndex + 1);
+            } else if (e.deltaY < 0) {
+                scrollToSection(currentIndex - 1);
+            }
         }, { passive: false });
 
         let touchStartY = 0;
@@ -209,8 +207,8 @@ const videoVerticalId = getVideoId(sector.video_vertical);
             if (isScrolling) return;
             const delta = touchStartY - e.changedTouches[0].screenY;
             const cur = getVisibleSectionIndex();
-            if (delta > 50) scrollTo(cur + 1);
-            else if (delta < -50) scrollTo(cur - 1);
+            if (delta > 50) scrollToSection(cur + 1);
+            else if (delta < -50) scrollToSection(cur - 1);
         }, { passive: false });
 
         window.addEventListener('keydown', (e) => {
@@ -219,8 +217,8 @@ const videoVerticalId = getVideoId(sector.video_vertical);
                 e.preventDefault();
                 if (isScrolling) return;
                 const cur = getVisibleSectionIndex();
-                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollTo(cur + 1);
-                else scrollTo(cur - 1);
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollToSection(cur + 1);
+                else scrollToSection(cur - 1);
             }
         }, { passive: false });
     });

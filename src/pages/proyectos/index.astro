@@ -227,53 +227,92 @@ const screens = groupIntoScreens(projects);
 
     /* ── Fullpage Scroll ── */
     document.addEventListener('DOMContentLoaded', () => {
-        const sections = Array.from(document.querySelectorAll('.pj-screen, footer'));
+        const sections = Array.from(document.querySelectorAll('.pj-screen'));
+        const footer = document.querySelector('footer');
+        if (footer) sections.push(footer);
+        
         if (sections.length === 0) return;
 
         let isScrolling = false;
         let scrollTimeout: ReturnType<typeof setTimeout>;
-        let accumulatedDelta = 0;
-        let deltaTimeout: ReturnType<typeof setTimeout> | null = null;
 
         function getVisibleSectionIndex() {
+            // Si estamos al fondo del todo del documento (margen de error de 5px)
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 5) {
+                return sections.length - 1; // Devolvemos el footer
+            }
+
             let maxIdx = 0, maxArea = 0;
             sections.forEach((sec, idx) => {
                 const r = sec.getBoundingClientRect();
                 const visible = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0));
-                if (visible > maxArea) { maxArea = visible; maxIdx = idx; }
+                // Si el footer u otra sección pequeña no llena la pantalla, 
+                // le damos un pequeño handicap positivo si es la última y estamos cerca para que gane
+                const bonus = (idx === sections.length - 1 && r.top < window.innerHeight / 2) ? 1000 : 0;
+                
+                if (visible + bonus > maxArea) { maxArea = visible + bonus; maxIdx = idx; }
             });
             return maxIdx;
         }
 
-        function scrollTo(index: number) {
+        function scrollToSection(index: number) {
             if (index < 0 || index >= sections.length || isScrolling) return;
             isScrolling = true;
-            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            const target = sections[index] as HTMLElement;
+            window.scrollTo({
+                top: target.offsetTop,
+                behavior: 'smooth'
+            });
+
             clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => { isScrolling = false; }, 1300);
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+            }, 1000); // 1000ms is perfectly calibrated to match trackpad smoothing curve
         }
 
         window.addEventListener('wheel', (e) => {
             const target = e.target as HTMLElement;
-            if (target.closest('.contact-body') || target.closest('footer')) return;
+            
+            // Si hacemos scroll DESDE dentro del formulario, permitir que el navegador maneje el overflow nativo de ese div.
+            if (target.closest('.contact-body') && target.closest('.contact-body')!.scrollHeight > target.closest('.contact-body')!.clientHeight) {
+                // If scrolling up while at top of form, OR scrolling down while at bottom of form, we let it snap to next section
+                const form = target.closest('.contact-body') as HTMLElement;
+                const atTop = form.scrollTop <= 0 && e.deltaY < 0;
+                const atBottom = form.scrollTop + form.clientHeight >= form.scrollHeight && e.deltaY > 0;
+                if (!atTop && !atBottom) {
+                    return; // native scroll inside form
+                }
+            }
+            
+            // Si es el footer y se está haciendo scroll arriba, hacer preventDefault y subir a la sección anterior
+            if (target.closest('footer') && e.deltaY < 0) {
+                 e.preventDefault();
+                 if (!isScrolling) scrollToSection(getVisibleSectionIndex() - 1);
+                 return;
+            }
 
-            e.preventDefault();
+            e.preventDefault(); // Stop native "drift" entirely on projects grid
+
             if (isScrolling) return;
 
-            accumulatedDelta += e.deltaY;
-            if (deltaTimeout) clearTimeout(deltaTimeout);
-            deltaTimeout = setTimeout(() => {
-                if (isScrolling) { accumulatedDelta = 0; return; }
-                const cur = getVisibleSectionIndex();
-                if (accumulatedDelta > 25) scrollTo(cur + 1);
-                else if (accumulatedDelta < -25) scrollTo(cur - 1);
-                accumulatedDelta = 0;
-            }, 120);
+            const currentIndex = getVisibleSectionIndex();
+            if (e.deltaY > 0) {
+                scrollToSection(currentIndex + 1);
+            } else if (e.deltaY < 0) {
+                scrollToSection(currentIndex - 1);
+            }
         }, { passive: false });
 
         let touchStartY = 0;
         window.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].screenY; }, { passive: false });
-        window.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+        
+        window.addEventListener('touchmove', (e) => { 
+            const target = e.target as HTMLElement;
+            if (target.closest('.contact-body')) return; // let form scroll naturally
+            e.preventDefault(); 
+        }, { passive: false });
+        
         window.addEventListener('touchend', (e) => {
             const target = e.target as HTMLElement;
             if (target.closest('.contact-body') || target.closest('footer')) return;
@@ -281,18 +320,22 @@ const screens = groupIntoScreens(projects);
             if (isScrolling) return;
             const delta = touchStartY - e.changedTouches[0].screenY;
             const cur = getVisibleSectionIndex();
-            if (delta > 25) scrollTo(cur + 1);
-            else if (delta < -25) scrollTo(cur - 1);
+            if (delta > 25) scrollToSection(cur + 1);
+            else if (delta < -25) scrollToSection(cur - 1);
         }, { passive: false });
 
         window.addEventListener('keydown', (e) => {
+            // Ignore if typing in form
+            const target = e.target as HTMLElement;
+            if (['INPUT', 'TEXTAREA'].includes(target.tagName)) return;
+
             const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' '];
             if (keys.includes(e.key)) {
                 e.preventDefault();
                 if (isScrolling) return;
                 const cur = getVisibleSectionIndex();
-                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollTo(cur + 1);
-                else scrollTo(cur - 1);
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollToSection(cur + 1);
+                else scrollToSection(cur - 1);
             }
         }, { passive: false });
     });

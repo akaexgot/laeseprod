@@ -13,9 +13,12 @@ const settings = await getSettings();
 
     <div class="section-container relative">
         <div id="nav-inner" class="flex items-center justify-between h-20 lg:h-24 transition-all duration-300">
-            <!-- Izquierda: Logo -->
-            <a href="/" class="flex lg:flex-1 items-center justify-start group">
-                <img src="/logo2.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-transform duration-500 group-hover:scale-105" />
+            <!-- Izquierda: Logo (dual images for scroll swap) -->
+            <a href="/" class="flex lg:flex-1 items-center justify-start group relative">
+                <div class="relative h-12 lg:h-14" style="min-width:120px">
+                    <img id="nav-logo-white" src="/logo-blanco-web.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:1" />
+                    <img id="nav-logo-dark" src="/logo-oscuro-web.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:0" />
+                </div>
             </a>
 
             <!-- Centro: Links (Absolutamente centrados) -->
@@ -79,7 +82,7 @@ const settings = await getSettings();
         <path d="M8 12h.01M12 12h.01M16 12h.01"></path>
     </svg>
     <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></span>
-</button>}
+</button>
 
 <script>
 (function () {
@@ -138,6 +141,10 @@ const settings = await getSettings();
 
 
 
+    // Logo elements
+    const logoWhite = document.getElementById('nav-logo-white') as HTMLImageElement | null;
+    const logoDark  = document.getElementById('nav-logo-dark') as HTMLImageElement | null;
+
     function applyStyle(s: typeof STYLE_DARK_TRANSPARENT) {
         // Fondo
         navBg.style.background       = s.bg;
@@ -155,6 +162,17 @@ const settings = await getSettings();
 
         // Brand
         if (navBrand) navBrand.style.color = s.brand;
+
+        // Logo swap: white logo for dark-transparent, dark logo otherwise
+        if (logoWhite && logoDark) {
+            if (s === STYLE_DARK_TRANSPARENT) {
+                logoWhite.style.opacity = '1';
+                logoDark.style.opacity  = '0';
+            } else {
+                logoWhite.style.opacity = '0';
+                logoDark.style.opacity  = '1';
+            }
+        }
 
         // CTA
         navCta.style.color            = s.cta.color;

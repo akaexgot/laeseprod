@@ -245,12 +245,14 @@ const gradients = [
             return maxIdx;
         }
 
-        function scrollTo(index: number) {
+        function scrollToSection(index: number) {
             if (index < 0 || index >= sections.length || isScrolling) return;
             isScrolling = true;
             sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
             clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => { isScrolling = false; }, 1300);
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+            }, 1300);
         }
 
         window.addEventListener('wheel', (e) => {
@@ -267,8 +269,8 @@ const gradients = [
             if (isScrolling) return;
             const delta = touchStartY - e.changedTouches[0].screenY;
             const cur = getVisibleSectionIndex();
-            if (delta > 50) scrollTo(cur + 1);
-            else if (delta < -50) scrollTo(cur - 1);
+            if (delta > 50) scrollToSection(cur + 1);
+            else if (delta < -50) scrollToSection(cur - 1);
         }, { passive: false });
 
         window.addEventListener('keydown', (e) => {
@@ -277,8 +279,8 @@ const gradients = [
                 e.preventDefault();
                 if (isScrolling) return;
                 const cur = getVisibleSectionIndex();
-                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollTo(cur + 1);
-                else scrollTo(cur - 1);
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollToSection(cur + 1);
+                else scrollToSection(cur - 1);
             }
         }, { passive: false });
     });

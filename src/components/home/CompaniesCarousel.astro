@@ -7,27 +7,20 @@ import { getCompanies } from "../../lib/data";
 const companies = await getCompanies();
 ---
 
-<section
+<div
     id="companies-section"
     class="bg-white border-b border-black/5 relative overflow-hidden z-10"
-    style="padding-top: 64px; padding-bottom: 16px;"
+    style="padding-top: 12px; padding-bottom: 6px;"
 >
-    <!-- Label -->
-    <div class="flex items-center justify-center gap-4 py-3 invisible">
-        <div class="h-px w-16 bg-gradient-to-r from-transparent to-black/10"></div>
-        <span class="text-[10px] text-dark/70 font-mono tracking-[0.3em] uppercase font-bold whitespace-nowrap">
-            Marcas que confían en nosotros
-        </span>
-        <div class="h-px w-16 bg-gradient-to-l from-transparent to-black/10"></div>
-    </div>
+    <!-- Label (compact) -->
 
     <!-- Marquee -->
-    <div class="overflow-hidden pb-8">
+    <div class="overflow-hidden pb-2">
         <div class="marquee-track flex items-center gap-6 lg:gap-10">
             {
                 [...companies, ...companies, ...companies, ...companies].map(
                     (company: any) => (
-                        <div class="flex items-center justify-center min-w-[160px] lg:min-w-[200px] flex-shrink-0">
+                        <div class="flex items-center justify-center min-w-[120px] lg:min-w-[160px] flex-shrink-0">
                             {company.website ? (
                                 <a 
                                     href={company.website} 
@@ -39,14 +32,14 @@ const companies = await getCompanies();
                                     <img
                                         src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
                                         alt={company.name}
-                                        class="h-16 lg:h-24 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
+                                        class="h-8 lg:h-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
                                     />
                                 </a>
                             ) : (
                                 <img
                                     src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
                                     alt={company.name}
-                                    class="h-16 lg:h-24 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                    class="h-8 lg:h-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
                                 />
                             )}
                         </div>
@@ -55,4 +48,4 @@ const companies = await getCompanies();
             }
         </div>
     </div>
-</section>
+</div>
