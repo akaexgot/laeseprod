@@ -149,7 +149,7 @@ import "../../styles/global.css";
                     } else {
                         // Send session tokens to server to set HttpOnly cookies
                         try {
-                            await fetch('/api/auth/session', {
+                            const res = await fetch('/api/auth/session', {
                                 method: 'POST',
                                 credentials: 'include',
                                 headers: { 'Content-Type': 'application/json' },
@@ -160,8 +160,13 @@ import "../../styles/global.css";
                                 }),
                             });
 
-                            // DEV: print document.cookie so we can see debug cookie set by server
                             if (import.meta.env.DEV) {
+                                try {
+                                    const json = await res.json();
+                                    console.log('POST /api/auth/session response:', json);
+                                } catch (e) {
+                                    console.warn('Could not parse /api/auth/session response JSON', e);
+                                }
                                 console.log('document.cookie after /api/auth/session ->', document.cookie);
                             }
                         } catch (err) {

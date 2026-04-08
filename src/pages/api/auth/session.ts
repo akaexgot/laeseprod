@@ -35,7 +35,9 @@ async function handleSessionRequest(request: Request) {
       headers.append('Set-Cookie', debugCookie);
     }
 
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+    // In development return cookies array in the response body for debugging
+    const body = !isProd ? { ok: true, cookies } : { ok: true };
+    return new Response(JSON.stringify(body), { status: 200, headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400 });
   }
