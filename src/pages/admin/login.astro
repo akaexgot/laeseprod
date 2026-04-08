@@ -132,7 +132,13 @@ import "../../styles/global.css";
 
                 if (!supabaseUrl || !supabaseKey) {
                     // Dev mode: redirect directly
-                    window.location.href = "/admin";
+                                if (import.meta.env.DEV) {
+                                    // Pause redirect in dev so cookies can be inspected
+                                    const proceed = confirm('Dev: cookies set. Abrir /admin ahora? (Aceptar = continuar)');
+                                    if (proceed) window.location.href = '/admin';
+                                } else {
+                                    window.location.href = "/admin";
+                                }
                     return;
                 }
 
