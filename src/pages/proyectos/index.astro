@@ -14,34 +14,40 @@ const allProjects = await getProjects();
 const projects = allProjects.filter((p: any) => p.video_project);
 
 function getVideoId(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if (match) return match[1];
-  if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
-  return null;
+    if (!value) return null;
+    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (match) return match[1];
+    if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
+    return null;
 }
 
-/**
- * Group projects into "screens" of 3-4 items.
- * Only creates complete groups — leftover projects that don't fill a screen are still shown.
- */
-function groupIntoScreens(projects: any[]) {
-  const screens: any[][] = [];
-  let i = 0;
-  let groupSize = 3;
+// Build screens according to business rules:
+// - First screen: up to 3 featured projects (`featured_home`)
+// - Following screens: chunks of 4 (2x2). Only full chunks are included.
+function buildProjectScreens(all: any[]) {
+    const FEATURED_LIMIT = 3;
+    const CHUNK_SIZE = 4;
 
-  while (i < projects.length) {
-    const remaining = projects.length - i;
-    // If remaining items can't fill a full group, just put them all in one
-    const size = remaining < groupSize ? remaining : groupSize;
-    screens.push(projects.slice(i, i + size));
-    i += size;
-    groupSize = groupSize === 3 ? 4 : 3;
-  }
-  return screens;
+    // 1. extract featured (preserve order)
+    const featured = all.filter(p => p.featured_home).slice(0, FEATURED_LIMIT);
+
+    // 2. remaining projects (preserve original order, exclude featured)
+    const remaining = all.filter(p => !featured.some((f: any) => f.id === p.id));
+
+    // 3. chunk remaining into groups of CHUNK_SIZE and only keep full chunks
+    const chunks: any[][] = [];
+    for (let i = 0; i < remaining.length; i += CHUNK_SIZE) {
+        const chunk = remaining.slice(i, i + CHUNK_SIZE);
+        if (chunk.length === CHUNK_SIZE) chunks.push(chunk);
+    }
+
+    const screens: any[][] = [];
+    if (featured.length > 0) screens.push(featured);
+    screens.push(...chunks);
+    return screens;
 }
 
-const screens = groupIntoScreens(projects);
+const screens = buildProjectScreens(projects);
 ---
 
 <BaseLayout
