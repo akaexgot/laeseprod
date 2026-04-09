@@ -8,14 +8,8 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getServiceSupabase } from "../../lib/supabase";
 import { getUserFromCookie } from "../../lib/auth";
 
-const cookie = Astro.request?.headers.get("cookie") || "";
-if (!Astro.request) return Astro.redirect('/admin/login');
-const { user, error: authError } = await getUserFromCookie(cookie);
-if (!user) return Astro.redirect('/admin/login');
-const serviceSupabase = getServiceSupabase();
-if (!serviceSupabase) return Astro.redirect('/admin/login');
-const { data: profile } = await serviceSupabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
-if (!profile?.is_admin) return Astro.redirect('/admin/login');
+// SSR auth is handled by middleware
+const serviceSupabase = getServiceSupabase()!;
 
 let messages: any[] = [];
 let error = null;
@@ -57,18 +51,18 @@ if (serviceSupabase) {
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left">
-                <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
-                    <tr>
-                        <th class="font-semibold w-64" style="padding: 1rem 1.5rem;">De / Empresa</th>
-                        <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Mensaje</th>
-                        <th class="font-semibold hidden md:table-cell w-40" style="padding: 1rem 1.5rem;">Fecha</th>
-                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
+                    <tr class="border-b border-zinc-800/50">
+                        <th style="padding: 1.25rem 1.5rem;" class="w-64">De / Empresa</th>
+                        <th class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">Mensaje</th>
+                        <th class="hidden md:table-cell w-40" style="padding: 1.25rem 1.5rem;">Fecha</th>
+                        <th class="text-right hidden sm:table-cell w-24" style="padding: 1.25rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {messages.map((msg) => (
                         <tr class={`transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default ${msg.status === 'nuevo' ? 'bg-zinc-800/20' : ''}`} data-id={msg.id} onclick="const btn = this.querySelector('.btn-view'); if(btn && !event.target.closest('button')) btn.click();">
-                            <td class="align-top" style="padding: 1rem 1.5rem;">
+                            <td class="align-top" style="padding: 1.25rem 1.5rem;">
                                 <div class="flex items-start justify-between">
                                     <div>
                                         <div class="font-medium text-zinc-100 flex items-center" style="gap: 0.5rem; margin-bottom: 0.125rem;">
@@ -87,10 +81,10 @@ if (serviceSupabase) {
                                     <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0 mt-1"></i>
                                 </div>
                             </td>
-                            <td class="hidden sm:table-cell align-top" style="padding: 1rem 1.5rem;">
+                            <td class="hidden sm:table-cell align-top" style="padding: 1.25rem 1.5rem;">
                                 <p class="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed line-clamp-2">{msg.message}</p>
                             </td>
-                            <td class="hidden md:table-cell align-top" style="padding: 1rem 1.5rem;">
+                            <td class="hidden md:table-cell align-top" style="padding: 1.25rem 1.5rem;">
                                 <span class="text-xs text-zinc-500">
                                     {new Date(msg.created_at).toLocaleDateString('es-ES', { 
                                         year: 'numeric', month: 'short', day: 'numeric',
@@ -98,24 +92,24 @@ if (serviceSupabase) {
                                     })}
                                 </span>
                             </td>
-                            <td class="hidden sm:table-cell align-top text-right" style="padding: 1rem 1.5rem;">
-                                <div class="flex flex-col items-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
+                            <td class="hidden sm:table-cell align-top text-right" style="padding: 1.25rem 1.5rem;">
+                                <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button class="btn-view hidden" data-msg={JSON.stringify(msg)}></button>
                                     {msg.status === 'nuevo' && (
                                         <button 
-                                            class="btn-mark-read inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-medium text-zinc-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-md transition-colors w-full justify-end border border-transparent hover:border-emerald-400/20" 
+                                            class="btn-mark-read p-2 text-zinc-500 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all" 
                                             data-id={msg.id}
                                             title="Marcar como leído"
                                         >
-                                            <i data-lucide="check-check" class="w-3.5 h-3.5"></i> Leer
+                                            <i data-lucide="check-check" class="w-4.5 h-4.5"></i>
                                         </button>
                                     )}
                                     <button 
-                                        class="btn-delete inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-medium text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors w-full justify-end border border-transparent hover:border-red-400/20" 
+                                        class="btn-delete p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" 
                                         data-id={msg.id}
                                         title="Eliminar"
                                     >
-                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Borrar
+                                        <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                     </button>
                                 </div>
                             </td>

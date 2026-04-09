@@ -30,17 +30,25 @@
     }
 }
 
-/* ── Grid layout (2x2) ──────────────────────── */
+/* ── Grid layout (2x2 blocks) ────────────────── */
 .pj-screen--grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
 }
-@media (max-width: 640px) {
+@media (min-width: 1024px) {
     .pj-screen--grid {
-        grid-template-columns: 1fr;
-        grid-template-rows: repeat(4, 1fr);
+        flex-direction: row;
     }
+}
+
+.pj-group-vertical {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.pj-cell--half {
+    flex: 1;
 }
 
 /* ── Stack (2 stacked cells) ─────────────────── */

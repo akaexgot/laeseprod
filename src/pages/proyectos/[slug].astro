@@ -6,6 +6,7 @@
  * Screen 3: CTA
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactFormBlock from '../../components/ui/ContactFormBlock.astro';
 import { getProjects } from '../../lib/data';
 
 const { slug } = Astro.params;
@@ -142,22 +143,9 @@ const makingOfId = expMobileId || expDesktopId;
         </section>
         )}
 
-        <!-- ═══ SCREEN 3: CTA ═══ -->
+        <!-- ═══ SCREEN 3: CONTACT FORM ═══ -->
         <section class="pj-detail__screen pj-detail__cta-screen" id="pj-cta">
-            <div class="pj-cta__glow"></div>
-            <div class="pj-cta__inner reveal">
-                <h2 class="pj-cta__title">¿Te gustaría un proyecto así?</h2>
-                <p class="pj-cta__text">Cuéntanos tu idea y lo hacemos realidad.</p>
-                <div class="pj-cta__buttons">
-                    <a href="/contacto" class="btn btn-primary btn-xl">
-                        Solicitar presupuesto
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                    </a>
-                    <a href="/proyectos" class="btn btn-outline btn-xl">
-                        Ver más proyectos
-                    </a>
-                </div>
-            </div>
+            <ContactFormBlock />
         </section>
     </article>
 </BaseLayout>
@@ -354,28 +342,56 @@ const makingOfId = expMobileId || expDesktopId;
         opacity: 0; pointer-events: none;
     }
 
-    /* ═══ SCREEN 3: CTA ═══ */
-    .pj-detail__cta-screen { background: var(--color-dark-surface); }
+    /* ═══ SCREEN 3: CTA / CONTACT ═══ */
+    .pj-detail__cta-screen { 
+        background: var(--color-dark-surface); 
+        padding-top: 5vh;
+    }
 
-    .pj-cta__glow {
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 600px; height: 350px; pointer-events: none;
-        background: radial-gradient(ellipse, rgba(155,27,48,0.15) 0%, transparent 70%);
+    /* Dark Theme Overrides for ContactFormBlock inside projects */
+    .pj-detail__cta-screen :global(.contact-body) {
+        background: transparent !important;
+        min-height: auto !important;
+        padding: 0 !important;
     }
-    .pj-cta__inner {
-        position: relative; z-index: 10;
-        display: flex; flex-direction: column; align-items: center; text-align: center;
-        gap: 1.25rem; padding: 2rem;
+
+    .pj-detail__cta-screen :global(.contact-form),
+    .pj-detail__cta-screen :global(.contact-card) {
+        background: var(--color-dark-card) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
     }
-    .pj-cta__title {
-        font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem);
-        font-weight: 800; color: #fff; margin: 0; line-height: 1.1;
+
+    .pj-detail__cta-screen :global(.contact-form__label),
+    .pj-detail__cta-screen :global(.contact-card__title),
+    .pj-detail__cta-screen :global(.contact-info-list__item),
+    .pj-detail__cta-screen :global(.contact-form__input) {
+        color: #fff !important;
     }
-    .pj-cta__text {
-        font-size: 1.0625rem; color: rgba(255,255,255,0.45); margin: 0; max-width: 400px;
+
+    .pj-detail__cta-screen :global(.contact-form__input) {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
     }
-    .pj-cta__buttons {
-        display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.75rem; justify-content: center;
+
+    .pj-detail__cta-screen :global(.contact-form__input:focus) {
+        border-color: var(--color-carmin) !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .pj-detail__cta-screen :global(.contact-form__label),
+    .pj-detail__cta-screen :global(.contact-card__title--info) {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .pj-detail__cta-screen :global(.contact-card__text),
+    .pj-detail__cta-screen :global(.contact-trust__item),
+    .pj-detail__cta-screen :global(.contact-info-list__item span) {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .pj-detail__cta-screen :global(.contact-form__input::placeholder) {
+        color: rgba(255, 255, 255, 0.2) !important;
     }
 </style>
 

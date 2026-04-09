@@ -1,7 +1,7 @@
 ---
 /**
- * Admin Login Page
- * Supabase Auth
+ * Admin Login Page - Premium Redesign
+ * Cinematic Dark Aesthetic with Glassmorphism
  */
 import "../../styles/global.css";
 ---
@@ -12,97 +12,274 @@ import "../../styles/global.css";
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="robots" content="noindex, nofollow" />
-        <title>Login | Admin - VideoMarketing Sevilla</title>
+        <title>Acceso Admin | VideoMarketing Sevilla</title>
         <link rel="icon" type="image/png" href="/logo2.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;500;700&display=swap"
             rel="stylesheet"
         />
+        <style>
+            :root {
+                --color-carmin: #9b1b30;
+                --color-carmin-light: #e8364f;
+                --bg-dark: #050508;
+            }
+            body {
+                background-color: var(--bg-dark);
+                font-family: 'Inter', sans-serif;
+                overflow: hidden;
+            }
+            .login-bg {
+                position: fixed;
+                inset: 0;
+                z-index: -1;
+                background: 
+                    radial-gradient(circle at 20% 30%, rgba(155, 27, 48, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 70%, rgba(155, 27, 48, 0.04) 0%, transparent 40%),
+                    #050508;
+            }
+            .login-grid {
+                position: absolute;
+                inset: 0;
+                background-image: radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
+                background-size: 40px 40px;
+                opacity: 0.5;
+            }
+            .login-container {
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1.5rem;
+                perspective: 1000px;
+            }
+            .login-card {
+                width: 100%;
+                max-width: 440px;
+                background: rgba(15, 15, 20, 0.4);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 2.5rem;
+                padding: 3.5rem 2.5rem;
+                box-shadow: 
+                    0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                    0 0 60px rgba(155, 27, 48, 0.05);
+                animation: cardEntry 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            @keyframes cardEntry {
+                from { opacity: 0; transform: translateY(30px) rotateX(-5deg); }
+                to { opacity: 1; transform: translateY(0) rotateX(0); }
+            }
+            .login-logo-wrapper {
+                position: relative;
+                width: 200px;
+                height: 50px;
+                margin-bottom: 2.5rem;
+                cursor: pointer;
+            }
+            .login-logo {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-contain: contain;
+                filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+                transition: opacity 0.5s ease, transform 0.5s ease;
+            }
+            .login-logo--dark { opacity: 0; }
+            .login-logo-wrapper:hover .login-logo--white { opacity: 0; transform: scale(0.98); }
+            .login-logo-wrapper:hover .login-logo--dark { opacity: 1; transform: scale(1.02); }
+            
+            .input-group { margin-bottom: 1.75rem; }
+            .input-label {
+                display: block;
+                font-family: 'Space Grotesk', sans-serif;
+                font-size: 0.75rem;
+                font-weight: 500;
+                color: rgba(255,255,255,0.4);
+                text-transform: uppercase;
+                letter-spacing: 0.15em;
+                margin-bottom: 0.75rem;
+            }
+            .input-wrapper {
+                position: relative;
+                transition: transform 0.3s ease;
+            }
+            .input-field {
+                width: 100%;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 1.125rem;
+                padding: 1.125rem 1.5rem;
+                color: #fff;
+                font-size: 0.9375rem;
+                outline: none;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-sizing: border-box;
+            }
+            .input-field:focus {
+                background: rgba(255, 255, 255, 0.05);
+                border-color: var(--color-carmin);
+                box-shadow: 0 0 0 4px rgba(155, 27, 48, 0.08);
+            }
+            .login-btn {
+                width: 100%;
+                background: linear-gradient(135deg, #c42847, #9b1b30);
+                color: #fff;
+                border: none;
+                border-radius: 1.125rem;
+                padding: 1.125rem;
+                font-family: 'Outfit', sans-serif;
+                font-size: 1rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 0 10px 25px -5px rgba(155, 27, 48, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.75rem;
+            }
+            .login-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 20px 40px -10px rgba(155, 27, 48, 0.45);
+                filter: brightness(1.1);
+            }
+            .login-btn:active { transform: translateY(0); }
+            .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+            .error-box {
+                background: rgba(239, 68, 68, 0.1);
+                border: 1px solid rgba(239, 68, 68, 0.2);
+                color: #f87171;
+                padding: 1rem;
+                border-radius: 1rem;
+                font-size: 0.8125rem;
+                margin-bottom: 1.75rem;
+                display: none;
+                animation: shake 0.5s ease;
+            }
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25%, 75% { transform: translateX(-4px); }
+                50% { transform: translateX(4px); }
+            }
+            .back-link {
+                display: inline-block;
+                margin-top: 2rem;
+                color: rgba(255,255,255,0.3);
+                font-size: 0.8125rem;
+                text-decoration: none;
+                transition: color 0.3s;
+                font-family: 'Space Grotesk', sans-serif;
+                letter-spacing: 0.05em;
+            }
+            .back-link:hover { color: var(--color-carmin-light); }
+        </style>
     </head>
-    <body
-        class="bg-dark text-light antialiased min-h-screen flex items-center justify-center"
-    >
-        <div class="w-full max-w-md mx-4">
-            <!-- Logo -->
-            <div class="text-center mb-10">
-                <div
-                    class="w-16 h-16 bg-gradient-carmin rounded-2xl flex items-center justify-center text-white font-bold text-2xl font-[Outfit] mx-auto mb-4"
-                >
-                    V
+    <body>
+        <div class="login-bg"></div>
+        <div class="login-grid"></div>
+
+        <main class="login-container">
+            <div class="login-card">
+                <div class="flex flex-col items-center text-center">
+                    <div class="login-logo-wrapper">
+                        <img src="/logo-blanco-web.png" alt="VideoMarketing Sevilla" class="login-logo login-logo--white" />
+                        <img src="/logo-oscuro-web.png" alt="VideoMarketing Sevilla" class="login-logo login-logo--dark" />
+                    </div>
+                    
+                    <div id="login-error" class="error-box"></div>
+
+                    <form id="login-form" class="w-full text-left" method="post" action="/api/auth/login">
+                        <div class="input-group">
+                            <label for="login-email" class="input-label">Identidad</label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="email"
+                                    id="login-email"
+                                    name="email"
+                                    autocomplete="email"
+                                    autocapitalize="off"
+                                    spellcheck="false"
+                                    required
+                                    class="input-field"
+                                    placeholder="admin@vms.es"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="login-password" class="input-label">Clave de acceso</label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="password"
+                                    id="login-password"
+                                    name="password"
+                                    autocomplete="current-password"
+                                    required
+                                    class="input-field"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                        </div>
+
+                        <button type="submit" id="login-submit" class="login-btn">
+                            <span>Ingresar al panel</span>
+                            <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <a href="/" class="back-link">
+                        RETORNAR A LA WEB PRINCIPAL
+                    </a>
                 </div>
-                <h1 class="text-2xl font-[Outfit] font-bold text-white">
-                    Panel de Administración
-                </h1>
-                <p class="text-light-muted text-sm mt-2">
-                    VideoMarketing Sevilla
-                </p>
             </div>
-
-            <!-- Login Form -->
-            <div class="glass rounded-3xl p-8">
-                <form id="login-form" class="space-y-5" method="post" action="/api/auth/login">
-                    <div>
-                        <label
-                            for="login-email"
-                            class="block text-sm font-medium text-light-muted mb-2"
-                            >Email</label
-                        >
-                        <input
-                            type="email"
-                            id="login-email"
-                            name="email"
-                            autocomplete="email"
-                            autocapitalize="off"
-                            spellcheck="false"
-                            required
-                            class="w-full px-5 py-3.5 bg-dark-card border border-dark-border rounded-2xl text-white placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors duration-300"
-                            placeholder="admin@videomarketingsevilla.es"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            for="login-password"
-                            class="block text-sm font-medium text-light-muted mb-2"
-                            >Contraseña</label
-                        >
-                        <input
-                            type="password"
-                            id="login-password"
-                            name="password"
-                            autocomplete="current-password"
-                            required
-                            class="w-full px-5 py-3.5 bg-dark-card border border-dark-border rounded-2xl text-white placeholder-light-subtle focus:outline-none focus:border-carmin transition-colors duration-300"
-                            placeholder="••••••••"
-                        />
-                    </div>
-
-                    <div
-                        id="login-error"
-                        class="hidden rounded-2xl p-3 text-sm bg-red-500/10 text-red-400 border border-red-500/20"
-                    >
-                    </div>
-
-                    <button
-                        type="submit"
-                        id="login-submit"
-                        class="w-full px-6 py-3.5 bg-gradient-carmin text-white font-semibold rounded-2xl hover:shadow-glow-strong transition-all duration-300 disabled:opacity-50"
-                    >
-                        Iniciar sesión
-                    </button>
-                </form>
-            </div>
-
-            <p class="text-center text-light-subtle text-xs mt-8">
-                <a href="/" class="hover:text-carmin-light transition-colors"
-                    >← Volver a la web</a
-                >
-            </p>
-        </div>
+        </main>
 
         <script>
-            // Display error passed via query param (server redirects back with ?error=...)
+            document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const submitBtn = document.getElementById('login-submit') as HTMLButtonElement;
+                const errorDiv = document.getElementById('login-error')!;
+                
+                errorDiv.style.display = 'none';
+                submitBtn.disabled = true;
+                const originalContent = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span>Verificando...</span>';
+
+                try {
+                    const formData = new FormData(form);
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        window.location.href = data.redirect || '/admin';
+                    } else {
+                        errorDiv.textContent = data.error || 'Autenticación fallida';
+                        errorDiv.style.display = 'block';
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalContent;
+                    }
+                } catch (err) {
+                    errorDiv.textContent = 'Error de conexión remota';
+                    errorDiv.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalContent;
+                }
+            });
+
+            // Catch URL errors
             (function(){
                 const params = new URLSearchParams(window.location.search);
                 const err = params.get('error');
@@ -110,7 +287,7 @@ import "../../styles/global.css";
                     const errorDiv = document.getElementById('login-error');
                     if (errorDiv) {
                         errorDiv.textContent = decodeURIComponent(err);
-                        errorDiv.classList.remove('hidden');
+                        errorDiv.style.display = 'block';
                     }
                 }
             })();

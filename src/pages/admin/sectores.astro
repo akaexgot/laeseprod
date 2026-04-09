@@ -8,14 +8,8 @@ import { getSectors } from "../../lib/data";
 import { getServiceSupabase } from "../../lib/supabase";
 import { getUserFromCookie } from "../../lib/auth";
 
-const cookie = Astro.request?.headers.get("cookie") || "";
-if (!Astro.request) return Astro.redirect('/admin/login');
-const { user, error } = await getUserFromCookie(cookie);
-if (!user) return Astro.redirect('/admin/login');
-const serviceSupabase = getServiceSupabase();
-if (!serviceSupabase) return Astro.redirect('/admin/login');
-const { data: profile } = await serviceSupabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
-if (!profile?.is_admin) return Astro.redirect('/admin/login');
+// SSR auth is handled by middleware
+const serviceSupabase = getServiceSupabase()!;
 
 const sectors = await getSectors();
 ---
@@ -37,18 +31,18 @@ const sectors = await getSectors();
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left" id="sectors-table">
-                <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
-                    <tr>
-                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Sector</th>
-                        <th class="font-semibold hidden sm:table-cell w-32" style="padding: 1rem 1.5rem;">Vídeo</th>
-                        <th class="font-semibold hidden md:table-cell w-24 text-center" style="padding: 1rem 1.5rem;">Orden</th>
-                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
+                    <tr class="border-b border-zinc-800/50">
+                        <th style="padding: 1.25rem 1.5rem;">Sector</th>
+                        <th class="hidden sm:table-cell w-32" style="padding: 1.25rem 1.5rem;">Vídeo</th>
+                        <th class="hidden md:table-cell w-24 text-center" style="padding: 1.25rem 1.5rem;">Orden</th>
+                        <th class="text-right hidden sm:table-cell w-24" style="padding: 1.25rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {sectors.map((sector: any) => (
                         <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={sector.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
-                            <td style="padding: 1rem 1.5rem;">
+                            <td style="padding: 1.25rem 1.5rem;">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-start" style="gap: 0.75rem;">
                                         <div class="w-8 h-8 rounded bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5 text-zinc-400">
@@ -62,7 +56,7 @@ const sectors = await getSectors();
                                     <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                 </div>
                             </td>
-                            <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
+                            <td class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">
                                 {sector.video ? (
                                     <span class="inline-flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 w-fit">
                                         <i data-lucide="check" class="w-3 h-3"></i> Listo
@@ -76,13 +70,13 @@ const sectors = await getSectors();
                             <td class="hidden md:table-cell" style="padding: 1rem 1.5rem;">
                                 <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{sector.order}</span>
                             </td>
-                            <td class="hidden sm:table-cell text-right" style="padding: 1rem 1.5rem;">
-                                <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
-                                    <button class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" data-sector={JSON.stringify(sector)} title="Editar">
-                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
+                                <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all btn-edit" data-sector={JSON.stringify(sector)} title="Editar">
+                                        <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
                                     </button>
-                                    <button class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors btn-delete" data-id={sector.id} title="Eliminar">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    <button class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={sector.id} title="Eliminar">
+                                        <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                     </button>
                                 </div>
                             </td>

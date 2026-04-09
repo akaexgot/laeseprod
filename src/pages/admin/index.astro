@@ -4,17 +4,8 @@ import { getProjects, getServices, getSectors, getCompanies } from "../../lib/da
 import { getServiceSupabase } from "../../lib/supabase";
 import { getUserFromCookie } from "../../lib/auth";
 
-// SSR auth + admin check
-const cookie = Astro.request?.headers.get("cookie") || "";
-if (!Astro.request) {
-    return Astro.redirect("/admin/login");
-}
-const { user, error } = await getUserFromCookie(cookie);
-if (!user) return Astro.redirect("/admin/login");
-const serviceSupabase = getServiceSupabase();
-if (!serviceSupabase) return Astro.redirect("/admin/login");
-const { data: profile } = await serviceSupabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
-if (!profile?.is_admin) return Astro.redirect('/admin/login');
+// SSR auth is handled by middleware
+const serviceSupabase = getServiceSupabase()!;
 
 const projects = await getProjects();
 const services = await getServices();

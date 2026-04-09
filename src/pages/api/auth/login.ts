@@ -21,7 +21,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const cookieOptions = {
     path: '/',
     httpOnly: true,
-    secure: import.meta.env.PROD,
+    secure: false, // Forzado a false para que funcione siempre en local sin HTTPS
     sameSite: 'lax' as const,
     maxAge: data.session.expires_in || 60 * 60 * 24 * 7,
   };
@@ -29,5 +29,16 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   cookies.set('sb-access-token', data.session.access_token, cookieOptions);
   cookies.set('sb-refresh-token', data.session.refresh_token, cookieOptions);
 
-  return redirect(redirectTo, 302);
+  // Para asegurar que Astro mande las cookies en un Response manual,
+  // a veces es necesario construir los headers explícitamente o usar la respuesta de cookies.
+  
+  return new Response(JSON.stringify({ 
+    success: true, 
+    redirect: redirectTo 
+  }), { 
+    status: 200, 
+    headers: { 
+      'Content-Type': 'application/json'
+    } 
+  });
 };

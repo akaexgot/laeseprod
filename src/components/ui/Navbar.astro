@@ -97,6 +97,7 @@ const settings = await getSettings();
     const path        = window.location.pathname;
     const lightPages  = ['/contacto', '/portal-clientes'];
     const isLightPage = lightPages.some(p => path === p || path.startsWith(p + '/'));
+    const isProjectPage = path.startsWith('/proyectos/') && path !== '/proyectos';
 
     // ── Estilos por tema ──────────────────────────────────────────────
     // DARK TRANSPARENT: encima de video/dark section sin scroll
@@ -204,6 +205,10 @@ const settings = await getSettings();
 
     function getDesiredState(): string {
         const scrollY = window.scrollY;
+        
+        // 0. Project detail pages: always dark-transparent (white icons/logo)
+        if (isProjectPage) return 'dark-transparent';
+
         const hero    = document.getElementById('hero');
         const fp      = document.getElementById('featured-projects');
         const cs      = document.getElementById('companies-section');
@@ -291,5 +296,43 @@ const settings = await getSettings();
             update(); // restaurar colores correctos tras cerrar
         }
     });
+
+    // ── Secret Admin Shortcut (Long Press on Logo) ──
+    const logoLink = document.querySelector('a[href="/"]');
+    let pressTimer: ReturnType<typeof setTimeout> | null = null;
+    const LONG_PRESS_DURATION = 2000; // 2 seconds
+
+    function startPress() {
+        if (pressTimer) return;
+        (logoLink as HTMLElement).style.transform = 'scale(0.95)';
+        (logoLink as HTMLElement).style.transition = 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)';
+        
+        pressTimer = setTimeout(() => {
+            window.location.href = '/admin/login';
+        }, LONG_PRESS_DURATION);
+    }
+
+    function cancelPress() {
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+        }
+        (logoLink as HTMLElement).style.transform = '';
+        (logoLink as HTMLElement).style.transition = 'transform 0.3s ease';
+    }
+
+    if (logoLink) {
+        // Mouse events
+        logoLink.addEventListener('mousedown', startPress);
+        logoLink.addEventListener('mouseup', cancelPress);
+        logoLink.addEventListener('mouseleave', cancelPress);
+        
+        // Touch events for mobile
+        logoLink.addEventListener('touchstart', (e) => {
+            startPress();
+        }, { passive: true });
+        logoLink.addEventListener('touchend', cancelPress);
+        logoLink.addEventListener('touchcancel', cancelPress);
+    }
 })();
 </script>

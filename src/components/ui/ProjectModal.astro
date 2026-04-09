@@ -35,12 +35,14 @@
                     <p class="pm-info__subtitle" id="pmSubtitle"></p>
                 </div>
                 <p class="pm-info__description" id="pmDescription"></p>
-                <div class="pm-info__actions">
                     <a href="#" class="btn btn-primary btn-xl pm-info__cta" id="pmLink">
                         Ver proyecto completo
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                     </a>
-                </div>
+                    <button class="btn btn-outline btn-xl pm-info__cta" id="pmToggleVideo">
+                        Ver Vídeo Principal
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    </button>
             </div>
         </div>
     </div>
@@ -150,6 +152,30 @@
         display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
     }
     .pm-info__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; }
+
+    /* Full video state */
+    .pm-modal.is-full-video {
+        max-width: 1200px;
+    }
+    .is-full-video .pm-info { display: none; }
+    .is-full-video .pm-video {
+        max-width: none;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 1.5rem;
+    }
+    .is-full-video .pm-body { padding: 0; }
+    .is-full-video .pm-close { background: rgba(0,0,0,0.5); color: #fff; }
+    
+    .btn-outline {
+        border: 1px solid rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.7);
+        background: transparent;
+    }
+    .btn-outline:hover {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+    }
 </style>
 
 <script>
@@ -163,13 +189,18 @@
         const descriptionEl = document.getElementById('pmDescription');
         const clientEl = document.getElementById('pmClient');
         const linkEl = document.getElementById('pmLink') as HTMLAnchorElement;
+        const toggleBtn = document.getElementById('pmToggleVideo');
+        const modalContainer = modal.querySelector('.pm-modal');
 
-        if (!modal || !iframe || !titleEl || !subtitleEl || !descriptionEl || !clientEl || !linkEl) return;
+        if (!modal || !iframe || !titleEl || !subtitleEl || !descriptionEl || !clientEl || !linkEl || !modalContainer) return;
+
+        let currentData: any = null;
 
         function openModal(data: {
             title: string; subtitle: string; description: string;
-            makingOfId: string; slug: string; clientName: string;
+            makingOfId: string; videoId: string; slug: string; clientName: string;
         }) {
+            currentData = data;
             titleEl!.textContent = data.title;
             subtitleEl!.textContent = data.subtitle || '';
             subtitleEl!.style.display = data.subtitle ? '' : 'none';
@@ -178,6 +209,9 @@
             clientEl!.textContent = data.clientName || '';
             clientEl!.style.display = data.clientName ? '' : 'none';
             linkEl!.href = `/proyectos/${data.slug}`;
+
+            modalContainer!.classList.remove('is-full-video');
+            toggleBtn?.classList.remove('hidden');
 
             if (data.makingOfId) {
                 iframe!.src = `https://www.youtube.com/embed/${data.makingOfId}?rel=0&modestbranding=1&autoplay=1`;
@@ -190,8 +224,19 @@
         function closeModal() {
             modal!.classList.remove('is-open');
             document.body.style.overflow = '';
-            setTimeout(() => { iframe!.src = ''; }, 350);
+            setTimeout(() => { 
+                iframe!.src = ''; 
+                modalContainer!.classList.remove('is-full-video');
+            }, 350);
         }
+
+        toggleBtn?.addEventListener('click', () => {
+            if (!currentData) return;
+            modalContainer!.classList.add('is-full-video');
+            toggleBtn.classList.add('hidden');
+            iframe!.src = `https://www.youtube.com/embed/${currentData.videoId}?rel=0&modestbranding=1&autoplay=1`;
+        });
+
 
         // Attach to all project links with data-pm attribute
         document.querySelectorAll('[data-pm-title]').forEach(el => {
@@ -201,7 +246,8 @@
                     title: el.getAttribute('data-pm-title') || '',
                     subtitle: el.getAttribute('data-pm-subtitle') || '',
                     description: el.getAttribute('data-pm-description') || '',
-                    makingOfId: el.getAttribute('data-pm-makingof') || el.getAttribute('data-pm-video') || '',
+                    makingOfId: el.getAttribute('data-pm-makingof') || '',
+                    videoId: el.getAttribute('data-pm-video') || '',
                     slug: el.getAttribute('data-pm-slug') || '',
                     clientName: el.getAttribute('data-pm-client') || '',
                 });

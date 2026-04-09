@@ -13,7 +13,7 @@ const projects = allProjects.slice(0, 3);
  */
 function getVideoId(value: string | null | undefined): string | null {
   if (!value) return null;
-  const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if (match) return match[1];
   if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
   return null;

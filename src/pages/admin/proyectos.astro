@@ -8,14 +8,8 @@ import { getProjects } from "../../lib/data";
 import { getServiceSupabase } from "../../lib/supabase";
 import { getUserFromCookie } from "../../lib/auth";
 
-const cookie = Astro.request?.headers.get("cookie") || "";
-if (!Astro.request) return Astro.redirect('/admin/login');
-const { user, error } = await getUserFromCookie(cookie);
-if (!user) return Astro.redirect('/admin/login');
-const serviceSupabase = getServiceSupabase();
-if (!serviceSupabase) return Astro.redirect('/admin/login');
-const { data: profile } = await serviceSupabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
-if (!profile?.is_admin) return Astro.redirect('/admin/login');
+// SSR auth is handled by middleware
+const serviceSupabase = getServiceSupabase()!;
 
 const projects = await getProjects();
 ---
@@ -37,19 +31,19 @@ const projects = await getProjects();
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left" id="projects-table">
-                <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
-                    <tr>
-                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Proyecto</th>
-                        <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Cliente / Categoría</th>
-                        <th class="font-semibold hidden md:table-cell w-32" style="padding: 1rem 1.5rem;">Multimedia</th>
-                        <th class="font-semibold hidden lg:table-cell text-center w-24" style="padding: 1rem 1.5rem;">Inicio</th>
-                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
+                    <tr class="border-b border-zinc-800/50">
+                        <th style="padding: 1.25rem 1.5rem;">Proyecto</th>
+                        <th class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">Cliente</th>
+                        <th class="hidden md:table-cell w-32" style="padding: 1.25rem 1.5rem;">Multimedia</th>
+                        <th class="hidden lg:table-cell text-center w-24" style="padding: 1.25rem 1.5rem;">Inicio</th>
+                        <th class="text-right hidden sm:table-cell w-24" style="padding: 1.25rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {projects.map((project: any) => (
                         <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={project.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
-                            <td style="padding: 1rem 1.5rem;">
+                            <td style="padding: 1.25rem 1.5rem;">
                                 <div class="flex items-center justify-between">
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                                         <div class="w-10 h-10 bg-zinc-950 rounded bg-cover bg-center border border-zinc-800 shrink-0"
@@ -64,13 +58,12 @@ const projects = await getProjects();
                                     <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                 </div>
                             </td>
-                            <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
+                            <td class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">
                                 <div>
                                     <span class="block text-zinc-300 mb-0.5">{project.client_name || '-'}</span>
-                                    <span class="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-zinc-700">{project.category || 'General'}</span>
                                 </div>
                             </td>
-                            <td class="hidden md:table-cell" style="padding: 1rem 1.5rem;">
+                            <td class="hidden md:table-cell" style="padding: 1.25rem 1.5rem;">
                                 {project.video_project ? (
                                     <span class="inline-flex items-center gap-1 text-emerald-400 text-xs bg-emerald-400/10 px-2 py-1 rounded border border-emerald-400/20">
                                         <i data-lucide="check" class="w-3 h-3"></i> Listo
@@ -81,18 +74,18 @@ const projects = await getProjects();
                                     </span>
                                 )}
                             </td>
-                            <td class="hidden lg:table-cell text-center" style="padding: 1rem 1.5rem;">
+                            <td class="hidden lg:table-cell text-center" style="padding: 1.25rem 1.5rem;">
                                 <button class="btn-toggle-featured p-1.5 rounded hover:bg-zinc-800 transition-colors" data-id={project.id} data-state={project.featured_home ? "1" : "0"} title={project.featured_home ? "Quitar del inicio" : "Destacar en inicio"}>
                                     <i data-lucide="star" class:list={["w-4 h-4", project.featured_home ? "text-amber-400 fill-amber-400" : "text-zinc-600"]}></i>
                                 </button>
                             </td>
-                            <td class="hidden sm:table-cell text-right" style="padding: 1rem 1.5rem;">
-                                <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
-                                    <button class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" data-project={JSON.stringify(project)} title="Editar">
-                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
+                                <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all btn-edit" data-project={JSON.stringify(project)} title="Editar">
+                                        <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
                                     </button>
-                                    <button class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors btn-delete" data-id={project.id} title="Eliminar">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    <button class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={project.id} title="Eliminar">
+                                        <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                     </button>
                                 </div>
                             </td>
@@ -131,36 +124,40 @@ const projects = await getProjects();
                             <input type="text" id="p-slug" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="auto-generado si vacío" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Categoría</label>
-                            <input type="text" id="p-category" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" />
-                        </div>
-                        <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Cliente</label>
                             <input type="text" id="p-client" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Descripción Corta</label>
-                            <textarea id="p-shortdesc" rows="2" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm resize-none"></textarea>
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Descripción</label>
+                            <textarea id="p-description" rows="5" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm resize-none"></textarea>
                         </div>
                     </div>
                     <!-- Right Column (Media) -->
                     <div class="col-span-1" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <h4 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider" style="margin-bottom: 0.5rem;">CONTENIDO MULTIMEDIA</h4>
+                        <!-- Drag & Drop Portada -->
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Imagen Miniatura (URL)</label>
-                            <input type="url" id="p-thumbnail" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" />
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Imagen de Portada</label>
+                            <div id="drop-zone-thumb" class="relative group cursor-pointer border-2 border-dashed border-zinc-800 hover:border-rose-500/50 bg-zinc-950/50 rounded-xl transition-all overflow-hidden" style="height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <input type="file" id="file-thumb" class="hidden" accept="image/*" />
+                                <input type="hidden" id="p-thumbnail" />
+                                <div id="preview-thumb" class="absolute inset-0 bg-cover bg-center hidden opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                                <div id="empty-thumb" class="relative z-10 flex flex-direction: column; align-items: center; gap: 0.25rem; text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                                    <i data-lucide="image-plus" class="w-8 h-8"></i>
+                                    <span class="text-sm font-medium">Arrastrar o click para subir portada</span>
+                                </div>
+                                <div id="loading-thumb" class="absolute inset-0 bg-zinc-950/80 hidden items-center justify-center z-20">
+                                    <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-rose-500"></i>
+                                </div>
+                            </div>
                         </div>
+
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Hero (YouTube)</label>
-                            <input type="url" id="p-video" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" />
+                            <input type="url" id="p-video" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="URL o ID de YouTube" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of (YouTube)</label>
-                            <input type="url" id="p-makingof" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Color de Fondo (Opcional)</label>
-                            <input type="text" id="p-color" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="#0f172a / slate-900 / etc" />
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of (Shorts/YouTube)</label>
+                            <input type="url" id="p-makingof" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="Acepta Shorts" />
                         </div>
                         <div style="padding-top: 0.5rem;">
                             <label class="flex items-center gap-2 cursor-pointer">
@@ -169,10 +166,6 @@ const projects = await getProjects();
                             </label>
                         </div>
                     </div>
-                </div>
-                <div class="col-span-1 lg:col-span-2" style="margin-top: 1rem;">
-                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Contenido / Descripción Completa (Markdown soportado)</label>
-                    <textarea id="p-content" rows="4" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm resize-y"></textarea>
                 </div>
             </form>
         </div>
@@ -219,15 +212,26 @@ const projects = await getProjects();
             $('project-id').value = data?.id || '';
             $('p-title').value = data?.title || '';
             $('p-slug').value = data?.slug || '';
-            $('p-category').value = data?.category || '';
             $('p-client').value = data?.client_name || '';
-            $('p-shortdesc').value = data?.short_description || '';
-            $('p-thumbnail').value = data?.thumbnail || '';
+            $('p-description').value = data?.description || '';
+            
+            // Cover handling
+            const thumbUrl = data?.thumbnail || '';
+            $('p-thumbnail').value = thumbUrl;
+            const previewThumb = document.getElementById('preview-thumb')!;
+            const emptyThumb = document.getElementById('empty-thumb')!;
+            if (thumbUrl) {
+                previewThumb.style.backgroundImage = `url('${thumbUrl}')`;
+                previewThumb.classList.remove('hidden');
+                emptyThumb.classList.add('hidden');
+            } else {
+                previewThumb.classList.add('hidden');
+                emptyThumb.classList.remove('hidden');
+            }
+
             $('p-video').value = data?.video_project || '';
-            $('p-makingof').value = data?.video_makingof || '';
-            $('p-color').value = data?.bg_color || '';
+            $('p-makingof').value = data?.video_explanation_mobile || '';
             $('p-featured').checked = data?.featured_home || false;
-            ($('p-content') as unknown as HTMLTextAreaElement).value = data?.content || '';
             
             if (data) modalDeleteBtn.classList.remove('hidden');
             else modalDeleteBtn.classList.add('hidden');
@@ -237,6 +241,72 @@ const projects = await getProjects();
         }
 
         function closeModal() { overlay.classList.add('hidden'); }
+
+        // Drag & Drop Logic
+        const dropZoneThumb = document.getElementById('drop-zone-thumb')!;
+        const fileInputThumb = document.getElementById('file-thumb') as HTMLInputElement;
+
+        function setupDropZone(dropZone: HTMLElement, fileInput: HTMLInputElement, inputId: string, previewId: string, emptyId: string, loadingId: string) {
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-rose-500', 'bg-rose-500/5'); });
+            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-rose-500', 'bg-rose-500/5'); });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-rose-500', 'bg-rose-500/5');
+                const file = e.dataTransfer?.files[0];
+                if (file) handleUpload(file, inputId, previewId, emptyId, loadingId);
+            });
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files?.[0];
+                if (file) handleUpload(file, inputId, previewId, emptyId, loadingId);
+            });
+        }
+
+        setupDropZone(dropZoneThumb, fileInputThumb, 'p-thumbnail', 'preview-thumb', 'empty-thumb', 'loading-thumb');
+
+        async function handleUpload(file: File, inputId: string, previewId: string, emptyId: string, loadingId: string) {
+            const loading = document.getElementById(loadingId)!;
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    $(inputId).value = data.url;
+                    updatePreview(data.url, previewId, emptyId);
+                    showToast('Imagen subida correctamente', 'success');
+                } else {
+                    const err = await res.json();
+                    showToast(err.error || 'Error al subir', 'error');
+                }
+            } catch (error) {
+                showToast('Error de conexión al subir', 'error');
+            } finally {
+                loading.classList.add('hidden');
+                loading.classList.remove('flex');
+            }
+        }
+
+        function updatePreview(url: string, previewId: string, emptyId: string) {
+            const preview = document.getElementById(previewId)!;
+            const empty = document.getElementById(emptyId)!;
+            if (url) {
+                preview.style.backgroundImage = `url('${url}')`;
+                preview.classList.remove('hidden');
+                empty.classList.add('hidden');
+            } else {
+                preview.classList.add('hidden');
+                empty.classList.remove('hidden');
+            }
+        }
 
         document.getElementById('btn-add')?.addEventListener('click', () => openModal());
         document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
@@ -272,9 +342,20 @@ const projects = await getProjects();
                 
                 btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-zinc-400"></i>';
                 // @ts-ignore
-                if (typeof lucide !== 'undefined') lucide.createIcons();
+                if (typeof (window as any).lucide !== 'undefined') (window as any).lucide.createIcons();
 
                 try {
+                    // Check limit
+                    if (newState) {
+                        const featuredCount = document.querySelectorAll('.btn-toggle-featured[data-state="1"]').length;
+                        if (featuredCount >= 3) {
+                            showToast('Límite de 3 destacados alcanzado. Desmarca uno primero.', 'error');
+                            btn.innerHTML = state ? '<i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>' : '<i data-lucide="star" class="w-4 h-4 text-zinc-600"></i>';
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            return;
+                        }
+                    }
+
                     const body = { id, featured_home: newState };
                     const res = await fetch('/api/admin/projects', {
                         method: 'PUT',
@@ -356,6 +437,20 @@ const projects = await getProjects();
             }
 
             const btn = document.getElementById('modal-save')!;
+            const isEdit = !!$('project-id').value;
+            const isFeatured = $('p-featured').checked;
+
+            if (isFeatured) {
+                const currentFeatured = document.querySelectorAll('.btn-toggle-featured[data-state="1"]');
+                const alreadyFeaturedInList = Array.from(currentFeatured).some(el => (el as HTMLElement).dataset.id === $('project-id').value);
+                
+                if (!alreadyFeaturedInList && currentFeatured.length >= 3) {
+                    errEl.textContent = 'Límite de 3 destacados alcanzado.';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+            }
+
             const oHtml = btn.innerHTML;
             btn.innerHTML = 'Guardando...';
             btn.setAttribute('disabled', 'true');
@@ -363,18 +458,14 @@ const projects = await getProjects();
             const body: any = {
                 title,
                 slug: $('p-slug').value.trim() || null,
-                category: $('p-category').value.trim() || null,
                 client_name: $('p-client').value.trim() || null,
-                short_description: $('p-shortdesc').value.trim() || null,
+                description: $('p-description').value.trim() || null,
                 thumbnail: $('p-thumbnail').value.trim() || null,
                 video_project: $('p-video').value.trim() || null,
-                video_makingof: $('p-makingof').value.trim() || null,
-                bg_color: $('p-color').value.trim() || null,
-                featured_home: $('p-featured').checked,
-                content: ($('p-content') as unknown as HTMLTextAreaElement).value.trim() || null,
+                video_explanation_mobile: $('p-makingof').value.trim() || null,
+                featured_home: $('p-featured').checked
             };
 
-            const isEdit = !!$('project-id').value;
             if (isEdit) body.id = $('project-id').value;
 
             try {

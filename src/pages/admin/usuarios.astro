@@ -1,0 +1,567 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+/**
+ * Users / Workers Management Page
+ * Allows creating workers with granular permissions
+ */
+---
+
+<AdminLayout title="Gestión de Usuarios" activeSection="usuarios">
+    <div class="flex flex-col gap-8">
+        <!-- Header Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between" style="margin-bottom: 2rem; gap: 1rem;">
+            <div>
+                <p class="text-zinc-400 text-sm">Gestiona el personal y sus permisos de acceso.</p>
+            </div>
+            <button id="btn-new-user"
+                class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
+                style="padding: 0.5rem 1rem; gap: 0.5rem;"
+            >
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Nuevo trabajador
+            </button>
+        </div>
+
+                <table class="w-full text-left border-collapse">
+                    <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
+                        <tr class="border-b border-zinc-800/50">
+                            <th style="padding: 1.25rem 1.5rem;">Usuario</th>
+                            <th style="padding: 1.25rem 1.5rem;">Rol / Permisos</th>
+                            <th style="padding: 1.25rem 1.5rem;" class="hidden md:table-cell">Creado</th>
+                            <th style="padding: 1.25rem 1.5rem;" class="text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y divide-zinc-800">
+                        <!-- Loaded via JS -->
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-zinc-500">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="w-6 h-6 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <p>Cargando trabajadores...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal (Create/Edit) -->
+    <div id="modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm" id="modal-overlay-bg"></div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col relative z-50">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
+                <div class="flex items-center gap-3">
+                    <i id="modal-icon" data-lucide="user-plus" class="w-5 h-5 text-rose-500"></i>
+                    <h3 class="text-lg font-semibold text-white" id="modal-title">Nuevo trabajador</h3>
+                </div>
+                <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="overflow-y-auto custom-scrollbar" style="scrollbar-width: thin; padding: 1.5rem;">
+                <form id="user-form" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <input type="hidden" id="user-id" name="id" />
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2" style="display: grid; gap: 1.5rem;">
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Email Acceso *</label>
+                            <input 
+                                type="email" 
+                                id="user-email" 
+                                name="email" 
+                                required 
+                                class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm"
+                                placeholder="trabajador@videomarketingsevilla.es"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Contraseña</label>
+                            <input 
+                                type="password" 
+                                id="user-password" 
+                                name="password" 
+                                class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm"
+                                placeholder="Mínimo 6 caracteres"
+                            />
+                            <p class="text-[10px] text-zinc-500 mt-1">Obligatorio para nuevos usuarios. Vacío para no cambiar en actuales.</p>
+                        </div>
+                    </div>
+
+                    <!-- Admin Toggle Section -->
+                    <div class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-6 flex items-center justify-between group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center border border-rose-500/20 group-hover:scale-105 transition-transform">
+                                <i data-lucide="shield-check" class="w-5 h-5 text-rose-500"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-zinc-100 text-base">Super-Administrador</p>
+                                <p class="text-[11px] text-zinc-500 uppercase tracking-tighter">Acceso total sin restricciones</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="user-is-admin" name="is_admin" class="sr-only peer">
+                            <div class="w-10 h-5.5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-zinc-500 after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-rose-600 peer-checked:after:bg-white"></div>
+                        </label>
+                    </div>
+
+                    <!-- Permissions Grid -->
+                    <div id="permissions-section" class="space-y-6">
+                        <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                            <h4 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Permisos de Acceso</h4>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 gap-4" id="permissions-grid">
+                            <!-- JS Generated Grid -->
+                        </div>
+                    </div>
+
+                    <!-- Delete Button Section -->
+                    <div id="danger-zone" class="mt-4 pt-6 border-t border-zinc-800 hidden">
+                        <button 
+                            type="button" 
+                            id="btn-delete-user"
+                            class="w-full bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-md transition-all text-xs font-bold flex items-center justify-center gap-2 border border-red-500/20"
+                        >
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            ELIMINAR TRABAJADOR
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+                <button id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
+                <button type="submit" form="user-form" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast-container" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-3"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                    <i data-lucide="alert-triangle" class="w-7 h-7 text-rose-500"></i>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar trabajador?</h3>
+                <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Se revocará todo el acceso al sistema.</p>
+            </div>
+            <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+                <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+                <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <style is:global>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+        /* Mejora de Tarjetas de Permisos (Global para JS) */
+        .permission-card {
+            min-height: 4.5rem;
+        }
+
+        .permission-group-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #52525b !important;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .permission-group-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, #27272a, transparent);
+        }
+
+        @media (max-width: 768px) {
+            .admin-responsive-table thead { display: none; }
+            .admin-responsive-table tr { 
+                display: flex; 
+                flex-direction: column; 
+                padding: 1.5rem; 
+                background: #18181b;
+                margin-bottom: 1rem;
+                border-radius: 1.25rem;
+                border: 1px solid #27272a !important;
+            }
+            .admin-responsive-table td { border: none !important; padding: 0.5rem 0 !important; }
+            .admin-responsive-table td:last-child { display: flex; justify-content: flex-end; padding-top: 1rem !important; border-t: 1px solid #27272a; }
+        }
+    </style>
+
+    <script>
+        const GROUPS = [
+            {
+                name: "Principal",
+                sections: [
+                    { id: 'dashboard', label: 'Escritorio', icon: 'layout-dashboard' }
+                ]
+            },
+            {
+                name: "Contenido",
+                sections: [
+                    { id: 'proyectos', label: 'Proyectos', icon: 'video' },
+                    { id: 'servicios', label: 'Servicios', icon: 'layers' },
+                    { id: 'sectores', label: 'Sectores', icon: 'building-2' },
+                    { id: 'empresas', label: 'Empresas', icon: 'briefcase' }
+                ]
+            },
+            {
+                name: "Comunicación",
+                sections: [
+                    { id: 'portal', label: 'Portal Clientes', icon: 'users' },
+                    { id: 'mensajes', label: 'Mensajes', icon: 'mail' },
+                    { id: 'chat', label: 'Chat en Vivo', icon: 'message-circle' }
+                ]
+            },
+            {
+                name: "Zona de Peligro",
+                isDanger: true,
+                sections: [
+                    { id: 'contratos', label: 'Contratos', icon: 'file-text' },
+                    { id: 'ajustes', label: 'Ajustes Generales', icon: 'settings' },
+                    { id: 'usuarios', label: 'Usuarios y Permisos', icon: 'user-cog' }
+                ]
+            }
+        ];
+
+        let users = [];
+
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/admin/users');
+                const data = await res.json();
+                users = data;
+                renderTable();
+            } catch (err) {
+                showToast('Error al cargar usuarios', 'error');
+            }
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('users-table-body');
+            if (!tableBody) return;
+
+            if (users.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-zinc-500">No hay trabajadores registrados.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = users.map(user => {
+                const initials = user.email.split('@')[0].substring(0, 2).toUpperCase();
+                const createdDate = user.created_at ? new Date(user.created_at).toLocaleDateString('es-ES') : '-';
+
+                return `
+                    <tr class="hover:bg-zinc-800/40 transition-all group cursor-pointer border-zinc-800/50" onclick="this.querySelector('.btn-edit-user').click()">
+                        <td style="padding: 1.25rem 1.5rem;">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center shadow-lg group-hover:border-rose-500/30 transition-colors">
+                                    <span class="text-xs font-bold text-zinc-400 group-hover:text-rose-400">${initials}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors">${user.email}</span>
+                                    <span class="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5">Trabajador Activo</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 1.25rem 1.5rem;">
+                            <div class="flex flex-wrap gap-2">
+                                ${user.is_admin ? `
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/20 uppercase tracking-tighter">
+                                        Super-Admin
+                                    </span>
+                                ` : ''}
+                                ${(user.permissions || []).map(p => `
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 capitalize">
+                                        ${p}
+                                    </span>
+                                `).join('')}
+                                ${!user.is_admin && (!user.permissions || user.permissions.length === 0) ? `
+                                    <span class="text-[10px] text-zinc-600 italic">Sin permisos configurados</span>
+                                ` : ''}
+                            </div>
+                        </td>
+                        <td style="padding: 1.25rem 1.5rem;" class="hidden md:table-cell text-zinc-500 text-xs font-medium">
+                            ${createdDate}
+                        </td>
+                        <td style="padding: 1.25rem 1.5rem;" class="text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <button 
+                                    class="btn-edit-user p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"
+                                    data-user='${JSON.stringify(user)}'
+                                    onclick="event.stopPropagation(); window.editUser('${user.id}')"
+                                    title="Editar"
+                                >
+                                    <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
+                                </button>
+                                <button 
+                                    class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                    onclick="event.stopPropagation(); window.deleteUser('${user.id}')"
+                                    title="Eliminar"
+                                >
+                                    <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // @ts-ignore
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function renderPermissionGrid() {
+            const permGrid = document.getElementById('permissions-grid');
+            if (!permGrid) return;
+            permGrid.innerHTML = GROUPS.map(group => {
+                const isDanger = group.isDanger;
+                return `
+                    <div class="col-span-full mt-12 first:mt-0">
+                        <div class="permission-group-title ${isDanger ? 'text-red-500/60 !mb-6' : ''}">
+                            <span class="flex items-center gap-2">
+                                ${isDanger ? '<i data-lucide="alert-triangle" class="w-3 h-3"></i>' : ''}
+                                ${group.name}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${group.sections.map(s => {
+                                const cardClass = isDanger 
+                                    ? "bg-red-500/5 border-red-500/10 hover:bg-red-500/10 hover:border-red-500/20" 
+                                    : "bg-zinc-900/40 border-white/5 hover:bg-zinc-800/60 hover:border-white/10";
+                                const iconClass = isDanger ? "text-red-500/50 group-hover/card:text-red-500" : "text-zinc-500 group-hover/card:text-rose-500";
+
+                                return `
+                                    <div class="flex flex-row items-center justify-between border rounded-2xl p-4 md:p-5 transition-all duration-300 group/card min-h-[4.5rem] ${cardClass}">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-11 h-11 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center group-hover/card:scale-110 transition-transform shadow-inner">
+                                                <i data-lucide="${s.icon}" class="w-5 h-5 transition-colors ${iconClass}"></i>
+                                            </div>
+                                            <span class="text-sm font-bold ${isDanger ? 'text-zinc-300 group-hover/card:text-red-400' : 'text-zinc-200'}">${s.label}</span>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                                            <input type="checkbox" name="perm_${s.id}" class="sr-only peer perm-checkbox">
+                                            <div class="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-zinc-500 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-${isDanger ? 'red' : 'rose'}-600 peer-checked:after:bg-white shadow-xl"></div>
+                                        </label>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // @ts-ignore
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function openModal(mode = 'create', userData = null) {
+            const modal = document.getElementById('modal-overlay');
+            const form = document.getElementById('user-form') as HTMLFormElement;
+            form.reset();
+            
+            document.getElementById('modal-title').innerHTML = mode === 'create' 
+                ? '<i data-lucide="user-plus" class="w-5 h-5 text-rose-500"></i> Nuevo Trabajador'
+                : '<i data-lucide="user-cog" class="w-5 h-5 text-rose-500"></i> Editar Trabajador';
+            
+            (document.getElementById('user-email') as HTMLInputElement).disabled = mode === 'edit';
+            document.getElementById('danger-zone').classList.toggle('hidden', mode === 'create');
+            document.getElementById('modal-save').textContent = mode === 'create' ? 'Crear Cuenta' : 'Guardar Cambios';
+
+            if (mode === 'edit' && userData) {
+                (document.getElementById('user-id') as HTMLInputElement).value = userData.id;
+                (document.getElementById('user-email') as HTMLInputElement).value = userData.email;
+                (document.getElementById('user-is-admin') as HTMLInputElement).checked = userData.is_admin;
+                
+                const perms = userData.permissions || [];
+                GROUPS.flatMap(g => g.sections).forEach(s => {
+                    const cb = form.querySelector(`[name="perm_${s.id}"]`) as HTMLInputElement;
+                    if (cb) cb.checked = perms.includes(s.id);
+                });
+            }
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            const inner = modal.children[1];
+            inner.classList.remove('scale-95');
+            inner.classList.add('scale-100');
+            // @ts-ignore
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal-overlay');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            const inner = modal.children[1];
+            inner.classList.remove('scale-100');
+            inner.classList.add('scale-95');
+        }
+
+        document.getElementById('btn-new-user').addEventListener('click', () => openModal('create'));
+        document.getElementById('modal-close-icon').addEventListener('click', closeModal);
+        document.getElementById('modal-cancel').addEventListener('click', closeModal);
+        document.getElementById('modal-overlay-bg').addEventListener('click', closeModal);
+
+        document.getElementById('user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target as HTMLFormElement;
+            const formData = new FormData(form);
+            const id = formData.get('id');
+            const mode = id ? 'PATCH' : 'POST';
+
+            const permissions = GROUPS.flatMap(g => g.sections)
+                .filter(s => formData.get(`perm_${s.id}`) === 'on')
+                .map(s => s.id);
+
+            const email = formData.get('email');
+            const password = formData.get('password') as string;
+
+            if (mode === 'create' && (!password || password.length < 6)) {
+                showToast('La contraseña es obligatoria y debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+
+            const payload = {
+                id,
+                email,
+                password: password || undefined,
+                is_admin: formData.get('is_admin') === 'on',
+                permissions
+            };
+
+            const btnSave = document.getElementById('modal-save') as HTMLButtonElement;
+            btnSave.disabled = true;
+            btnSave.textContent = 'Guardando...';
+
+            try {
+                const res = await fetch('/api/admin/users', {
+                    method: mode,
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (result.error) throw new Error(result.error);
+
+                showToast(id ? 'Cambios guardados' : 'Trabajador creado', 'success');
+                closeModal();
+                loadUsers();
+            } catch (err: any) {
+                showToast(err.message, 'error');
+            } finally {
+                btnSave.disabled = false;
+                btnSave.textContent = id ? 'Guardar Cambios' : 'Crear Cuenta';
+            }
+        });
+
+        async function performDelete(id) {
+            if (!id) return;
+
+            const btnYes = document.getElementById('confirm-yes') as HTMLButtonElement;
+            btnYes.textContent = 'Eliminando...';
+            btnYes.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/users', {
+                    method: 'DELETE',
+                    body: JSON.stringify({ id })
+                });
+                const result = await res.json();
+                if (result.error) throw new Error(result.error);
+
+                showToast('Trabajador eliminado', 'success');
+                closeConfirm();
+                closeModal();
+                loadUsers();
+            } catch (err: any) {
+                showToast(err.message, 'error');
+            } finally {
+                btnYes.textContent = 'Eliminar';
+                btnYes.disabled = false;
+            }
+        }
+
+        // Confirmation Modal Logic
+        const confirmOverlay = document.getElementById('confirm-overlay')!;
+        let pendingDeleteId: string | null = null;
+
+        function openConfirm(id: string) {
+            pendingDeleteId = id;
+            confirmOverlay.classList.remove('hidden');
+        }
+
+        function closeConfirm() {
+            pendingDeleteId = null;
+            confirmOverlay.classList.add('hidden');
+        }
+
+        document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
+        document.getElementById('confirm-yes').addEventListener('click', () => performDelete(pendingDeleteId));
+        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+
+        document.getElementById('btn-delete-user').addEventListener('click', () => {
+            const id = (document.getElementById('user-id') as HTMLInputElement).value;
+            openConfirm(id);
+        });
+
+        window.deleteUser = function(id) {
+            openConfirm(id);
+        };
+
+        window.editUser = function(id) {
+            const user = users.find(u => u.id === id);
+            if (user) openModal('edit', user);
+        };
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
+            }`;
+            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
+            if (type === 'success') {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`;
+            } else {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
+            }
+            container.appendChild(toast);
+            setTimeout(() => { 
+                toast.style.animation = 'toast-out 0.3s ease-in forwards'; 
+                setTimeout(() => toast.remove(), 300); 
+            }, 4000);
+        }
+
+        renderPermissionGrid();
+        loadUsers();
+    </script>
+
+    <style is:global>
+        @keyframes toast-in { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes toast-out { from { transform: translateY(0); opacity: 1; } to { transform: translateY(20px); opacity: 0; } }
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-slide-in { animation: slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    </style>
+</AdminLayout>

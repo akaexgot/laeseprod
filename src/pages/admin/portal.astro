@@ -8,14 +8,8 @@ import { getServiceSupabase } from "../../lib/supabase";
 import { getUserFromCookie } from "../../lib/auth";
 import { getPortalClientsAdmin } from "../../lib/data";
 
-const cookie = Astro.request?.headers.get("cookie") || "";
-if (!Astro.request) return Astro.redirect('/admin/login');
-const { user, error } = await getUserFromCookie(cookie);
-if (!user) return Astro.redirect('/admin/login');
-const serviceSupabase = getServiceSupabase();
-if (!serviceSupabase) return Astro.redirect('/admin/login');
-const { data: profile } = await serviceSupabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
-if (!profile?.is_admin) return Astro.redirect('/admin/login');
+// SSR auth is handled by middleware
+const serviceSupabase = getServiceSupabase()!;
 
 const clients = await getPortalClientsAdmin();
 ---
@@ -37,12 +31,12 @@ const clients = await getPortalClientsAdmin();
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left" id="clients-table">
-                <thead class="text-xs text-zinc-400 bg-zinc-950/50 uppercase border-b border-zinc-800">
-                    <tr>
-                        <th class="font-semibold" style="padding: 1rem 1.5rem;">Cliente</th>
-                        <th class="font-semibold hidden sm:table-cell" style="padding: 1rem 1.5rem;">Dropbox</th>
-                        <th class="font-semibold hidden md:table-cell" style="padding: 1rem 1.5rem;">Estado</th>
-                        <th class="font-semibold text-right hidden sm:table-cell w-24" style="padding: 1rem 1.5rem;">Acciones</th>
+                <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
+                    <tr class="border-b border-zinc-800/50">
+                        <th style="padding: 1.25rem 1.5rem;">Cliente</th>
+                        <th class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">Dropbox</th>
+                        <th class="hidden md:table-cell" style="padding: 1.25rem 1.5rem;">Estado</th>
+                        <th class="text-right hidden sm:table-cell w-24" style="padding: 1.25rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
@@ -56,7 +50,7 @@ const clients = await getPortalClientsAdmin();
                     ) : (
                         clients.map((client: any) => (
                             <tr class="transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default" data-id={client.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button') && !event.target.closest('a')) btn.click();">
-                                <td style="padding: 0.75rem 1.5rem;">
+                                <td style="padding: 1.25rem 1.5rem;">
                                     <div class="flex items-center justify-between">
                                         <div style="display: flex; align-items: center; gap: 0.75rem;">
                                             <div class="w-10 h-10 bg-zinc-950 rounded-xl border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
@@ -73,7 +67,7 @@ const clients = await getPortalClientsAdmin();
                                         <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                     </div>
                                 </td>
-                                <td class="hidden sm:table-cell" style="padding: 1rem 1.5rem;">
+                                <td class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">
                                     {client.dropbox_link ? (
                                         <a href={client.dropbox_link} target="_blank" class="text-sm text-zinc-400 hover:text-rose-400 hover:underline flex items-center gap-1">
                                             ✓ Configurado
@@ -83,7 +77,7 @@ const clients = await getPortalClientsAdmin();
                                         <span class="text-sm text-amber-400">⚠ Sin enlace</span>
                                     )}
                                 </td>
-                                <td class="hidden md:table-cell" style="padding: 1rem 1.5rem;">
+                                <td class="hidden md:table-cell" style="padding: 1.25rem 1.5rem;">
                                     {client.is_active ? (
                                         <div class="flex items-center gap-2" title="Activo">
                                             <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
@@ -96,10 +90,10 @@ const clients = await getPortalClientsAdmin();
                                         </div>
                                     )}
                                 </td>
-                                <td class="hidden sm:table-cell text-right" style="padding: 1rem 1.5rem;">
-                                    <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity" style="gap: 0.5rem;">
+                                <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
+                                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button 
-                                            class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors btn-edit" 
+                                            class="btn-edit p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all" 
                                             title="Editar"
                                             data-id={client.id}
                                             data-name={client.client_name}
@@ -108,14 +102,14 @@ const clients = await getPortalClientsAdmin();
                                             data-password={client.password_hash || ''}
                                             data-active={client.is_active ? 'true' : 'false'}
                                         >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
                                         </button>
                                         <button 
-                                            class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors btn-delete" 
+                                            class="btn-delete p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" 
                                             title="Eliminar"
                                             data-id={client.id}
                                         >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                         </button>
                                     </div>
                                 </td>

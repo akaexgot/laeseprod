@@ -14,7 +14,11 @@ interface Props {
 
 const { title, activeSection } = Astro.props;
 
-const menuGroups = [
+const userProfile = Astro.locals.userProfile;
+const isSuperAdmin = userProfile?.is_admin || false;
+const permissions = userProfile?.permissions || [];
+
+const allMenuGroups = [
     {
         name: "Principal",
         items: [
@@ -34,6 +38,7 @@ const menuGroups = [
         name: "Comunicación",
         items: [
             { label: "Portal Clientes", href: "/admin/portal", icon: "users", id: "portal" },
+            { label: "Contratos", href: "/admin/contratos", icon: "file-text", id: "contratos" },
             { label: "Mensajes", href: "/admin/mensajes", icon: "mail", id: "mensajes" },
             { label: "Chat en Vivo", href: "/admin/chat", icon: "message-circle", id: "chat" }
         ]
@@ -41,10 +46,22 @@ const menuGroups = [
     {
         name: "Configuración",
         items: [
+            { label: "Usuarios", href: "/admin/usuarios", icon: "user-cog", id: "usuarios" },
             { label: "Ajustes Generales", href: "/admin/ajustes", icon: "settings", id: "ajustes" }
         ]
     }
 ];
+
+// Filter groups and items based on permissions
+const menuGroups = allMenuGroups.map(group => {
+    return {
+        ...group,
+        items: group.items.filter(item => isSuperAdmin || permissions.includes(item.id))
+    };
+}).filter(group => group.items.length > 0);
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 ---
 
 <!doctype html>
@@ -93,19 +110,29 @@ const menuGroups = [
         </style>
     </head>
     <body class="bg-zinc-950 text-zinc-100 antialiased overflow-hidden selection:bg-rose-500/30 selection:text-white admin-layout" style="font-family: 'Inter', sans-serif;">
-        <script type="module">
+        <script define:vars={{ supabaseUrl, supabaseKey }}>
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-        const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
-        const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
-        const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
+        
         async function checkSession() {
-            if (!supabase) return window.location.href = '/admin/login';
+            if (!supabaseUrl || !supabaseKey) {
+                console.warn('Supabase config missing');
+                return;
+            }
+            
+            const supabase = createClient(supabaseUrl, supabaseKey);
             const { data } = await supabase.auth.getUser();
+            
             if (!data?.user && window.location.pathname !== '/admin/login') {
                 window.location.href = '/admin/login';
             }
         }
-        checkSession();
+        
+        // Wait for page load to ensure everything is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkSession);
+        } else {
+            checkSession();
+        }
         </script>
         <!-- Foolproof explicitly styled wrapper to guarantee padding/width constraints -->
         <div class="admin-layout" style="display: flex; height: 100vh; width: 100vw; background-color: #09090b; overflow: hidden;">
@@ -118,13 +145,8 @@ const menuGroups = [
             >
                 <!-- Logo -->
                 <div class="border-b border-zinc-800" style="height: 64px; display: flex; align-items: center; padding: 0 1.5rem;">
-                    <a href="/admin" class="flex items-center gap-3 group w-full">
-                        <div class="w-8 h-8 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-rose-900/20">
-                            V
-                        </div>
-                        <div class="flex-1 overflow-hidden">
-                            <span class="block text-sm font-semibold text-zinc-100 truncate">VideoMarketing</span>
-                        </div>
+                    <a href="/admin" class="flex items-center group w-full">
+                        <img src="/logo-blanco-web.png" alt="VideoMarketing Sevilla Logo" class="h-8 lg:h-9 w-auto object-contain transition-transform duration-500 group-hover:scale-105" />
                     </a>
                 </div>
 
@@ -231,6 +253,24 @@ const menuGroups = [
                     // @ts-ignore
                     lucide.createIcons();
                 }
+
+                // Logout logic
+                const logoutBtn = document.getElementById('admin-logout');
+                logoutBtn?.addEventListener('click', async () => {
+                    const originalText = logoutBtn.innerHTML;
+                    logoutBtn.innerHTML = 'Cerrando...';
+                    logoutBtn.setAttribute('disabled', 'true');
+                    
+                    try {
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        // Clear cookies manually as fallback
+                        document.cookie = 'sb-access-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                        document.cookie = 'sb-refresh-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                        window.location.href = '/admin/login';
+                    } catch (err) {
+                        window.location.href = '/admin/login';
+                    }
+                });
             });
 
             // Mobile sidebar toggle
