@@ -14,7 +14,10 @@ export default defineConfig({
 
   adapter: node({
     mode: 'standalone'
-  })
+  }),
+  security: {
+    checkOrigin: false
+  }
 });
 
 // Force restart to rebuild Tailwind CSS cache

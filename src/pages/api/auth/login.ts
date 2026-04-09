@@ -3,10 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   try {
-    const formData = await request.formData();
-    const email = formData.get('email')?.toString();
-    const password = formData.get('password')?.toString();
-    const redirectTo = formData.get('redirectTo')?.toString() || '/admin';
+    const { email, password, redirectTo = '/admin' } = await request.json();
 
     if (!email || !password) {
       return new Response(JSON.stringify({ error: 'Email y contraseña son obligatorios.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
