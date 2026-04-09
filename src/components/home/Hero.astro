@@ -29,22 +29,74 @@ const heroSubtitle = settings.hero_subtitle || '';
 >
     <!-- Fullscreen Video Background -->
     <div
-        class="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-dark"
+        id="hero-video-container"
+        class="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-dark text-white"
         style={`background-image: url(https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg); background-size: cover; background-position: center;`}
     >
-        <iframe
-            id="hero-video-iframe"
-            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-            class="video-bg opacity-0 transition-opacity duration-1000"
-            frameborder="0"
-            allow="autoplay; encrypted-media"
-            allowfullscreen
-            onload="this.style.opacity='1'"
-        >
-        </iframe>
+        <!-- Contenedor con la clase video-bg que se encarga del tamaño y posición -->
+        <div id="hero-player-wrapper" class="video-bg opacity-0 transition-opacity duration-1000">
+            <div id="hero-player"></div>
+        </div>
 
         <div class="absolute inset-0 bg-dark/10"></div>
     </div>
+
+    <script is:inline define:vars={{ youtubeId }}>
+        // Carga de la API de YouTube
+        if (!window.YT) {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        }
+
+        function initHeroPlayer() {
+            new window.YT.Player('hero-player', {
+                videoId: youtubeId,
+                width: '100%',
+                height: '100%',
+                playerVars: {
+                    autoplay: 1,
+                    mute: 1,
+                    loop: 1,
+                    playlist: youtubeId,
+                    controls: 0,
+                    showinfo: 0,
+                    rel: 0,
+                    modestbranding: 1,
+                    playsinline: 1,
+                    enablejsapi: 1,
+                    origin: window.location.origin
+                },
+                events: {
+                    onReady: (event) => {
+                        event.target.mute();
+                        event.target.playVideo();
+                    },
+                    onStateChange: (event) => {
+                        // 1 = PLAYING
+                        if (event.data === window.YT.PlayerState.PLAYING) {
+                            const wrapper = document.getElementById('hero-player-wrapper');
+                            if (wrapper) wrapper.style.opacity = '1';
+                            
+                            // Emitir el evento para el preloader
+                            window.dispatchEvent(new CustomEvent('vm-hero-ready'));
+                        }
+                    }
+                }
+            });
+        }
+
+        if (window.YT && window.YT.Player) {
+            initHeroPlayer();
+        } else {
+            const previousOnReady = window.onYouTubeIframeAPIReady;
+            window.onYouTubeIframeAPIReady = () => {
+                if (previousOnReady) previousOnReady();
+                initHeroPlayer();
+            };
+        }
+    </script>
 
     <!-- Content (Centered) -->
     <div

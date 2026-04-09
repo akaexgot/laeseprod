@@ -65,15 +65,25 @@ const { title, description, image, noindex } = Astro.props;
                 const bar = document.getElementById('preloader-bar');
                 if (!preloader || !bar) return;
 
-                // Speed up progress simulation
+                const isHome = window.location.pathname === '/';
                 let progress = 0;
-                const interval = setInterval(() => {
-                    progress += Math.random() * 25;
-                    if (progress > 98) progress = 98;
-                    bar.style.width = `${progress}%`;
-                }, 80);
+                let loadingFinished = false;
 
-                window.addEventListener('load', () => {
+                // Speed up progress simulation initially
+                const interval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += Math.random() * 15;
+                    } else if (!loadingFinished) {
+                        progress += 0.5; // Slow down near the end until signal
+                    }
+                    if (progress > 99) progress = 99;
+                    bar.style.width = `${progress}%`;
+                }, 100);
+
+                const dismissPreloader = () => {
+                    if (loadingFinished) return;
+                    loadingFinished = true;
+                    
                     clearInterval(interval);
                     bar.style.width = '100%';
                     
@@ -82,17 +92,23 @@ const { title, description, image, noindex } = Astro.props;
                         setTimeout(() => {
                             preloader.remove();
                         }, 700);
-                    }, 100);
+                    }, 200);
+                };
+
+                // Normal pages: wait for window.load
+                window.addEventListener('load', () => {
+                    if (!isHome) dismissPreloader();
                 });
 
-                // Safety timeout - reduced for faster experience
+                // Home page: wait for the video signal explicitly
+                window.addEventListener('vm-hero-ready', () => {
+                    dismissPreloader();
+                });
+
+                // Safety timeout - expanded to 15s to allow high quality buffering if needed
                 setTimeout(() => {
-                    const p = document.getElementById('site-preloader');
-                    if (p) {
-                        p.classList.add('fade-out');
-                        setTimeout(() => p.remove(), 700);
-                    }
-                }, 3000);
+                    dismissPreloader();
+                }, 15000);
             });
         </script>
 

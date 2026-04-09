@@ -203,29 +203,41 @@ const settings = await getSettings();
     let currentState = '';
 
     function getDesiredState(): string {
-        const hasVideoHero = document.getElementById('video-hero') !== null;
+        const scrollY = window.scrollY;
+        const hero    = document.getElementById('hero');
+        const fp      = document.getElementById('featured-projects');
+        const cs      = document.getElementById('companies-section');
 
-        if (hasVideoHero && window.scrollY < 80) {
+        // 1. Pages with light backgrounds (Contact, Portal)
+        if (isLightPage) {
+            return scrollY > 80 ? 'light' : 'light-top';
+        }
+
+        // 2. Homepage / Dark Sections Logic
+        // Stay transparent if we are over the Hero or Featured Projects (dark bg)
+        // EXCEPCIÓN: Si estamos sobre el carousel de empresas (porque es blanco)
+        if (cs) {
+            const csTop = cs.getBoundingClientRect().top + scrollY;
+            if (scrollY + 80 >= csTop) {
+                return 'dark-solid';
+            }
+        }
+
+        if (hero && scrollY < hero.offsetHeight - 80) {
             return 'dark-transparent';
         }
 
-        if (isLightPage) {
-            return window.scrollY > 80 ? 'light' : 'light-top';
-        }
-
-        // ¿El navbar está visualmente sobre #featured-projects?
-        const fp = document.getElementById('featured-projects');
         if (fp) {
-            const fpTop    = fp.offsetTop;
+            const fpTop = fp.offsetTop;
             const fpBottom = fpTop + fp.offsetHeight;
-            const navBottom = window.scrollY + 96; // altura navbar
+            const navBottom = scrollY + 96;
             if (navBottom >= fpTop && navBottom <= fpBottom) {
                 return 'dark-transparent';
             }
         }
 
-        // Scroll normal en páginas oscuras
-        return window.scrollY > 80 ? 'dark-solid' : 'dark-transparent';
+        // Default: scroll normal
+        return scrollY > 80 ? 'dark-solid' : 'dark-transparent';
     }
 
     function update() {
