@@ -54,9 +54,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col relative z-50">
             <!-- Header -->
             <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 text-white">
                     <i id="modal-icon" data-lucide="user-plus" class="w-5 h-5 text-rose-500"></i>
-                    <h3 class="text-lg font-semibold text-white" id="modal-title">Nuevo trabajador</h3>
+                    <h3 class="text-lg font-semibold" id="modal-title">Nuevo trabajador</h3>
                 </div>
                 <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -381,9 +381,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             const form = document.getElementById('user-form') as HTMLFormElement;
             form.reset();
             
-            document.getElementById('modal-title').innerHTML = mode === 'create' 
-                ? '<i data-lucide="user-plus" class="w-5 h-5 text-rose-500"></i> Nuevo Trabajador'
-                : '<i data-lucide="user-cog" class="w-5 h-5 text-rose-500"></i> Editar Trabajador';
+            const modalIcon = document.getElementById('modal-icon')!;
+            const modalTitle = document.getElementById('modal-title')!;
+            
+            modalIcon.setAttribute('data-lucide', mode === 'create' ? 'user-plus' : 'user-cog');
+            modalTitle.textContent = mode === 'create' ? 'Nuevo Trabajador' : 'Editar Trabajador';
             
             (document.getElementById('user-email') as HTMLInputElement).disabled = mode === 'edit';
             document.getElementById('danger-zone').classList.toggle('hidden', mode === 'create');

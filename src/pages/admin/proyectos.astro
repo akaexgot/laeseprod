@@ -16,8 +16,21 @@ const projects = await getProjects();
 
 <AdminLayout title="Proyectos" activeSection="proyectos">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between" style="margin-bottom: 1.5rem; gap: 1rem;">
-        <div>
-            <p class="text-zinc-400 text-sm">Gestiona tus proyectos. Total: <span class="text-zinc-100 font-medium">{projects.length}</span></p>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
+            <p class="text-zinc-400 text-sm whitespace-nowrap">Gestiona tus proyectos. Total: <span class="text-zinc-100 font-medium">{projects.length}</span></p>
+            
+            <!-- Real-time Search -->
+            <div class="relative w-full max-w-xs">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
+                </div>
+                <input 
+                    type="text" 
+                    id="project-search" 
+                    class="block w-full pl-10 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" 
+                    placeholder="Buscar proyectos..."
+                />
+            </div>
         </div>
         <button id="btn-add"
             class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
@@ -201,6 +214,29 @@ const projects = await getProjects();
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- REAL-TIME SEARCH (PROJECTS) ---
+        const searchInput = document.getElementById('project-search') as HTMLInputElement;
+        const totalSpan = document.querySelector('.text-zinc-100.font-medium');
+        
+        searchInput?.addEventListener('input', (e) => {
+            const q = (e.target as HTMLInputElement).value.toLowerCase();
+            const rows = document.querySelectorAll('#projects-table tbody tr');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                // Get relevant columns for search
+                const title = row.querySelector('.font-medium')?.textContent?.toLowerCase() || '';
+                const slug = row.querySelector('.text-xs.text-zinc-500')?.textContent?.toLowerCase() || '';
+                const client = row.querySelector('.hidden.sm\\:table-cell')?.textContent?.toLowerCase() || '';
+                
+                const match = title.includes(q) || slug.includes(q) || client.includes(q);
+                (row as HTMLElement).style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
+
+            if (totalSpan) totalSpan.textContent = visibleCount.toString();
+        });
+
         const overlay = document.getElementById('modal-overlay')!;
         const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
         const errEl = document.getElementById('modal-error')!;

@@ -1,0 +1,340 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getServiceSupabase } from "../../lib/supabase";
+import { replacePlaceholders } from "../../lib/contracts";
+
+const { id } = Astro.params;
+const supabase = getServiceSupabase();
+
+let contract: any = null;
+let template: any = null;
+let error = null;
+
+if (supabase && id) {
+    const { data: cData, error: cError } = await supabase
+        .from('contracts')
+        .select('*, contract_templates(*)')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (cError || !cData) {
+        error = "Contrato no encontrado o enlace expirado.";
+    } else if (cData.status === 'completed') {
+        error = "Este contrato ya ha sido firmado y pagado.";
+    } else {
+        contract = cData;
+        template = cData.contract_templates;
+    }
+} else {
+    error = "Error de conexión con el servidor.";
+}
+
+// Prepare merged data for initial preview
+const initialData = { ...contract?.admin_data, ...contract?.client_data };
+const contractHtml = template ? replacePlaceholders(template.content, initialData) : '';
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firma de Contrato | VideoMarketing Sevilla</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <style>
+        :root { --rose: #e11d48; --rose-hover: #be123c; }
+        body { font-family: 'Inter', sans-serif; background: #09090b; color: #f4f4f5; margin: 0; }
+        .contract-container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
+        .card { background: #18181b; border: 1px solid #27272a; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .card-header { background: #1a1a1a; padding: 2rem; border-bottom: 1px solid #27272a; text-align: center; }
+        .card-body { padding: 2.5rem; }
+        h1 { font-family: 'Outfit', sans-serif; font-size: 1.75rem; margin: 0; color: #fff; }
+        .contract-text { background: #fff; color: #18181b; padding: 3rem; border-radius: 0.5rem; font-size: 0.95rem; line-height: 1.6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .contract-text strong { color: #000; font-weight: 700; }
+        .step-indicator { display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; }
+        .step { width: 40px; height: 4px; border-radius: 2px; background: #27272a; transition: all 0.3s; }
+        .step.active { background: var(--rose); box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); }
+        input { width: 100%; padding: 0.75rem 1rem; background: #09090b; border: 1px solid #27272a; border-radius: 0.5rem; color: #fff; font-size: 0.9rem; transition: all 0.2s; box-sizing: border-box; }
+        input:focus { outline: none; border-color: var(--rose); ring: 1px solid var(--rose); }
+        .btn-primary { background: var(--rose); color: #fff; border: none; padding: 1rem 2rem; border-radius: 0.75rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s; width: 100%; margin-top: 1.5rem; box-shadow: 0 10px 15px -3px rgba(225, 29, 72, 0.3); }
+        .btn-primary:hover { background: var(--rose-hover); transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .signature-wrapper { background: #fff; border-radius: 0.5rem; margin-top: 1rem; position: relative; }
+        canvas { width: 100%; height: 200px; touch-action: none; cursor: crosshair; }
+        .clear-sig { position: absolute; bottom: 0.5rem; right: 0.5rem; background: #f4f4f5; border: 1px solid #e4e4e7; color: #71717a; padding: 0.25rem 0.5rem; font-size: 0.7rem; border-radius: 0.25rem; }
+    </style>
+</head>
+<body>
+    <div class="contract-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <img src="/logo-blanco-web.png" alt="Logo" style="height: 40px;">
+        </div>
+
+        {error ? (
+            <div class="card" style="padding: 4rem 2rem; text-align: center;">
+                <div style="color: var(--rose); margin-bottom: 1rem;">
+                    <svg style="width: 48px; height: 48px; margin: 0 auto;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <h2 style="margin-bottom: 0.5rem;">{error}</h2>
+                <p style="color: #a1a1aa;">Si crees que esto es un error, contacta con nosotros.</p>
+                <a href="/" style="display: inline-block; margin-top: 1.5rem; color: #fff; text-decoration: none; font-weight: 500;">Volver a la web</a>
+            </div>
+        ) : (
+            <div class="card">
+                <div class="card-header">
+                    <h1>Revisión de Contrato</h1>
+                    <p style="color: #71717a; font-size: 0.9rem; margin-top: 0.5rem;">Por favor, completa tus datos para proceder a la firma del documento.</p>
+                </div>
+
+                <div class="step-indicator" id="stepper">
+                    <div class="step active" data-step="1"></div>
+                    <div class="step" data-step="2"></div>
+                    <div class="step" data-step="3"></div>
+                </div>
+
+                <div class="card-body">
+                    <!-- STEP 1: CLIENT INFO -->
+                    <div id="step-1" class="active-step">
+                        <div style="display: grid; gap: 1.5rem;">
+                            <h3 style="margin-top: 0;">Tus Datos Fiscales</h3>
+                            {template.client_fields.map((field: string) => (
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: #71717a; margin-bottom: 0.5rem; letter-spacing: 0.05em;">{field.replace(/_/g, ' ')}</label>
+                                    <input type="text" class="client-input" data-field={field} placeholder={`Introduce ${field.toLowerCase()}`} />
+                                </div>
+                            ))}
+                            <button class="btn-primary" id="go-to-step-2">Revisar y Continuar</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: REVIEW & SIGN -->
+                    <div id="step-2" style="display: none;">
+                        <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Revisa el documento</h3>
+                        <div class="contract-text" id="contract-preview" style="margin-bottom: 2rem;">
+                            <!-- HTML injected here -->
+                        </div>
+
+                        <h3 style="margin-bottom: 1rem;">Tu Firma</h3>
+                        <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1rem;">Dibuja tu firma en el recuadro blanco inferior para proceder.</p>
+                        <div class="signature-wrapper">
+                            <canvas id="signature-pad"></canvas>
+                            <button class="clear-sig" id="clear-sig">Limpiar</button>
+                        </div>
+
+                        <button class="btn-primary" id="go-to-step-3" disabled>Firmar y proceder al pago</button>
+                        <button style="width: 100%; background: none; border: none; color: #71717a; margin-top: 1rem; cursor: pointer; font-size: 0.9rem;" id="back-to-step-1">Quiero modificar mis datos</button>
+                    </div>
+
+                    <!-- STEP 3: PAYMENT -->
+                    <div id="step-3" style="display: none; text-align: center; padding: 2rem 0;">
+                        <div style="color: var(--rose); margin-bottom: 1.5rem;">
+                            <svg style="width: 64px; height: 64px; margin: 0 auto;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        </div>
+                        <h2 style="margin-bottom: 0.5rem;">Contrato Firmado Correctamente</h2>
+                        <p style="color: #a1a1aa; margin-bottom: 2rem;">Para finalizar el proceso y activar el servicio, por favor procede al pago del depósito inicial de <strong>{contract?.amount_to_pay}€</strong>.</p>
+                        
+                        <button class="btn-primary" id="btn-pay" style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                            <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10v2a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+                            Pagar con Stripe
+                        </button>
+                        <p style="font-size: 0.75rem; color: #52525b; margin-top: 1rem;">Serás redirigido a la pasarela de pago segura de Stripe.</p>
+                    </div>
+                </div>
+            </div>
+        )}
+        <div style="text-align: center; margin-top: 2rem; color: #52525b; font-size: 0.75rem;">
+            &copy; {new Date().getFullYear()} VideoMarketing Sevilla. Proceso de firma digital segura.
+        </div>
+    </div>
+
+    <script define:vars={{ contract, template, id }}>
+        const $ = (id) => document.getElementById(id);
+        const steps = ['step-1', 'step-2', 'step-3'];
+        let currentStep = 1;
+        let signaturePad = null;
+
+        function setStep(n) {
+            currentStep = n;
+            steps.forEach((s, idx) => {
+                $(s).style.display = (idx + 1 === n) ? 'block' : 'none';
+                const stepEl = document.querySelector(`.step[data-step="${idx + 1}"]`);
+                if (idx + 1 <= n) stepEl.classList.add('active');
+                else stepEl.classList.remove('active');
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function replaceVariables(text, data) {
+            let result = text;
+            for (const [key, value] of Object.entries(data)) {
+                const regex = new RegExp(`{{${key}}}`, 'g');
+                result = result.replace(regex, value?.toString() || '<span style="color: #e11d48; border-bottom: 2px dashed #e11d48;">[?]</span>');
+            }
+            return result;
+        }
+
+        // STEP 1 -> STEP 2
+        $('go-to-step-2')?.addEventListener('click', () => {
+            const inputs = document.querySelectorAll('.client-input');
+            const clientData = {};
+            let valid = true;
+            inputs.forEach(i => {
+                if (!i.value.trim()) { i.style.borderColor = '#e11d48'; valid = false; }
+                else { i.style.borderColor = ''; clientData[i.dataset.field] = i.value.trim(); }
+            });
+
+            if (!valid) return;
+
+            // Prepare preview
+            const merged = { ...contract.admin_data, ...clientData };
+            $('contract-preview').innerHTML = replaceVariables(template.content, merged);
+            
+            setStep(2);
+
+            // Re-trigger resize now that it's visible
+            setTimeout(() => {
+                if (signaturePad) resizeCanvas();
+            }, 50);
+
+            // Init Signature Pad if not done
+            if (!signaturePad) {
+                const canvas = $('signature-pad');
+                signaturePad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgba(0,0,0,0)',
+                    penColor: 'rgb(0, 0, 0)'
+                });
+                
+                function resizeCanvas() {
+                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                    canvas.width = canvas.offsetWidth * ratio;
+                    canvas.height = canvas.offsetHeight * ratio;
+                    canvas.getContext("2d").scale(ratio, ratio);
+                    signaturePad.clear();
+                }
+                window.addEventListener("resize", resizeCanvas);
+                // Delay resize to ensure element is rendered
+                setTimeout(resizeCanvas, 50);
+                signaturePad.onEnd = () => {
+                    $('go-to-step-3').disabled = signaturePad.isEmpty();
+                };
+            }
+        });
+
+        $('back-to-step-1')?.addEventListener('click', () => setStep(1));
+        $('clear-sig')?.addEventListener('click', () => {
+            signaturePad.clear();
+            $('go-to-step-3').disabled = true;
+        });
+
+        // STEP 2 -> STEP 3 (Signing)
+        $('go-to-step-3')?.addEventListener('click', async () => {
+            const btn = $('go-to-step-3');
+            btn.disabled = true;
+            btn.textContent = 'Guardando firma...';
+
+            // Gather client data
+            const inputs = document.querySelectorAll('.client-input');
+            const client_data = {};
+            inputs.forEach(i => client_data[i.dataset.field] = i.value.trim());
+
+            const signature_svg = signaturePad.toDataURL(); // Use Image URL for simple signature storage
+
+            try {
+                const res = await fetch(`/api/contracts/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_data,
+                        signature_svg,
+                        status: 'pending_payment'
+                    })
+                });
+
+                if (res.ok) {
+                    setStep(3);
+                } else {
+                    const err = await res.json();
+                    showToast(err.error || 'Error al guardar la firma.', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Firmar y proceder al pago';
+                }
+            } catch (err) {
+                showToast('Error de conexión.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Firmar y proceder al pago';
+            }
+        });
+
+        // STEP 3 -> STRIPE
+        $('btn-pay')?.addEventListener('click', async () => {
+            const btn = $('btn-pay');
+            btn.disabled = true;
+            btn.textContent = 'Redirigiendo a Stripe...';
+
+            try {
+                const res = await fetch(`/api/stripe/checkout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contract_id: id })
+                });
+
+                if (res.ok) {
+                    const { url } = await res.json();
+                    window.location.href = url;
+                } else {
+                    showToast('Error al crear la sesión de pago.', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Pagar con Stripe';
+                }
+            } catch (err) {
+                showToast('Error de conexión con Stripe.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Pagar con Stripe';
+            }
+        });
+
+        // TOAST SYSTEM
+        function showToast(message, type = 'success') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.style.cssText = 'position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none;';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.style.cssText = `
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#10b981' : '#e11d48'};
+                color: white;
+                border-radius: 0.75rem;
+                font-weight: 600;
+                font-size: 0.9rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+                animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                pointer-events: auto;
+            `;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px) scale(0.95)';
+                toast.style.transition = 'all 0.4s ease';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+    </script>
+    <style>
+        @keyframes toast-in {
+            from { transform: translateY(100%) scale(0.9); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+    </style>
+</body>
+</html>

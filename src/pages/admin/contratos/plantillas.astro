@@ -1,0 +1,397 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { getServiceSupabase } from "../../../lib/supabase";
+
+const supabase = getServiceSupabase();
+
+let templates: any[] = [];
+if (supabase) {
+    const { data } = await supabase
+        .from('contract_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+    if (data) templates = data;
+}
+---
+
+<AdminLayout title="Gestor de Plantillas" activeSection="contratos">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+            <div>
+                <nav class="flex text-zinc-500 text-xs mb-1" aria-label="Breadcrumb">
+                    <ol class="list-none p-0 inline-flex">
+                        <li class="flex items-center">
+                            <a href="/admin/contratos" class="hover:text-rose-500 transition-colors">Contratos</a>
+                            <i data-lucide="chevron-right" class="w-3 h-3 mx-2"></i>
+                        </li>
+                        <li class="text-zinc-300">Plantillas</li>
+                    </ol>
+                </nav>
+                <h1 class="text-2xl font-bold text-white tracking-tight">Gestor de Plantillas</h1>
+                <p class="text-zinc-400 text-sm mt-1">Define el texto legal y los campos dinámicos para tus contratos.</p>
+            </div>
+            <button id="btn-add-template" class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm" style="padding: 0.5rem 1rem; gap: 0.5rem;">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Nueva Plantilla
+            </button>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
+                        <tr class="border-b border-zinc-800/50">
+                            <th style="padding: 1.25rem 1.5rem;">Título de la Plantilla</th>
+                            <th style="padding: 1.25rem 1.5rem;">Campos (Dueño / Cliente)</th>
+                            <th style="padding: 1.25rem 1.5rem;">Creado el</th>
+                            <th class="text-right" style="padding: 1.25rem 1.5rem;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800">
+                        {templates.map((t) => (
+                            <tr class="hover:bg-zinc-800/30 transition-colors">
+                                <td style="padding: 1.25rem 1.5rem;" class="font-medium text-zinc-100">{t.title}</td>
+                                <td style="padding: 1.25rem 1.5rem;" class="text-zinc-400 font-mono text-xs">
+                                    <span class="text-rose-400">{t.admin_fields?.length || 0}</span> / 
+                                    <span class="text-emerald-400">{t.client_fields?.length || 0}</span>
+                                </td>
+                                <td style="padding: 1.25rem 1.5rem;" class="text-zinc-500">{new Date(t.created_at).toLocaleDateString('es-ES')}</td>
+                                <td style="padding: 1.25rem 1.5rem;" class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="btn-edit p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-all" data-id={t.id} data-template={JSON.stringify(t)}>
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="btn-delete p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all" data-id={t.id}>
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        {templates.length === 0 && (
+                            <tr>
+                                <td colspan="4" style="padding: 5rem 1.5rem;" class="text-center text-zinc-500 bg-zinc-800/10">
+                                    No hay plantillas configuradas todavía.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+        </div>
+    </div>
+
+    <!-- Modal: Editor de Plantilla -->
+    <div id="modal-template" class="fixed inset-0 bg-zinc-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-6xl h-[95vh] flex flex-col shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
+                        <i data-lucide="file-text" class="w-5 h-5 text-rose-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white tracking-tight" id="modal-title">Nueva Plantilla</h3>
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold mt-0.5">Editor de documento legal</p>
+                    </div>
+                </div>
+                <button id="modal-close" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Editor Body -->
+            <div class="flex-1 overflow-hidden flex flex-col lg:flex-row">
+                <!-- Sidebar: Configuración de Campos -->
+                <div class="w-full lg:w-80 bg-zinc-900/50 border-r border-zinc-800 overflow-y-auto flex flex-col gap-6" style="padding: 1.5rem;">
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Título de la Plantilla</label>
+                        <input type="text" id="t-title" placeholder="Ej: Contrato de Arras" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:border-rose-500 transition-all font-medium" />
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-bold text-zinc-400 uppercase tracking-wider">Tus campos (Dueño)</label>
+                            <span class="text-[10px] text-rose-400 font-mono">{"{{tag}}"}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="add-admin-field" placeholder="Nombre campo..." class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:outline-none focus:border-rose-500" />
+                            <button id="btn-add-admin" class="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-colors">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div id="admin-fields-list" class="flex flex-wrap gap-2"></div>
+                        <p class="text-[10px] text-zinc-500 italic">Ej: PRECIO, SERVICIO</p>
+                    </div>
+
+                    <div class="space-y-4 pt-4 border-t border-zinc-800/50">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-bold text-zinc-400 uppercase tracking-wider">Campos del cliente</label>
+                            <span class="text-[10px] text-emerald-400 font-mono">{"{{tag}}"}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="add-client-field" placeholder="Nombre campo..." class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:outline-none focus:border-rose-500" />
+                            <button id="btn-add-client" class="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-colors">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div id="client-fields-list" class="flex flex-wrap gap-2"></div>
+                        <p class="text-[10px] text-zinc-500 italic">Ej: CIF_CLIENTE</p>
+                    </div>
+
+                    <div class="mt-auto pt-6 border-t border-zinc-800">
+                        <div class="bg-rose-500/5 border border-rose-500/10 rounded-xl p-4">
+                            <p class="text-[11px] text-zinc-400 leading-relaxed">Usa las etiquetas en el texto, ej: {"{{PRECIO}}"}. El cliente solo podrá rellenar sus campos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main: Editor -->
+                <div class="flex-1 flex flex-col bg-white overflow-hidden">
+                    <div id="quill-editor" class="flex-1 text-black"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-zinc-900 border-t border-zinc-800 flex justify-end gap-3" style="padding: 1.25rem 1.5rem;">
+                <button id="btn-close-modal" class="px-4 py-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors">Cancelar</button>
+                <button id="btn-save" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-md text-sm font-semibold shadow-sm transition-all tracking-wide">GUARDAR PLANTILLA</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar plantilla?</h3>
+                <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción es permanente y no podrá deshacerse.</p>
+            </div>
+            <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+                <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+                <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+</AdminLayout>
+
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js" is:inline></script>
+
+<style is:global>
+    /* Quill Custom Dark Theme UI */
+    .ql-toolbar.ql-snow { border-color: #27272a !important; background: #18181b !important; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; }
+    .ql-container.ql-snow { border-color: #27272a !important; font-size: 16px !important; }
+    .ql-editor { padding: 40px !important; line-height: 1.6 !important; min-height: 500px !important; }
+    .ql-snow .ql-stroke { stroke: #a1a1aa !important; }
+    .ql-snow .ql-fill { fill: #a1a1aa !important; }
+    .ql-snow .ql-picker { color: #a1a1aa !important; }
+    .ql-snow .ql-picker-options { background-color: #18181b !important; border-color: #27272a !important; }
+    
+    .shadow-glow { box-shadow: 0 0 20px rgba(225, 29, 72, 0.2); }
+</style>
+
+<script>
+    declare const Quill: any;
+    let quill: any;
+    let adminFields: string[] = [];
+    let clientFields: string[] = [];
+    let currentId: string | null = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('modal-template')!;
+        const btnAdd = document.getElementById('btn-add-template')!;
+        const btnClose = document.getElementById('modal-close')!;
+        const btnCloseBottom = document.getElementById('btn-close-modal')!;
+
+        // Toast Helper
+        function showToast(message: string, type: 'success' | 'error' = 'success') {
+            const container = document.getElementById('toast-container')!;
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-zinc-900' : 'bg-red-500/10';
+            const borderColor = type === 'success' ? 'border-zinc-800' : 'border-red-500/20';
+            const iconColor = type === 'success' ? 'text-emerald-500' : 'text-red-500';
+            const icon = type === 'success' 
+                ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border ${borderColor} ${bgColor} text-white shadow-2xl min-w-[280px] pointer-events-auto`;
+            toast.style.animation = 'toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+            
+            toast.innerHTML = `
+                <div class="${iconColor}">${icon}</div>
+                <p class="text-sm font-medium">${message}</p>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toast-out 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Init Quill
+        quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            placeholder: 'Escribe o pega aquí el contenido de tu contrato. Usa {{VARIABLE}} para campos dinámicos...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['link', 'image', 'blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Field Management
+        function renderTags() {
+            const adminList = document.getElementById('admin-fields-list')!;
+            const clientList = document.getElementById('client-fields-list')!;
+            
+            adminList.innerHTML = adminFields.map(f => `
+                <span class="inline-flex items-center px-2 py-1 rounded-md bg-rose-500/10 text-rose-400 text-[10px] font-bold border border-rose-500/20 gap-1.5">
+                    ${f}
+                    <button class="remove-admin hover:text-white" data-val="${f}"><i data-lucide="x" class="w-3 h-3"></i></button>
+                </span>
+            `).join('');
+
+            clientList.innerHTML = clientFields.map(f => `
+                <span class="inline-flex items-center px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20 gap-1.5">
+                    ${f}
+                    <button class="remove-client hover:text-white" data-val="${f}"><i data-lucide="x" class="w-3 h-3"></i></button>
+                </span>
+            `).join('');
+
+            // @ts-ignore
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            // Re-bind remove buttons
+            document.querySelectorAll('.remove-admin').forEach(b => b.addEventListener('click', (e) => {
+                const val = (e.currentTarget as HTMLElement).dataset.val;
+                adminFields = adminFields.filter(f => f !== val);
+                renderTags();
+            }));
+            document.querySelectorAll('.remove-client').forEach(b => b.addEventListener('click', (e) => {
+                const val = (e.currentTarget as HTMLElement).dataset.val;
+                clientFields = clientFields.filter(f => f !== val);
+                renderTags();
+            }));
+        }
+
+        document.getElementById('btn-add-admin')?.addEventListener('click', () => {
+            const input = document.getElementById('add-admin-field') as HTMLInputElement;
+            const val = input.value.trim().toUpperCase().replace(/\s+/g, '_');
+            if (val && !adminFields.includes(val)) {
+                adminFields.push(val);
+                input.value = '';
+                renderTags();
+            }
+        });
+
+        document.getElementById('btn-add-client')?.addEventListener('click', () => {
+            const input = document.getElementById('add-client-field') as HTMLInputElement;
+            const val = input.value.trim().toUpperCase().replace(/\s+/g, '_');
+            if (val && !clientFields.includes(val)) {
+                clientFields.push(val);
+                input.value = '';
+                renderTags();
+            }
+        });
+
+        // Modal Logic
+        function openModal(template: any = null) {
+            currentId = template?.id || null;
+            (document.getElementById('t-title') as HTMLInputElement).value = template?.title || '';
+            quill.root.innerHTML = template?.content || '';
+            adminFields = template?.admin_fields || [];
+            clientFields = template?.client_fields || [];
+            document.getElementById('modal-title')!.textContent = currentId ? 'Editar Plantilla' : 'Nueva Plantilla';
+            renderTags();
+            modal.classList.remove('hidden');
+        }
+
+        btnAdd.addEventListener('click', () => openModal());
+        [btnClose, btnCloseBottom].forEach(b => b.addEventListener('click', () => modal.classList.add('hidden')));
+
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const t = JSON.parse((btn as HTMLElement).dataset.template!);
+                openModal(t);
+            });
+        });
+
+        // Save Logic
+        document.getElementById('btn-save')?.addEventListener('click', async () => {
+            const btn = document.getElementById('btn-save') as HTMLButtonElement;
+            const title = (document.getElementById('t-title') as HTMLInputElement).value.trim();
+            const content = quill.root.innerHTML;
+
+            if (!title || !content || content === '<p><br></p>') {
+                showToast('Falta completar el título o el contenido legal', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            const payload = { id: currentId, title, content, admin_fields: adminFields, client_fields: clientFields };
+            const method = currentId ? 'PATCH' : 'POST';
+
+            try {
+                const res = await fetch('/api/admin/templates', {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    showToast(currentId ? 'Plantilla actualizada' : 'Plantilla creada con éxito', 'success');
+                    setTimeout(() => window.location.reload(), 800);
+                } else {
+                    showToast('Error al procesar la solicitud', 'error');
+                }
+            } catch (e) {
+                showToast('Error de conexión con el servidor', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Guardar Plantilla';
+            }
+        });
+
+        // Delete Logic
+        const confirmOverlay = document.getElementById('confirm-overlay')!;
+        const confirmYes = document.getElementById('confirm-yes')!;
+        const confirmCancel = document.getElementById('confirm-cancel')!;
+        let pendingId: string | null = null;
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                pendingId = (btn as HTMLElement).dataset.id!;
+                confirmOverlay.classList.remove('hidden');
+            });
+        });
+
+        confirmCancel.addEventListener('click', () => confirmOverlay.classList.add('hidden'));
+        confirmYes.addEventListener('click', async () => {
+            if (!pendingId) return;
+            const res = await fetch('/api/admin/templates', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: pendingId })
+            });
+            if (res.ok) {
+                showToast('Plantilla eliminada', 'success');
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                showToast('Hubo un error al intentar eliminar la plantilla', 'error');
+            }
+        });
+    });
+</script>

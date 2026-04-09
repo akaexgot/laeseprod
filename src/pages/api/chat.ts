@@ -173,22 +173,37 @@ export const POST: APIRoute = async ({ request }) => {
             .update({ status: 'active', updated_at: new Date().toISOString() })
             .eq('id', conversation_id);
 
-        // SEND EMAIL NOTIFICATION
-        if (sender_type === 'visitor' && import.meta.env.RESEND_API_KEY) {
+        // AUTO-REPLY AND NOTIFICATIONS
+        if (sender_type === 'visitor') {
             const { count } = await supabase
                 .from('chat_messages')
                 .select('*', { count: 'exact', head: true })
                 .eq('conversation_id', conversation_id)
                 .eq('sender_type', 'visitor');
 
-            // Send notification if it's the very first message, OR the conversation was previously closed, OR it's been >12h
-            if (count === 1 || wasClosed || beenLongTime) {
+            const isFirstMessage = count === 1;
+
+            // 1. Send Auto-reply (First message only)
+            if (isFirstMessage) {
+                const autoReplyText = "¡Hola! Gracias por contactar con VideoMarketing Sevilla. Enseguida uno de nuestros compañeros te atenderá. Mientras tanto, puedes contarnos qué necesitas.";
+                await supabase
+                    .from('chat_messages')
+                    .insert({ 
+                        conversation_id, 
+                        sender_type: 'admin', 
+                        message: autoReplyText 
+                    });
+            }
+
+            // 2. Send Email Notification
+            if (import.meta.env.RESEND_API_KEY && (isFirstMessage || wasClosed || beenLongTime)) {
                 const { getSettings } = await import('../../lib/data');
                 const settings = await getSettings();
                 const { sendChatNotification } = await import('../../lib/resend');
                 
                 if (settings.email) {
-                    sendChatNotification(convCheck?.visitor_name || 'Visitante', message, settings.email).catch(err => console.error('Error sending chat notification:', err));
+                    sendChatNotification(convCheck?.visitor_name || 'Visitante', message, settings.email)
+                        .catch(err => console.error('Error sending chat notification:', err));
                 }
             }
         }
