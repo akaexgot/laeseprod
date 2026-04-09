@@ -10,7 +10,7 @@ import { getUserFromCookie } from "../../lib/auth";
 
 const cookie = Astro.request?.headers.get("cookie") || "";
 if (!Astro.request) return Astro.redirect('/admin/login');
-const { user, error } = await getUserFromCookie(cookie);
+const { user, error: authError } = await getUserFromCookie(cookie);
 if (!user) return Astro.redirect('/admin/login');
 const serviceSupabase = getServiceSupabase();
 if (!serviceSupabase) return Astro.redirect('/admin/login');
