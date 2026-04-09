@@ -209,11 +209,6 @@ body {
   box-shadow: 0 0 60px -10px rgba(155, 27, 48, 0.35);
 }
 
-/* ── Dot Pattern ── */
-.dot-pattern {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
 
 /* ── Status Dot (small pulsing indicator) ── */
 .status-dot {

@@ -159,14 +159,6 @@
     justify-content: center;
     padding: clamp(4rem, 6vh, 6rem) 0 clamp(2rem, 5vh, 4rem) 0;
 }
-.detail-content__dots {
-    position: absolute;
-    inset: 0;
-    opacity: 0.05;
-    pointer-events: none;
-    background-image: radial-gradient(#000 1px, transparent 1px);
-    background-size: 22px 22px;
-}
 .detail-content__inner {
     position: relative;
     z-index: 10;

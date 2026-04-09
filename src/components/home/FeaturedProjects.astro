@@ -50,11 +50,13 @@ function getVideoId(value: string | null | undefined): string | null {
            data-pm-makingof={makingOfId}
            data-pm-slug={projects[0].slug}
            data-pm-client={projects[0].client_name || ''}>
-          <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000">
+          <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
+               style={`background-image: url(https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg); background-size: cover; background-position: center;`}>
             <iframe
               src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
               style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:177.78vh; height:56.25vw; min-width:100%; min-height:100%;"
               frameborder="0" allow="autoplay; encrypted-media"
+              loading="lazy"
             ></iframe>
             <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
           </div>
@@ -96,11 +98,13 @@ function getVideoId(value: string | null | undefined): string | null {
              data-pm-makingof={makingOfId}
              data-pm-slug={project.slug}
              data-pm-client={project.client_name || ''}>
-            <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000">
+            <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
+                 style={`background-image: url(https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg); background-size: cover; background-position: center;`}>
               <iframe
                 src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
                 style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:177.78vh; height:56.25vw; min-width:100%; min-height:100%;"
                 frameborder="0" allow="autoplay; encrypted-media"
+                loading="lazy"
               ></iframe>
               <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             </div>

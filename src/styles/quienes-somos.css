@@ -172,11 +172,6 @@
     justify-content: center;
 }
 
-.qs-about__dots {
-    position: absolute; inset: 0; opacity: .05; pointer-events: none;
-    background-image: radial-gradient(#000 1px, transparent 1px);
-    background-size: 22px 22px;
-}
 .qs-about__grid {
     position: relative; z-index: 10;
     display: grid; grid-template-columns: 1fr;
@@ -240,11 +235,6 @@
 .qs-find {
     position: relative; background: #f9fafb;
     padding: 5rem 0 6rem;
-}
-.qs-find__dots {
-    position: absolute; inset: 0; opacity: .08; pointer-events: none;
-    background-image: radial-gradient(#000 1px, transparent 1px);
-    background-size: 22px 22px;
 }
 .qs-section-header {
     text-align: center; margin-bottom: 3rem;
