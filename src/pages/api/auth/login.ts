@@ -2,43 +2,54 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const formData = await request.formData();
-  const email = formData.get('email')?.toString();
-  const password = formData.get('password')?.toString();
-  const redirectTo = formData.get('redirectTo')?.toString() || '/admin';
+  try {
+    const formData = await request.formData();
+    const email = formData.get('email')?.toString();
+    const password = formData.get('password')?.toString();
+    const redirectTo = formData.get('redirectTo')?.toString() || '/admin';
 
-  if (!email || !password) {
-    return new Response(JSON.stringify({ error: 'Email y contraseña son obligatorios.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    if (!email || !password) {
+      return new Response(JSON.stringify({ error: 'Email y contraseña son obligatorios.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return new Response(JSON.stringify({ 
+        error: 'Servidor no configurado. Verifica las variables de entorno PUBLIC_SUPABASE_URL y PUBLIC_SUPABASE_ANON_KEY.' 
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error || !data?.session) {
+      return new Response(JSON.stringify({ error: 'Credenciales incorrectas o usuario no autorizado.' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const isProd = import.meta.env.PROD;
+    
+    const cookieOptions = {
+      path: '/',
+      httpOnly: true,
+      secure: isProd, // Solo secure en producción (HTTPS)
+      sameSite: 'lax' as const,
+      maxAge: data.session.expires_in || 60 * 60 * 24 * 7,
+    };
+
+    cookies.set('sb-access-token', data.session.access_token, cookieOptions);
+    cookies.set('sb-refresh-token', data.session.refresh_token, cookieOptions);
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      redirect: redirectTo 
+    }), { 
+      status: 200, 
+      headers: { 'Content-Type': 'application/json' } 
+    });
+  } catch (e: any) {
+    console.error('Login error:', e);
+    return new Response(JSON.stringify({ error: `Error interno del servidor: ${e.message}` }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
-
-  const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error || !data?.session) {
-    return new Response(JSON.stringify({ error: 'Credenciales incorrectas.' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
-
-  const cookieOptions = {
-    path: '/',
-    httpOnly: true,
-    secure: false, // Forzado a false para que funcione siempre en local sin HTTPS
-    sameSite: 'lax' as const,
-    maxAge: data.session.expires_in || 60 * 60 * 24 * 7,
-  };
-
-  cookies.set('sb-access-token', data.session.access_token, cookieOptions);
-  cookies.set('sb-refresh-token', data.session.refresh_token, cookieOptions);
-
-  // Para asegurar que Astro mande las cookies en un Response manual,
-  // a veces es necesario construir los headers explícitamente o usar la respuesta de cookies.
-  
-  return new Response(JSON.stringify({ 
-    success: true, 
-    redirect: redirectTo 
-  }), { 
-    status: 200, 
-    headers: { 
-      'Content-Type': 'application/json'
-    } 
-  });
 };

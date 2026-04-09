@@ -272,7 +272,8 @@ import "../../styles/global.css";
                         submitBtn.innerHTML = originalContent;
                     }
                 } catch (err) {
-                    errorDiv.textContent = 'Error de conexión remota';
+                    console.error('Login connection error:', err);
+                    errorDiv.textContent = 'No se pudo conectar con el servidor. Verifica tu conexión o las variables de entorno.';
                     errorDiv.style.display = 'block';
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalContent;
