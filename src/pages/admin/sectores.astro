@@ -5,13 +5,12 @@
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getSectors } from "../../lib/data";
-import { supabase, getServiceSupabase } from "../../lib/supabase";
+import { getServiceSupabase } from "../../lib/supabase";
+import { getUserFromCookie } from "../../lib/auth";
 
 const cookie = Astro.request?.headers.get("cookie") || "";
 if (!Astro.request) return Astro.redirect('/admin/login');
-if (!supabase) return Astro.redirect('/admin/login');
-const { data: userData } = await supabase.auth.getUser({ cookie });
-const user = userData?.user;
+const { user, error } = await getUserFromCookie(cookie);
 if (!user) return Astro.redirect('/admin/login');
 const serviceSupabase = getServiceSupabase();
 if (!serviceSupabase) return Astro.redirect('/admin/login');

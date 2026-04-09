@@ -20,8 +20,8 @@ async function handleSessionRequest(request: Request) {
     const cookieAttrs = `Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}` + (isProd ? '; Secure' : '');
 
     const cookies = [
-      `sb-access-token=${encodeURIComponent(access_token)}; ${cookieAttrs}`,
-      `sb-refresh-token=${encodeURIComponent(refresh_token)}; ${cookieAttrs}`,
+      `sb-access-token=${access_token}; ${cookieAttrs}`,
+      `sb-refresh-token=${refresh_token}; ${cookieAttrs}`,
     ];
 
     const headers = new Headers();
@@ -31,7 +31,7 @@ async function handleSessionRequest(request: Request) {
 
     // In development, also set a non-HttpOnly debug cookie so the client can inspect it
     if (!isProd) {
-      const debugCookie = `sb-access-token-debug=${encodeURIComponent(access_token)}; Path=/; SameSite=Lax; Max-Age=${maxAge}`;
+      const debugCookie = `sb-access-token-debug=${access_token}; Path=/; SameSite=Lax; Max-Age=${maxAge}`;
       headers.append('Set-Cookie', debugCookie);
     }
 

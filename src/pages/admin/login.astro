@@ -42,7 +42,7 @@ import "../../styles/global.css";
 
             <!-- Login Form -->
             <div class="glass rounded-3xl p-8">
-                <form id="login-form" class="space-y-5">
+                <form id="login-form" class="space-y-5" method="post" action="/api/auth/login">
                     <div>
                         <label
                             for="login-email"
@@ -102,95 +102,18 @@ import "../../styles/global.css";
         </div>
 
         <script>
-            import { createClient } from "@supabase/supabase-js";
-
-            const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || "";
-            const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || "";
-
-            const form = document.getElementById(
-                "login-form",
-            ) as HTMLFormElement;
-            const errorDiv = document.getElementById("login-error")!;
-            const submitBtn = document.getElementById(
-                "login-submit",
-            ) as HTMLButtonElement;
-
-            form?.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                submitBtn.disabled = true;
-                submitBtn.textContent = "Entrando...";
-                errorDiv.classList.add("hidden");
-
-                const email = (
-                    document.getElementById("login-email") as HTMLInputElement
-                ).value;
-                const password = (
-                    document.getElementById(
-                        "login-password",
-                    ) as HTMLInputElement
-                ).value;
-
-                if (!supabaseUrl || !supabaseKey) {
-                    // Dev mode: redirect directly
-                                if (import.meta.env.DEV) {
-                                    // Pause redirect in dev so cookies can be inspected
-                                    const proceed = confirm('Dev: cookies set. Abrir /admin ahora? (Aceptar = continuar)');
-                                    if (proceed) window.location.href = '/admin';
-                                } else {
-                                    window.location.href = "/admin";
-                                }
-                    return;
-                }
-
-                try {
-                    const supabase = createClient(supabaseUrl, supabaseKey);
-                    const { data, error } = await supabase.auth.signInWithPassword({
-                        email,
-                        password,
-                    });
-
-                    if (error || !data?.session) {
-                        errorDiv.textContent = "Credenciales incorrectas";
-                        errorDiv.classList.remove("hidden");
-                    } else {
-                        // Send session tokens to server to set HttpOnly cookies
-                        try {
-                            const res = await fetch('/api/auth/session', {
-                                method: 'POST',
-                                credentials: 'include',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    access_token: data.session.access_token,
-                                    refresh_token: data.session.refresh_token,
-                                    expires_in: data.session.expires_in || null,
-                                }),
-                            });
-
-                            if (import.meta.env.DEV) {
-                                try {
-                                    const json = await res.json();
-                                    console.log('POST /api/auth/session response:', json);
-                                } catch (e) {
-                                    console.warn('Could not parse /api/auth/session response JSON', e);
-                                }
-                                console.log('document.cookie after /api/auth/session ->', document.cookie);
-                            }
-                        } catch (err) {
-                            console.error('Failed to persist session on server', err);
-                        }
-
-                        // Redirect to admin; server-side pages will read cookies
-                        window.location.href = "/admin";
+            // Display error passed via query param (server redirects back with ?error=...)
+            (function(){
+                const params = new URLSearchParams(window.location.search);
+                const err = params.get('error');
+                if (err) {
+                    const errorDiv = document.getElementById('login-error');
+                    if (errorDiv) {
+                        errorDiv.textContent = decodeURIComponent(err);
+                        errorDiv.classList.remove('hidden');
                     }
-                } catch (e) {
-                    console.error(e);
-                    errorDiv.textContent = "Error de conexión";
-                    errorDiv.classList.remove("hidden");
                 }
-
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Iniciar sesión";
-            });
+            })();
         </script>
     </body>
 </html>
