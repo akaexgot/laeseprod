@@ -32,13 +32,13 @@ const { title, description, image, noindex } = Astro.props;
     </head>
     <body class="bg-dark text-light antialiased">
         <!-- ── PRELOADER ── -->
-        <div id="site-preloader" class="fixed inset-0 z-[9999] bg-[#0a0a0f] flex items-center justify-center transition-all duration-700 ease-in-out">
-            <div class="relative flex flex-col items-center gap-8">
-                <div class="preloader-logo-container relative w-32 h-32 lg:w-40 lg:h-40">
+        <div id="site-preloader" class="fixed inset-0 z-[9999] bg-[#0a0a0f] grid place-items-center transition-all duration-700 ease-in-out">
+            <div class="flex flex-col items-center justify-center w-full px-10">
+                <div class="preloader-logo-container relative w-32 h-32 lg:w-40 lg:h-40 flex items-center justify-center">
                     <img src="/logo-blanco-web.png" alt="Cargando..." class="w-full h-full object-contain animate-preloader-spin" />
                     <div class="absolute inset-0 rounded-full border-2 border-carmin/20 border-t-carmin animate-spin duration-500"></div>
                 </div>
-                <div class="h-1 w-24 bg-white/10 rounded-full overflow-hidden">
+                <div class="h-1 w-24 bg-white/10 rounded-full overflow-hidden mt-8">
                     <div id="preloader-bar" class="h-full bg-carmin transition-all duration-300 ease-out" style="width: 0%"></div>
                 </div>
             </div>

@@ -15,7 +15,7 @@ const settings = await getSettings();
         <div id="nav-inner" class="flex items-center justify-between h-20 lg:h-24 transition-all duration-300">
             <!-- Izquierda: Logo (dual images for scroll swap) -->
             <a href="/" class="flex lg:flex-1 items-center justify-start group relative">
-                <div class="relative h-12 lg:h-14" style="min-width:120px">
+                <div class="relative h-12 lg:h-14 lg:min-w-[120px]">
                     <img id="nav-logo-white" src="/logo-blanco-web.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:1" />
                     <img id="nav-logo-dark" src="/logo-oscuro-web.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:0" />
                 </div>
@@ -286,6 +286,8 @@ const settings = await getSettings();
             line2.classList.add('-rotate-45','-translate-y-[3px]','w-6');
             line1.style.background = '#fff';
             line2.style.background = '#fff';
+            if (logoWhite) logoWhite.style.opacity = '1';
+            if (logoDark) logoDark.style.opacity = '0';
             document.body.style.overflow = 'hidden';
         } else {
             menu.classList.add('opacity-0','pointer-events-none');

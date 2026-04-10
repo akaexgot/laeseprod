@@ -42,7 +42,7 @@ function getVideoId(value: string | null | undefined): string | null {
       const makingOfId = getVideoId(projects[0].video_explanation_mobile) || getVideoId(projects[0].video_explanation_desktop) || videoId;
       if (!videoId) return null;
       return (
-        <a href={`/proyectos/${projects[0].slug}`} class="group relative w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden block reveal-left"
+        <a href={`/proyectos/${projects[0].slug}`} class="group relative w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden block reveal-left project-card"
            data-pm-title={projects[0].title}
            data-pm-subtitle={projects[0].subtitle || ''}
            data-pm-description={projects[0].description || ''}
@@ -90,7 +90,7 @@ function getVideoId(value: string | null | undefined): string | null {
         const makingOfId = getVideoId(project.video_explanation_mobile) || getVideoId(project.video_explanation_desktop) || videoId;
         if (!videoId) return null;
         return (
-          <a href={`/proyectos/${project.slug}`} class={`group relative w-full h-1/2 overflow-hidden block border-l border-white/5 ${idx === 0 ? 'border-b border-white/5' : ''}`}
+          <a href={`/proyectos/${project.slug}`} class={`group relative w-full h-1/2 overflow-hidden block border-l border-white/5 ${idx === 0 ? 'border-b border-white/5' : ''} project-card`}
              data-pm-title={project.title}
              data-pm-subtitle={project.subtitle || ''}
              data-pm-description={project.description || ''}
@@ -140,20 +140,72 @@ function getVideoId(value: string | null | undefined): string | null {
     position: absolute; top: 6rem; left: 0; width: 50%;
     z-index: 30; pointer-events: none;
     display: flex; flex-direction: column; align-items: flex-start;
-    padding-left: 5rem;
+    padding-left: 1.5rem;
   }
   @media (min-width: 1024px) {
-    .fp-header { top: 8rem; padding-left: 7rem; }
+    .fp-header { top: 8rem; padding-left: 7rem; width: 50%; }
   }
   .fp-info {
     position: absolute; bottom: 0; left: 0; right: 0;
     display: flex; flex-direction: column; justify-content: flex-end;
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .fp-info--large { padding: 0 1.5rem 5rem 5rem; }
-  .fp-info--small { padding: 0 1.5rem 3.5rem 3rem; }
+
+  /* Ocultar info en móvil por defecto hasta interacción */
+  @media (max-width: 1024px) {
+    .fp-info { 
+      opacity: 0; 
+      transform: translateY(20px);
+      pointer-events: none;
+    }
+    .project-card.active .fp-info {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    /* El degradado también se oculta para ver la imagen limpia */
+    .project-card .bg-gradient-to-t {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .project-card.active .bg-gradient-to-t {
+      opacity: 1;
+    }
+  }
+
+  .fp-info--large { padding: 0 1.5rem 5rem 1.5rem; }
+  .fp-info--small { padding: 0 1.5rem 3.5rem 1.5rem; }
   @media (min-width: 1024px) {
     .fp-info--large { padding: 0 2rem 6rem 7rem; }
     .fp-info--small { padding: 0 2rem 4rem 4rem; }
   }
   .fp-explore { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.25rem; }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.project-card');
+    
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        // Solo en móvil/tablet
+        if (window.innerWidth <= 1024) {
+          if (!card.classList.contains('active')) {
+            e.preventDefault();
+            // Desactivar otros
+            cards.forEach(c => c.classList.remove('active'));
+            // Activar este
+            card.classList.add('active');
+          }
+        }
+      });
+    });
+
+    // Cerrar si se pincha fuera
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.project-card')) {
+        cards.forEach(c => c.classList.remove('active'));
+      }
+    });
+  });
+</script>

@@ -1,62 +1,139 @@
 ---
 /**
- * Custom 404 Page
+ * 404 - Error Page
+ * Custom cinematic error page for VideoMarketing Sevilla
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout
-    title="Página no encontrada"
-    description="La página que buscas no existe."
->
-    <section class="min-h-[70vh] flex items-center justify-center">
-        <div class="text-center px-4">
-            <div
-                class="text-8xl lg:text-[12rem] font-[Outfit] font-bold text-gradient-carmin leading-none mb-4 animate-fade-up"
-            >
-                404
+<BaseLayout title="404 - Página no encontrada">
+    <section class="error-page relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-zinc-950">
+        <!-- Cinematic Background (Blurred/Grained) -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black"></div>
+            <div class="absolute inset-0 opacity-20 bg-[url('/grain.png')] pointer-events-none"></div>
+            
+            <!-- Floating Decorative Elements -->
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-rose-600/10 blur-[120px] rounded-full animate-pulse"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-zinc-800/20 blur-[150px] rounded-full animate-pulse" style="animation-delay: 2s;"></div>
+        </div>
+
+        <div class="container relative z-10 px-6 max-w-2xl mx-auto flex flex-col items-center justify-center text-center">
+            <!-- Glitchy 404 -->
+            <div class="glitch-container relative mb-8">
+                <h1 class="text-[12rem] lg:text-[18rem] font-bold leading-none tracking-tighter text-white opacity-10 select-none">
+                    404
+                </h1>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <h2 class="text-7xl lg:text-9xl font-bold tracking-tighter text-white glitch" data-text="404">
+                        404
+                    </h2>
+                </div>
             </div>
-            <h1
-                class="text-2xl lg:text-3xl font-[Outfit] font-bold text-white mb-4 animate-fade-up"
-                style="animation-delay: 0.1s;"
-            >
-                Página no encontrada
-            </h1>
-            <p
-                class="text-light-muted mb-8 max-w-md mx-auto animate-fade-up"
-                style="animation-delay: 0.2s;"
-            >
-                Lo sentimos, la página que buscas no existe o ha sido movida.
-            </p>
-            <div
-                class="flex items-center justify-center gap-4 animate-fade-up"
-                style="animation-delay: 0.3s;"
-            >
-                <a
-                    href="/"
-                    class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-carmin text-white font-semibold rounded-full hover:shadow-glow-strong transition-all duration-300 hover:scale-105"
-                >
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        ><path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                        ></path></svg
-                    >
-                    Volver al inicio
-                </a>
-                <a
-                    href="/contacto"
-                    class="inline-flex items-center gap-2 px-6 py-3 border border-dark-border text-white font-medium rounded-full hover:border-carmin/30 transition-all duration-300"
-                >
-                    Contacto
-                </a>
+
+            <!-- Content -->
+            <div class="reveal-up">
+                <h3 class="text-2xl lg:text-3xl font-bold text-white mb-4 tracking-tight">
+                    Parece que nos hemos <span class="text-rose-500 italic">salido de guión</span>
+                </h3>
+                <p class="text-zinc-400 text-base lg:text-lg mb-12 max-w-md mx-auto leading-relaxed text-center">
+                    La escena que buscas no existe o ha sido eliminada del montaje final. 
+                    No te preocupes, el resto de la web sigue en marcha.
+                </p>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/" class="group flex items-center gap-3 bg-rose-600 hover:bg-rose-500 text-white font-bold px-8 py-4 rounded-full transition-all duration-500 shadow-lg shadow-rose-600/20">
+                        <span>VOLVER A LA ACCIÓN</span>
+                        <svg class="w-5 h-5 transition-transform duration-500 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </a>
+                    <a href="/contacto" class="text-zinc-400 hover:text-white font-medium text-sm tracking-widest uppercase transition-colors px-6 py-4">
+                        Reportar error
+                    </a>
+                </div>
             </div>
+        </div>
+
+        <!-- Camera Frame Corner Doodles -->
+        <div class="absolute top-12 left-12 w-12 h-12 border-t-2 border-l-2 border-zinc-800 pointer-events-none"></div>
+        <div class="absolute top-12 right-12 w-12 h-12 border-t-2 border-r-2 border-zinc-800 pointer-events-none"></div>
+        <div class="absolute bottom-12 left-12 w-12 h-12 border-b-2 border-l-2 border-zinc-800 pointer-events-none"></div>
+        <div class="absolute bottom-12 right-12 w-12 h-12 border-b-2 border-r-2 border-zinc-800 pointer-events-none"></div>
+        
+        <!-- REC indicator -->
+        <div class="absolute top-12 left-28 flex items-center gap-2 opacity-50 pointer-events-none">
+            <div class="w-3 h-3 bg-rose-600 rounded-full animate-pulse"></div>
+            <span class="text-zinc-400 font-mono text-xs tracking-widest">LOSING_SIGNAL</span>
         </div>
     </section>
 </BaseLayout>
+
+<style>
+    .error-page {
+        background-color: #09090b;
+    }
+
+    /* Glitch Effect */
+    .glitch {
+        position: relative;
+        text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                    -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+                    0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+        animation: glitch 500ms infinite;
+    }
+
+    .glitch span {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    @keyframes glitch {
+        0% {
+            text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                        -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                        -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+        }
+        14% {
+            text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                        -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                        -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+        }
+        15% {
+            text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                        0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                        -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+        }
+        49% {
+            text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                        0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                        -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+        }
+        50% {
+            text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                        0.05em 0 0 rgba(0, 255, 0, 0.75),
+                        0 -0.05em 0 rgba(0, 0, 255, 0.75);
+        }
+        99% {
+            text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                        0.05em 0 0 rgba(0, 255, 0, 0.75),
+                        0 -0.05em 0 rgba(0, 0, 255, 0.75);
+        }
+        100% {
+            text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                        -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                        -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+        }
+    }
+
+    .reveal-up {
+        animation: reveal-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes reveal-up {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>

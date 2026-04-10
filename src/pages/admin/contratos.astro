@@ -140,14 +140,14 @@ const getStatusLabel = (status: string) => {
                                                 <i data-lucide="link" class="w-4 h-4"></i>
                                             </button>
                                         )}
-                                        {contract.status === 'completed' && contract.pdf_url && (
+                                        {contract.pdf_url && (
                                             <a 
                                                 href={contract.pdf_url} 
                                                 target="_blank"
-                                                class="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all"
-                                                title="Descargar PDF"
+                                                class="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all border border-transparent hover:border-emerald-500/20"
+                                                title="Descargar Contrato PDF"
                                             >
-                                                <i data-lucide="download" class="w-4 h-4"></i>
+                                                <i data-lucide="file-down" class="w-4 h-4"></i>
                                             </a>
                                         )}
                                         <button 
