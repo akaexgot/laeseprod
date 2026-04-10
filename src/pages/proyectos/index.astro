@@ -141,6 +141,8 @@ const screens = buildProjectScreens(projects);
                                             <div class="pj-cell__info">
                                                 <span class="pj-cell__client">{item.client_name}</span>
                                                 <h3 class="pj-cell__title">{item.title}</h3>
+                                                {item.subtitle && <p class="pj-cell__subtitle">{item.subtitle}</p>}
+
                                                 <div class="pj-cell__cta">
                                                     <span>Ver proyecto</span>
                                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
@@ -181,6 +183,8 @@ const screens = buildProjectScreens(projects);
                                     <div class="pj-cell__info">
                                         <span class="pj-cell__client">{item.client_name}</span>
                                         <h3 class="pj-cell__title">{item.title}</h3>
+                                        {item.subtitle && <p class="pj-cell__subtitle">{item.subtitle}</p>}
+
                                         <div class="pj-cell__cta">
                                             <span>Ver proyecto</span>
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>

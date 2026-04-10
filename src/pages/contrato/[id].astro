@@ -42,359 +42,394 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
     title="Firma de Contrato | VideoMarketing Sevilla"
     description="Portal seguro de firma de contratos y gestión de pagos."
 >
-    <div class="contract-page-wrapper">
-        <div class="contract-container">
-            {error ? (
-                <div class="card error-card">
-                    <div class="error-icon">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </div>
-                    <h2 class="error-title">{error}</h2>
-                    <p class="error-text">Si crees que esto es un error o el enlace ha caducado, contacta con nosotros.</p>
-                    <a href="/" class="btn-back">Volver a Inicio</a>
-                </div>
-            ) : (
-                <div class="card main-card">
-                    <div class="card-header">
-                        <div class="header-pre">VideoMarketing Sevilla</div>
-                        <h1 class="header-title">Finalización de Contrato</h1>
-                        <p class="header-desc">Sigue los pasos secuenciales para formalizar tu proyecto con nosotros de forma segura.</p>
-                    </div>
+    <section class="contract-body">
+        <div class="contract-bg-dots"></div>
 
-                    <div class="step-indicator" id="stepper">
-                        <div class="step active" data-step="0"><span>Info</span></div>
-                        <div class="step" data-step="1"><span>Fiscal</span></div>
-                        <div class="step" data-step="2"><span>Firma</span></div>
-                        <div class="step" data-step="3"><span>Pago</span></div>
+        <div class="section-container contract-body__grid">
+            <!-- MAIN COLUMN -->
+            <div class="contract-main-col">
+                {error ? (
+                    <div class="card error-card">
+                        <div class="error-icon">
+                            <svg fill="none" class="w-12 h-12 mx-auto" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </div>
+                        <h2 class="error-title">{error}</h2>
+                        <p class="error-text">Si crees que esto es un error o el enlace ha caducado, contacta con nosotros.</p>
+                        <a href="/" class="btn-back">Volver a Inicio</a>
                     </div>
-
-                    <div class="card-body">
-                        <!-- STEP 0: EMAIL & PHONE -->
-                        <div id="step-0" class="active-step">
-                            <div class="form-grid">
-                                <h3 class="step-title">Tus datos de contacto</h3>
-                                <p class="step-desc">Necesitamos estos datos para enviarte la copia firmada del contrato automáticamente.</p>
-                                
-                                <div class="input-group">
-                                    <label class="field-label">Correo Electrónico *</label>
-                                    <input type="email" id="c-email" value={contract?.client_email || ''} class="client-auth-input" />
-                                </div>
-                                <div class="input-group">
-                                    <label class="field-label">Teléfono de Contacto *</label>
-                                    <input type="tel" id="c-phone" value={contract?.client_phone || ''} class="client-auth-input" />
-                                </div>
-                                
-                                <button class="btn-primary" id="go-to-step-1">Continuar a datos fiscales</button>
-                                
-                                <div class="trust-info-minimal">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    Tus datos están protegidos y solo se usarán para la gestión de este contrato.
-                                </div>
-                            </div>
+                ) : (
+                    <div class="card main-card">
+                        <div class="card-header">
+                            <div class="header-pre">VideoMarketing Sevilla</div>
+                            <h1 class="header-title">Finalización de Contrato</h1>
+                            <p class="header-desc">Sigue los pasos secuenciales para formalizar tu proyecto con nosotros de forma segura.</p>
                         </div>
 
-                        <!-- STEP 1: FISCAL INFO -->
-                        <div id="step-1" style="display: none;">
-                            <div class="form-grid">
-                                <h3 class="step-title">Datos Fiscales</h3>
-                                <p class="step-desc">Introduce la información legal que aparecerá en el contrato y en tus facturas.</p>
-                                
-                                {template.client_fields.map((field: string) => (
+                        <div class="step-indicator" id="stepper">
+                            <div class="step active" data-step="0"><span>Info</span></div>
+                            <div class="step" data-step="1"><span>Fiscal</span></div>
+                            <div class="step" data-step="2"><span>Firma</span></div>
+                            <div class="step" data-step="3"><span>Pago</span></div>
+                        </div>
+
+                        <div class="card-body">
+                            <!-- STEP 0: EMAIL & PHONE -->
+                            <div id="step-0" class="active-step">
+                                <div class="form-grid">
+                                    <h3 class="step-title">Tus datos de contacto</h3>
+                                    <p class="step-desc">Necesitamos estos datos para enviarte la copia firmada del contrato automáticamente.</p>
+                                    
                                     <div class="input-group">
-                                        <label class="field-label">{field.replace(/_/g, ' ')} *</label>
-                                        <input type="text" class="client-data-input" data-field={field} value={contract?.client_data?.[field] || ''} />
+                                        <label class="field-label">Correo Electrónico *</label>
+                                        <input type="email" id="c-email" value={contract?.client_email || ''} class="client-auth-input" />
                                     </div>
-                                ))}
-                                
-                                <div class="flex-actions">
-                                    <button class="btn-secondary" id="back-to-step-0">Volver</button>
-                                    <button class="btn-primary" id="go-to-step-2">Revisar y Continuar</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- STEP 2: REVIEW & SIGN -->
-                        <div id="step-2" style="display: none;">
-                            <h3 class="step-title">Revisión del documento</h3>
-                            <div class="contract-review-box" id="contract-preview">
-                                <!-- HTML injected here -->
-                            </div>
-
-                            <div class="sign-section">
-                                <h3 class="step-title">Aceptación y Firma</h3>
-                                
-                                <div class="terms-check-wrapper" style="margin-bottom: 2rem;">
-                                    <label class="terms-label" id="terms-label-element">
-                                        <input type="checkbox" id="terms-accept" class="terms-checkbox" />
-                                        <span class="terms-text" style="color: #18181b;">
-                                            <strong>Acepto:</strong> {settings?.contract_terms_text || 'Acepto los términos y condiciones del servicio y autorizo la firma digital de este documento.'}
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <div class="signature-container">
-                                    <p class="signature-hint">Utiliza el dedo o el ratón para firmar dentro del recuadro.</p>
-                                    <div class="signature-canvas-wrap">
-                                        <canvas id="signature-pad"></canvas>
-                                        <button class="btn-clear-sig" id="clear-sig">Limpiar firma</button>
+                                    <div class="input-group">
+                                        <label class="field-label">Teléfono de Contacto *</label>
+                                        <input type="tel" id="c-phone" value={contract?.client_phone || ''} class="client-auth-input" />
                                     </div>
-                                </div>
-
-                                <div class="flex-actions" style="margin-top: 2rem;">
-                                    <button class="btn-secondary" id="back-to-step-1">Editar datos</button>
-                                    <div style="flex: 2; position: relative;">
-                                        <button class="btn-primary" id="btn-submit-signature" disabled>
-                                            {contract?.is_billable ? 'Firmar y proceder al pago' : 'Firmar y Finalizar'}
-                                        </button>
-                                        <p id="signature-warning" style="color: #e11d48; font-size: 0.75rem; text-align: center; margin-top: 0.75rem; font-weight: 600;">
-                                            Debes firmar y aceptar los términos
-                                        </p>
+                                    
+                                    <button class="btn-primary" id="go-to-step-1">Continuar a datos fiscales</button>
+                                    
+                                    <div class="trust-info-minimal">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        Tus datos están protegidos y solo se usarán para la gestión de este contrato.
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- STEP 3: PAYMENT / SUCCESS -->
-                        <div id="step-3" style="display: none;">
-                            <div class="success-screen">
-                                {contract?.is_billable && contract.status !== 'completed' && contract.status !== 'paid' ? (
-                                    <div id="payment-checkout-box">
-                                        <h2 class="success-title">Firma Guardada</h2>
-                                        <p class="final-desc">Tu firma se ha registrado correctamente. Solo falta completar el pago inicial para finalizar.</p>
-                                        
-                                        <div class="payment-card">
-                                            <p class="payment-desc">Depósito inicial a abonar:</p>
-                                            <div class="payment-amount">{contract?.amount_to_pay}€</div>
-                                            
-                                            <div class="trust-badges">
-                                                <div class="badge">
-                                                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                                    <span>Pago Seguro SSL</span>
-                                                </div>
-                                                <div class="badge">
-                                                    <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                                                    <span>Powered by Stripe</span>
-                                                </div>
-                                            </div>
+                            <!-- STEP 1: FISCAL INFO -->
+                            <div id="step-1" style="display: none;">
+                                <div class="form-grid">
+                                    <h3 class="step-title">Datos Fiscales</h3>
+                                    <p class="step-desc">Introduce la información legal que aparecerá en el contrato y en tus facturas.</p>
+                                    
+                                    {template.client_fields.map((field: string) => (
+                                        <div class="input-group">
+                                            <label class="field-label">{field.replace(/_/g, ' ')} *</label>
+                                            <input type="text" class="client-data-input" data-field={field} value={contract?.client_data?.[field] || ''} />
+                                        </div>
+                                    ))}
+                                    
+                                    <div class="flex-actions">
+                                        <button class="btn-secondary" id="back-to-step-0">Volver</button>
+                                        <button class="btn-primary" id="go-to-step-2">Revisar y Continuar</button>
+                                    </div>
+                                </div>
+                            </div>
 
-                                            <button class="btn-primary btn-pay" id="btn-pay">
-                                                Proceder al pago seguro
-                                            </button>
-                                            <p class="security-info">Tus datos bancarios nunca se guardan en nuestros servidores. El pago es procesado íntegramente por Stripe.</p>
+                            <!-- STEP 2: REVIEW & SIGN -->
+                            <div id="step-2" style="display: none;">
+                                <h3 class="step-title">Revisión del documento</h3>
+                                <div class="contract-review-box" id="contract-preview">
+                                    <!-- HTML injected here -->
+                                </div>
+
+                                <div class="sign-section">
+                                    <h3 class="step-title">Aceptación y Firma</h3>
+                                    
+                                    <div class="terms-check-wrapper" style="margin-bottom: 2rem;">
+                                        <label class="terms-label" id="terms-label-element">
+                                            <input type="checkbox" id="terms-accept" class="terms-checkbox" />
+                                            <span class="terms-text" style="color: #18181b;">
+                                                <strong>Acepto:</strong> {settings?.contract_terms_text || 'Acepto los términos y condiciones del servicio y autorizo la firma digital de este documento.'}
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <div class="signature-container">
+                                        <p class="signature-hint">Utiliza el dedo o el ratón para firmar dentro del recuadro.</p>
+                                        <div class="signature-canvas-wrap">
+                                            <canvas id="signature-pad"></canvas>
+                                            <button class="btn-clear-sig" id="clear-sig">Limpiar firma</button>
                                         </div>
                                     </div>
 
-                                    <div id="payment-success-msg" style="display:none;">
+                                    <div class="flex-actions" style="margin-top: 2rem;">
+                                        <button class="btn-secondary" id="back-to-step-1">Editar datos</button>
+                                        <div style="flex: 2; position: relative;">
+                                            <button class="btn-primary" id="btn-submit-signature" disabled>
+                                                {contract?.is_billable ? 'Firmar y proceder al pago' : 'Firmar y Finalizar'}
+                                            </button>
+                                            <p id="signature-warning" style="color: #e11d48; font-size: 0.75rem; text-align: center; margin-top: 0.75rem; font-weight: 600;">
+                                                Debes firmar y aceptar los términos
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 3: PAYMENT / SUCCESS -->
+                            <div id="step-3" style="display: none;">
+                                <div class="success-screen">
+                                    {contract?.is_billable && contract.status !== 'completed' && contract.status !== 'paid' ? (
+                                        <div id="payment-checkout-box" class="w-full">
+                                            <h2 class="success-title">Firma Guardada</h2>
+                                            <p class="final-desc">Tu firma se ha registrado correctamente. Solo falta completar el pago inicial para finalizar.</p>
+                                            
+                                            <div class="payment-card">
+                                                <p class="payment-desc">Depósito inicial a abonar:</p>
+                                                <div class="payment-amount">{contract?.amount_to_pay}€</div>
+                                                
+                                                <div class="trust-badges">
+                                                    <div class="badge">
+                                                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                                        <span>Pago Seguro SSL</span>
+                                                    </div>
+                                                    <div class="badge">
+                                                        <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                                        <span>Stripe Secured</span>
+                                                    </div>
+                                                </div>
+
+                                                <button class="btn-primary btn-pay" id="btn-pay">
+                                                    Proceder al pago seguro
+                                                </button>
+                                                <p class="security-info">Tus datos bancarios nunca se guardan en nuestros servidores. El pago es procesado íntegramente por Stripe.</p>
+                                            </div>
+                                        </div>
+
+                                        <div id="payment-success-msg" style="display:none;" class="w-full">
+                                            <div class="final-success">
+                                                <h2 class="success-title">Contrato Firmado</h2>
+                                                <p class="final-desc">¡Pago recibido correctamente! El proceso se ha completado. En breve recibirás una copia en tu correo electrónico ({contract?.client_email || 'el correo proporcionado'}).</p>
+                                                
+                                                <div class="success-icon">
+                                                    <svg class="w-20 h-20 text-emerald-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                </div>
+
+                                                <div class="success-actions">
+                                                    {contract.pdf_url && (
+                                                        <a href={contract.pdf_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
+                                                            Descargar Contrato (PDF)
+                                                        </a>
+                                                    )}
+                                                    <a href="/" class="btn-primary" style="width:auto; padding-inline: 4rem;">Volver al sitio web</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
                                         <div class="final-success">
                                             <h2 class="success-title">Contrato Firmado</h2>
-                                            <p class="final-desc">¡Pago recibido correctamente! El proceso se ha completado. En breve recibirás una copia en tu correo electrónico ({contract?.client_email || 'el correo proporcionado'}).</p>
-                                            
+                                            <p class="final-desc">
+                                                {contract.status === 'completed' || contract.status === 'paid' 
+                                                    ? '¡Gracias! El contrato ya ha sido firmado y procesado correctamente.' 
+                                                    : 'El proceso se ha completado correctamente. En breve recibirás una copia en tu correo electrónico.'}
+                                            </p>
+
                                             <div class="success-icon">
-                                                <svg class="w-16 h-16 text-emerald-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                <svg class="w-20 h-20 text-emerald-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                             </div>
 
+                                            <p class="text-xs text-zinc-400 mt-2 mb-8">
+                                                Enviado a: {contract?.client_email || 'Tu bandeja de entrada'}
+                                            </p>
+                                            
                                             <div class="success-actions">
                                                 {contract.pdf_url && (
-                                                    <a href={contract.pdf_url} target="_blank" class="btn-secondary" style="border-color: #e4e4e7; width: auto; min-width: 200px;">
+                                                    <a href={contract.pdf_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
                                                         Descargar Contrato (PDF)
                                                     </a>
                                                 )}
                                                 <a href="/" class="btn-primary" style="width:auto; padding-inline: 4rem;">Volver al sitio web</a>
                                             </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div class="final-success">
-                                        <h2 class="success-title">Contrato Firmado</h2>
-                                        <p class="final-desc">
-                                            {contract.status === 'completed' || contract.status === 'paid' 
-                                                ? '¡Gracias! El contrato ya ha sido firmado y procesado correctamente.' 
-                                                : 'El proceso se ha completado correctamente. En breve recibirás una copia en tu correo electrónico.'}
-                                        </p>
-
-                                        <div class="success-icon">
-                                            <svg class="w-16 h-16 text-emerald-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        </div>
-
-                                        <p class="text-xs text-zinc-400 mt-2 mb-8">
-                                            Enviado a: {contract?.client_email || 'Tu bandeja de entrada'}
-                                        </p>
-                                        
-                                        <div class="success-actions">
-                                            {contract.pdf_url && (
-                                                <a href={contract.pdf_url} target="_blank" class="btn-secondary" style="border-color: #e4e4e7; width: auto; min-width: 200px;">
-                                                    Descargar Contrato (PDF)
-                                                </a>
-                                            )}
-                                            <a href="/" class="btn-primary" style="width:auto; padding-inline: 4rem;">Volver al sitio web</a>
-                                        </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
+                )}
+            </div>
+
+            <!-- SIDEBAR COLUMN -->
+            <aside class="contract-sidebar">
+                <!-- WhatsApp Card -->
+                <a
+                    href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20tengo%20una%20duda%20con%20el%20contrato%20num%20${contract?.id}`}
+                    target="_blank"
+                    rel="noopener"
+                    class="support-card support-card--wa"
+                >
+                    <div class="support-card__icon support-card__icon--wa">
+                        <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    </div>
+                    <div>
+                        <h4 class="support-card__title">¿Necesitas ayuda?</h4>
+                        <p class="support-card__text">Escríbenos por WhatsApp y resolvemos tus dudas al instante.</p>
+                    </div>
+                </a>
+
+                <!-- Contact Details -->
+                <div class="sidebar-info-card">
+                    <h4 class="sidebar-info-card__title">Contacto Directo</h4>
+                    <ul class="sidebar-contact-list">
+                        <li>
+                            <svg fill="none" class="w-4 h-4 text-carmin" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <span>{settings.email}</span>
+                        </li>
+                        <li>
+                            <svg fill="none" class="w-4 h-4 text-carmin" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            <span>{settings.phone}</span>
+                        </li>
+                    </ul>
                 </div>
-            )}
+
+                <!-- Trust Badges Sidebar -->
+                <div class="sidebar-trust-box">
+                    <div class="trust-item">
+                        <div class="trust-item__icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </div>
+                        <div>
+                            <h5>Firma Certificada</h5>
+                            <p>Proceso legalmente vinculante con trazabilidad completa.</p>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-item__icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        </div>
+                        <div>
+                            <h5>Seguridad de Pago</h5>
+                            <p>Tus datos bancarios nunca se almacenan en nuestros sistemas.</p>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-item__icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h5>Soporte 24/7</h5>
+                            <p>Si tienes problemas, nuestro asistente IA o equipo humano te ayudarán.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
         </div>
-    </div>
+    </section>
 
     <style>
-        .contract-page-wrapper {
-            background: #000;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.1) 0%, transparent 60%),
-                radial-gradient(circle at 100% 100%, rgba(22, 22, 24, 0.5) 0%, transparent 100%);
-            min-height: 100vh;
-            padding: 10rem 1.5rem 6rem;
+        .contract-body {
             position: relative;
+            min-height: 100vh;
+            background: #000;
+            padding: 8rem 0 6rem;
+            overflow: hidden;
         }
-        .contract-container { max-width: 900px; margin: 0 auto; position: relative; z-index: 10; }
-        .card { background: #ffffff; border: 1px solid #e4e4e7; border-radius: 2rem; overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.4); }
-        .card-header { padding: 4rem 3rem 3rem; border-bottom: 1px solid #f4f4f5; text-align: center; background: #fafafa; }
-        .card-header h1 { font-size: 2.5rem; font-weight: 800; color: #09090b; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
-        .card-header p { color: #71717a; font-size: 1.1rem; }
-        .card-body { padding: 4rem 3rem; color: #18181b; }
-        
-        .form-label { display: block; font-size: 0.8rem; font-weight: 700; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
-        .form-input { width: 100%; background: #ffffff; border: 1px solid #e4e4e7; color: #09090b; padding: 1rem 1.25rem; border-radius: 0.75rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.1rem; font-weight: 500; }
-        .form-input:focus { border-color: #e11d48; box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.05); background: #ffffff; outline: none; }
-        .form-input::placeholder { color: #a1a1aa; }
+        .contract-bg-dots {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+        }
+        .contract-body__grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+            position: relative;
+            z-index: 10;
+        }
+        @media (min-width: 1024px) {
+            .contract-body__grid {
+                grid-template-columns: 3fr 1.3fr;
+                gap: 4rem;
+                align-items: start;
+            }
+        }
 
-        .contract-preview { background: #fafafa; border: 1px solid #f4f4f5; border-radius: 1.5rem; padding: 3rem; color: #18181b; line-height: 1.8; font-size: 1.1rem; margin-bottom: 3rem; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); }
-        .contract-preview strong { color: #09090b; font-weight: 800; }
-        .contract-preview p { margin-bottom: 1.5rem; }
-        
-        .signature-pad-container { background: #ffffff; border: 2px dashed #e4e4e7; border-radius: 1.5rem; position: relative; transition: all 0.3s; }
-        .signature-pad-container:hover { border-color: #e11d48; background: #fffafb; }
-        .signature-pad-container canvas { cursor: crosshair; }
-        .signature-instruction { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #a1a1aa; pointer-events: none; text-align: center; }
+        .card { background: #ffffff; border: 1px solid #e4e4e7; border-radius: 2rem; overflow: hidden; box-shadow: 0 40px 80px -15px rgba(0,0,0,0.5); }
+        .card-header { padding: 3.5rem 3rem 2.5rem; border-bottom: 1px solid #f4f4f5; text-align: center; background: #fafafa; }
+        .header-pre { color: #e11d48; font-family: 'Inter', monospace; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 0.75rem; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 2.25rem; font-weight: 800; color: #09090b; margin: 0; line-height: 1.1; }
+        .header-desc { color: #71717a; font-size: 0.95rem; margin-top: 1rem; max-width: 500px; margin-inline: auto; line-height: 1.6; }
 
-        .btn-primary { background: #e11d48; color: #ffffff; padding: 1.25rem 2.5rem; border-radius: 1rem; font-weight: 700; font-size: 1.1rem; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.75rem; width: 100%; box-shadow: 0 10px 20px -5px rgba(225, 29, 72, 0.3); }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 20px 30px -10px rgba(225, 29, 72, 0.4); background: #f43f5e; }
-        .btn-primary:active { transform: translateY(-1px); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .btn-secondary { background: #f4f4f5; color: #18181b; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; border: 1px solid #e4e4e7; cursor: pointer; }
-        .btn-secondary:hover { background: #e4e4e7; border-color: #d4d4d8; }
-
-        .trust-badge { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 0.75rem; color: #166534; font-size: 0.875rem; font-weight: 600; }
-
-        .terms-checkbox { width: 1.5rem; height: 1.5rem; border: 2px solid #e11d48; border-radius: 0.5rem; appearance: none; cursor: pointer; transition: all 0.2s; position: relative; background: #ffffff; flex-shrink: 0; }
-        .terms-checkbox:checked { background: #e11d48; border-color: #e11d48; }
-        .terms-checkbox:checked::after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; font-weight: bold; }
-        .terms-label { font-size: 0.95rem; color: #18181b; line-height: 1.4; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; padding: 1.5rem; background: #fffafb; border: 1px solid #ffe4e6; border-radius: 1.25rem; transition: all 0.2s; }
-        .terms-label:hover { background: #fff1f2; border-color: #fecdd3; }
-        .terms-label strong { color: #e11d48; font-weight: 700; }
-        .terms-text { display: block; }        .header-pre { color: #e11d48; font-family: 'Space Grotesk', monospace; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.25em; margin-bottom: 1rem; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 2.75rem; font-weight: 800; color: #fff; margin: 0; line-height: 1.1; }
-        .header-desc { color: #52525b; font-size: 1rem; margin-top: 1rem; max-width: 500px; margin-inline: auto; line-height: 1.6; }
-
-        .step-indicator { display: flex; justify-content: center; gap: 1rem; margin: 2rem 0; padding: 0 4rem; }
-        .step { flex: 1; height: 4px; background: #1a1a1c; border-radius: 2px; position: relative; transition: all 0.4s ease; }
-        .step span { position: absolute; top: -1.5rem; left: 0; font-size: 0.65rem; text-transform: uppercase; color: #3f3f46; font-weight: 700; letter-spacing: 0.05em; }
-        .step.active { background: #e11d48; box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3); }
+        .step-indicator { display: flex; justify-content: center; gap: 0.75rem; margin: 2rem 0; padding: 0 3rem; }
+        .step { flex: 1; height: 3px; background: #f4f4f5; border-radius: 2px; position: relative; transition: all 0.4s ease; }
+        .step span { position: absolute; top: -1.25rem; left: 0; font-size: 0.6rem; text-transform: uppercase; color: #a1a1aa; font-weight: 700; letter-spacing: 0.05em; }
+        .step.active { background: #e11d48; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); }
         .step.active span { color: #e11d48; }
 
-        .card-body { padding: 4rem; }
+        .card-body { padding: 3rem; color: #18181b; }
         
-        .step-title { font-family: 'Outfit', sans-serif; font-size: 1.75rem; color: #fff; margin-bottom: 0.75rem; }
-        .step-desc { color: #71717a; font-size: 1rem; margin-bottom: 2.5rem; line-height: 1.6; }
+        .step-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: #09090b; margin-bottom: 0.5rem; }
+        .step-desc { color: #71717a; font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.6; }
         
-        .form-grid { display: flex; flex-direction: column; gap: 1.75rem; max-width: 550px; margin: 0 auto; }
-        .input-group { display: flex; flex-direction: column; gap: 0.6rem; }
-        .field-label { font-size: 0.75rem; text-transform: uppercase; color: #52525b; font-weight: 700; letter-spacing: 0.1em; }
+        .form-grid { display: flex; flex-direction: column; gap: 1.5rem; max-width: 100%; }
+        .input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .field-label { font-size: 0.7rem; text-transform: uppercase; color: #71717a; font-weight: 700; letter-spacing: 0.05em; }
         
-        input { 
-            width: 100%; 
-            padding: 1.125rem 1.5rem; 
-            background: #070708; 
-            border: 1px solid #1a1a1c; 
-            border-radius: 1.25rem; 
-            color: #fff; 
-            font-size: 1rem; 
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-sizing: border-box; 
-        }
-        input:focus { outline: none; border-color: #e11d48; background: #0e0e11; box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1); }
+        input { width: 100%; padding: 0.875rem 1.25rem; background: #fafafa; border: 1.5px solid #e4e4e7; border-radius: 0.75rem; color: #09090b; font-size: 0.95rem; transition: all 0.2s; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #e11d48; background: #ffffff; box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.05); }
         
-        .btn-primary { 
-            background: #e11d48; color: #fff; border: none; padding: 1.25rem 2.5rem; border-radius: 1.5rem; 
-            font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
-            box-shadow: 0 20px 40px -10px rgba(225, 29, 72, 0.4); border: 1px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-            width: 100%;
-        }
-        .btn-primary:hover { background: #f43f5e; transform: translateY(-2px); box-shadow: 0 25px 50px -12px rgba(225, 29, 72, 0.6); }
-        .btn-primary:active { transform: translateY(0); }
+        .btn-primary { background: #e11d48; color: #fff; border: none; padding: 1.125rem 2rem; border-radius: 1rem; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 20px -5px rgba(225, 29, 72, 0.3); display: flex; align-items: center; justify-content: center; gap: 0.6rem; width: 100%; }
+        .btn-primary:hover { background: #f43f5e; transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(225, 29, 72, 0.4); }
         .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .btn-secondary { background: #141416; color: #71717a; border: 1px solid #1a1a1c; padding: 1.25rem; border-radius: 1.5rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        .btn-secondary:hover { background: #1a1a1c; color: #fff; }
+        .btn-secondary { background: #f4f4f5; color: #71717a; border: 1px solid #e4e4e7; padding: 1.125rem; border-radius: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .btn-secondary:hover { background: #e4e4e7; color: #18181b; }
+        .flex-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-top: 2rem; }
 
-        .flex-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 1.25rem; margin-top: 2.5rem; }
+        .contract-review-box { background: white; border-radius: 1.5rem; padding: 3rem 2.5rem; color: #18181b; line-height: 1.8; font-size: 0.95rem; margin-bottom: 3rem; border: 1px solid #f4f4f5; font-family: 'Inter', sans-serif; max-height: 500px; overflow-y: auto; }
+        .sign-section { border-top: 1px solid #f4f4f5; padding-top: 3rem; }
+        .terms-check-wrapper { margin-bottom: 2rem; background: #fafafa; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e4e4e7; }
+        .terms-label { display: flex; gap: 1rem; cursor: pointer; align-items: flex-start; }
+        .terms-label input { width: 1.25rem; height: 1.25rem; accent-color: #e11d48; margin-top: 0.2rem; }
+        .terms-text { font-size: 0.85rem; color: #3f3f46; line-height: 1.5; }
 
-        .contract-review-box { 
-            background: white; border-radius: 2rem; padding: 5rem 4rem; color: #18181b; 
-            line-height: 2; font-size: 1.05rem; margin-bottom: 4rem; overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            font-family: 'Inter', serif;
-        }
-        .contract-review-box strong { color: #000; font-weight: 800; }
-        
-        .sign-section { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4rem; }
-        .terms-check-wrapper { margin-bottom: 2.5rem; background: #070708; padding: 2rem; border-radius: 1.5rem; border: 1px solid #1a1a1c; }
-        .terms-label { display: flex; gap: 1.25rem; cursor: pointer; align-items: flex-start; }
-        .terms-label input { width: 1.5rem; height: 1.5rem; flex-shrink: 0; cursor: pointer; accent-color: #e11d48; margin: 0; }
-        .terms-text { font-size: 0.95rem; color: #71717a; line-height: 1.6; }
+        .signature-container { margin-bottom: 3rem; }
+        .signature-hint { font-size: 0.8rem; color: #71717a; margin-bottom: 1rem; text-align: center; }
+        .signature-canvas-wrap { background: #fdfdfd; border: 1px solid #e4e4e7; border-radius: 1.5rem; position: relative; overflow: hidden; height: 250px; }
+        canvas { width: 100%; height: 250px; touch-action: none; cursor: crosshair; }
+        .btn-clear-sig { position: absolute; bottom: 1rem; right: 1rem; background: #fff; border: 1px solid #e4e4e7; color: #a1a1aa; padding: 0.4rem 0.8rem; font-size: 0.7rem; font-weight: 700; border-radius: 0.5rem; cursor: pointer; }
 
-        .signature-container { margin-bottom: 4rem; }
-        .signature-hint { font-size: 0.9rem; color: #52525b; margin-bottom: 1.25rem; text-align: center; }
-        .signature-canvas-wrap { background: #fff; border-radius: 2rem; position: relative; overflow: hidden; height: 350px; box-shadow: inset 0 2px 20px rgba(0,0,0,0.15); }
-        canvas { width: 100%; height: 350px; touch-action: none; cursor: crosshair; }
-        .btn-clear-sig { position: absolute; bottom: 1.5rem; right: 2rem; background: #f4f4f5; border: 1px solid #e4e4e7; color: #71717a; padding: 0.6rem 1.25rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.75rem; cursor: pointer; }
+        /* Sidebar Styles */
+        .contract-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+        .support-card { background: #09090b; border: 1px solid #1a1a1c; border-radius: 1.5rem; padding: 1.5rem; display: flex; gap: 1rem; align-items: center; text-decoration: none; transition: all 0.3s; }
+        .support-card--wa:hover { border-color: #25D366; box-shadow: 0 0 20px rgba(37,211,102,0.1); }
+        .support-card__icon { width: 3rem; height: 3rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .support-card__icon--wa { background: rgba(37,211,102,0.1); color: #25D366; }
+        .support-card__icon svg { width: 1.5rem; height: 1.5rem; }
+        .support-card__title { font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0; }
+        .support-card__text { font-size: 0.8rem; color: #71717a; line-height: 1.4; margin: 0.25rem 0 0; }
 
-        .success-screen { text-align: center; padding: 2rem 0; display: flex; flex-direction: column; align-items: center; }
-        .success-icon { margin-top: 2rem; margin-bottom: 2rem; animation: scale-in 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes scale-in { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .success-title { font-family: 'Outfit', sans-serif; font-size: 3rem; font-weight: 800; color: #09090b; margin-bottom: 1rem; text-align: center; }
-        
-        .payment-card { background: #09090b; border: 1px solid #1a1a1c; border-radius: 2.5rem; padding: 4rem; width: 100%; max-width: 550px; margin: 2rem auto 0; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        .payment-desc { color: #71717a; margin-bottom: 0.75rem; font-size: 1.1rem; }
-        .payment-amount { font-family: 'Outfit', sans-serif; font-size: 4.5rem; font-weight: 800; color: #fff; margin-bottom: 2rem; letter-spacing: -0.02em; }
-        .trust-badges { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
-        .badge { display: flex; align-items: center; gap: 0.6rem; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #52525b; }
-        .security-info { font-size: 0.75rem; color: #3f3f46; margin-top: 2rem; line-height: 1.6; max-width: 350px; margin-inline: auto; }
-        .final-success { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
-        .final-desc { color: #52525b; font-size: 1.25rem; margin-bottom: 1.5rem; max-width: 600px; margin-inline: auto; line-height: 1.8; }
-        .success-actions { display: flex; flex-direction: column; gap: 1rem; width: 100%; align-items: center; margin-top: 1.5rem; }
-        @media (min-width: 640px) { .success-actions { flex-direction: row; justify-content: center; } }
+        .sidebar-info-card { background: #09090b; border: 1px solid #1a1a1c; border-radius: 1.5rem; padding: 1.5rem; }
+        .sidebar-info-card__title { font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.25rem; }
+        .sidebar-contact-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }
+        .sidebar-contact-list li { display: flex; align-items: center; gap: 0.75rem; color: #a1a1aa; font-size: 0.85rem; }
+        .text-carmin { color: #e11d48; }
 
-        .trust-info-minimal { display: flex; align-items: center; justify-content: center; gap: 0.75rem; color: #3f3f46; font-size: 0.8rem; margin-top: 2rem; text-align: center; line-height: 1.4; max-width: 400px; margin-inline: auto; }
+        .sidebar-trust-box { display: flex; flex-direction: column; gap: 1.25rem; padding: 0.5rem; }
+        .trust-item { display: flex; gap: 1rem; align-items: flex-start; }
+        .trust-item__icon { width: 1.5rem; height: 1.5rem; border-radius: 0.5rem; background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 0.25rem; }
+        .trust-item__icon svg { width: 0.9rem; height: 0.9rem; }
+        .trust-item h5 { font-size: 0.85rem; font-weight: 700; color: #e4e4e7; margin: 0; }
+        .trust-item p { font-size: 0.75rem; color: #71717a; line-height: 1.4; margin: 0.2rem 0 0; }
 
-        @keyframes toast-in {
-            from { transform: translateY(100%) scale(0.9); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
-        }
+        .success-screen { text-align: center; }
+        .success-title { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 800; color: #09090b; }
+        .final-desc { color: #71717a; font-size: 1.1rem; line-height: 1.6; }
+        .payment-card { background: #fafafa; border: 1px solid #e4e4e7; border-radius: 1.5rem; padding: 2.5rem; margin-top: 1.5rem; }
+        .payment-amount { font-family: 'Outfit', sans-serif; font-size: 3.5rem; font-weight: 800; color: #09090b; }
+        .trust-badges { display: flex; justify-content: center; gap: 1.5rem; margin: 1.5rem 0; opacity: 0.7; }
+        .badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.65rem; color: #71717a; font-weight: 700; text-transform: uppercase; }
 
-        .error-card { padding: 6rem 3rem; text-align: center; }
-        .error-icon { color: #e11d48; margin-bottom: 2rem; }
-        .error-title { font-family: 'Outfit', sans-serif; font-size: 2rem; color: #fff; margin-bottom: 1rem; }
-        .error-text { color: #52525b; margin-bottom: 2.5rem; font-size: 1.1rem; }
-        .btn-back { display: inline-flex; background: #1a1a1c; color: #fff; padding: 1rem 2rem; border-radius: 1.25rem; font-weight: 700; text-decoration: none; border: 1px solid #27272a; transition: all 0.2s; }
-        .btn-back:hover { background: #27272a; border-color: #3f3f46; }
+        .error-card { background: #09090b; border-color: #1a1a1c; padding: 5rem 2rem; color: #fff; }
+        .error-title { font-family: 'Outfit', sans-serif; font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .error-text { color: #52525b; margin-bottom: 2rem; }
+        .btn-back { display: inline-block; background: #e11d48; color: #fff; padding: 1rem 2rem; border-radius: 1rem; text-decoration: none; font-weight: 700; }
 
         @media (max-width: 768px) {
-            .contract-page-wrapper { padding: 3rem 1rem; }
-            .card-header { padding: 3rem 1.5rem 2rem; }
-            .card-body { padding: 2rem 1.5rem; }
+            .contract-body { padding-top: 6rem; }
+            .card-header { padding: 2.5rem 1.5rem; }
+            .card-body { padding: 1.5rem; }
             .flex-actions { grid-template-columns: 1fr; }
-            .contract-review-box { padding: 3rem 1.5rem; font-size: 0.95rem; }
-            .header-title { font-size: 2rem; }
-            .step-indicator { padding: 0 1rem; }
-            .payment-card { padding: 2.5rem 1.5rem; }
-            .payment-amount { font-size: 3.5rem; }
+            .contract-review-box { padding: 2rem 1.5rem; }
+            .header-title { font-size: 1.75rem; }
+            .payment-amount { font-size: 3rem; }
         }
     </style>
+
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <script define:vars={{ contract, template, id }}>
