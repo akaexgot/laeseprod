@@ -34,6 +34,7 @@ export const POST: APIRoute = async ({ request, url }) => {
         }
 
         // 2. Create Stripe Session
+        const siteUrl = import.meta.env.PUBLIC_SITE_URL || url.origin;
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
@@ -50,8 +51,8 @@ export const POST: APIRoute = async ({ request, url }) => {
                 },
             ],
             mode: 'payment',
-            success_url: `${url.origin}/contrato/${contract_id}?status=success`,
-            cancel_url: `${url.origin}/contrato/${contract_id}?status=cancel`,
+            success_url: `${siteUrl}/contrato/${contract_id}?status=success`,
+            cancel_url: `${siteUrl}/contrato/${contract_id}?status=cancel`,
             metadata: {
                 contract_id: contract.id
             }

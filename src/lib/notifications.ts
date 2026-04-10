@@ -15,7 +15,7 @@ export async function sendOwnerNotification(title: string, message: string) {
 
     try {
         await resend.emails.send({
-            from: 'VideoMarketing Sevilla <notificaciones@videomarketingsevilla.reviseo.es>',
+            from: 'VideoMarketing Sevilla <no-reply@videomarketingsevilla.com>',
             to: PUSHOVER_EMAIL,
             subject: title,
             text: message,
