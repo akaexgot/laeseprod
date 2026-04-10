@@ -15,9 +15,10 @@ const services = await getServices();
 ---
 
 <AdminLayout title="Servicios" activeSection="servicios">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between" style="margin-bottom: 1.5rem; gap: 1rem;">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="margin-bottom: 3.5rem !important;">
         <div>
-            <p class="text-zinc-400 text-sm">Gestiona los servicios que ofreces. Total: <span class="text-zinc-100 font-medium">{services.length}</span></p>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Servicios</h1>
+            <p class="text-zinc-400 text-sm" style="margin-top: 0.75rem !important;">Gestiona los servicios que ofreces. Total: <span class="text-zinc-100 font-medium">{services.length}</span></p>
         </div>
         <button id="btn-add"
             class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
@@ -27,6 +28,9 @@ const services = await getServices();
             Nuevo servicio
         </button>
     </div>
+
+    <!-- Divider -->
+    <div style="margin-bottom: 4rem !important;"></div>
 
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
@@ -348,3 +352,4 @@ const services = await getServices();
         });
     });
 </script>
+</AdminLayout>

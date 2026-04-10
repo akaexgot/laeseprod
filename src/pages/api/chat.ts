@@ -205,6 +205,13 @@ export const POST: APIRoute = async ({ request }) => {
                     sendChatNotification(convCheck?.visitor_name || 'Visitante', message, settings.email)
                         .catch(err => console.error('Error sending chat notification:', err));
                 }
+
+                // Send Pushover Notification
+                const { sendOwnerNotification } = await import('../../lib/notifications');
+                sendOwnerNotification(
+                    `Chat: ${convCheck?.visitor_name || 'Visitante'}`,
+                    `${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`
+                ).catch(err => console.error('Error sending Pushover notification:', err));
             }
         }
 

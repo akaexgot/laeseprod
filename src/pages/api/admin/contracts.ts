@@ -25,7 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (!supabase) return new Response(JSON.stringify({ error: 'Supabase no configurado' }), { status: 500 });
 
     try {
-        const { template_id, admin_data, total_amount, amount_to_pay } = await request.json();
+        const { template_id, admin_data, total_amount, amount_to_pay, is_billable, billable_amount } = await request.json();
 
         if (!template_id || !admin_data) {
             return new Response(JSON.stringify({ error: 'Faltan datos requeridos' }), { status: 400 });
@@ -37,7 +37,9 @@ export const POST: APIRoute = async ({ request }) => {
                 template_id,
                 admin_data,
                 total_amount: total_amount || 0,
-                amount_to_pay: amount_to_pay || total_amount || 0,
+                amount_to_pay: amount_to_pay || 0,
+                is_billable: is_billable || false,
+                billable_amount: billable_amount || 0,
                 status: 'pending_client'
             })
             .select()

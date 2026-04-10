@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(import.meta.env.RESEND_API_KEY);
+export const resend = new Resend(import.meta.env.RESEND_API_KEY);
 const defaultFromEmail = 'no-reply@videomarketingsevilla.com';
 
 export interface ContactFormData {
@@ -139,5 +139,31 @@ export async function sendContactAutoReply(data: ContactFormData) {
         to: data.email,
         subject: 'Hemos recibido tu solicitud de presupuesto',
         html: getEmailShell('Notificación VideoMarketing Sevilla', content)
+    });
+}
+/** Notificación de Contrato firmado con PDF adjunto */
+export async function sendContractFinalizedEmail(clientEmail: string, clientName: string, pdfBuffer: Uint8Array) {
+    const content = `
+        <h2 class="email-title">Tu Contrato ha sido Firmado</h2>
+        <p>¡Hola <strong>${clientName}</strong>!</p>
+        <p>Te enviamos adjunto a este correo la copia oficial y firmada digitalmente de tu contrato con VideoMarketing Sevilla.</p>
+        <p>Este documento es legalmente vinculante y sirve como justificante de los acuerdos alcanzados.</p>
+        <br/>
+        <p>Si tienes cualquier duda respecto a las clausulas o los siguientes pasos, no dudes en responder a este correo.</p>
+        <br/>
+        <p style="color: #666; font-style: italic;">— Gestión de Proyectos VideoMarketing Sevilla</p>
+    `;
+
+    return resend.emails.send({
+        from: `Contratos | VideoMarketing Sevilla <${defaultFromEmail}>`,
+        to: clientEmail,
+        subject: `Documento Firmado: Contrato VideoMarketing Sevilla`,
+        html: getEmailShell('Copia de tu Contrato', content),
+        attachments: [
+            {
+                filename: `Contrato_VideoMarketing_Sevilla_${clientName.replace(/\s+/g, '_')}.pdf`,
+                content: Buffer.from(pdfBuffer),
+            }
+        ]
     });
 }

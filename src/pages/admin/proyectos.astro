@@ -15,22 +15,10 @@ const projects = await getProjects();
 ---
 
 <AdminLayout title="Proyectos" activeSection="proyectos">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between" style="margin-bottom: 1.5rem; gap: 1rem;">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
-            <p class="text-zinc-400 text-sm whitespace-nowrap">Gestiona tus proyectos. Total: <span class="text-zinc-100 font-medium">{projects.length}</span></p>
-            
-            <!-- Real-time Search -->
-            <div class="relative w-full max-w-xs">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
-                </div>
-                <input 
-                    type="text" 
-                    id="project-search" 
-                    class="block w-full pl-10 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" 
-                    placeholder="Buscar proyectos..."
-                />
-            </div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="margin-bottom: 3.5rem !important;">
+        <div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Proyectos</h1>
+            <p class="text-zinc-400 text-sm" style="margin-top: 0.75rem !important;">Gestiona tus proyectos. Total: <span class="text-zinc-100 font-medium">{projects.length}</span></p>
         </div>
         <button id="btn-add"
             class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
@@ -39,6 +27,19 @@ const projects = await getProjects();
             <i data-lucide="plus" class="w-4 h-4"></i>
             Nuevo proyecto
         </button>
+    </div>
+
+    <!-- Search Tool -->
+    <div class="relative" style="margin-bottom: 4rem !important; margin-top: 1rem !important;">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
+        </div>
+        <input 
+            type="text" 
+            id="project-search" 
+            placeholder="Buscar proyectos por título o cliente..." 
+            class="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-3.5 pl-10 pr-4 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all shadow-sm"
+        />
     </div>
 
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
@@ -93,12 +94,12 @@ const projects = await getProjects();
                                 </button>
                             </td>
                             <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
-                                <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button class="p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all btn-edit" data-project={JSON.stringify(project)} title="Editar">
-                                        <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
+                                <div class="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all btn-edit" data-project={JSON.stringify(project)} title="Editar">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
                                     </button>
-                                    <button class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={project.id} title="Eliminar">
-                                        <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
+                                    <button class="p-1.5 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={project.id} title="Eliminar">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </div>
                             </td>
@@ -135,6 +136,10 @@ const projects = await getProjects();
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Slug (opcional)</label>
                             <input type="text" id="p-slug" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="auto-generado si vacío" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Subtítulo</label>
+                            <input type="text" id="p-subtitle" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="Ej: Video corporativo / Spots" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Cliente</label>
@@ -182,11 +187,11 @@ const projects = await getProjects();
                 </div>
             </form>
         </div>
-        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
-            <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
-            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
-            <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
-            <button type="submit" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
+        <div class="border-t border-zinc-800 bg-zinc-950 flex items-center justify-end mt-auto relative" style="padding: 0.75rem 1.25rem; gap: 0.5rem;">
+            <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-3"></p>
+            <button type="button" id="modal-delete" class="text-xs font-semibold text-rose-500 hover:text-white hover:bg-rose-500/10 border border-rose-500/20 rounded-lg transition-all hidden mr-auto" style="padding: 0.4rem 0.75rem;">Eliminar</button>
+            <button type="button" id="modal-cancel" class="text-xs font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.4rem 0.75rem;">Cancelar</button>
+            <button type="submit" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg shadow-glow transition-all" style="padding: 0.45rem 1rem;">Guardar Cambios</button>
         </div>
     </div>
 </div>
@@ -248,6 +253,7 @@ const projects = await getProjects();
             $('project-id').value = data?.id || '';
             $('p-title').value = data?.title || '';
             $('p-slug').value = data?.slug || '';
+            $('p-subtitle').value = data?.subtitle || '';
             $('p-client').value = data?.client_name || '';
             $('p-description').value = data?.description || '';
             
@@ -494,6 +500,7 @@ const projects = await getProjects();
             const body: any = {
                 title,
                 slug: $('p-slug').value.trim() || null,
+                subtitle: $('p-subtitle').value.trim() || null,
                 client_name: $('p-client').value.trim() || null,
                 description: $('p-description').value.trim() || null,
                 thumbnail: $('p-thumbnail').value.trim() || null,
@@ -528,3 +535,4 @@ const projects = await getProjects();
         });
     });
 </script>
+</AdminLayout>

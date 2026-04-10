@@ -1,5 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
+import { generateContractPDF, replacePlaceholders } from '../../../lib/contracts';
+import { sendContractFinalizedEmail } from '../../../lib/resend';
+import { sendOwnerNotification } from '../../../lib/notifications';
 
 /**
  * PUT - Update contract with client data and signature
@@ -10,38 +13,90 @@ export const PUT: APIRoute = async ({ params, request }) => {
     if (!supabase) return new Response(JSON.stringify({ error: 'Supabase no configurado' }), { status: 500 });
 
     try {
-        const { client_data, signature_svg, status } = await request.json();
+        const { client_email, client_phone, client_data, signature_svg, status } = await request.json();
 
-        if (!id || !client_data || !signature_svg) {
-            return new Response(JSON.stringify({ error: 'Faltan datos requeridos' }), { status: 400 });
+        if (!id || !client_data || !signature_svg || !client_email || !client_phone) {
+            return new Response(JSON.stringify({ error: 'Faltan datos requeridos (Email, Teléfono o Datos Fiscales)' }), { status: 400 });
         }
 
-        // Before updating, verify it's not already paid/completed
-        const { data: contract } = await supabase
+        // 1. Fetch current contract details
+        const { data: contract, error: fetchErr } = await supabase
             .from('contracts')
-            .select('status')
+            .select('*, contract_templates(*)')
             .eq('id', id)
             .single();
 
-        if (contract?.status === 'completed' || contract?.status === 'paid') {
-            return new Response(JSON.stringify({ error: 'El contrato ya está procesado' }), { status: 400 });
+        if (fetchErr || !contract) {
+            return new Response(JSON.stringify({ error: 'Contrato no encontrado' }), { status: 404 });
         }
 
-        const { data, error } = await supabase
+        if (contract.status === 'completed' || contract.status === 'paid') {
+            return new Response(JSON.stringify({ error: 'El contrato ya está procesado y no puede modificarse.' }), { status: 400 });
+        }
+
+        // 2. Prepare update data
+        const isBillable = contract.is_billable;
+        const newStatus = isBillable ? 'pending_payment' : 'completed';
+
+        const { data: updated, error: updateErr } = await supabase
             .from('contracts')
             .update({
+                client_email,
+                client_phone,
                 client_data,
                 signature_svg,
-                status: status || 'pending_payment'
+                status: newStatus,
+                updated_at: new Date().toISOString()
             })
             .eq('id', id)
             .select()
             .single();
 
-        if (error) throw error;
+        if (updateErr) throw updateErr;
 
-        return new Response(JSON.stringify(data), { status: 200 });
+        // 3. Post-signing logic
+        if (!isBillable) {
+            // If No payment required, generate PDF and send email NOW
+            try {
+                // Prepare HTML content for PDF
+                const merged = { 
+                    ...contract.admin_data, 
+                    ...client_data,
+                    CLIENT_EMAIL: client_email,
+                    CLIENT_PHONE: client_phone
+                };
+                const fullHtml = replacePlaceholders(contract.contract_templates.content, merged);
+                
+                // Generate PDF
+                const pdfBuffer = await generateContractPDF(
+                    `Contrato: ${contract.title || 'Servicios Audiovisuales'}`,
+                    fullHtml,
+                    signature_svg
+                );
+
+                // Send Email to Client
+                await sendContractFinalizedEmail(client_email, client_data.NOMBRE || client_email, pdfBuffer);
+
+                // Pushover Notification
+                await sendOwnerNotification(
+                    `✅ Contrato Finalizado`,
+                    `El cliente ${client_email} ha firmado: ${contract.title}. Copia enviada por email.`
+                );
+            } catch (postErr) {
+                console.error('Error in post-signing process (non-billable):', postErr);
+                // We don't return error to user because the signature was saved correctly
+            }
+        } else {
+            // If billable, just notify the admin that a signature happened and payment is pending
+            await sendOwnerNotification(
+                `✍️ Contrato Firmado (Pago Pendiente)`,
+                `Cliente: ${client_email}\nContrato: ${contract.title}\nMonto: ${contract.amount_to_pay}€.\nEsperando pago vía Stripe.`
+            );
+        }
+
+        return new Response(JSON.stringify(updated), { status: 200 });
     } catch (e: any) {
+        console.error('Error updating contract:', e);
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });
     }
 };

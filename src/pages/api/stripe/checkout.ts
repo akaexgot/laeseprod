@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { getServiceSupabase } from '../../../lib/supabase';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2025-02-24-preview' as any
+    apiVersion: '2023-10-16' as any // Use a stable version
 });
 
 export const POST: APIRoute = async ({ request, url }) => {
@@ -11,7 +11,9 @@ export const POST: APIRoute = async ({ request, url }) => {
     if (!supabase) return new Response(JSON.stringify({ error: 'Supabase no configurado' }), { status: 500 });
 
     try {
-        const { contract_id } = await request.json();
+        const body = await request.json();
+        const { contract_id } = body;
+        
         if (!contract_id) return new Response(JSON.stringify({ error: 'ID de contrato requerido' }), { status: 400 });
 
         // 1. Fetch contract data
@@ -21,7 +23,15 @@ export const POST: APIRoute = async ({ request, url }) => {
             .eq('id', contract_id)
             .single();
 
-        if (cError || !contract) return new Response(JSON.stringify({ error: 'Contrato no encontrado' }), { status: 404 });
+        if (cError || !contract) {
+            console.error('Database fetch error:', cError);
+            return new Response(JSON.stringify({ error: 'Contrato no encontrado en la base de datos' }), { status: 404 });
+        }
+
+        const amountCents = Math.round((contract.amount_to_pay || 0) * 100);
+        if (amountCents < 50) {
+            return new Response(JSON.stringify({ error: 'El importe debe ser al menos 0.50€ para procesar el pago.' }), { status: 400 });
+        }
 
         // 2. Create Stripe Session
         const session = await stripe.checkout.sessions.create({
@@ -31,10 +41,10 @@ export const POST: APIRoute = async ({ request, url }) => {
                     price_data: {
                         currency: 'eur',
                         product_data: {
-                            name: `Pago: ${contract.contract_templates.title}`,
-                            description: `Servicio: ${contract.admin_data.SERVICIO || 'Producción Audiovisual'}`,
+                            name: `Pago: ${contract.contract_templates?.title || 'Contrato VideoMarketing Sevilla'}`,
+                            description: `Servicio: ${contract.admin_data?.SERVICIO || 'Producción Audiovisual'}`,
                         },
-                        unit_amount: Math.round(contract.amount_to_pay * 100), // Stripe uses cents
+                        unit_amount: amountCents,
                     },
                     quantity: 1,
                 },
@@ -47,12 +57,14 @@ export const POST: APIRoute = async ({ request, url }) => {
             }
         });
 
-        // 3. Update contract with session ID (optional but good for tracking)
+        // 3. Update contract with session ID
         await supabase.from('contracts').update({ payment_id: session.id }).eq('id', contract_id);
 
         return new Response(JSON.stringify({ url: session.url }), { status: 200 });
     } catch (e: any) {
-        console.error('Stripe error:', e);
-        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+        console.error('Stripe Session Error:', e);
+        return new Response(JSON.stringify({ 
+            error: `Stripe Error: ${e.message || 'Error desconocido'}` 
+        }), { status: 500 });
     }
 };

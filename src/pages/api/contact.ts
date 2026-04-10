@@ -43,6 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
             const { getSettings } = await import('../../lib/data');
             const settings = await getSettings();
             const { sendContactNotification, sendContactAutoReply } = await import('../../lib/resend');
+            const { sendOwnerNotification } = await import('../../lib/notifications');
             
             await Promise.allSettled([
                 sendContactNotification({ 
@@ -50,6 +51,10 @@ export const POST: APIRoute = async ({ request }) => {
                     adminEmail: settings.email 
                 }),
                 sendContactAutoReply({ name, email, phone, company, message }),
+                sendOwnerNotification(
+                    `Nuevo Lead: ${name}`,
+                    `Mensaje de ${name} (${email}).\nTel: ${phone || 'N/D'}\n${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`
+                )
             ]);
         }
 
