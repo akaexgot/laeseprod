@@ -25,7 +25,7 @@ const heroSubtitle = settings.hero_subtitle || '';
 
 <section
     id="hero"
-    class="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden"
+    class="relative h-screen h-[100dvh] min-h-[600px] flex items-center justify-center overflow-hidden"
 >
     <!-- Fullscreen Video Background -->
     <div
@@ -100,7 +100,7 @@ const heroSubtitle = settings.hero_subtitle || '';
 
     <!-- Content (Centered) -->
     <div
-        class="relative z-10 w-full px-6 flex flex-col items-center justify-center text-center pt-12"
+        class="relative z-10 w-full px-6 flex flex-col items-center justify-center text-center pt-4 lg:pt-12"
     >
         <!-- Badge -->
         <div
@@ -201,6 +201,7 @@ const heroSubtitle = settings.hero_subtitle || '';
         width: 100%;
         height: 56.25vw;
         min-height: 100vh;
+        min-height: 100dvh;
         min-width: 177.77vh;
         pointer-events: none;
     }

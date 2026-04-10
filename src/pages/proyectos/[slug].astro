@@ -401,6 +401,9 @@ const makingOfId = expMobileId || expDesktopId;
         const sections = Array.from(document.querySelectorAll('.pj-detail__screen'));
         if (sections.length === 0) return;
 
+        // Solo activar scroll snap en escritorio (>1024px)
+        if (window.innerWidth <= 1024) return;
+
         let isScrolling = false;
         let scrollTimeout: ReturnType<typeof setTimeout>;
 

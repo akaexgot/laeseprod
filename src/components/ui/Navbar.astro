@@ -11,7 +11,7 @@ const settings = await getSettings();
 <nav id="navbar" class="fixed top-0 inset-x-0 z-50 transition-all duration-300">
     <div id="nav-bg" class="absolute inset-0 -z-10 transition-all duration-300"></div>
 
-    <div class="section-container relative">
+    <div class="section-container relative pt-[env(safe-area-inset-top)]">
         <div id="nav-inner" class="flex items-center justify-between h-20 lg:h-24 transition-all duration-300">
             <!-- Izquierda: Logo (dual images for scroll swap) -->
             <a href="/" class="flex lg:flex-1 items-center justify-start group relative">
@@ -101,8 +101,11 @@ const settings = await getSettings();
 
     // ── Estilos por tema ──────────────────────────────────────────────
     // DARK TRANSPARENT: encima de video/dark section sin scroll
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
     const STYLE_DARK_TRANSPARENT = {
-        bg:         'linear-gradient(to bottom, rgba(5,5,8,0.55) 0%, rgba(5,5,8,0.12) 65%, transparent 100%)',
+        bg: isMobile 
+            ? 'transparent'
+            : 'linear-gradient(to bottom, rgba(5,5,8,0.55) 0%, rgba(5,5,8,0.12) 65%, transparent 100%)',
         bgFilter:   'none',
         border:     'none',
         linkColor:  'rgba(255,255,255,0.80)',
