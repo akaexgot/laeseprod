@@ -46,11 +46,11 @@ const contactHeroVideoId = extractYouTubeId(settings.contact_hero_video);
                     <span>Hablemos</span>
                 </div>
 
-                <h1 class="contact-hero__title" style="color: white; margin-bottom: 1.5rem; line-height: 1.1;">
+                <h1 class="contact-hero__title" style="color: white; margin-bottom: 0.25rem; line-height: 1.1;">
                     Cuéntanos tu <span class="text-rose-500" style="color: #e11d48;">proyecto</span>
                 </h1>
 
-                <p class="contact-hero__subtitle" style="color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto 2.5rem; font-size: 1.125rem;">
+                <p class="contact-hero__subtitle" style="color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto 1rem; font-size: 1.125rem;">
                     Rellena el formulario o escríbenos por WhatsApp.<br />
                     Te respondemos en menos de 24 horas.
                 </p>
@@ -108,6 +108,16 @@ const contactHeroVideoId = extractYouTubeId(settings.contact_hero_video);
                 </div>
             </div>
         </section>
+        <style is:global>
+            body, main { background-color: #ffffff !important; }
+            .navbar { background: transparent !important; border: none !important; }
+            .nav-link { color: #6b7280 !important; font-weight: 500; }
+            .nav-link:hover, .nav-link.active { color: #111111 !important; }
+            #nav-logo-white { opacity: 0 !important; }
+            #nav-logo-dark { opacity: 1 !important; }
+            #nav-cta { color: #111111 !important; border-color: rgba(0,0,0,0.12) !important; background: rgba(0,0,0,0.04) !important; }
+            .hamburger-line { background: #111111 !important; }
+        </style>
     )}
 
     <!-- ═══════════════════════════════════════════

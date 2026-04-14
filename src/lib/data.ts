@@ -139,6 +139,33 @@ export async function getCompanies() {
     return data;
 }
 
+/** Fetch awards (logo carousel) */
+export async function getAwards() {
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from('awards')
+        .select('*')
+        .order('order', { ascending: true });
+
+    if (error || !data) return [];
+    return data;
+}
+
+/** Fetch FAQs */
+export async function getFaqs() {
+    if (!supabase) return fallback.faqs || [];
+
+    const { data, error } = await supabase
+        .from('faqs')
+        .select('*')
+        .eq('is_active', true)
+        .order('order', { ascending: true });
+
+    if (error || !data) return fallback.faqs || [];
+    return data;
+}
+
 /** Fetch footer data */
 export async function getFooterData() {
     if (!supabase) return fallback.footerData;

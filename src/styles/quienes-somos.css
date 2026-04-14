@@ -128,16 +128,27 @@
 
 /* ── ABOUT ──────────────────────────────────── */
 .qs-about {
-    position: relative; background: #fff;
-    padding: 2rem 0;
-    justify-content: center;
-    gap: 3rem;
+    position: relative; 
+    background: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+.qs-about__main-content {
+    flex: 1;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 5rem;
 }
 .qs-stats-container {
     width: 100%;
     background: #fff;
     border-bottom: 1px solid #f3f4f6;
-    padding: 1.5rem 0;
+    padding: 1rem 0;
 }
 .qs-stats__grid {
     display: flex; flex-wrap: wrap;
@@ -167,19 +178,21 @@
 
 .qs-about-content-wrapper {
     width: 100%;
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding: 1rem 0;
 }
 
 .qs-about__grid {
     position: relative; z-index: 10;
     display: grid; grid-template-columns: 1fr;
-    gap: 3rem; align-items: center;
+    gap: 2rem; align-items: center;
 }
 @media (min-width: 1024px) {
     .qs-about__grid { grid-template-columns: 1fr 1fr; gap: 4rem; }
-    .qs-about-content-wrapper { padding: 5rem 0; }
+    .qs-about-content-wrapper { padding: 2rem 0; }
 }
 
 /* Video */
@@ -233,11 +246,24 @@
 
 /* ── FIND ───────────────────────────────────── */
 .qs-find {
-    position: relative; background: #f9fafb;
-    padding: 5rem 0 6rem;
+    position: relative; 
+    background: #f9fafb;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+.qs-find__main-content {
+    flex: 1;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 5rem;
 }
 .qs-section-header {
-    text-align: center; margin-bottom: 3rem;
+    text-align: center; margin-bottom: 2rem;
 }
 .qs-section-title {
     font-family: 'Outfit', sans-serif;
@@ -258,7 +284,7 @@
 /* Mapa */
 .qs-map {
     border-radius: 1.5rem; overflow: hidden;
-    height: 28rem; border: 1px solid #e5e7eb;
+    height: 24rem; border: 1px solid #e5e7eb;
     box-shadow: 0 4px 24px rgba(0,0,0,.06);
 }
 .qs-map__iframe { width: 100%; height: 100%; border: 0; display: block; }

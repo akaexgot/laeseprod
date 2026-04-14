@@ -1,0 +1,292 @@
+---
+/**
+ * Admin - FAQs Management
+ * Manage questions and answers for the home page
+ */
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getFaqs } from "../../lib/data";
+import { getServiceSupabase } from "../../lib/supabase";
+
+// No need for explicit auth check, middleware handles it
+const faqs = await getFaqs();
+---
+
+<AdminLayout title="Preguntas Frecuentes" activeSection="faqs">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="margin-bottom: 3.5rem !important;">
+        <div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Preguntas Frecuentes</h1>
+            <p class="text-zinc-400 text-sm" style="margin-top: 0.75rem !important;">Gestiona las dudas habituales de tus clientes. Total: <span class="text-zinc-100 font-medium">{faqs.length}</span></p>
+        </div>
+        <button id="btn-add"
+            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
+            style="padding: 0.5rem 1rem; gap: 0.5rem;"
+        >
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Nueva pregunta
+        </button>
+    </div>
+
+    <!-- Divider -->
+    <div style="margin-bottom: 4rem !important;"></div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left" id="faqs-table">
+                <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
+                    <tr class="border-b border-zinc-800/50">
+                        <th style="padding: 1.25rem 1.5rem;">Pregunta / Respuesta</th>
+                        <th class="hidden md:table-cell w-24 text-center" style="padding: 1.25rem 1.5rem;">Orden</th>
+                        <th class="hidden sm:table-cell w-28 text-center" style="padding: 1.25rem 1.5rem;">Estado</th>
+                        <th class="text-right hidden sm:table-cell w-24" style="padding: 1.25rem 1.5rem;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800">
+                    {faqs.map((faq: any) => (
+                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={faq.id}>
+                            <td style="padding: 1.25rem 1.5rem;">
+                                <div class="flex flex-col gap-1">
+                                    <span class="font-medium text-zinc-100">{faq.question}</span>
+                                    <p class="text-zinc-400 text-xs line-clamp-1">{faq.answer}</p>
+                                </div>
+                            </td>
+                            <td class="hidden md:table-cell text-center" style="padding: 1.25rem 1.5rem;">
+                                <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{faq.order}</span>
+                            </td>
+                            <td class="hidden sm:table-cell text-center" style="padding: 1.25rem 1.5rem;">
+                                {faq.is_active ? (
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Activa
+                                    </span>
+                                ) : (
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-zinc-800 text-zinc-500 text-[10px] font-bold uppercase tracking-wider border border-zinc-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+                                        Oculta
+                                    </span>
+                                )}
+                            </td>
+                            <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
+                                <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all btn-edit"
+                                        data-id={faq.id} data-question={faq.question} data-answer={faq.answer} data-order={faq.order} data-active={faq.is_active.toString()}
+                                        title="Editar">
+                                        <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
+                                    </button>
+                                    <button class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={faq.id} title="Eliminar">
+                                        <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {faqs.length === 0 && (
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col items-center justify-center text-center" style="padding: 3rem; margin-top: 1.5rem;">
+            <div class="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center border border-zinc-800 mb-4">
+                <i data-lucide="help-circle" class="w-6 h-6 text-zinc-500"></i>
+            </div>
+            <h3 class="text-zinc-200 font-semibold text-lg">No hay preguntas frecuentes</h3>
+            <p class="text-zinc-500 text-sm max-w-xs mt-2">Añade las dudas más comunes que suelen tener tus clientes para ayudarles.</p>
+        </div>
+    )}
+
+    <!-- Acciones móviles -->
+    <div class="fixed bottom-6 right-6 lg:hidden z-50">
+        <button id="btn-add-mobile" class="w-14 h-14 bg-rose-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-rose-500 transition-transform active:scale-95">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-[100] hidden items-center justify-center" style="padding: 1.5rem;">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="border-b border-zinc-800" style="padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <h3 id="modal-title" class="text-lg font-bold text-white tracking-tight">Nueva pregunta</h3>
+                <button id="modal-close" class="text-zinc-400 hover:text-zinc-100 transition-colors p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form id="faq-form" style="padding: 1.5rem;">
+                <input type="hidden" name="id" id="faq-id" />
+                
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Pregunta</label>
+                        <input type="text" name="question" id="faq-question" required 
+                            class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none"
+                            placeholder="Ej: ¿Qué servicios audiovisuales ofrecéis?"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Respuesta</label>
+                        <textarea name="answer" id="faq-answer" required rows="4"
+                            class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none resize-none"
+                            placeholder="Introduce aquí la respuesta detallada..."
+                        ></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Orden</label>
+                            <input type="number" name="order" id="faq-order" value="0" min="0"
+                                class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Estado</label>
+                            <select name="is_active" id="faq-active" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none">
+                                <option value="true">Activa</option>
+                                <option value="false">Oculta</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-zinc-800" style="margin-top: 2rem; padding-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button type="button" id="btn-cancel" class="px-5 py-2.5 text-sm font-semibold text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-xl transition-all">Cancelar</button>
+                    <button type="submit" id="btn-submit" class="px-6 py-2.5 bg-rose-600 text-white text-sm font-bold rounded-xl hover:bg-rose-500 shadow-lg shadow-rose-900/20 transition-all flex items-center gap-2">
+                        <span>Guardar</span>
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Notification Toast -->
+    <div id="toast-container" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm px-4"></div>
+
+    <script>
+        const modal = document.getElementById('modal-overlay');
+        const form = document.getElementById('faq-form') as HTMLFormElement;
+        const modalTitle = document.getElementById('modal-title');
+        const btnAdd = document.getElementById('btn-add');
+        const btnAddMobile = document.getElementById('btn-add-mobile');
+        const btnCancel = document.getElementById('btn-cancel');
+        const btnClose = document.getElementById('modal-close');
+        const toastContainer = document.getElementById('toast-container');
+
+        function showToast(message: string, type: 'success' | 'error' = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `p-4 mb-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300 border ${type === 'success' ? 'bg-zinc-900 border-emerald-500/20 text-emerald-500' : 'bg-zinc-900 border-red-500/20 text-red-500'}`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">${message}</span>
+            `;
+            toastContainer?.appendChild(toast);
+            // @ts-ignore
+            if (window.lucide) window.lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.classList.replace('fade-in', 'fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function openModal(data: any = null) {
+            if (data) {
+                modalTitle!.textContent = 'Editar pregunta';
+                (document.getElementById('faq-id') as HTMLInputElement).value = data.id;
+                (document.getElementById('faq-question') as HTMLInputElement).value = data.question;
+                (document.getElementById('faq-answer') as HTMLTextAreaElement).value = data.answer;
+                (document.getElementById('faq-order') as HTMLInputElement).value = data.order;
+                (document.getElementById('faq-active') as HTMLSelectElement).value = data.active;
+            } else {
+                modalTitle!.textContent = 'Nueva pregunta';
+                form.reset();
+                (document.getElementById('faq-id') as HTMLInputElement).value = '';
+            }
+            modal?.classList.remove('hidden');
+            modal?.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal?.classList.remove('flex');
+            modal?.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        btnAdd?.addEventListener('click', () => openModal());
+        btnAddMobile?.addEventListener('click', () => openModal());
+        btnCancel?.addEventListener('click', closeModal);
+        btnClose?.addEventListener('click', closeModal);
+
+        // Edit button listeners
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const d = (btn as HTMLElement).dataset;
+                openModal({ ...d });
+            });
+        });
+
+        // Delete button listeners
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const id = (btn as HTMLElement).dataset.id;
+                if (!id || !confirm('¿Estás seguro de que quieres eliminar esta pregunta?')) return;
+                
+                try {
+                    const res = await fetch('/api/admin/faqs', {
+                        method: 'DELETE',
+                        body: JSON.stringify({ id })
+                    });
+                    if (res.ok) {
+                        showToast('Pregunta eliminada correctamente');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast('Error al eliminar', 'error');
+                    }
+                } catch (err) {
+                    showToast('Error de red', 'error');
+                }
+            });
+        });
+
+        form?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const id = formData.get('id');
+            const data = {
+                id: id || undefined,
+                question: formData.get('question'),
+                answer: formData.get('answer'),
+                order: parseInt(formData.get('order') as string) || 0,
+                is_active: formData.get('is_active') === 'true'
+            };
+
+            const btnSubmit = document.getElementById('btn-submit');
+            btnSubmit?.setAttribute('disabled', 'true');
+            // @ts-ignore
+            btnSubmit.innerHTML = '<span class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>';
+
+            try {
+                const res = await fetch('/api/admin/faqs', {
+                    method: id ? 'PUT' : 'POST',
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    showToast(id ? 'Pregunta actualizada' : 'Pregunta creada');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    const errData = await res.json();
+                    showToast(errData.error || 'Error al guardar', 'error');
+                    btnSubmit?.removeAttribute('disabled');
+                    // @ts-ignore
+                    btnSubmit.innerHTML = '<span>Guardar</span><i data-lucide="check" class="w-4 h-4"></i>';
+                    // @ts-ignore
+                    if (window.lucide) window.lucide.createIcons();
+                }
+            } catch (err) {
+                showToast('Error de red', 'error');
+                btnSubmit?.removeAttribute('disabled');
+            }
+        });
+    </script>
+</AdminLayout>

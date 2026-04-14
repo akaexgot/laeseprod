@@ -1,36 +1,36 @@
 ---
 /**
- * Companies — Clean Infinite Marquee with logos
- * Uses actual logo_url from DB when available
+ * Awards — Clean Infinite Marquee with award logos
  */
-import { getCompanies } from "../../lib/data";
-const companies = await getCompanies();
+import { getAwards } from "../../lib/data";
+const awards = await getAwards();
+
+// If no awards, don't render or show a placeholder?
+// User wants it to be exactly like CompaniesCarousel.
 ---
 
+{awards.length > 0 && (
 <div
-    id="companies-section"
-    class="bg-white border-b border-black/5 relative overflow-hidden z-10 companies-carousel-wrap h-[15vh] flex items-center"
+    id="awards-section"
+    class="bg-white border-b border-black/5 relative overflow-hidden z-10 awards-carousel-wrap h-[15vh] flex items-center"
 >
-    <!-- Label (compact) -->
-
-    <!-- Marquee -->
     <div class="overflow-hidden w-full">
         <div class="marquee-track flex items-center gap-10 lg:gap-20">
             {
-                [...companies, ...companies, ...companies, ...companies].map(
-                    (company: any) => (
+                [...awards, ...awards, ...awards, ...awards].map(
+                    (award: any) => (
                         <div class="flex items-center justify-center min-w-[160px] lg:min-w-[220px] flex-shrink-0">
-                            {company.website ? (
+                            {award.website ? (
                                 <a 
-                                    href={company.website} 
+                                    href={award.website} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     class="block transition-all duration-500 hover:scale-110"
-                                    title={`Visitar web de ${company.name}`}
+                                    title={`Ver premio ${award.name}`}
                                 >
                                     <img
-                                        src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
-                                        alt={company.name}
+                                        src={award.image_url}
+                                        alt={award.name}
                                         class="h-16 lg:h-28 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
                                         loading="lazy"
                                         decoding="async"
@@ -38,8 +38,8 @@ const companies = await getCompanies();
                                 </a>
                             ) : (
                                 <img
-                                    src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
-                                    alt={company.name}
+                                    src={award.image_url}
+                                    alt={award.name}
                                     class="h-16 lg:h-28 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
                                 />
                             )}
@@ -50,3 +50,4 @@ const companies = await getCompanies();
         </div>
     </div>
 </div>
+)}

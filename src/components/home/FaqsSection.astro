@@ -1,0 +1,277 @@
+---
+/**
+ * FAQs Section — Premium Accordion Design
+ */
+import { getFaqs } from "../../lib/data";
+const faqs = await getFaqs();
+
+if (faqs.length === 0) return null;
+---
+
+<section id="faq-section" class="faq-section">
+    <div class="section-container">
+        <!-- Header -->
+        <div class="faq-header reveal">
+            <div class="faq-eyebrow">
+                <span class="faq-eyebrow__dot"></span>
+                <span class="faq-eyebrow__text">Dudas habituales</span>
+            </div>
+            <h2 class="faq-title">Preguntas <span class="text-gradient-carmin italic">frecuentes</span></h2>
+            <p class="faq-subtitle">Todo lo que necesitas saber antes de empezar tu proyecto audiovisual con nosotros.</p>
+        </div>
+
+        <!-- Accordion Scroll Area -->
+        <div class="faq-scroll-area reveal delay-2">
+            <div class="faq-grid">
+                {faqs.map((faq: any, index: number) => (
+                    <div class="faq-item group" data-faq-id={faq.id}>
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span class="faq-number">{(index + 1).toString().padStart(2, '0')}</span>
+                            <span class="faq-question">{faq.question}</span>
+                            <div class="faq-icon-wrap">
+                                <svg class="faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m6-6H6"/>
+                                </svg>
+                            </div>
+                        </button>
+                        <div class="faq-content">
+                            <div class="faq-content-inner">
+                                <p>{faq.answer}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* ── Section ────────────────────────────────────────────── */
+.faq-section {
+    position: relative;
+    padding: 6rem 0;
+    background-color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 3.5rem;
+}
+.faq-eyebrow {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .375rem 1.125rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(155,27,48,.15);
+    background: rgba(155,27,48,.03);
+    margin-bottom: 1.25rem;
+}
+.faq-eyebrow__dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #c42847;
+    box-shadow: 0 0 8px rgba(196,40,71,.4);
+}
+.faq-eyebrow__text {
+    font-size: .75rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: #9b1422;
+}
+.faq-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800; color: #111;
+    line-height: 1.1; margin-bottom: 1rem;
+}
+.faq-subtitle {
+    font-size: 1rem; color: #6b7280;
+    line-height: 1.6;
+}
+
+/* ── Accordion ──────────────────────────────────────────── */
+.faq-scroll-area {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    max-height: 65vh; /* Limit height to prevent overflow in full-screen */
+    overflow-y: auto;
+    padding: 1rem 0.5rem 2rem;
+    
+    /* Scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(155,27,48,0.2) transparent;
+}
+.faq-scroll-area::-webkit-scrollbar {
+    width: 4px;
+}
+.faq-scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+.faq-scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(155,27,48,0.1);
+    border-radius: 10px;
+}
+.faq-scroll-area:hover::-webkit-scrollbar-thumb {
+    background: rgba(155,27,48,0.3);
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    .faq-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.faq-item {
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    border-radius: 1.25rem;
+    transition: all .4s cubic-bezier(0.4, 0, 0.2, 1);
+    height: fit-content;
+}
+.faq-item:hover {
+    background: #fff;
+    border-color: rgba(155,27,48,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+}
+.faq-item.active {
+    background: #fff;
+    border-color: rgba(155,27,48,0.3);
+    box-shadow: 0 20px 40px rgba(155,27,48,0.06);
+}
+
+.faq-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    text-align: left;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+.faq-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: rgba(155,27,48,0.4);
+    margin-top: 0.125rem;
+}
+.faq-question {
+    flex: 1;
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    font-weight: 700;
+    color: #111;
+    line-height: 1.4;
+    transition: color .3s;
+}
+.faq-item:hover .faq-question,
+.faq-item.active .faq-question {
+    color: #9b1b30;
+}
+
+.faq-icon-wrap {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all .4s;
+}
+.faq-item.active .faq-icon-wrap {
+    background: #9b1b30;
+    border-color: #9b1b30;
+    transform: rotate(45deg);
+}
+.faq-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #111;
+    transition: color .4s;
+}
+.faq-item.active .faq-icon {
+    color: #fff;
+}
+
+.faq-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: all .5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.faq-content-inner {
+    padding: 0 2rem 2.5rem 4.5rem;
+}
+.faq-content-inner p {
+    font-size: 1.0625rem;
+    color: #4b5563;
+    line-height: 1.7;
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .faq-trigger { padding: 1.5rem; gap: 1rem; }
+    .faq-content-inner { padding: 0 1.5rem 1.5rem 3.25rem; }
+    .faq-icon-wrap { width: 2rem; height: 2rem; }
+}
+</style>
+
+<script>
+    function initFaqs() {
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        faqItems.forEach(item => {
+            const trigger = item.querySelector('.faq-trigger');
+            const content = item.querySelector('.faq-content') as HTMLElement;
+            
+            trigger?.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                // Close all others
+                faqItems.forEach(other => {
+                    if (other !== item) {
+                        other.classList.remove('active');
+                        (other.querySelector('.faq-content') as HTMLElement).style.maxHeight = '0';
+                        (other.querySelector('.faq-trigger') as HTMLElement).setAttribute('aria-expanded', 'false');
+                    }
+                });
+                
+                // Toggle current
+                if (isActive) {
+                    item.classList.remove('active');
+                    content.style.maxHeight = '0';
+                    trigger.setAttribute('aria-expanded', 'false');
+                } else {
+                    item.classList.add('active');
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    trigger.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+    }
+
+    // Initialize on page load
+    initFaqs();
+    
+    // Re-init on view transition (if used)
+    document.addEventListener('astro:page-load', initFaqs);
+</script>

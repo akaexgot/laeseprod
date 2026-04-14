@@ -95,7 +95,7 @@ const settings = await getSettings();
     const lines    = navbar.querySelectorAll<HTMLElement>('.hamburger-line');
 
     const path        = window.location.pathname;
-    const lightPages  = ['/contacto', '/portal-clientes'];
+    const lightPages  = ['/portal-clientes'];
     const isLightPage = lightPages.some(p => path === p || path.startsWith(p + '/'));
     const isProjectPage = path.startsWith('/proyectos/') && path !== '/proyectos';
 

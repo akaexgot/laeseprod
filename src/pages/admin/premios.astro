@@ -1,31 +1,29 @@
 ---
 /**
- * Admin - Companies (Logo Carousel) Management
- * Restyled with a premium Zinc Dark Mode aesthetic natively
+ * Admin - Awards (Logo Carousel) Management
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { getCompanies } from "../../lib/data";
+import { getAwards } from "../../lib/data";
 import { getServiceSupabase } from "../../lib/supabase";
-import { getUserFromCookie } from "../../lib/auth";
 
 // SSR auth is handled by middleware
 const serviceSupabase = getServiceSupabase()!;
 
-const companies = await getCompanies();
+const awards = await getAwards();
 ---
 
-<AdminLayout title="Empresas" activeSection="empresas">
+<AdminLayout title="Premios" activeSection="premios">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="margin-bottom: 3.5rem !important;">
         <div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">Empresas</h1>
-            <p class="text-zinc-400 text-sm" style="margin-top: 0.75rem !important;">Gestiona las empresas. Total: <span class="text-zinc-100 font-medium">{companies.length}</span></p>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Premios y Galardones</h1>
+            <p class="text-zinc-400 text-sm" style="margin-top: 0.75rem !important;">Gestiona los premios. Total: <span class="text-zinc-100 font-medium">{awards.length}</span></p>
         </div>
         <button id="btn-add"
             class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
             style="padding: 0.5rem 1rem; gap: 0.5rem;"
         >
             <i data-lucide="plus" class="w-4 h-4"></i>
-            Nueva empresa
+            Nuevo premio
         </button>
     </div>
 
@@ -34,37 +32,37 @@ const companies = await getCompanies();
 
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left" id="companies-table">
+            <table class="w-full text-sm text-left" id="awards-table">
                 <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
                     <tr class="border-b border-zinc-800/50">
-                        <th style="padding: 1.25rem 1.5rem;">Empresa</th>
+                        <th style="padding: 1.25rem 1.5rem;">Premio / Galardón</th>
                         <th class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">Sitio Web</th>
                         <th class="hidden md:table-cell w-24 text-center" style="padding: 1.25rem 1.5rem;">Orden</th>
                         <th class="text-right hidden sm:table-cell w-24" style="padding: 1.25rem 1.5rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
-                    {companies.map((company: any) => (
-                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={company.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
+                    {awards.map((award: any) => (
+                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={award.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
                             <td style="padding: 1.25rem 1.5rem;">
                                 <div class="flex items-center justify-between">
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                                         <div class="w-10 h-10 bg-zinc-950 rounded border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                                            {company.logo_url ? (
-                                                <img src={company.logo_url} alt={company.name} class="max-w-full max-h-full object-contain p-1" />
+                                            {award.image_url ? (
+                                                <img src={award.image_url} alt={award.name} class="max-w-full max-h-full object-contain p-1" />
                                             ) : (
                                                 <i data-lucide="image-off" class="w-4 h-4 text-zinc-600"></i>
                                             )}
                                         </div>
-                                        <span class="font-medium text-zinc-100">{company.name}</span>
+                                        <span class="font-medium text-zinc-100">{award.name}</span>
                                     </div>
                                     <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                 </div>
                             </td>
                             <td class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">
-                                {company.website ? (
-                                    <a href={company.website} target="_blank" class="text-zinc-400 hover:text-rose-400 text-sm hover:underline flex items-center gap-1.5 w-fit">
-                                        {company.website.replace(/^https?:\/\//, '')}
+                                {award.website ? (
+                                    <a href={award.website} target="_blank" class="text-zinc-400 hover:text-rose-400 text-sm hover:underline flex items-center gap-1.5 w-fit">
+                                        {award.website.replace(/^https?:\/\//, '')}
                                         <i data-lucide="external-link" class="w-3 h-3"></i>
                                     </a>
                                 ) : (
@@ -72,16 +70,16 @@ const companies = await getCompanies();
                                 )}
                             </td>
                             <td class="hidden md:table-cell" style="padding: 1.25rem 1.5rem;">
-                                <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{company.order}</span>
+                                <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{award.order}</span>
                             </td>
                             <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
                                 <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button class="p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all btn-edit"
-                                        data-id={company.id} data-name={company.name} data-logo={company.logo_url || ''} data-website={company.website || ''} data-order={company.order}
+                                        data-id={award.id} data-name={award.name} data-image={award.image_url || ''} data-website={award.website || ''} data-order={award.order}
                                         title="Editar">
                                         <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
                                     </button>
-                                    <button class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={company.id} title="Eliminar">
+                                    <button class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={award.id} title="Eliminar">
                                         <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                     </button>
                                 </div>
@@ -93,13 +91,13 @@ const companies = await getCompanies();
         </div>
     </div>
 
-    {companies.length === 0 && (
+    {awards.length === 0 && (
         <div class="bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col items-center justify-center text-center" style="padding: 3rem; margin-top: 1.5rem;">
             <div class="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center border border-zinc-800 mb-4">
-                <i data-lucide="briefcase" class="w-6 h-6 text-zinc-500"></i>
+                <i data-lucide="award" class="w-6 h-6 text-zinc-500"></i>
             </div>
-            <h3 class="text-zinc-100 font-semibold mb-1">No hay empresas</h3>
-            <p class="text-zinc-400 text-sm mb-6 max-w-sm">Añade marcas clientes para mostrarlas en el carrusel animado de la página de inicio.</p>
+            <h3 class="text-zinc-100 font-semibold mb-1">No hay premios</h3>
+            <p class="text-zinc-400 text-sm mb-6 max-w-sm">Añade galardones para mostrarlos en el carrusel de la página Quiénes Somos.</p>
         </div>
     )}
 </AdminLayout>
@@ -110,7 +108,7 @@ const companies = await getCompanies();
         
         <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
             <h3 id="modal-title" class="text-lg font-semibold text-zinc-50 flex items-center gap-2">
-                <span id="modal-title-text">Añadir empresa</span>
+                <span id="modal-title-text">Añadir premio</span>
             </h3>
             <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
@@ -121,12 +119,12 @@ const companies = await getCompanies();
         
         <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
             <div style="margin-bottom: 0.5rem;">
-                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Nombre *</label>
-                <input type="text" id="modal-name" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="Nombre completo" />
+                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Nombre del Premio *</label>
+                <input type="text" id="modal-name" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="Ej: Cannes Corporate Media & TV Awards" />
             </div>
             
             <div style="margin-bottom: 0.5rem;">
-                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Logotipo de la Empresa</label>
+                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Imagen / Logo del Premio</label>
                 
                 <!-- Drag & Drop Zone -->
                 <div id="drop-zone" class="relative group cursor-pointer drop-zone">
@@ -138,7 +136,7 @@ const companies = await getCompanies();
                                 <i data-lucide="upload" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-zinc-200">Pulsa o arrastra el logo</p>
+                                <p class="text-sm font-medium text-zinc-200">Pulsa o arrastra la imagen</p>
                                 <p class="text-xs text-zinc-500 mt-1">PNG, JPG, SVG o WebP (máx. 2MB)</p>
                             </div>
                         </div>
@@ -149,9 +147,9 @@ const companies = await getCompanies();
                         </div>
 
                         <div id="upload-preview" class="hidden relative w-full h-32 flex items-center justify-center rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden group/preview">
-                            <img id="logo-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
+                            <img id="image-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
                             <div class="absolute inset-0 bg-zinc-950/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
-                                <button type="button" id="btn-remove-logo" class="bg-rose-600 text-white p-2 rounded-full hover:bg-rose-500 transition-all">
+                                <button type="button" id="btn-remove-image" class="bg-rose-600 text-white p-2 rounded-full hover:bg-rose-500 transition-all">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -159,12 +157,12 @@ const companies = await getCompanies();
                     </div>
                 </div>
 
-                <input type="url" id="modal-logo" class="hidden" />
+                <input type="url" id="modal-image" class="hidden" />
             </div>
 
             <div class="grid grid-cols-2" style="display: grid; gap: 1.5rem;">
                 <div>
-                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Sitio Web</label>
+                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Sitio Web (Opcional)</label>
                     <input type="url" id="modal-website" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" placeholder="https://..." />
                 </div>
                 <div>
@@ -206,7 +204,6 @@ const companies = await getCompanies();
         </div>
     </div>
 </div>
-</div>
 
 <!-- Toast Container -->
 <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
@@ -217,79 +214,73 @@ const companies = await getCompanies();
         const modalTitleText = document.getElementById('modal-title-text')!;
         const modalId = document.getElementById('modal-id') as HTMLInputElement;
         const modalName = document.getElementById('modal-name') as HTMLInputElement;
-        const modalLogo = document.getElementById('modal-logo') as HTMLInputElement;
+        const modalImage = document.getElementById('modal-image') as HTMLInputElement;
         const modalWebsite = document.getElementById('modal-website') as HTMLInputElement;
         const modalOrder = document.getElementById('modal-order') as HTMLInputElement;
         const modalError = document.getElementById('modal-error')!;
         const modalDeleteBtn = document.getElementById('modal-delete')!;
-        const logoPreview = document.getElementById('logo-preview')!;
-        const logoPreviewImg = document.getElementById('logo-preview-img') as HTMLImageElement;
+        const imagePreviewImg = document.getElementById('image-preview-img') as HTMLImageElement;
 
         function openModal(data?: any) {
             if (data) {
-                modalTitleText.textContent = 'Editar empresa';
+                modalTitleText.textContent = 'Editar premio';
                 modalId.value = data.id || '';
                 modalName.value = data.name || '';
-                modalLogo.value = data.logo || '';
+                modalImage.value = data.image || '';
                 modalWebsite.value = data.website || '';
                 modalOrder.value = data.order || '0';
                 modalDeleteBtn.classList.remove('hidden');
             } else {
-                modalTitleText.textContent = 'Añadir empresa';
+                modalTitleText.textContent = 'Añadir premio';
                 modalId.value = '';
                 modalName.value = '';
-                modalLogo.value = '';
+                modalImage.value = '';
                 modalWebsite.value = '';
                 modalOrder.value = '0';
                 modalDeleteBtn.classList.add('hidden');
             }
-            updateLogoPreview();
+            updateImagePreview();
             modalError.classList.add('hidden');
             overlay.classList.remove('hidden');
         }
 
         function closeModal() { overlay.classList.add('hidden'); }
 
-        function updateLogoPreview() {
-            const url = modalLogo.value;
+        function updateImagePreview() {
+            const url = modalImage.value;
             const idle = document.getElementById('upload-idle')!;
             const preview = document.getElementById('upload-preview')!;
             const loading = document.getElementById('upload-loading')!;
             
             if (url) {
-                logoPreviewImg.src = url;
+                imagePreviewImg.src = url;
                 preview.classList.remove('hidden');
                 idle.classList.add('hidden');
             } else {
                 preview.classList.add('hidden');
                 idle.classList.remove('hidden');
-                logoPreviewImg.src = '';
+                imagePreviewImg.src = '';
             }
             loading.classList.add('hidden');
         }
 
-        // Drag and Drop Logic
         const dropZone = document.getElementById('drop-zone')!;
         const fileInput = document.getElementById('file-input') as HTMLInputElement;
 
         dropZone.addEventListener('click', () => fileInput.click());
-
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('ready');
         });
-
         ['dragleave', 'dragend'].forEach(type => {
             dropZone.addEventListener(type, () => dropZone.classList.remove('ready'));
         });
-
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('ready');
             const file = e.dataTransfer?.files[0];
             if (file) handleUpload(file);
         });
-
         fileInput.addEventListener('change', () => {
             const file = fileInput.files?.[0];
             if (file) handleUpload(file);
@@ -300,55 +291,48 @@ const companies = await getCompanies();
                 showToast('El archivo debe ser una imagen', 'error');
                 return;
             }
-
             const idle = document.getElementById('upload-idle')!;
             const loading = document.getElementById('upload-loading')!;
             const preview = document.getElementById('upload-preview')!;
-
             idle.classList.add('hidden');
             preview.classList.add('hidden');
             loading.classList.remove('hidden');
 
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('folder', 'logos');
+            formData.append('folder', 'awards');
 
             try {
                 const res = await fetch('/api/admin/upload', {
                     method: 'POST',
                     body: formData,
                 });
-
                 if (res.ok) {
                     const data = await res.json();
-                    modalLogo.value = data.url;
-                    updateLogoPreview();
-                    showToast('Logo subido correctamente', 'success');
+                    modalImage.value = data.url;
+                    updateImagePreview();
+                    showToast('Imagen subida correctamente', 'success');
                 } else {
                     const err = await res.json();
                     showToast(err.error || 'Error al subir', 'error');
-                    updateLogoPreview();
+                    updateImagePreview();
                 }
             } catch (error) {
                 showToast('Error de conexión al subir', 'error');
-                updateLogoPreview();
+                updateImagePreview();
             }
         }
 
-        document.getElementById('btn-remove-logo')?.addEventListener('click', (e) => {
+        document.getElementById('btn-remove-image')?.addEventListener('click', (e) => {
             e.stopPropagation();
-            modalLogo.value = '';
-            updateLogoPreview();
+            modalImage.value = '';
+            updateImagePreview();
         });
 
         document.getElementById('btn-add')?.addEventListener('click', () => openModal());
         document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
         document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
-        
-        // Close on outside click
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeModal();
-        });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
 
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -356,7 +340,7 @@ const companies = await getCompanies();
                 openModal({
                     id: b.dataset.id,
                     name: b.dataset.name,
-                    logo: b.dataset.logo,
+                    image: b.dataset.image,
                     website: b.dataset.website,
                     order: b.dataset.order
                 });
@@ -372,7 +356,6 @@ const companies = await getCompanies();
             }
         });
 
-        // Confirm modal logic
         const confirmOverlay = document.getElementById('confirm-overlay')!;
         const confirmYes = document.getElementById('confirm-yes')!;
         const confirmCancel = document.getElementById('confirm-cancel')!;
@@ -393,11 +376,10 @@ const companies = await getCompanies();
             if (!pendingDeleteId) return;
             confirmYes.textContent = 'Eliminando...';
             (confirmYes as HTMLButtonElement).disabled = true;
-            const id = pendingDeleteId;
-            const res = await fetch('/api/admin/companies', {
+            const res = await fetch('/api/admin/awards', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id }),
+                body: JSON.stringify({ id: pendingDeleteId }),
             });
             if (res.ok) location.reload();
             else {
@@ -414,24 +396,20 @@ const companies = await getCompanies();
             });
         });
 
-        // Toast notification
-                                function showToast(message: string, type: 'error' | 'success' = 'error') {
-            const container = document.getElementById('toast-container')!;
+        function showToast(message: string, type: 'error' | 'success' = 'error') {
+            const container = document.getElementById('toast-container')! as HTMLElement;
             const toast = document.createElement('div');
             toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
                 type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
             }`;
             toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
-            if (type === 'success') {
-                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`;
-            } else {
-                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
-            }
+            toast.innerHTML = type === 'success' 
+              ? `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`
+              : `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
-        // Save
         document.getElementById('modal-save')?.addEventListener('click', async () => {
             const name = modalName.value.trim();
             if (!name) {
@@ -439,7 +417,6 @@ const companies = await getCompanies();
                 modalError.classList.remove('hidden');
                 return;
             }
-
             const saveBtn = document.getElementById('modal-save')!;
             const oHtml = saveBtn.innerHTML;
             saveBtn.innerHTML = 'Guardando...';
@@ -447,24 +424,21 @@ const companies = await getCompanies();
 
             const body: any = {
                 name,
-                logo_url: modalLogo.value.trim() || null,
+                image_url: modalImage.value.trim() || null,
                 website: modalWebsite.value.trim() || null,
                 order: parseInt(modalOrder.value) || 0,
             };
-
             const isEdit = !!modalId.value;
             if (isEdit) body.id = modalId.value;
 
             try {
-                const res = await fetch('/api/admin/companies', {
+                const res = await fetch('/api/admin/awards', {
                     method: isEdit ? 'PUT' : 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body),
                 });
-
-                if (res.ok) {
-                    location.reload();
-                } else {
+                if (res.ok) location.reload();
+                else {
                     const err = await res.json();
                     modalError.textContent = err.error || 'Error al guardar';
                     modalError.classList.remove('hidden');
@@ -480,4 +454,3 @@ const companies = await getCompanies();
         });
     });
 </script>
-</AdminLayout>
