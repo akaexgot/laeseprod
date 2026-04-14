@@ -44,44 +44,6 @@ export async function generateContractPDF(title: string, htmlContent: string, si
     const margin = 50;
     let y = height - margin;
 
-    // --- Header & Logo ---
-    try {
-        const logoPath = path.resolve('public/logo-oscuro-web.png');
-        const logoBytes = await fs.readFile(logoPath);
-        const logoImage = await pdfDoc.embedPng(logoBytes);
-        const logoDims = logoImage.scale(0.15); // Adjust scale as needed
-        
-        page.drawImage(logoImage, {
-            x: margin,
-            y: y - logoDims.height + 10,
-            width: logoDims.width,
-            height: logoDims.height,
-        });
-        y -= (logoDims.height + 20);
-    } catch (e) {
-        console.warn('Could not load logo for PDF:', e);
-        y -= 20;
-    }
-
-    // Title
-    page.drawText(title.toUpperCase(), { 
-        x: margin, 
-        y, 
-        size: 16, 
-        font: fontBold, 
-        color: rgb(0.1, 0.1, 0.1) 
-    });
-    y -= 10;
-    
-    // Horizontal Line
-    page.drawLine({
-        start: { x: margin, y },
-        end: { x: width - margin, y },
-        thickness: 1,
-        color: rgb(0.8, 0.8, 0.8),
-    });
-    y -= 40;
-
     // --- Content Rendering ---
     // Extract text from HTML (simple replacement for tags)
     // In a production environment with complex HTML, we'd use a dedicated HTML-to-PDF engine
@@ -188,15 +150,21 @@ export async function generateContractPDF(title: string, htmlContent: string, si
     const pages = pdfDoc.getPages();
     for (let i = 0; i < pages.length; i++) {
         const { width } = pages[i].getSize();
-        pages[i].drawText(`Página ${i + 1} de ${pages.length}`, {
-            x: width / 2 - 25,
+        
+        // Left side: Company info
+        pages[i].drawText(`VideoMarketing Sevilla | www.videomarketingsevilla.reviseo.es`, {
+            x: margin,
             y: 20,
             size: 8,
             font: fontMain,
             color: rgb(0.6, 0.6, 0.6)
         });
-        pages[i].drawText(`VideoMarketing Sevilla | www.videomarketingsevilla.reviseo.es`, {
-            x: margin,
+
+        // Right side: Page numbering
+        const pageText = `Página ${i + 1} de ${pages.length}`;
+        const pageTextWidth = fontMain.widthOfTextAtSize(pageText, 8);
+        pages[i].drawText(pageText, {
+            x: width - margin - pageTextWidth,
             y: 20,
             size: 8,
             font: fontMain,
