@@ -43,10 +43,10 @@ const makingOfId = expMobileId || expDesktopId;
                     {makingOfId ? (
                         <div class="pj-hero__video-frame">
                             <iframe
-                                src={`https://www.youtube.com/embed/${makingOfId}?rel=0&modestbranding=1`}
+                                src={`https://www.youtube.com/embed/${makingOfId}?rel=0&modestbranding=1&enablejsapi=1&origin=${Astro.url.origin}`}
                                 class="pj-hero__video-iframe"
                                 frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
                                 allowfullscreen
                                 title="Making Of"
                             ></iframe>
@@ -54,10 +54,10 @@ const makingOfId = expMobileId || expDesktopId;
                     ) : mainVideoId ? (
                         <div class="pj-hero__video-frame pj-hero__video-frame--horizontal">
                             <iframe
-                                src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1`}
+                                src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1&enablejsapi=1&origin=${Astro.url.origin}`}
                                 class="pj-hero__video-iframe"
                                 frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
                                 allowfullscreen
                                 title={project.title}
                             ></iframe>
@@ -114,10 +114,10 @@ const makingOfId = expMobileId || expDesktopId;
             <!-- Background video (muted, autoplay, no controls) -->
             <div class="pj-video__bg" id="pjVideoBg">
                 <iframe
-                    src={`https://www.youtube.com/embed/${mainVideoId}?autoplay=1&mute=1&loop=1&playlist=${mainVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    src={`https://www.youtube.com/embed/${mainVideoId}?autoplay=1&mute=1&loop=1&playlist=${mainVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
                     class="pj-video__bg-iframe"
                     frameborder="0"
-                    allow="autoplay; encrypted-media"
+                    allow="autoplay; encrypted-media; compute-pressure"
                 ></iframe>
             </div>
             <!-- Overlay (hides when playing) -->
@@ -134,9 +134,9 @@ const makingOfId = expMobileId || expDesktopId;
             <iframe
                 id="pjFullPlayer"
                 class="pj-video__full-player"
-                data-src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1&autoplay=1`}
+                data-src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1&autoplay=1&enablejsapi=1&origin=${Astro.url.origin}`}
                 frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
                 allowfullscreen
                 title={project.title}
             ></iframe>

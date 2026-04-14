@@ -211,6 +211,7 @@ const settings = await getSettings();
         
         // 0. Project detail pages: always dark-transparent (white icons/logo)
         if (isProjectPage) return 'dark-transparent';
+        if (path.startsWith('/carta')) return 'dark-solid';
 
         const hero    = document.getElementById('hero');
         const fp      = document.getElementById('featured-projects');

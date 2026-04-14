@@ -1,0 +1,614 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { getServiceSupabase } from "../../../lib/supabase";
+
+const sb = getServiceSupabase()!;
+const userProfile = Astro.locals.userProfile;
+
+// Permission check
+if (!userProfile?.is_admin && !userProfile?.permissions?.includes('carta')) {
+    return Astro.redirect('/admin');
+}
+
+const { id } = Astro.params;
+
+const { data: carta } = await sb.from('cartas').select('*').eq('id', id).single();
+if (!carta) return Astro.redirect('/admin/carta');
+
+// Fetch existing details depending on type
+let imagenes = [];
+let bloques = [];
+
+if (carta.tipo === 'imagenes' || carta.tipo === 'pdf') {
+    const { data } = await sb.from('carta_imagenes').select('*').eq('carta_id', id).order('orden');
+    imagenes = data || [];
+} else if (carta.tipo === 'manual') {
+    const { data } = await sb.from('carta_bloques').select(`*, servicios:carta_servicios(*)`).eq('carta_id', id).order('orden');
+    
+    // Sort servicios inside each block
+    bloques = (data || []).map(b => ({
+        ...b,
+        servicios: (b.servicios || []).sort((a: any, b: any) => a.orden - b.orden)
+    }));
+}
+---
+
+<AdminLayout title={`Editando: ${carta.nombre}`} activeSection="carta">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="margin-bottom: 2rem !important;">
+        <div>
+            <a href="/admin/carta" class="text-zinc-500 hover:text-zinc-300 flex items-center gap-1 text-sm mb-2 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver a Cartas
+            </a>
+            <h1 class="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                {carta.nombre}
+                <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">{carta.tipo}</span>
+            </h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href={`/carta/${carta.slug}`} target="_blank" class="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg transition-colors border border-zinc-700 shadow-sm" style="padding: 0.625rem 1.25rem; font-size: 0.875rem;">
+                <i data-lucide="external-link" class="w-4 h-4 text-zinc-400"></i> Ver Pública
+            </a>
+            <button type="button" id="btn-save-all" class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl transition-all shadow-lg" style="padding: 0.75rem 1.5rem; font-size: 0.875rem;">
+                <i data-lucide="save" class="w-4 h-4"></i> Guardar Cambios
+            </button>
+        </div>
+    </div>
+
+    <!-- Hidden data for client script -->
+    <script id="carta-data" type="application/json" set:html={JSON.stringify({
+        id: carta.id,
+        tipo: carta.tipo,
+        video_url: carta.video_url,
+        imagenes,
+        bloques
+    })}></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" style="margin-bottom: 4rem !important;">
+        <!-- Left Column: Media handling -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            {carta.tipo === 'imagenes' && (
+                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-zinc-100 flex items-center gap-2"><i data-lucide="images" class="w-5 h-5 text-rose-500"></i> Galería de Imágenes</h2>
+                        <button id="btn-upload-imgs" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-white rounded border border-zinc-700 transition-colors">Subir Imágenes</button>
+                        <input type="file" id="file-imgs" multiple accept="image/*" class="hidden" />
+                    </div>
+                    <div id="imgs-loading" class="hidden items-center gap-2 text-rose-400 text-sm mb-4 bg-rose-500/10 p-3 rounded-lg border border-rose-500/20">
+                        <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Subiendo imágenes, por favor espera...
+                    </div>
+                    <div id="imgs-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <!-- Imgs injected here -->
+                    </div>
+                    <div id="imgs-empty" class="hidden flex-col items-center justify-center p-8 text-zinc-500 border-2 border-dashed border-zinc-800 rounded-lg bg-zinc-950">
+                        <i data-lucide="image-plus" class="w-8 h-8 mb-2 opacity-50"></i>
+                        <p class="text-sm">No hay imágenes. Sube algunas.</p>
+                    </div>
+                </div>
+            )}
+
+            {carta.tipo === 'pdf' && (
+                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-zinc-100 flex items-center gap-2"><i data-lucide="file-text" class="w-5 h-5 text-rose-500"></i> Archivo PDF</h2>
+                        <button id="btn-upload-pdf" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-white rounded border border-zinc-700 transition-colors">Subir Nuevo PDF</button>
+                        <input type="file" id="file-pdf" accept="application/pdf" class="hidden" />
+                    </div>
+                    <p class="text-xs text-zinc-400 mb-4">El PDF se procesará y extraeremos automáticamente sus páginas como imágenes.</p>
+                    <div id="pdf-loading" class="hidden items-center gap-2 text-rose-400 text-sm mb-4 bg-rose-500/10 p-3 rounded-lg border border-rose-500/20">
+                        <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Procesando PDF...
+                    </div>
+                    <div id="imgs-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <!-- Extracted PDF pages injected here -->
+                    </div>
+                </div>
+            )}
+
+            {carta.tipo === 'manual' && (
+                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="text-lg font-semibold text-zinc-100 flex items-center gap-2"><i data-lucide="layout-list" class="w-5 h-5 text-rose-500"></i> Bloques de Servicio</h2>
+                        <button type="button" id="btn-add-block" class="bg-zinc-800 hover:bg-zinc-700 font-bold text-white rounded-xl border border-zinc-700 transition-all shadow-lg flex items-center gap-2" style="padding: 0.75rem 1.5rem; font-size: 0.875rem;">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Añadir Nuevo Bloque
+                        </button>
+                    </div>
+                    <div id="blocks-container" class="space-y-10">
+                        <!-- Blocks injected here -->
+                    </div>
+                    <div id="blocks-empty" class="hidden flex-col items-center justify-center p-8 text-zinc-500 border-2 border-dashed border-zinc-800 rounded-lg bg-zinc-950">
+                        <i data-lucide="layout-template" class="w-8 h-8 mb-2 opacity-50"></i>
+                        <p class="text-sm">Añade tu primer bloque para empezar.</p>
+                    </div>
+                </div>
+            )}
+        </div>
+
+        <!-- Right Column: Settings -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm">
+                <h3 class="text-sm font-semibold text-zinc-300 uppercase tracking-wider mb-4">Ajustes Generales</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-1">Nombre Interno (solo se cambia desde la lista)</label>
+                        <input type="text" class="w-full px-3 py-2 border border-zinc-800 bg-zinc-950 rounded-md text-zinc-500 text-sm cursor-not-allowed" value={carta.nombre} disabled />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-1">Enlace YouTube (Opcional)</label>
+                        <input type="url" id="edit-video" class="w-full px-3 py-2 border border-zinc-800 bg-zinc-950 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 text-sm" placeholder="https://youtube.com/..." value={carta.video_url} />
+                        <p class="text-[11px] text-zinc-500 mt-1">Si añades un vídeo, se mostrará junto a tu carta. Shorts para diseño vertical.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-5 shadow-sm">
+                <h3 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-2">Ayuda y Consejos</h3>
+                <ul class="text-xs text-zinc-400 space-y-2 list-disc pl-4">
+                    {carta.tipo === 'imagenes' && (
+                        <li>Puedes arrastrar las imágenes para reordenarlas.</li>
+                    )}
+                    {carta.tipo === 'pdf' && (
+                        <li>Sube tu PDF exportado para la web. Cloudinary extraerá la máxima calidad.</li>
+                    )}
+                    {carta.tipo === 'manual' && (
+                        <li>Puedes reordenar tanto bloques como servicios dentro de los bloques usando arrastrar y soltar.</li>
+                    )}
+                    <li>No olvides hacer clic en <strong>Guardar Cambios</strong> arriba a la derecha.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <div id="confirm-icon-container" style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                </div>
+                <h3 id="confirm-title" style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Estás seguro?</h3>
+                <p id="confirm-text" style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer.</p>
+            </div>
+            <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+                <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+                <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+</AdminLayout>
+
+<style is:global>
+    .sortable-ghost { opacity: 0.4; }
+    .sortable-drag { cursor: grabbing !important; }
+</style>
+
+<script>
+    function initializeCartaEditor() {
+        // --- UI UTILS ---
+        function showToast(message: string, type: 'error' | 'success' = 'error') {
+            const container = document.getElementById('toast-container')!;
+            const toast = document.createElement('div');
+            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
+            }`;
+            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
+            if (type === 'success') {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`;
+            } else {
+                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
+            }
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        const confirmOverlay = document.getElementById('confirm-overlay')!;
+        const confirmYes = document.getElementById('confirm-yes')!;
+        const confirmCancel = document.getElementById('confirm-cancel')!;
+        let onConfirmCallback: (() => void) | null = null;
+
+        function openConfirm(title: string, text: string, callback: () => void) {
+            (document.getElementById('confirm-title')!).textContent = title;
+            (document.getElementById('confirm-text')!).textContent = text;
+            onConfirmCallback = callback;
+            confirmOverlay.classList.remove('hidden');
+        }
+        function closeConfirm() {
+            onConfirmCallback = null;
+            confirmOverlay.classList.add('hidden');
+        }
+        confirmCancel.addEventListener('click', closeConfirm);
+        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+        confirmYes.addEventListener('click', () => {
+            if(onConfirmCallback) onConfirmCallback();
+            closeConfirm();
+        });
+
+        const raw = document.getElementById('carta-data')?.textContent;
+        if (!raw) return;
+        const state = JSON.parse(raw);
+        
+        // --- 1. IMAGENES / PDF LOGIC ---
+        if (state.tipo === 'imagenes' || state.tipo === 'pdf') {
+            const grid = document.getElementById('imgs-grid');
+            const empty = document.getElementById('imgs-empty');
+            
+            function renderImgs() {
+                if(!grid) return;
+                grid.innerHTML = '';
+                if(state.imagenes.length === 0) {
+                    empty?.classList.remove('hidden');
+                    empty?.classList.add('flex');
+                } else {
+                    empty?.classList.add('hidden');
+                    empty?.classList.remove('flex');
+                    state.imagenes.forEach((img: any, idx: number) => {
+                        const div = document.createElement('div');
+                        div.className = "relative group rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950 aspect-[3/4] cursor-grab";
+                        div.dataset.id = idx.toString();
+                        div.innerHTML = `
+                            <img src="${img.url}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                <i data-lucide="move" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <button type="button" class="btn-del-img absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" data-idx="${idx}">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                            <div class="absolute bottom-2 left-2 bg-zinc-900/80 backdrop-blur px-2 py-1 rounded text-[10px] font-semibold text-zinc-300 pointer-events-none">
+                                ${idx + 1}
+                            </div>
+                        `;
+                        grid.appendChild(div);
+                    });
+                    // @ts-ignore
+                    if (window.lucide) window.lucide.createIcons();
+
+                    document.querySelectorAll('.btn-del-img').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const i = parseInt((e.currentTarget as HTMLElement).dataset.idx!);
+                            openConfirm('¿Eliminar imagen?', 'Esta página se borrará de la carta permanentemente.', () => {
+                                state.imagenes.splice(i, 1);
+                                renderImgs();
+                                showToast('Imagen eliminada de la lista', 'success');
+                            });
+                        });
+                    });
+                }
+            }
+            renderImgs();
+
+            // @ts-ignore
+            if (window.Sortable && grid) {
+                 // @ts-ignore
+                new Sortable(grid, {
+                    animation: 150,
+                    onEnd: function (evt: any) {
+                        const itemEl = state.imagenes.splice(evt.oldIndex, 1)[0];
+                        state.imagenes.splice(evt.newIndex, 0, itemEl);
+                        renderImgs();
+                    },
+                });
+            }
+
+            if (state.tipo === 'imagenes') {
+                const fileIn = document.getElementById('file-imgs') as HTMLInputElement;
+                const btnUpload = document.getElementById('btn-upload-imgs');
+                const loading = document.getElementById('imgs-loading');
+
+                btnUpload?.addEventListener('click', () => fileIn.click());
+                fileIn?.addEventListener('change', async () => {
+                    const files = fileIn.files;
+                    if(!files || files.length === 0) return;
+                    
+                    loading?.classList.remove('hidden');
+                    loading?.classList.add('flex');
+
+                    for(let i=0; i<files.length; i++){
+                        const fd = new FormData();
+                        fd.append('file', files[i]);
+                        fd.append('folder', 'cartas');
+                        try {
+                            const r = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+                            if(r.ok) {
+                                const d = await r.json();
+                                state.imagenes.push({ url: d.url, orden: 0 });
+                            }
+                        } catch(e) {}
+                    }
+                    loading?.classList.remove('flex');
+                    loading?.classList.add('hidden');
+                    fileIn.value = '';
+                    renderImgs();
+                });
+            }
+
+            if (state.tipo === 'pdf') {
+                const fileIn = document.getElementById('file-pdf') as HTMLInputElement;
+                const btnUpload = document.getElementById('btn-upload-pdf');
+                const loading = document.getElementById('pdf-loading');
+
+                btnUpload?.addEventListener('click', () => fileIn.click());
+                fileIn?.addEventListener('change', async () => {
+                    const files = fileIn.files;
+                    if(!files || files.length === 0) return;
+
+                    loading?.classList.remove('hidden');
+                    loading?.classList.add('flex');
+
+                    const fd = new FormData();
+                    fd.append('file', files[0]);
+                    fd.append('folder', 'cartas');
+                    try {
+                        const r = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+                        if(r.ok) {
+                            const d = await r.json();
+                            const { url, pages } = d;
+                            // If Cloudinary processes a PDF, generating image versions is just changing extension to jpg and using pg_{n}
+                            // Original: https://res.cloudinary.com/dlco8tyiz/image/upload/v17.../cartas/file.pdf
+                            state.imagenes = [];
+                            const bUrl = url.replace('.pdf', '.jpg');
+                            
+                            for(let p = 1; p <= pages; p++) {
+                                // insert pg_X/ before v...
+                                const split = bUrl.split('/upload/');
+                                const pgUrl = `${split[0]}/upload/pg_${p}/${split[1]}`;
+                                state.imagenes.push({ url: pgUrl, orden: p });
+                            }
+                            showToast('PDF procesado correctamente', 'success');
+                        } else {
+                            showToast("Error del servidor subiendo PDF", 'error');
+                        }
+                    } catch(e) { showToast("Error de red al subir PDF", 'error'); }
+
+                    loading?.classList.remove('flex');
+                    loading?.classList.add('hidden');
+                    fileIn.value = '';
+                    renderImgs();
+                });
+            }
+        }
+
+        // --- 2. MANUAL LOGIC ---
+        if (state.tipo === 'manual') {
+            const container = document.getElementById('blocks-container');
+            const empty = document.getElementById('blocks-empty');
+
+            function generateId() { return Math.random().toString(36).substr(2, 9); }
+
+            let sortableDnd: any = null;
+
+            function renderManual() {
+                try {
+                    if(!container) return;
+                    container.innerHTML = '';
+                    if(state.bloques.length === 0) {
+                        empty?.classList.remove('hidden');
+                        empty?.classList.add('flex');
+                        if (sortableDnd) { sortableDnd.destroy(); sortableDnd = null; }
+                    } else {
+                        empty?.classList.add('hidden');
+                        empty?.classList.remove('flex');
+                        state.bloques.forEach((b: any, bIdx: number) => {
+                            b._tmpId = b._tmpId || b.id || generateId();
+                            if (!b.servicios) b.servicios = [];
+                            
+                            const blockDiv = document.createElement('div');
+                            blockDiv.className = "bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-lg transition-all hover:border-zinc-700/50";
+                            blockDiv.dataset.bIdx = bIdx.toString();
+                            
+                            // Header
+                            const pHeader = document.createElement('div');
+                            pHeader.className = "bg-zinc-900/40 px-6 py-4 border-b border-zinc-800 flex items-center justify-between cursor-grab block-handle";
+                            pHeader.innerHTML = `
+                                <div class="flex items-center gap-4 flex-1 mr-4">
+                                    <i data-lucide="grip-vertical" class="w-5 h-5 text-zinc-700 opacity-50"></i>
+                                    <input type="text" class="inp-b-title bg-transparent border-none text-base font-bold text-zinc-100 focus:ring-0 p-0 w-full placeholder-zinc-700" value="${b.titulo || ''}" placeholder="Nombre de este bloque (ej: Entrantes, Bebidas...)" />
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" class="btn-del-block text-zinc-600 hover:text-rose-500 transition-colors p-1.5 hover:bg-rose-500/10 rounded-lg" title="Eliminar bloque completo"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            `;
+                            blockDiv.appendChild(pHeader);
+
+                            // Body (Servicios)
+                            const pBody = document.createElement('div');
+                            pBody.className = "p-8 space-y-8";
+                            
+                            const sContainer = document.createElement('div');
+                            sContainer.className = "space-y-6 s-list";
+                            
+                            b.servicios.forEach((s: any, sIdx: number) => {
+                                const sDiv = document.createElement('div');
+                                sDiv.className = "flex items-start gap-4 bg-zinc-900/30 p-5 rounded-xl border border-zinc-800/80 group transition-all hover:bg-zinc-900/50";
+                                sDiv.dataset.sIdx = sIdx.toString();
+                                sDiv.innerHTML = `
+                                    <div class="pt-1.5 service-handle cursor-grab opacity-20 group-hover:opacity-100 transition-opacity">
+                                        <i data-lucide="grip-vertical" class="w-5 h-5 text-zinc-500"></i>
+                                    </div>
+                                    <div class="flex-1 grid grid-cols-12 gap-5 min-w-0">
+                                        <div class="col-span-8 min-w-0">
+                                            <input type="text" class="inp-s-nombre w-full bg-transparent border-b border-zinc-800 focus:border-rose-500 text-base font-semibold text-zinc-100 focus:ring-0 p-1.5 placeholder-zinc-700" value="${s.nombre||''}" placeholder="Nombre del plato o servicio *" />
+                                            <textarea class="inp-s-desc w-full bg-transparent border-none text-xs text-zinc-400 focus:ring-0 p-1.5 placeholder-zinc-700 mt-2 resize-none h-10" placeholder="Añadir una breve descripción de los ingredientes o detalles...">${s.descripcion||''}</textarea>
+                                        </div>
+                                        <div class="col-span-4 flex items-start gap-3">
+                                            <div class="relative flex-1">
+                                                <input type="text" class="inp-s-precio w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-sm font-bold text-rose-500 text-center focus:border-rose-500 focus:outline-none placeholder-zinc-800 shadow-inner" value="${s.precio||''}" placeholder="0.00" />
+                                                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-bold">€</span>
+                                            </div>
+                                            <button type="button" class="btn-del-s mt-1 text-zinc-700 hover:text-rose-500 p-2 hover:bg-rose-500/10 rounded-lg transition-all"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
+                                `;
+                                sContainer.appendChild(sDiv);
+
+                                // Binders for inputs
+                                setTimeout(() => {
+                                    sDiv.querySelector('.inp-s-nombre')?.addEventListener('input', (e) => { s.nombre = (e.target as HTMLInputElement).value; });
+                                    sDiv.querySelector('.inp-s-desc')?.addEventListener('input', (e) => { s.descripcion = (e.target as HTMLTextAreaElement).value; });
+                                    sDiv.querySelector('.inp-s-precio')?.addEventListener('input', (e) => { s.precio = (e.target as HTMLInputElement).value; });
+                                    sDiv.querySelector('.btn-del-s')?.addEventListener('click', () => { 
+                                        b.servicios.splice(sIdx, 1); renderManual(); 
+                                    });
+                                }, 50);
+                            });
+                            
+                            pBody.appendChild(sContainer);
+
+                            // Add service button
+                            const pAddS = document.createElement('button');
+                            pAddS.type = 'button';
+                            pAddS.className = "w-full py-4 border-2 border-dashed border-zinc-800/80 text-sm font-bold text-zinc-500 rounded-xl hover:text-rose-400 hover:border-rose-500/40 hover:bg-rose-500/5 transition-all flex items-center justify-center gap-2 mt-8 group";
+                            pAddS.innerHTML = '<i data-lucide="plus-circle" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> Añadir nuevo servicio a este bloque';
+                            pAddS.onclick = () => { 
+                                b.servicios.push({ nombre: '', precio: '', descripcion: '' });
+                                renderManual();
+                            };
+                            pBody.appendChild(pAddS);
+
+                            blockDiv.appendChild(pBody);
+                            container.appendChild(blockDiv);
+
+                            // Binder for header inputs
+                            setTimeout(() => {
+                                pHeader.querySelector('.inp-b-title')?.addEventListener('input', (e) => { b.titulo = (e.target as HTMLInputElement).value; });
+                                pHeader.querySelector('.btn-del-block')?.addEventListener('click', () => {
+                                    openConfirm('¿Eliminar bloque?', 'Se borrarán todos los servicios dentro de este bloque.', () => {
+                                        state.bloques.splice(bIdx, 1); 
+                                        renderManual(); 
+                                        showToast('Bloque eliminado', 'success');
+                                    });
+                                });
+                            }, 50);
+
+                            // Service Sortable
+                            // @ts-ignore
+                            if (window.Sortable) {
+                                // @ts-ignore
+                                new Sortable(sContainer, {
+                                    handle: '.service-handle',
+                                    animation: 150,
+                                    onEnd: (evt: any) => {
+                                        const it = b.servicios.splice(evt.oldIndex, 1)[0];
+                                        b.servicios.splice(evt.newIndex, 0, it);
+                                        renderManual();
+                                    }
+                                });
+                            }
+                        });
+                        
+                        // @ts-ignore
+                        if (window.lucide) window.lucide.createIcons();
+
+                        // Block Sortable
+                        // @ts-ignore
+                        if (window.Sortable) {
+                             // @ts-ignore
+                            new Sortable(container, {
+                                handle: '.block-handle',
+                                animation: 150,
+                                onEnd: (evt: any) => {
+                                    const it = state.bloques.splice(evt.oldIndex, 1)[0];
+                                    state.bloques.splice(evt.newIndex, 0, it);
+                                    renderManual();
+                                }
+                            });
+                        }
+                    }
+                } catch(error: any) {
+                    showToast("Error crítico: " + error?.message, 'error');
+                }
+            }
+
+            // Boton de añadir bloque
+            const addBtn = document.getElementById('btn-add-block');
+            if (addBtn) {
+                addBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    try {
+                        if (!state.bloques) state.bloques = [];
+                        state.bloques.push({ titulo: '', servicios: [] });
+                        renderManual();
+                        // Auto-focus on new block title
+                        setTimeout(() => {
+                            const inputs = document.querySelectorAll('.inp-b-title');
+                            if (inputs.length > 0) (inputs[inputs.length - 1] as HTMLInputElement).focus();
+                        }, 100);
+                    } catch(err: any) {
+                        showToast("Error en el evento click: " + err.message, 'error');
+                    }
+                });
+            } else {
+                console.warn("Botón 'Añadir Bloque' no encontrado en el DOM");
+            }
+            
+            renderManual();
+        }
+
+        // --- 3. SAVE ---
+        document.getElementById('btn-save-all')?.addEventListener('click', async (e) => {
+            const btn = e.currentTarget as HTMLButtonElement;
+            const oHtml = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Guardando...';
+            // @ts-ignore
+            if(window.lucide) window.lucide.createIcons();
+            btn.disabled = true;
+
+            const video_url = (document.getElementById('edit-video') as HTMLInputElement)?.value.trim() || null;
+
+            let payload: any = {
+                tipo: state.tipo,
+                video_url
+            };
+
+            if (state.tipo === 'imagenes' || state.tipo === 'pdf') {
+                payload.imagenes = state.imagenes.map((img: any, idx: number) => ({ url: img.url, orden: idx }));
+            } else {
+                payload.bloques = state.bloques.map((b: any, idx: number) => ({
+                    titulo: b.titulo || 'Bloque',
+                    orden: idx,
+                    visible: true,
+                    servicios: b.servicios.map((s: any, sIdx: number) => ({ ...s, orden: sIdx }))
+                }));
+            }
+
+            try {
+                // Update specific data
+                const r1 = await fetch(`/api/admin/cartas/${state.id}`, {
+                    method: 'PUT',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                // Update generic Carta fields
+                const r2 = await fetch(`/api/admin/cartas`, {
+                    method: 'PUT',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({ id: state.id, video_url })
+                });
+
+                if(r1.ok && r2.ok) {
+                    btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Guardado';
+                    // @ts-ignore
+                    if(window.lucide) window.lucide.createIcons();
+                    showToast('Cambios guardados con éxito', 'success');
+                    setTimeout(() => { btn.innerHTML = oHtml; btn.disabled = false; }, 2000);
+                } else {
+                    showToast("Error guardando datos", 'error');
+                    btn.innerHTML = oHtml;
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                showToast("Error de conexión", 'error');
+                btn.innerHTML = oHtml;
+                btn.disabled = false;
+            }
+        });
+    }
+
+    // Run when script executes, Astro defers module scripts automatically
+    initializeCartaEditor();
+</script>

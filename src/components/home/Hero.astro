@@ -72,6 +72,15 @@ const heroSubtitle = settings.hero_subtitle || '';
                     onReady: (event) => {
                         event.target.mute();
                         event.target.playVideo();
+                        
+                        // Add compute-pressure to allow policy to avoid browser warnings
+                        const iframe = event.target.getIframe();
+                        if (iframe) {
+                            const currentAllow = iframe.getAttribute('allow') || '';
+                            if (!currentAllow.includes('compute-pressure')) {
+                                iframe.setAttribute('allow', currentAllow + (currentAllow ? '; ' : '') + 'compute-pressure');
+                            }
+                        }
                     },
                     onStateChange: (event) => {
                         // 1 = PLAYING
@@ -100,11 +109,11 @@ const heroSubtitle = settings.hero_subtitle || '';
 
     <!-- Content (Centered) -->
     <div
-        class="relative z-10 w-full px-6 flex flex-col items-center justify-center text-center pt-4 lg:pt-12"
+        class="relative z-10 w-full px-6 flex flex-col items-center justify-center text-center pt-20 lg:pt-12"
     >
         <!-- Badge -->
         <div
-            class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 animate-fade-up shadow-2xl"
+            class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-10 animate-fade-up shadow-2xl"
         >
             <div
                 class="w-2 h-2 bg-carmin rounded-full animate-pulse shadow-[0_0_10px_rgba(232,54,79,0.8)]"
@@ -117,7 +126,8 @@ const heroSubtitle = settings.hero_subtitle || '';
 
         <!-- Headline -->
         <h1
-            class="text-editorial-lg text-white text-center mb-12 uppercase tracking-tight drop-shadow-2xl px-4"
+            class="text-editorial-lg text-white text-center mb-10 uppercase tracking-tight drop-shadow-2xl px-4"
+            style="line-height: 1.15 !important;"
         >
             {titleLines.map((line: string, idx: number) => {
                 const isLeft = idx % 2 !== 0;
@@ -128,7 +138,7 @@ const heroSubtitle = settings.hero_subtitle || '';
                 const parts = line.split(/(\*\*.*?\*\*)/g);
                 
                 return (
-                    <div class="mb-2 last:mb-0">
+                    <div class="mb-4 last:mb-0">
                         <span 
                             class={`inline-block ${animClass} opacity-0`}
                             style={`animation-fill-mode: forwards; animation-delay: ${delay}`}
@@ -156,7 +166,7 @@ const heroSubtitle = settings.hero_subtitle || '';
 
         {/* CTA Buttons */}
         <div 
-            class="flex flex-wrap items-center justify-center gap-4 mt-36 animate-fade-up opacity-0"
+            class="flex flex-wrap items-center justify-center gap-4 mt-20 lg:mt-36 animate-fade-up opacity-0"
             style={`animation-fill-mode: forwards; animation-delay: ${(0.5 + titleLines.length * 0.2).toFixed(1)}s`}
         >
             <button type="button" class="js-open-chat hero-cta hero-cta--primary group">

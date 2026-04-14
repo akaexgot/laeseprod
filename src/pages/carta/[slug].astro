@@ -1,0 +1,315 @@
+---
+/**
+ * Página pública de Carta de Servicios
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getServiceSupabase } from "../../lib/supabase";
+import ChatBotButton from "../../components/chat/ChatBotButton.astro"; // assuming the emoji button exists
+
+const sb = getServiceSupabase()!;
+const { slug } = Astro.params;
+
+const { data: carta } = await sb.from('cartas').select('*').eq('slug', slug).single();
+if (!carta) return Astro.redirect('/404');
+
+let imagenes = [];
+let bloques = [];
+
+if (carta.tipo === 'imagenes' || carta.tipo === 'pdf') {
+    const { data } = await sb.from('carta_imagenes').select('*').eq('carta_id', carta.id).order('orden');
+    imagenes = data || [];
+} else if (carta.tipo === 'manual') {
+    const { data } = await sb.from('carta_bloques').select(`*, servicios:carta_servicios(*)`).eq('carta_id', carta.id).order('orden');
+    bloques = (data || []).map(b => ({
+        ...b,
+        servicios: (b.servicios || []).sort((a: any, b: any) => a.orden - b.orden)
+    }));
+}
+
+const hasVideo = !!carta.video_url;
+const isVertical = hasVideo && carta.video_url.includes('/shorts/');
+let videoEmbedUrl = '';
+
+if (hasVideo) {
+    if (carta.video_url.includes('youtube.com/watch?v=')) {
+        videoEmbedUrl = carta.video_url.replace('watch?v=', 'embed/');
+    } else if (carta.video_url.includes('youtu.be/')) {
+        videoEmbedUrl = carta.video_url.replace('youtu.be/', 'youtube.com/embed/');
+    } else if (carta.video_url.includes('/shorts/')) {
+        videoEmbedUrl = carta.video_url.replace('/shorts/', '/embed/');
+    } else {
+        videoEmbedUrl = carta.video_url; // fallback
+    }
+    
+    // Preparar URL con parámetros - evitar doble "?"
+    const separator = videoEmbedUrl.includes('?') ? '&' : '?';
+    videoEmbedUrl = `${videoEmbedUrl}${separator}autoplay=0&loop=1&playsinline=1&rel=0`;
+}
+
+const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.tipo === 'manual';
+---
+
+<BaseLayout 
+    title={`${carta.nombre} | VideoMarketing Sevilla`}
+    description={`Carta de servicios y precios de ${carta.nombre}`}
+>
+    <!-- Cargamos Swiper siempre para evitar fallos de navegación de Astro -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script is:inline src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- Forzamos los estilos en línea para evadir cualquier bug de caché de Tailwind -->
+    <div style="width: 100%; min-height: 100vh; padding-top: 160px; padding-bottom: 96px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; position: relative; background-color: #ffffff; color: #111;">
+        <!-- Decoration -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[400px] bg-rose-900/5 blur-[120px] rounded-full pointer-events-none"></div>
+
+        <div style={`width: 100%; max-width: ${hasVideo ? '1300px' : '850px'}; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 10;`}>
+            <header style="text-align: center; margin-bottom: 4rem; width: 100%;">
+                <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6 w-full break-words">
+                    {carta.nombre}
+                </h1>
+            </header>
+
+            <div 
+                style={`width: 100%; min-height: ${hasVideo ? '400px' : 'auto'};`} 
+                class={hasVideo ? "grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-20 items-start" : ""}
+            >
+                
+                {hasVideo && (
+                    <div class={`w-full flex justify-center relative lg:sticky lg:top-40 z-30 ${isVertical ? 'lg:col-span-5' : 'lg:col-span-7'}`}>
+                        <div 
+                            style={`width: 100%; aspect-ratio: ${isVertical ? '9/16' : '16/9'};`}
+                            class="relative rounded-2xl overflow-hidden shadow-2xl border border-zinc-200 bg-zinc-950"
+                        >
+                            <iframe 
+                                src={videoEmbedUrl}
+                                style="width: 100% !important; height: 100% !important; border: 0;"
+                                allow="autoplay; fullscreen; picture-in-picture"
+                                allowfullscreen
+                                loading="lazy"
+                            ></iframe>
+                        </div>
+                    </div>
+                )}
+
+                <div class={hasVideo ? (isVertical ? "lg:col-span-7 w-full" : "lg:col-span-5 w-full") : "w-full"}>
+                    {/* Render Carrusel */}
+                    {(carta.tipo === 'imagenes' || carta.tipo === 'pdf') && (
+                        <div class="relative max-w-[600px] mx-auto w-full group">
+                            <!-- Swiper -->
+                            <div class="swiper carta-swiper rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 bg-zinc-900">
+                                <div class="swiper-wrapper">
+                                    {imagenes.map((img) => (
+                                        <div class="swiper-slide cursor-grab active:cursor-grabbing">
+                                            <div class="relative aspect-[3/4] sm:aspect-[2/3] w-full bg-zinc-950 flex items-center justify-center">
+                                                <img 
+                                                    src={img.url} 
+                                                    alt={`Página ${img.orden}`} 
+                                                    class="w-full h-full object-contain"
+                                                    loading="lazy"
+                                                />
+                                                <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <!-- Navigation buttons -->
+                                <div class="carta-nav-prev flex items-center justify-center absolute top-1/2 -translate-y-1/2 left-4 z-20 !text-white !bg-zinc-950/70 hover:!bg-zinc-900 border border-zinc-700 w-12 h-12 rounded-full cursor-pointer transition-all shadow-xl hover:scale-110">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                                </div>
+                                <div class="carta-nav-next flex items-center justify-center absolute top-1/2 -translate-y-1/2 right-4 z-20 !text-white !bg-zinc-950/70 hover:!bg-zinc-900 border border-zinc-700 w-12 h-12 rounded-full cursor-pointer transition-all shadow-xl hover:scale-110">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                </div>
+                                <!-- Pagination -->
+                                <div class="swiper-pagination !bottom-4"></div>
+                            </div>
+                        </div>
+                    )}
+
+            {/* Render Manual Blocks */}
+            {carta.tipo === 'manual' && (
+                <div class="relative w-full group">
+                    {/* Swiper Manual */}
+                    <div class="swiper manual-swiper rounded-3xl overflow-hidden shadow-2xl border border-zinc-200/60 bg-white">
+                        <div class="swiper-wrapper">
+                            {bloques.map((b) => b.visible && (
+                                <div class="swiper-slide h-auto">
+                                    <div class="h-full" style="padding: 2.5rem;">
+                                        <h3 class="text-2xl font-bold text-zinc-900 mb-8 flex items-center gap-3 break-words">
+                                            <div class="w-1.5 h-6 bg-rose-600 rounded-full shrink-0"></div>
+                                            <span class="break-words">{b.titulo}</span>
+                                        </h3>
+                                        
+                                        <div class="flex flex-col gap-10">
+                                            {b.servicios.map((s, idx) => (
+                                                <div class={`group flex flex-col sm:flex-row sm:items-center justify-between gap-6 ${idx !== b.servicios.length - 1 ? 'border-b border-zinc-100 pb-10' : ''}`}>
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="font-bold text-zinc-800 text-lg sm:text-xl group-hover:text-rose-600 transition-colors uppercase tracking-tight break-words">{s.nombre}</div>
+                                                        {s.descripcion && <p class="text-base text-zinc-600 mt-4 leading-relaxed max-w-2xl break-words whitespace-pre-wrap">{s.descripcion}</p>}
+                                                    </div>
+                                                    {s.precio && (
+                                                        <div class="shrink-0 mt-2 sm:mt-0">
+                                                            <span class="inline-block px-5 py-2.5 bg-rose-50 text-rose-600 font-bold rounded-xl text-lg sm:text-xl shadow-sm border border-rose-100">
+                                                                {s.precio}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        
+                    </div>
+                    
+                    {/* Pagination Dots Manual */}
+                    <div class="manual-pagination swiper-pagination !bottom-6"></div>
+
+                    {/* Navigation button Manual (Outside Swiper now, only Next) */}
+                    <div class="manual-nav-next flex items-center justify-center absolute top-1/2 -translate-y-1/2 -right-4 lg:-right-16 z-30 text-white bg-rose-600 hover:bg-rose-500 w-12 h-12 rounded-full cursor-pointer transition-all shadow-[0_4px_20px_rgba(225,29,72,0.4)] hover:scale-110 active:scale-95">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </div>
+                </div>
+            )}
+        </div>
+    </div>
+            
+            <div style="margin-top: 6rem; display: flex; justify-content: center; padding-bottom: 4rem; border-bottom: 1px solid #e4e4e7;">
+                <button onclick="window.showShareToast()" style="width: 4rem; height: 4rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center;" class="bg-zinc-900 hover:bg-zinc-800 text-white transition-all shadow-[0_10px_40px_rgb(0,0,0,0.15)] hover:shadow-2xl hover:-translate-y-1 relative group overflow-hidden" title="Copiar enlace para compartir">
+                    <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Elegante Modal/Toast inferior -->
+    <div id="toast-share" class="fixed bottom-8 right-8 transform translate-y-20 opacity-0 transition-all duration-500 z-50 flex items-center gap-4 bg-zinc-900 border border-zinc-800 text-white px-6 py-4 rounded-2xl shadow-2xl pointer-events-none">
+        <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+        </div>
+        <div class="font-medium">¡Enlace copiado al portapapeles!</div>
+    </div>
+
+</BaseLayout>
+
+<script is:inline>
+    window.showShareToast = function() {
+        navigator.clipboard.writeText(window.location.href);
+        const toast = document.getElementById('toast-share');
+        if(toast) {
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
+        }
+    };
+
+    function initializeSwipers() {
+        console.log("DEBUG: Iniciando inicialización de Swipers...");
+        
+        if (typeof window.Swiper === 'undefined') {
+            console.log("DEBUG: Swiper no encontrado en window, reintentando en 200ms...");
+            setTimeout(initializeSwipers, 200);
+            return;
+        }
+
+        const cartaEl = document.querySelector('.carta-swiper');
+        const numSlides = document.querySelectorAll('.carta-swiper .swiper-slide').length;
+        
+        console.log("DEBUG: Elemento .carta-swiper:", cartaEl);
+        console.log("DEBUG: Numero de slides detectadas:", numSlides);
+
+        if (cartaEl && numSlides > 0) {
+            if (cartaEl.swiper) {
+                console.log("DEBUG: Destruyendo instancia de Swiper previa...");
+                cartaEl.swiper.destroy(true, true);
+            }
+
+            try {
+                const cartaSwiperInstance = new window.Swiper('.carta-swiper', {
+                    loop: numSlides > 1,
+                    grabCursor: true,
+                    effect: 'creative',
+                    creativeEffect: {
+                        prev: { shadow: true, translate: ['-20%', -20, -1], rotate: [0, 0, -5] },
+                        next: { translate: ['100%', 0, 0] },
+                    },
+                    navigation: {
+                        nextEl: '.carta-nav-next',
+                        prevEl: '.carta-nav-prev',
+                    },
+                    pagination: { el: '.carta-swiper .swiper-pagination', clickable: true, dynamicBullets: true },
+                    keyboard: { enabled: true },
+                });
+
+            } catch (err) {
+                console.error("DEBUG: ERROR al crear Swiper Carta:", err);
+            }
+        }
+
+        // --- Swiper Manual ---
+        const manualEl = document.querySelector('.manual-swiper');
+        const numManualSlides = document.querySelectorAll('.manual-swiper .swiper-slide').length;
+        
+        if (manualEl && numManualSlides > 0) {
+            // @ts-ignore
+            if (manualEl.swiper) manualEl.swiper.destroy(true, true);
+
+            try {
+                const manualSwiperInstance = new window.Swiper('.manual-swiper', {
+                    spaceBetween: 30,
+                    loop: numManualSlides > 1,
+                    grabCursor: true,
+                    pagination: { 
+                        el: '.manual-pagination', 
+                        clickable: true 
+                    },
+                    keyboard: { enabled: true },
+                    autoHeight: true,
+                });
+
+                // Enlace forzado manual para botón Siguiente (Externo)
+                const btnNextManual = document.querySelector('.manual-nav-next');
+                
+                if(btnNextManual) {
+                    const newNext = btnNextManual.cloneNode(true);
+                    btnNextManual.parentNode.replaceChild(newNext, btnNextManual);
+                    
+                    newNext.addEventListener('click', () => manualSwiperInstance.slideNext(400));
+                }
+            } catch (err) {
+                console.error("DEBUG: ERROR al crear Swiper Manual:", err);
+            }
+        }
+    }
+
+    // Compatibilidad total con Astro ViewTransitions y recargas nativas
+    document.addEventListener('astro:page-load', () => {
+        console.log("DEBUG: Evento astro:page-load detectado");
+        initializeSwipers();
+    });
+    
+    // Fallback de carga inicial
+    if (document.readyState === 'complete') {
+        initializeSwipers();
+    } else {
+        window.addEventListener('load', initializeSwipers);
+    }
+</script>
+
+<style>
+    /* Customize Swiper CSS globally */
+    .carta-swiper .swiper-pagination-bullet { background: rgba(255,255,255,0.4) !important; opacity: 1 !important; transform: scale(0.8); }
+    .carta-swiper .swiper-pagination-bullet-active { background: #e11d48 !important; transform: scale(1.1); }
+    
+    .manual-swiper .swiper-pagination-bullet { background: rgba(0,0,0,0.15) !important; opacity: 1 !important; transform: scale(0.8); box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+    .manual-swiper .swiper-pagination-bullet-active { background: #e11d48 !important; transform: scale(1.2); box-shadow: 0 4px 10px rgba(225,29,72,0.4); }
+    
+    .swiper-button-next::after, .swiper-button-prev::after { font-size: 1.25rem !important; font-weight: 900; }
+</style>

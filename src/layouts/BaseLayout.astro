@@ -38,9 +38,6 @@ const { title, description, image, noindex } = Astro.props;
                     <img src="/logo-blanco-web.png" alt="Cargando..." class="w-full h-full object-contain animate-preloader-spin" />
                     <div class="absolute inset-0 rounded-full border-2 border-carmin/20 border-t-carmin animate-spin duration-500"></div>
                 </div>
-                <div class="h-1 w-24 bg-white/10 rounded-full overflow-hidden mt-8">
-                    <div id="preloader-bar" class="h-full bg-carmin transition-all duration-300 ease-out" style="width: 0%"></div>
-                </div>
             </div>
         </div>
 
@@ -62,30 +59,14 @@ const { title, description, image, noindex } = Astro.props;
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const preloader = document.getElementById('site-preloader');
-                const bar = document.getElementById('preloader-bar');
-                if (!preloader || !bar) return;
+                if (!preloader) return;
 
                 const isHome = window.location.pathname === '/';
-                let progress = 0;
+
                 let loadingFinished = false;
-
-                // Speed up progress simulation initially
-                const interval = setInterval(() => {
-                    if (progress < 90) {
-                        progress += Math.random() * 15;
-                    } else if (!loadingFinished) {
-                        progress += 0.5; // Slow down near the end until signal
-                    }
-                    if (progress > 99) progress = 99;
-                    bar.style.width = `${progress}%`;
-                }, 100);
-
                 const dismissPreloader = () => {
-                    if (loadingFinished) return;
                     loadingFinished = true;
                     
-                    clearInterval(interval);
-                    bar.style.width = '100%';
                     
                     setTimeout(() => {
                         preloader.classList.add('fade-out');

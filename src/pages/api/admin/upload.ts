@@ -41,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
         cloudinaryFormData.append('signature', signature);
 
         const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
             {
                 method: 'POST',
                 body: cloudinaryFormData,
@@ -56,7 +56,9 @@ export const POST: APIRoute = async ({ request }) => {
 
         return new Response(JSON.stringify({ 
             url: data.secure_url,
-            public_id: data.public_id 
+            public_id: data.public_id,
+            pages: data.pages || 1,
+            format: data.format || 'jpg'
         }), { status: 200 });
 
     } catch (e: any) {

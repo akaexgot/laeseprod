@@ -43,9 +43,9 @@ if (cleanMapUrl && cleanMapUrl.includes('<iframe')) {
             <section id="video-hero" class="qs-video-hero">
                 <div class="qs-video-hero__bg">
                     <iframe
-                        src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&loop=1&playlist=${heroVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                        src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&loop=1&playlist=${heroVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
                         class="qs-video-hero__iframe"
-                        frameborder="0" allow="autoplay; encrypted-media"
+                        frameborder="0" allow="autoplay; encrypted-media; compute-pressure"
                         title="Vídeo corporativo VideoMarketing Sevilla"
                     ></iframe>
                 </div>
@@ -130,9 +130,10 @@ if (cleanMapUrl && cleanMapUrl.includes('<iframe')) {
                 <div class="qs-video__frame">
                     {corporateVideoId ? (
                         <iframe
-                            src={`https://www.youtube.com/embed/${corporateVideoId}?rel=0`}
+                            src={`https://www.youtube.com/embed/${corporateVideoId}?rel=0&enablejsapi=1&origin=${Astro.url.origin}`}
                             class="w-full h-full object-cover"
                             style="border:none;"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
                             allowfullscreen></iframe>
                     ) : (
                         <div class="qs-video__placeholder">
