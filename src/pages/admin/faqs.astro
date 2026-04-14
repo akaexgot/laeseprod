@@ -42,11 +42,14 @@ const faqs = await getFaqs();
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {faqs.map((faq: any) => (
-                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={faq.id}>
+                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={faq.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
                             <td style="padding: 1.25rem 1.5rem;">
-                                <div class="flex flex-col gap-1">
-                                    <span class="font-medium text-zinc-100">{faq.question}</span>
-                                    <p class="text-zinc-400 text-xs line-clamp-1">{faq.answer}</p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="font-medium text-zinc-100 line-clamp-1">{faq.question}</span>
+                                        <p class="text-zinc-500 text-xs line-clamp-1">{faq.answer}</p>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
                                 </div>
                             </td>
                             <td class="hidden md:table-cell text-center" style="padding: 1.25rem 1.5rem;">
@@ -55,12 +58,10 @@ const faqs = await getFaqs();
                             <td class="hidden sm:table-cell text-center" style="padding: 1.25rem 1.5rem;">
                                 {faq.is_active ? (
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                         Activa
                                     </span>
                                 ) : (
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-zinc-800 text-zinc-500 text-[10px] font-bold uppercase tracking-wider border border-zinc-700">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
                                         Oculta
                                     </span>
                                 )}
@@ -89,134 +90,143 @@ const faqs = await getFaqs();
             <div class="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center border border-zinc-800 mb-4">
                 <i data-lucide="help-circle" class="w-6 h-6 text-zinc-500"></i>
             </div>
-            <h3 class="text-zinc-200 font-semibold text-lg">No hay preguntas frecuentes</h3>
-            <p class="text-zinc-500 text-sm max-w-xs mt-2">Añade las dudas más comunes que suelen tener tus clientes para ayudarles.</p>
+            <h3 class="text-zinc-100 font-semibold mb-1">No hay preguntas frecuentes</h3>
+            <p class="text-zinc-400 text-sm mb-6 max-w-sm">Añade dudas comunes para ayudar a tus clientes potenciales.</p>
         </div>
     )}
 
-    <!-- Acciones móviles -->
-    <div class="fixed bottom-6 right-6 lg:hidden z-50">
-        <button id="btn-add-mobile" class="w-14 h-14 bg-rose-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-rose-500 transition-transform active:scale-95">
-            <i data-lucide="plus" class="w-6 h-6"></i>
-        </button>
-    </div>
+</AdminLayout>
 
-    <!-- Modal Form -->
-    <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-[100] hidden items-center justify-center" style="padding: 1.5rem;">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div class="border-b border-zinc-800" style="padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
-                <h3 id="modal-title" class="text-lg font-bold text-white tracking-tight">Nueva pregunta</h3>
-                <button id="modal-close" class="text-zinc-400 hover:text-zinc-100 transition-colors p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+<!-- Modal Form -->
+<div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        
+        <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
+            <h3 id="modal-title" class="text-lg font-bold text-white tracking-tight">Nueva pregunta</h3>
+            <button id="modal-close" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <input type="hidden" id="faq-id" />
+        
+        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Pregunta *</label>
+                <input type="text" id="faq-question" required 
+                    class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none rounded-md px-3 py-2 text-sm"
+                    placeholder="Ej: ¿Qué servicios audiovisuales ofrecemos?"
+                />
             </div>
             
-            <form id="faq-form" style="padding: 1.5rem;">
-                <input type="hidden" name="id" id="faq-id" />
-                
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                    <div>
-                        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Pregunta</label>
-                        <input type="text" name="question" id="faq-question" required 
-                            class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none"
-                            placeholder="Ej: ¿Qué servicios audiovisuales ofrecéis?"
-                        />
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Respuesta</label>
-                        <textarea name="answer" id="faq-answer" required rows="4"
-                            class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none resize-none"
-                            placeholder="Introduce aquí la respuesta detallada..."
-                        ></textarea>
-                    </div>
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Respuesta *</label>
+                <textarea id="faq-answer" required rows="5"
+                    class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none resize-none rounded-md px-3 py-2 text-sm"
+                    placeholder="Describe la respuesta detallada..."
+                ></textarea>
+            </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Orden</label>
-                            <input type="number" name="order" id="faq-order" value="0" min="0"
-                                class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Estado</label>
-                            <select name="is_active" id="faq-active" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none">
-                                <option value="true">Activa</option>
-                                <option value="false">Oculta</option>
-                            </select>
-                        </div>
-                    </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Orden</label>
+                    <input type="number" id="faq-order" value="0" min="0"
+                        class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none rounded-md px-3 py-2 text-sm"
+                    />
                 </div>
+                <div>
+                    <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Estado</label>
+                    <select id="faq-active" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none rounded-md px-3 py-2 text-sm">
+                        <option value="true">Activa</option>
+                        <option value="false">Oculta</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-                <div class="border-t border-zinc-800" style="margin-top: 2rem; padding-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
-                    <button type="button" id="btn-cancel" class="px-5 py-2.5 text-sm font-semibold text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-xl transition-all">Cancelar</button>
-                    <button type="submit" id="btn-submit" class="px-6 py-2.5 bg-rose-600 text-white text-sm font-bold rounded-xl hover:bg-rose-500 shadow-lg shadow-rose-900/20 transition-all flex items-center gap-2">
-                        <span>Guardar</span>
-                        <i data-lucide="check" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </form>
+        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end items-center relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
+            <p id="modal-error" class="text-rose-400 text-xs font-medium absolute left-6 hidden"></p>
+            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto">Eliminar</button>
+            <button type="button" id="btn-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
+            <button type="button" id="btn-submit" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-lg transition-all flex items-center gap-2" style="padding: 0.5rem 1.25rem;">
+                <span>Guardar</span>
+                <i data-lucide="check" class="w-4 h-4"></i>
+            </button>
         </div>
     </div>
+</div>
 
-    <!-- Custom Notification Toast -->
-    <div id="toast-container" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm px-4"></div>
+<!-- Delete Confirmation Modal -->
+<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
+            <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
+        </div>
+        <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
+            <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
+            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        const modal = document.getElementById('modal-overlay');
-        const form = document.getElementById('faq-form') as HTMLFormElement;
-        const modalTitle = document.getElementById('modal-title');
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('modal-overlay')!;
+        const modalId = document.getElementById('faq-id') as HTMLInputElement;
+        const modalQuestion = document.getElementById('faq-question') as HTMLInputElement;
+        const modalAnswer = document.getElementById('faq-answer') as HTMLTextAreaElement;
+        const modalOrder = document.getElementById('faq-order') as HTMLInputElement;
+        const modalActive = document.getElementById('faq-active') as HTMLSelectElement;
+        const modalTitle = document.getElementById('modal-title')!;
+        const modalError = document.getElementById('modal-error')!;
+        const modalDeleteBtn = document.getElementById('modal-delete')!;
         const btnAdd = document.getElementById('btn-add');
-        const btnAddMobile = document.getElementById('btn-add-mobile');
         const btnCancel = document.getElementById('btn-cancel');
         const btnClose = document.getElementById('modal-close');
-        const toastContainer = document.getElementById('toast-container');
-
-        function showToast(message: string, type: 'success' | 'error' = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `p-4 mb-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300 border ${type === 'success' ? 'bg-zinc-900 border-emerald-500/20 text-emerald-500' : 'bg-zinc-900 border-red-500/20 text-red-500'}`;
-            toast.innerHTML = `
-                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i>
-                <span class="font-medium text-sm">${message}</span>
-            `;
-            toastContainer?.appendChild(toast);
-            // @ts-ignore
-            if (window.lucide) window.lucide.createIcons();
-            
-            setTimeout(() => {
-                toast.classList.replace('fade-in', 'fade-out');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+        const btnSubmit = document.getElementById('btn-submit');
 
         function openModal(data: any = null) {
+            modalError.classList.add('hidden');
             if (data) {
-                modalTitle!.textContent = 'Editar pregunta';
-                (document.getElementById('faq-id') as HTMLInputElement).value = data.id;
-                (document.getElementById('faq-question') as HTMLInputElement).value = data.question;
-                (document.getElementById('faq-answer') as HTMLTextAreaElement).value = data.answer;
-                (document.getElementById('faq-order') as HTMLInputElement).value = data.order;
-                (document.getElementById('faq-active') as HTMLSelectElement).value = data.active;
+                modalTitle.textContent = 'Editar pregunta';
+                modalId.value = data.id;
+                modalQuestion.value = data.question;
+                modalAnswer.value = data.answer;
+                modalOrder.value = data.order;
+                modalActive.value = data.active;
+                modalDeleteBtn.classList.remove('hidden');
             } else {
-                modalTitle!.textContent = 'Nueva pregunta';
-                form.reset();
-                (document.getElementById('faq-id') as HTMLInputElement).value = '';
+                modalTitle.textContent = 'Nueva pregunta';
+                modalId.value = '';
+                modalQuestion.value = '';
+                modalAnswer.value = '';
+                modalOrder.value = '0';
+                modalActive.value = 'true';
+                modalDeleteBtn.classList.add('hidden');
             }
-            modal?.classList.remove('hidden');
-            modal?.classList.add('flex');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
             document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
-            modal?.classList.remove('flex');
-            modal?.classList.add('hidden');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
             document.body.style.overflow = '';
         }
 
         btnAdd?.addEventListener('click', () => openModal());
-        btnAddMobile?.addEventListener('click', () => openModal());
         btnCancel?.addEventListener('click', closeModal);
         btnClose?.addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
 
-        // Edit button listeners
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -225,68 +235,134 @@ const faqs = await getFaqs();
             });
         });
 
-        // Delete button listeners
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const id = (btn as HTMLElement).dataset.id;
-                if (!id || !confirm('¿Estás seguro de que quieres eliminar esta pregunta?')) return;
-                
-                try {
-                    const res = await fetch('/api/admin/faqs', {
-                        method: 'DELETE',
-                        body: JSON.stringify({ id })
-                    });
-                    if (res.ok) {
-                        showToast('Pregunta eliminada correctamente');
-                        setTimeout(() => window.location.reload(), 1000);
-                    } else {
-                        showToast('Error al eliminar', 'error');
-                    }
-                } catch (err) {
-                    showToast('Error de red', 'error');
+        // ── DELETE CONFIRMATION LOGIC ───────────────────────
+        const confirmOverlay = document.getElementById('confirm-overlay')!;
+        const confirmYes = document.getElementById('confirm-yes')!;
+        const confirmCancel = document.getElementById('confirm-cancel')!;
+        let pendingDeleteId: string | null = null;
+
+        function openConfirm(id: string) {
+            pendingDeleteId = id;
+            confirmOverlay.classList.remove('hidden');
+            confirmOverlay.classList.add('flex');
+        }
+        function closeConfirm() {
+            pendingDeleteId = null;
+            confirmOverlay.classList.add('hidden');
+            confirmOverlay.classList.remove('flex');
+        }
+        confirmCancel.addEventListener('click', closeConfirm);
+        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+
+        confirmYes.addEventListener('click', async () => {
+            if (!pendingDeleteId) return;
+            confirmYes.textContent = 'Eliminando...';
+            (confirmYes as HTMLButtonElement).disabled = true;
+            
+            try {
+                const res = await fetch('/api/admin/faqs', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: pendingDeleteId })
+                });
+                if (res.ok) {
+                    showToast('Pregunta eliminada correctamente', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('Error al eliminar', 'error');
+                    closeConfirm();
+                    confirmYes.textContent = 'Eliminar';
+                    (confirmYes as HTMLButtonElement).disabled = false;
                 }
+            } catch (err) {
+                showToast('Error de conexión', 'error');
+                closeConfirm();
+            }
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openConfirm((btn as HTMLElement).dataset.id!);
             });
         });
 
-        form?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const id = formData.get('id');
+        modalDeleteBtn.addEventListener('click', () => {
+            const id = modalId.value;
+            if (id) {
+                closeModal();
+                openConfirm(id);
+            }
+        });
+
+        // ── TOAST LOGIC ────────────────────────────────────
+        function showToast(message: string, type: 'error' | 'success' = 'error') {
+            const container = document.getElementById('toast-container')!;
+            const toast = document.createElement('div');
+            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
+            }`;
+            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
+            toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center">
+                <i data-lucide="${type === 'success' ? 'check' : 'x'}" class="w-5 h-5"></i>
+            </div><span>${message}</span>`;
+            container.appendChild(toast);
+            // @ts-ignore
+            if (window.lucide) window.lucide.createIcons();
+            setTimeout(() => { 
+                toast.style.animation = 'toast-out 0.3s ease-in forwards'; 
+                setTimeout(() => toast.remove(), 300); 
+            }, 4000);
+        }
+
+        // ── SAVE LOGIC ─────────────────────────────────────
+        btnSubmit?.addEventListener('click', async () => {
+            const question = modalQuestion.value.trim();
+            const answer = modalAnswer.value.trim();
+            
+            if (!question || !answer) {
+                modalError.textContent = 'Pregunta y respuesta obligatorias';
+                modalError.classList.remove('hidden');
+                return;
+            }
+
+            const oHtml = btnSubmit.innerHTML;
+            btnSubmit.innerHTML = 'Guardando...';
+            btnSubmit.setAttribute('disabled', 'true');
+
+            const id = modalId.value;
             const data = {
                 id: id || undefined,
-                question: formData.get('question'),
-                answer: formData.get('answer'),
-                order: parseInt(formData.get('order') as string) || 0,
-                is_active: formData.get('is_active') === 'true'
+                question,
+                answer,
+                order: parseInt(modalOrder.value) || 0,
+                is_active: modalActive.value === 'true'
             };
-
-            const btnSubmit = document.getElementById('btn-submit');
-            btnSubmit?.setAttribute('disabled', 'true');
-            // @ts-ignore
-            btnSubmit.innerHTML = '<span class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>';
 
             try {
                 const res = await fetch('/api/admin/faqs', {
                     method: id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 if (res.ok) {
-                    showToast(id ? 'Pregunta actualizada' : 'Pregunta creada');
+                    showToast(id ? 'Pregunta actualizada' : 'Pregunta creada', 'success');
                     setTimeout(() => window.location.reload(), 1000);
                 } else {
-                    const errData = await res.json();
-                    showToast(errData.error || 'Error al guardar', 'error');
-                    btnSubmit?.removeAttribute('disabled');
-                    // @ts-ignore
-                    btnSubmit.innerHTML = '<span>Guardar</span><i data-lucide="check" class="w-4 h-4"></i>';
+                    const err = await res.json();
+                    modalError.textContent = err.error || 'Error al guardar';
+                    modalError.classList.remove('hidden');
+                    btnSubmit.innerHTML = oHtml;
+                    btnSubmit.removeAttribute('disabled');
                     // @ts-ignore
                     if (window.lucide) window.lucide.createIcons();
                 }
             } catch (err) {
-                showToast('Error de red', 'error');
-                btnSubmit?.removeAttribute('disabled');
+                modalError.textContent = 'Error de red';
+                modalError.classList.remove('hidden');
+                btnSubmit.innerHTML = oHtml;
+                btnSubmit.removeAttribute('disabled');
             }
         });
-    </script>
-</AdminLayout>
+    });
+</script>
