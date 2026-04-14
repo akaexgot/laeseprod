@@ -54,7 +54,7 @@ const clients = allClients.filter((c: any) => c.is_active);
                       <!-- Logo area -->
                       <div class="pc-card__logo-area">
                           {client.image ? (
-                              <img src={client.image} alt={client.client_name} class="pc-card__logo-img" loading="lazy" />
+                              <img src={client.image} alt={client.client_name} class={`pc-card__logo-img pc-card__logo-img--${client.image_type || 'logo'}`} loading="lazy" />
                           ) : (
                               <div class="pc-card__logo-placeholder">
                                   <span class="pc-card__logo-initial">{client.client_name.charAt(0)}</span>
@@ -236,13 +236,21 @@ const clients = allClients.filter((c: any) => c.is_active);
     transform: translateY(-4px);
 }
 .pc-card__logo-img {
+    transition: filter .3s, transform .5s;
+}
+.pc-card__logo-img--logo {
     width: 70%; height: 70%;
     object-fit: contain;
     filter: grayscale(0.3) brightness(0.9);
-    transition: filter .3s;
+}
+.pc-card__logo-img--image {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.95);
 }
 .pc-card:hover .pc-card__logo-img {
     filter: grayscale(0) brightness(1);
+    transform: scale(1.05);
 }
 .pc-card__logo-placeholder {
     width: 100%; height: 100%;

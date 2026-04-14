@@ -105,6 +105,7 @@ const clients = await getPortalClientsAdmin();
                                             data-dropbox={client.dropbox_link || ''}
                                             data-password={client.password_hash || ''}
                                             data-active={client.is_active ? 'true' : 'false'}
+                                            data-type={client.image_type || 'logo'}
                                         >
                                             <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
                                         </button>
@@ -180,6 +181,26 @@ const clients = await getPortalClientsAdmin();
                 </div>
 
                 <input type="hidden" id="c-image" />
+            </div>
+
+            <div style="margin-bottom: 0.5rem;">
+                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.75rem;">Ajuste de la imagen</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="image_type" value="logo" class="hidden peer" id="type-logo" checked />
+                        <div class="flex items-center justify-center gap-2 p-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 peer-checked:text-rose-500 hover:border-zinc-700 transition-all">
+                            <i data-lucide="layout" class="w-4 h-4"></i>
+                            <span class="text-xs font-semibold uppercase tracking-wider">Logo (Contain)</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="image_type" value="image" class="hidden peer" id="type-image" />
+                        <div class="flex items-center justify-center gap-2 p-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 peer-checked:text-rose-500 hover:border-zinc-700 transition-all">
+                            <i data-lucide="image" class="w-4 h-4"></i>
+                            <span class="text-xs font-semibold uppercase tracking-wider">Foto (Cover)</span>
+                        </div>
+                    </label>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1rem; margin-bottom: 0.5rem;">
@@ -262,6 +283,12 @@ const clients = await getPortalClientsAdmin();
             $('c-dropbox').value = data?.dropbox || '';
             $('c-password').value = data?.password || '';
             $('c-active').checked = data ? data.active === 'true' : true;
+            
+            if (data?.type === 'image') {
+                $('type-image').checked = true;
+            } else {
+                $('type-logo').checked = true;
+            }
 
             // Update password hint
             const pwHint = document.getElementById('pw-hint')!;
@@ -410,6 +437,7 @@ const clients = await getPortalClientsAdmin();
                     dropbox: el.dataset.dropbox,
                     password: el.dataset.password,
                     active: el.dataset.active,
+                    type: el.dataset.type,
                 });
             });
         });
@@ -513,6 +541,7 @@ const clients = await getPortalClientsAdmin();
                 image: $('c-image').value.trim() || null,
                 dropbox_link: $('c-dropbox').value.trim() || null,
                 is_active: $('c-active').checked,
+                image_type: (document.querySelector('input[name="image_type"]:checked') as HTMLInputElement)?.value || 'logo',
             };
 
             // Only include password if provided (on edit, empty = keep existing)

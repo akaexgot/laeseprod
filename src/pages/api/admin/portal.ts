@@ -12,7 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
 
-        const allowed = ['client_name', 'image', 'dropbox_link', 'password_hash', 'is_active'];
+        const allowed = ['client_name', 'image', 'dropbox_link', 'password_hash', 'is_active', 'image_type'];
         const filteredBody: any = {};
         for (const key of allowed) {
             if (key in body) filteredBody[key] = body[key];
@@ -38,7 +38,7 @@ export const PUT: APIRoute = async ({ request }) => {
         const { id } = body;
         if (!id) return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
 
-        const allowed = ['client_name', 'image', 'dropbox_link', 'password_hash', 'is_active'];
+        const allowed = ['client_name', 'image', 'dropbox_link', 'password_hash', 'is_active', 'image_type'];
         const updates: any = {};
         for (const key of allowed) {
             if (key in body) updates[key] = body[key];
