@@ -25,13 +25,13 @@ const heroSubtitle = settings.hero_subtitle || '';
 
 <section
     id="hero"
-    class="relative h-screen h-[100dvh] min-h-[600px] flex items-center justify-center overflow-hidden"
+    class="relative flex items-center justify-center overflow-hidden"
+    style={`height: 100vh; height: 100dvh; min-height: 600px; background: #050508 url(https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg) center/cover no-repeat;`}
 >
     <!-- Fullscreen Video Background -->
     <div
         id="hero-video-container"
-        class="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-dark text-white"
-        style={`background-image: url(https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg); background-size: cover; background-position: center;`}
+        class="absolute inset-0 z-0 overflow-hidden pointer-events-none"
     >
         <!-- Contenedor con la clase video-bg que se encarga del tamaño y posición -->
         <div id="hero-player-wrapper" class="video-bg opacity-0 transition-opacity duration-1000">

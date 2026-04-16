@@ -66,6 +66,10 @@ body {
   overflow-x: hidden;
 }
 
+main > * {
+  font-size: 1rem;
+}
+
 
 
 /* ── Typography Scale (Editorial) ── */

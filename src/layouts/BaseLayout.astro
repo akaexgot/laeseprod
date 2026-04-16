@@ -6,6 +6,7 @@
 import Head from "../components/seo/Head.astro";
 import Navbar from "../components/ui/Navbar.astro";
 import Footer from "../components/ui/Footer.astro";
+import MobileBottomBar from "../components/ui/MobileBottomBar.astro";
 import ProjectModal from "../components/ui/ProjectModal.astro";
 import "../styles/global.css";
 import "../styles/contacto-chat.css";
@@ -95,11 +96,12 @@ const { title, description, image, noindex } = Astro.props;
 
         <Navbar />
 
-        <main>
+        <main style="display: flex; flex-direction: column; font-size: 0;">
             <slot />
         </main>
 
         <Footer />
+        <MobileBottomBar />
         <ProjectModal />
 
         <!-- Scroll Reveal Observer -->

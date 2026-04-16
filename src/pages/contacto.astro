@@ -3,6 +3,7 @@
  * Contacto Page — Premium redesign + Chat Widget
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqsSection from "../components/home/FaqsSection.astro";
 import "../styles/contacto.css";
 import "../styles/contacto-chat.css";
 import { getSettings } from "../lib/data";
@@ -261,6 +262,9 @@ const contactHeroVideoId = extractYouTubeId(settings.contact_hero_video);
             </aside>
         </div>
     </section>
+
+    <!-- ═══ FAQ SECTION ═══ -->
+    <FaqsSection />
 
     <!-- ═══════════════════════════════════════════
          CHAT WIDGET

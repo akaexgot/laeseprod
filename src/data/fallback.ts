@@ -23,6 +23,7 @@ export const siteSettings = {
     hero_subtitle: 'Productora audiovisual especializada en video marketing para empresas',
     hero_video_desktop: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     hero_video_mobile: '',
+    faq_section_enabled: true,
 };
 
 export const navigation = [

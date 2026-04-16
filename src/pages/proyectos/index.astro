@@ -233,7 +233,7 @@ const screens = buildProjectScreens(projects);
 
     /* ── Fullpage Scroll ── */
     document.addEventListener('DOMContentLoaded', () => {
-        const sections = Array.from(document.querySelectorAll('.pj-screen, .contact-body, footer'));
+        const sections = Array.from(document.querySelectorAll('.pj-screen, .contact-body, #site-footer'));
         if (sections.length === 0) return;
 
         // Solo activar scroll snap en escritorio (>1024px)

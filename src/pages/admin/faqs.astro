@@ -1,14 +1,15 @@
 ---
 /**
  * Admin - FAQs Management
- * Manage questions and answers for the home page
+ * Manage questions and answers with global toggle
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { getFaqs } from "../../lib/data";
+import { getFaqs, getSettings } from "../../lib/data";
 import { getServiceSupabase } from "../../lib/supabase";
 
-// No need for explicit auth check, middleware handles it
 const faqs = await getFaqs();
+const settings = await getSettings();
+const faqEnabled = settings.faq_section_enabled !== false;
 ---
 
 <AdminLayout title="Preguntas Frecuentes" activeSection="faqs">
@@ -26,8 +27,30 @@ const faqs = await getFaqs();
         </button>
     </div>
 
+    <!-- Toggle FAQ Section -->
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm" style="margin-bottom: 2rem !important; padding: 1.25rem 1.5rem;">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center">
+                    <i data-lucide="eye" class="w-4.5 h-4.5 text-zinc-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-zinc-100">Mostrar sección FAQ en la web</p>
+                    <p class="text-xs text-zinc-500" style="margin-top: 2px;">Actívalo para que las preguntas frecuentes aparezcan en servicios, sectores y contacto.</p>
+                </div>
+            </div>
+            <button id="faq-toggle" 
+                class={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-rose-500/30 ${faqEnabled ? 'bg-rose-600' : 'bg-zinc-700'}`}
+                data-enabled={faqEnabled.toString()}
+                title={faqEnabled ? 'Desactivar sección FAQ' : 'Activar sección FAQ'}
+            >
+                <span class={`inline-block h-5 w-5 rounded-full bg-white shadow-lg transform transition-transform duration-300 ${faqEnabled ? 'translate-x-6' : 'translate-x-1'}`}></span>
+            </button>
+        </div>
+    </div>
+
     <!-- Divider -->
-    <div style="margin-bottom: 4rem !important;"></div>
+    <div style="margin-bottom: 2rem !important;"></div>
 
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
@@ -362,6 +385,56 @@ const faqs = await getFaqs();
                 modalError.classList.remove('hidden');
                 btnSubmit.innerHTML = oHtml;
                 btnSubmit.removeAttribute('disabled');
+            }
+        });
+
+        // ── FAQ TOGGLE LOGIC ──────────────────────────────
+        const faqToggle = document.getElementById('faq-toggle');
+        faqToggle?.addEventListener('click', async () => {
+            const currentlyEnabled = faqToggle.dataset.enabled === 'true';
+            const newState = !currentlyEnabled;
+            const dot = faqToggle.querySelector('span')!;
+
+            // Optimistic UI update
+            faqToggle.dataset.enabled = newState.toString();
+            if (newState) {
+                faqToggle.classList.remove('bg-zinc-700');
+                faqToggle.classList.add('bg-rose-600');
+                dot.classList.remove('translate-x-1');
+                dot.classList.add('translate-x-6');
+            } else {
+                faqToggle.classList.remove('bg-rose-600');
+                faqToggle.classList.add('bg-zinc-700');
+                dot.classList.remove('translate-x-6');
+                dot.classList.add('translate-x-1');
+            }
+
+            try {
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ faq_section_enabled: newState })
+                });
+                if (res.ok) {
+                    showToast(newState ? 'Sección FAQ activada' : 'Sección FAQ desactivada', 'success');
+                } else {
+                    // Revert on error
+                    faqToggle.dataset.enabled = currentlyEnabled.toString();
+                    if (currentlyEnabled) {
+                        faqToggle.classList.remove('bg-zinc-700');
+                        faqToggle.classList.add('bg-rose-600');
+                        dot.classList.remove('translate-x-1');
+                        dot.classList.add('translate-x-6');
+                    } else {
+                        faqToggle.classList.remove('bg-rose-600');
+                        faqToggle.classList.add('bg-zinc-700');
+                        dot.classList.remove('translate-x-6');
+                        dot.classList.add('translate-x-1');
+                    }
+                    showToast('Error al cambiar el estado', 'error');
+                }
+            } catch {
+                showToast('Error de conexión', 'error');
             }
         });
     });

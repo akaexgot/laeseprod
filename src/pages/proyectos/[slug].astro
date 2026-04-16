@@ -398,7 +398,7 @@ const makingOfId = expMobileId || expDesktopId;
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         /* ── Fullpage Scroll ── */
-        const sections = Array.from(document.querySelectorAll('.pj-detail__screen'));
+        const sections = Array.from(document.querySelectorAll('.pj-detail__screen, #site-footer'));
         if (sections.length === 0) return;
 
         // Solo activar scroll snap en escritorio (>1024px)

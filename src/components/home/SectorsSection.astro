@@ -1,6 +1,6 @@
 ---
 /**
- * Sectors — Premium 3D Coverflow Carousel
+ * Sectors — Premium Carousel (Desktop 3D Coverflow / Mobile Horizontal Scroll)
  * Renders ALL sectors that have a video dynamically from DB
  */
 import { getSectors } from '../../lib/data';
@@ -19,18 +19,48 @@ function extractYouTubeId(url: string | null | undefined): string | null {
 ---
 
 {sectors.length > 0 && (
-<section id="sectors-section" class="relative bg-white overflow-hidden text-dark lg:min-h-screen flex flex-col justify-center pt-24 pb-24 lg:pt-32 lg:pb-20 px-8 sm:px-12 lg:px-10">
+<section id="sectors-section" class="relative bg-white overflow-hidden text-dark lg:min-h-screen flex flex-col justify-center sectors-section-wrap" style="padding: 3rem 1rem 2.5rem;">
 
   <!-- Section Title -->
-  <div class="relative z-10 text-center mb-8 reveal" style="padding: 0 1.5rem;">
+  <div class="relative z-10 text-center mb-6 lg:mb-8 reveal" style="padding: 0 1.5rem;">
     <h2 style="font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: #111; line-height: 1.1; margin: 0;">
       Nuestros <span class="text-gradient-carmin" style="font-style: italic;">Sectores</span>
     </h2>
   </div>
 
-  <div class="relative w-full flex items-center justify-center perspective-2000">
+  <!-- MOBILE: Horizontal scroll cards -->
+  <div class="sectors-mobile-scroll lg:hidden">
+    <div class="sectors-mobile-track">
+      {sectors.map((sector: any, idx: number) => {
+        const videoId = extractYouTubeId(sector.video);
+        if (!videoId) return null;
+        return (
+          <a href={`/sectores/${sector.slug}`} class="sct-card reveal" style={`animation-delay: ${idx * 0.1}s`}>
+            <img 
+              src={`https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`} 
+              alt={sector.title}
+              loading="lazy"
+              decoding="async"
+              class="sct-card__img"
+            />
+            <div class="sct-card__gradient"></div>
+            <div class="sct-card__content">
+              <h3 class="sct-card__title">{sector.title}</h3>
+              <span class="sct-card__cta">
+                Explorar
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+              </span>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+
+  <!-- DESKTOP: 3D Coverflow Carousel (unchanged) -->
+  <div class="relative w-full hidden lg:flex items-center justify-center perspective-2000">
     
-    <div id="sectors-carousel" class="relative w-[88vw] md:w-full max-w-[900px] aspect-[16/9] md:aspect-[4/3] z-20 reveal-scale">
+    <div id="sectors-carousel" class="relative w-full max-w-[900px] aspect-[4/3] z-20 reveal-scale">
       {sectors.map((sector: any, idx: number) => {
         const videoId = extractYouTubeId(sector.video);
         if (!videoId) return null;
@@ -62,11 +92,11 @@ function extractYouTubeId(url: string | null | undefined): string | null {
       })}
     </div>
 
-    <button id="btn-prev-sectors" class="btn btn-circle absolute left-4 md:left-12 lg:left-32 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center justify-center text-dark hover:bg-carmin hover:border-carmin hover:text-white hover:scale-110 transition-all duration-300 z-50 shadow-xl reveal-left delay-3">
-      <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    <button id="btn-prev-sectors" class="btn btn-circle absolute left-12 lg:left-32 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center justify-center text-dark hover:bg-carmin hover:border-carmin hover:text-white hover:scale-110 transition-all duration-300 z-50 shadow-xl reveal-left delay-3">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
     </button>
-    <button id="btn-next-sectors" class="absolute right-4 md:right-12 lg:right-32 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center justify-center text-dark hover:bg-carmin hover:border-carmin hover:text-white hover:scale-110 transition-all duration-300 z-50 shadow-xl reveal-right delay-3">
-      <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <button id="btn-next-sectors" class="absolute right-12 lg:right-32 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center justify-center text-dark hover:bg-carmin hover:border-carmin hover:text-white hover:scale-110 transition-all duration-300 z-50 shadow-xl reveal-right delay-3">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
     </button>
   </div>
 </section>
@@ -171,5 +201,118 @@ function extractYouTubeId(url: string | null | undefined): string | null {
   .perspective-2000 {
     perspective: 2000px;
     transform-style: preserve-3d;
+  }
+  @media (min-width: 1025px) {
+    .sectors-section-wrap {
+        padding: 8rem 2.5rem 5rem !important;
+    }
+  }
+
+  /* ═══ MOBILE CINEMATIC CARDS ═══ */
+  .sectors-mobile-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0.5rem 0 1rem;
+  }
+  .sectors-mobile-scroll::-webkit-scrollbar { display: none; }
+
+  .sectors-mobile-track {
+    display: flex;
+    gap: 0.875rem;
+    padding: 0 1rem;
+    width: max-content;
+  }
+
+  .sct-card {
+    position: relative;
+    display: block;
+    width: 75vw;
+    max-width: 340px;
+    aspect-ratio: 3/4;
+    flex-shrink: 0;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .sct-card:active {
+    transform: scale(0.97);
+    transition: transform 0.15s ease;
+  }
+
+  .sct-card__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+  .sct-card:active .sct-card__img {
+    transform: scale(1.05);
+  }
+
+  .sct-card__gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.85) 0%,
+      rgba(0,0,0,0.4) 35%,
+      rgba(0,0,0,0.05) 65%,
+      transparent 100%
+    );
+    z-index: 1;
+  }
+
+  .sct-card__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .sct-card__title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.375rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    line-height: 1.15;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+
+  .sct-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    background: rgba(196, 40, 71, 0.8);
+    backdrop-filter: blur(8px);
+    width: fit-content;
+  }
+  .sct-card__cta svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+</style>
+
+    height: 0.875rem;
   }
 </style>

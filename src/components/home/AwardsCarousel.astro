@@ -12,14 +12,14 @@ const awards = await getAwards();
 {awards.length > 0 && (
 <div
     id="awards-section"
-    class="bg-white border-b border-black/5 relative overflow-hidden z-10 awards-carousel-wrap h-[15vh] flex items-center"
+    class="bg-white border-b border-black/5 relative overflow-hidden z-10 awards-carousel-wrap h-32 lg:h-48 flex items-center"
 >
     <div class="overflow-hidden w-full">
         <div class="marquee-track flex items-center gap-10 lg:gap-20">
             {
                 [...awards, ...awards, ...awards, ...awards].map(
                     (award: any) => (
-                        <div class="flex items-center justify-center min-w-[160px] lg:min-w-[220px] flex-shrink-0">
+                        <div class="flex items-center justify-center min-w-[200px] lg:min-w-[300px] flex-shrink-0">
                             {award.website ? (
                                 <a 
                                     href={award.website} 
@@ -31,7 +31,7 @@ const awards = await getAwards();
                                     <img
                                         src={award.image_url}
                                         alt={award.name}
-                                        class="h-16 lg:h-28 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                        class="h-24 lg:h-36 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
                                         loading="lazy"
                                         decoding="async"
                                     />
@@ -40,7 +40,7 @@ const awards = await getAwards();
                                 <img
                                     src={award.image_url}
                                     alt={award.name}
-                                    class="h-16 lg:h-28 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                    class="h-24 lg:h-36 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
                                 />
                             )}
                         </div>

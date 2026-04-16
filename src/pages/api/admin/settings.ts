@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
             'font_heading', 'font_body', 'whatsapp_number', 'phone', 'email', 'address',
             'instagram', 'linkedin', 'google_maps_embed', 'hero_title', 'hero_subtitle',
             'hero_video_desktop', 'hero_video_mobile', 'about_hero_video', 'contact_hero_video',
-            'about_corporate_video'
+            'about_corporate_video', 'faq_section_enabled'
         ];
 
         const updates: Record<string, any> = {};

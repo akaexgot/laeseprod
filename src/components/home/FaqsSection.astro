@@ -1,9 +1,15 @@
 ---
 /**
  * FAQs Section — Premium Accordion Design
+ * Can be used on any page (services, sectors, contact)
+ * Respects the global faq_section_enabled setting
  */
-import { getFaqs } from "../../lib/data";
+import { getFaqs, getSettings } from "../../lib/data";
 const faqs = await getFaqs();
+const settings = await getSettings();
+
+// If the FAQ section is disabled in settings, don't render
+if (!settings.faq_section_enabled) return null;
 
 if (faqs.length === 0) return null;
 ---
@@ -52,12 +58,17 @@ if (faqs.length === 0) return null;
     position: relative;
     padding: 6rem 0;
     background-color: #ffffff;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+}
+
+@media (min-width: 1025px) {
+    .faq-section {
+        min-height: 100vh;
+    }
 }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -100,26 +111,7 @@ if (faqs.length === 0) return null;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    max-height: 65vh; /* Limit height to prevent overflow in full-screen */
-    overflow-y: auto;
     padding: 1rem 0.5rem 2rem;
-    
-    /* Scrollbar styling */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(155,27,48,0.2) transparent;
-}
-.faq-scroll-area::-webkit-scrollbar {
-    width: 4px;
-}
-.faq-scroll-area::-webkit-scrollbar-track {
-    background: transparent;
-}
-.faq-scroll-area::-webkit-scrollbar-thumb {
-    background: rgba(155,27,48,0.1);
-    border-radius: 10px;
-}
-.faq-scroll-area:hover::-webkit-scrollbar-thumb {
-    background: rgba(155,27,48,0.3);
 }
 
 .faq-grid {
