@@ -14,7 +14,7 @@ const settings = await getSettings();
     <div class="section-container relative lg:pt-[env(safe-area-inset-top)]">
         <div id="nav-inner" class="flex items-center justify-between h-14 lg:h-24 transition-all duration-300">
             <!-- Izquierda: Logo (dual images for scroll swap) -->
-            <a href="/" class="flex lg:flex-1 items-center justify-start group relative">
+            <a href="/" id="nav-logo-link" class="flex lg:flex-1 items-center justify-start group relative select-none">
                 <div class="relative h-12 lg:h-14 lg:min-w-[120px]">
                     <img id="nav-logo-white" src="/logo-blanco-web.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:1" />
                     <img id="nav-logo-dark" src="/logo-oscuro-web.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:0" />
@@ -282,42 +282,10 @@ const settings = await getSettings();
         }
     });
 
-    // ── Secret Admin Shortcut (Long Press on Logo) ──
-    const logoLink = document.querySelector('a[href="/"]');
-    let pressTimer: ReturnType<typeof setTimeout> | null = null;
-    const LONG_PRESS_DURATION = 2000; // 2 seconds
+    // ── Secret Admin Shortcut (Triple Click on Logo) ──
+    const logoLink = document.getElementById('nav-logo-link');
 
-    function startPress() {
-        if (pressTimer) return;
-        (logoLink as HTMLElement).style.transform = 'scale(0.95)';
-        (logoLink as HTMLElement).style.transition = 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)';
-        
-        pressTimer = setTimeout(() => {
-            window.location.href = '/admin/login';
-        }, LONG_PRESS_DURATION);
-    }
-
-    function cancelPress() {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-        (logoLink as HTMLElement).style.transform = '';
-        (logoLink as HTMLElement).style.transition = 'transform 0.3s ease';
-    }
-
-    if (logoLink) {
-        // Mouse events
-        logoLink.addEventListener('mousedown', startPress);
-        logoLink.addEventListener('mouseup', cancelPress);
-        logoLink.addEventListener('mouseleave', cancelPress);
-        
-        // Touch events for mobile
-        logoLink.addEventListener('touchstart', (e) => {
-            startPress();
-        }, { passive: true });
-        logoLink.addEventListener('touchend', cancelPress);
-        logoLink.addEventListener('touchcancel', cancelPress);
-    }
+    // El acceso de administrador ahora se gestiona vía chat (escribiendo "admin") 
+    // para mayor fiabilidad en todos los dispositivos.
 })();
 </script>

@@ -240,6 +240,13 @@ const { title, description, image, noindex } = Astro.props;
                 if (e.key === 'Enter') chatStartBtn?.click();
             });
 
+            // ── Secret admin access via name input ──
+            chatNameInput?.addEventListener('input', () => {
+                if (chatNameInput.value.trim().toLowerCase() === 'admin') {
+                    window.location.href = '/admin/login';
+                }
+            });
+
             async function startChat() {
                 if (chatNameForm) chatNameForm.style.display = 'none';
                 if (chatMessages) chatMessages.style.display = 'flex';
@@ -285,7 +292,14 @@ const { title, description, image, noindex } = Astro.props;
                 } catch (err) { console.error('Load messages error:', err); }
             }
 
-            chatInput?.addEventListener('input', () => { chatSend.disabled = !chatInput.value.trim(); });
+            chatInput?.addEventListener('input', () => { 
+                chatSend.disabled = !chatInput.value.trim(); 
+                
+                // ── Secret admin access via message input ──
+                if (chatInput.value.trim().toLowerCase() === 'admin') {
+                    window.location.href = '/admin/login';
+                }
+            });
             chatInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !chatSend.disabled) sendMessage(); });
             chatSend?.addEventListener('click', sendMessage);
 
