@@ -31,7 +31,7 @@ function extractYouTubeId(url: string | null | undefined): string | null {
   <!-- MOBILE: Horizontal scroll cards -->
   <div class="sectors-mobile-scroll lg:hidden">
     <div class="sectors-mobile-track">
-      {sectors.map((sector: any, idx: number) => {
+      {sectors.length > 0 && [sectors[sectors.length - 1], ...sectors, sectors[0]].map((sector: any, idx: number) => {
         const videoId = extractYouTubeId(sector.video);
         if (!videoId) return null;
         return (
@@ -56,6 +56,21 @@ function extractYouTubeId(url: string | null | undefined): string | null {
       })}
     </div>
   </div>
+  
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const track = document.querySelector('.sectors-mobile-scroll');
+      if (track && window.innerWidth < 1024) {
+        setTimeout(() => {
+          const cards = track.querySelectorAll('.sct-card');
+          if (cards.length > 1) {
+            const target = cards[1];
+            track.scrollLeft = target.offsetLeft - (window.innerWidth - target.offsetWidth) / 2;
+          }
+        }, 100);
+      }
+    });
+  </script>
 
   <!-- DESKTOP: 3D Coverflow Carousel (unchanged) -->
   <div class="relative w-full hidden lg:flex items-center justify-center perspective-2000">
@@ -214,22 +229,23 @@ function extractYouTubeId(url: string | null | undefined): string | null {
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    padding: 0.5rem 0 1rem;
+    padding: 0.5rem 0 1.5rem;
+    scroll-snap-type: x mandatory;
   }
   .sectors-mobile-scroll::-webkit-scrollbar { display: none; }
 
   .sectors-mobile-track {
     display: flex;
-    gap: 0.875rem;
-    padding: 0 1rem;
+    gap: 1rem;
+    padding: 0 17.5vw;
     width: max-content;
   }
 
   .sct-card {
     position: relative;
     display: block;
-    width: 75vw;
-    max-width: 340px;
+    width: 65vw;
+    max-width: 320px;
     aspect-ratio: 3/4;
     flex-shrink: 0;
     border-radius: 1.25rem;
@@ -237,6 +253,7 @@ function extractYouTubeId(url: string | null | undefined): string | null {
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    scroll-snap-align: center;
   }
   .sct-card:active {
     transform: scale(0.97);

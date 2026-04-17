@@ -14,8 +14,13 @@ import CtaSection from "../components/home/CtaSection.astro";
 
 <BaseLayout>
 	<Hero />
-	<FeaturedProjects>
+	<div class="block lg:hidden">
 		<CompaniesCarousel />
+	</div>
+	<FeaturedProjects>
+		<div class="hidden lg:block w-full">
+			<CompaniesCarousel />
+		</div>
 	</FeaturedProjects>
 	<ServicesSection />
 	<SectorsSection />

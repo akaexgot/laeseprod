@@ -66,12 +66,12 @@
     z-index: 45;
     padding-bottom: env(safe-area-inset-bottom, 0px);
     background: linear-gradient(180deg, 
-        rgba(10, 10, 15, 0.92) 0%, 
-        rgba(5, 5, 8, 0.98) 100%
+        rgba(255, 255, 255, 0.96) 0%, 
+        rgba(252, 252, 252, 0.99) 100%
     );
     backdrop-filter: saturate(180%) blur(24px);
     -webkit-backdrop-filter: saturate(180%) blur(24px);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -104,7 +104,7 @@
     flex: 1;
     padding: 0.3rem 0.15rem;
     text-decoration: none;
-    color: rgba(255, 255, 255, 0.35);
+    color: rgba(9, 9, 11, 0.5); /* Text color light mode unselected */
     transition: color 0.3s ease;
     -webkit-tap-highlight-color: transparent;
     position: relative;
@@ -182,27 +182,6 @@
         }
     });
 
-    // Auto-hide on scroll down, show on scroll up
-    let lastScrollY = window.scrollY;
-    let ticking = false;
-
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const currentScrollY = window.scrollY;
-                const diff = currentScrollY - lastScrollY;
-
-                if (diff > 10 && currentScrollY > 120) {
-                    bar.classList.add('is-hidden');
-                } else if (diff < -8) {
-                    bar.classList.remove('is-hidden');
-                }
-
-                lastScrollY = currentScrollY;
-                ticking = false;
-            });
-            ticking = true;
-        }
-    }, { passive: true });
+    // Auto-hide feature removed by request
 })();
 </script>

@@ -92,7 +92,14 @@ const settings = await getSettings();
   justify-content: center;
   padding: 4rem 1.5rem;
   min-height: 100vh;
-  background-color: #ffffff; /* Fondo blanco */
+  background-color: #ffffff;
+}
+
+@media (max-width: 1024px) {
+  .cta-section {
+    min-height: auto;
+    padding: 3rem 1.5rem;
+  }
 }
 
 /* ── Fondo ─────────────────────────────────────────────── */
