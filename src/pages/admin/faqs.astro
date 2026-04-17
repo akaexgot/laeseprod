@@ -248,7 +248,7 @@ const faqEnabled = settings.faq_section_enabled !== false;
         btnAdd?.addEventListener('click', () => openModal());
         btnCancel?.addEventListener('click', closeModal);
         btnClose?.addEventListener('click', closeModal);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+        // overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); }); // Disabled closing on click outside
 
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -275,7 +275,7 @@ const faqEnabled = settings.faq_section_enabled !== false;
             confirmOverlay.classList.remove('flex');
         }
         confirmCancel.addEventListener('click', closeConfirm);
-        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
 
         confirmYes.addEventListener('click', async () => {
             if (!pendingDeleteId) return;

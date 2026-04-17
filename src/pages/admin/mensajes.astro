@@ -297,7 +297,7 @@ if (serviceSupabase) {
             confirmOverlay.classList.add('hidden');
         }
         confirmCancel.addEventListener('click', closeConfirm);
-        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
 
         confirmYes.addEventListener('click', async () => {
             if (!pendingDeleteId) return;

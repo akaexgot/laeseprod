@@ -423,7 +423,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         document.getElementById('btn-new-user').addEventListener('click', () => openModal('create'));
         document.getElementById('modal-close-icon').addEventListener('click', closeModal);
         document.getElementById('modal-cancel').addEventListener('click', closeModal);
-        document.getElementById('modal-overlay-bg').addEventListener('click', closeModal);
+        // document.getElementById('modal-overlay-bg').addEventListener('click', closeModal); // Disabled closing on click outside
 
         document.getElementById('user-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -518,7 +518,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
         document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
         document.getElementById('confirm-yes').addEventListener('click', () => performDelete(pendingDeleteId));
-        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
 
         document.getElementById('btn-delete-user').addEventListener('click', () => {
             const id = (document.getElementById('user-id') as HTMLInputElement).value;

@@ -216,9 +216,9 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
             errSpan.classList.add('hidden');
         }));
 
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) overlay.classList.add('hidden');
-        });
+        // overlay.addEventListener('click', (e) => {
+        //     if (e.target === overlay) overlay.classList.add('hidden');
+        // });
 
         // Dynamic sections
         const radioBtns = document.querySelectorAll('input[name="c-tipo"]');
@@ -431,7 +431,7 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
             confirmOverlay.classList.add('hidden');
         }
         confirmCancel.addEventListener('click', closeConfirm);
-        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
 
         confirmYes.addEventListener('click', async () => {
             if (!pendingDeleteId) return;

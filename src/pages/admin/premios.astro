@@ -332,7 +332,7 @@ const awards = await getAwards();
         document.getElementById('btn-add')?.addEventListener('click', () => openModal());
         document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
         document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+        // overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); }); // Disabled closing on click outside
 
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -370,7 +370,7 @@ const awards = await getAwards();
             confirmOverlay.classList.add('hidden');
         }
         confirmCancel.addEventListener('click', closeConfirm);
-        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
 
         confirmYes.addEventListener('click', async () => {
             if (!pendingDeleteId) return;

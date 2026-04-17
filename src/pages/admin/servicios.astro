@@ -223,10 +223,10 @@ const services = await getServices();
         document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
         document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
 
-        // Close on outside click
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeModal();
-        });
+        // Close on outside click is disabled 
+        // overlay.addEventListener('click', (e) => {
+        //     if (e.target === overlay) closeModal();
+        // });
 
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -259,7 +259,7 @@ const services = await getServices();
             confirmOverlay.classList.add('hidden');
         }
         confirmCancel.addEventListener('click', closeConfirm);
-        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
 
         confirmYes.addEventListener('click', async () => {
             if (!pendingDeleteId) return;

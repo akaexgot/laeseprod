@@ -222,7 +222,7 @@ if (carta.tipo === 'imagenes' || carta.tipo === 'pdf') {
             confirmOverlay.classList.add('hidden');
         }
         confirmCancel.addEventListener('click', closeConfirm);
-        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
         confirmYes.addEventListener('click', () => {
             if(onConfirmCallback) onConfirmCallback();
             closeConfirm();
