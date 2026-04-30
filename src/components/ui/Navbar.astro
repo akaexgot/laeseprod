@@ -202,25 +202,33 @@ const settings = await getSettings();
         }
 
         // 2. Homepage / Dark Sections Logic
-        // Stay transparent if we are over the Hero or Featured Projects (dark bg)
-        // EXCEPCIÓN: Si estamos sobre el carousel de empresas (porque es blanco)
-        if (cs) {
-            const csTop = cs.getBoundingClientRect().top + scrollY;
-            if (scrollY + 80 >= csTop) {
-                return 'dark-solid';
-            }
-        }
+        // En desktop, Hero y FeaturedProjects (pantallas 1 y 2) → siempre transparente
+        const isDesktop = window.innerWidth > 1024;
+        const navBottom = scrollY + 96;
 
+        // Hero section: transparente
         if (hero && scrollY < hero.offsetHeight - 80) {
             return 'dark-transparent';
         }
 
+        // FeaturedProjects section (incluye CompaniesCarousel en desktop): transparente
         if (fp) {
             const fpTop = fp.offsetTop;
             const fpBottom = fpTop + fp.offsetHeight;
-            const navBottom = scrollY + 96;
             if (navBottom >= fpTop && navBottom <= fpBottom) {
-                return 'dark-transparent';
+                // En desktop, toda la sección featured-projects es oscura → transparente
+                // En móvil, el companies-section se renderiza fuera, así que respetar su posición
+                if (isDesktop) {
+                    return 'dark-transparent';
+                }
+            }
+        }
+
+        // CompaniesCarousel fuera de FeaturedProjects (móvil) o tras pasar FeaturedProjects
+        if (cs) {
+            const csTop = cs.getBoundingClientRect().top + scrollY;
+            if (scrollY + 80 >= csTop) {
+                return 'dark-solid';
             }
         }
 
