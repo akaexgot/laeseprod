@@ -30,7 +30,7 @@ const awards = await getAwards();
                                     title={`Ver premio ${award.name}`}
                                 >
                                     <img
-                                        src={optimizeCloudinaryImage(award.image_url, 300)}
+                                        src={optimizeCloudinaryImage(award.image_url, 150)}
                                         alt={award.name}
                                         class="h-10 lg:h-16 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
                                         loading="lazy"
@@ -39,7 +39,7 @@ const awards = await getAwards();
                                 </a>
                             ) : (
                                 <img
-                                    src={optimizeCloudinaryImage(award.image_url, 300)}
+                                    src={optimizeCloudinaryImage(award.image_url, 150)}
                                     alt={award.name}
                                     class="h-10 lg:h-16 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
                                 />

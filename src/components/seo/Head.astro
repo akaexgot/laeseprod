@@ -106,7 +106,7 @@ const websiteSchema = {
 <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 
 <!-- Preload Critical Assets -->
-<link rel="preload" href={`https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`} as="image" fetchpriority="high" />
+<link rel="preload" href={`https://i.ytimg.com/vi_webp/${youtubeId}/hqdefault.webp`} as="image" fetchpriority="high" />
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" as="style" />
 
 <!-- Security Meta Tags -->
@@ -116,10 +116,11 @@ const websiteSchema = {
 <!-- Preconnect Google Fonts & DNS-Prefetch YouTube -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://i.ytimg.com" crossorigin />
 <link rel="dns-prefetch" href="https://www.youtube-nocookie.com" />
 <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
 <!-- Favicon -->
 <link rel="icon" type="image/png" href="/favicon.png" />

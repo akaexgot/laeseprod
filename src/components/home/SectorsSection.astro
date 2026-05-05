@@ -43,9 +43,9 @@ function extractYouTubeId(url: string | null | undefined): string | null {
                <video aria-hidden="true" src={optimizeCloudinaryVideo(videoUrl, { width: 720 })} class="sct-card__img" style="object-fit: cover;" autoplay loop muted playsinline></video>
             ) : (
                <img 
-                 src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`} 
+                 src={`https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp`} 
                  width="400"
-                 height="533" 
+                 height="300" 
                  alt={sector.title}
                  loading="lazy"
                  decoding="async"
