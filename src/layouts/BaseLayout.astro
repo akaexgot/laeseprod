@@ -133,6 +133,8 @@ const { title, description, image, noindex } = Astro.props;
                 visitorId = 'v_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
                 localStorage.setItem('vm_visitor_id', visitorId);
             }
+            // Ensure cookie is set for server-side validation (middleware)
+            document.cookie = `vm_visitor_id=${visitorId}; path=/; max-age=31536000; SameSite=Lax`;
 
             // Open/Close
             floatingBtn.addEventListener('click', () => {

@@ -2,22 +2,29 @@ import { defineMiddleware } from "astro:middleware";
 import { createClient } from "@supabase/supabase-js";
 import { getServiceSupabase } from "./lib/supabase";
 
-const PROTECTED = ["/admin"];
+const PROTECTED = ["/admin", "/api/admin"];
 const PUBLIC = ["/admin/login"];
 
 export const onRequest = defineMiddleware(async ({ request, cookies, redirect, locals }, next) => {
-  const { pathname } = new URL(request.url);
+  const { pathname, searchParams } = new URL(request.url);
 
-  const isProtected = PROTECTED.some(r => pathname.startsWith(r))
+  // Sensitive chat actions that need admin protection
+  const isAdminChatAction = pathname === "/api/chat" && searchParams.get('list') === '1';
+
+  const isProtected = (PROTECTED.some(r => pathname.startsWith(r)) || isAdminChatAction)
     && !PUBLIC.includes(pathname);
 
   if (!isProtected) return next();
+
+  const isApiRequest = pathname.startsWith("/api/");
 
   const accessToken = cookies.get("sb-access-token")?.value;
   const refreshToken = cookies.get("sb-refresh-token")?.value;
 
   if (!accessToken || !refreshToken) {
-    console.log("Middleware: No tokens found, redirecting to login");
+    if (isApiRequest) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
     return redirect(`/admin/login?redirectTo=${encodeURIComponent(pathname)}`);
   }
 
@@ -37,6 +44,9 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     console.error("Middleware Auth Error:", error?.message || "No user found");
     cookies.delete("sb-access-token", { path: "/" });
     cookies.delete("sb-refresh-token", { path: "/" });
+    if (isApiRequest) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
     return redirect("/admin/login");
   }
 
@@ -52,7 +62,15 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     "/admin/chat": "chat",
     "/admin/ajustes": "ajustes",
     "/admin/usuarios": "usuarios",
-    "/admin": "dashboard", // Fallback for the root admin page
+    "/admin": "dashboard", 
+    // API mappings
+    "/api/admin/proyectos": "proyectos",
+    "/api/admin/servicios": "servicios",
+    "/api/admin/sectores": "sectores",
+    "/api/admin/companies": "empresas",
+    "/api/admin/awards": "ajustes",
+    "/api/admin/users": "usuarios",
+    "/api/chat": "chat",
   };
 
   // Identify the target section
@@ -70,7 +88,9 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     .maybeSingle();
 
   if (profileError || !profile) {
-    console.error("Middleware Permission Error: Profile missing for", data.user.email);
+    if (isApiRequest) {
+      return new Response(JSON.stringify({ error: "Forbidden: No profile found" }), { status: 403 });
+    }
     return redirect("/admin/login?error=" + encodeURIComponent("No se encontró un perfil de administrador para tu cuenta."));
   }
 
@@ -85,14 +105,12 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
   // Grant access if the section is in the user's permissions
   const userPermissions = profile.permissions || [];
   if (targetSection && userPermissions.includes(targetSection)) {
-    console.log(`Middleware: Access granted for ${data.user.email} to section: ${targetSection}`);
     return next();
   }
 
   // Deny access if no permission found
-  console.error(`Middleware: Access denied for ${data.user.email} to section: ${targetSection || pathname}`);
+  if (isApiRequest) {
+    return new Response(JSON.stringify({ error: "Forbidden: Missing permissions" }), { status: 403 });
+  }
   return redirect("/admin/login?error=" + encodeURIComponent("No tienes permisos para acceder a esta sección."));
-
-  console.log("Middleware: Access granted for Admin", data.user.email);
-  return next();
 });
