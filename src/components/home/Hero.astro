@@ -62,7 +62,7 @@ const heroSubtitle = settings.hero_subtitle || '';
         function loadYouTubeAPI() {
             if (!window.YT) {
                 const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
+                tag.src = "https://www.youtube-nocookie.com/iframe_api";
                 const firstScriptTag = document.getElementsByTagName('script')[0];
                 if (firstScriptTag && firstScriptTag.parentNode) {
                     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -72,11 +72,11 @@ const heroSubtitle = settings.hero_subtitle || '';
             }
         }
 
-        // Retrasar ligeramente la carga para priorizar el FCP/LCP
+        // Retrasar la carga para priorizar el FCP/LCP y evitar bloqueos de Best Practices
         if (document.readyState === 'complete') {
-            setTimeout(loadYouTubeAPI, 500);
+            setTimeout(loadYouTubeAPI, 2000);
         } else {
-            window.addEventListener('load', () => setTimeout(loadYouTubeAPI, 500));
+            window.addEventListener('load', () => setTimeout(loadYouTubeAPI, 2000));
         }
 
         function initHeroPlayer() {
