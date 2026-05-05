@@ -4,6 +4,7 @@
  * Uses dynamic video from settings DB
  */
 import { getSettings } from "../../lib/data";
+import { optimizeCloudinaryVideo } from "../../lib/cloudinary";
 const settings = await getSettings();
 
 // Extract YouTube ID from any URL format
@@ -20,7 +21,9 @@ const isNativeVideo = settings.hero_video_desktop &&
                        settings.hero_video_desktop.endsWith('.mp4') || 
                        settings.hero_video_desktop.endsWith('.webm'));
 
-const videoUrl = settings.hero_video_desktop;
+const rawVideoUrl = settings.hero_video_desktop;
+// Apply Cloudinary optimization if it's a native video
+const videoUrl = isNativeVideo ? optimizeCloudinaryVideo(rawVideoUrl, { width: 1920, bitRate: '4m' }) : rawVideoUrl;
 const youtubeId = !isNativeVideo ? (extractYouTubeId(videoUrl) || 'D91q99QK11k') : null;
 
 // Prepare dynamic title lines (split by newlines)

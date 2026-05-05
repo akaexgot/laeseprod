@@ -4,6 +4,7 @@
  * Uses video_project from DB, hides empty slots
  */
 import { getFeaturedProjects } from '../../lib/data';
+import { optimizeCloudinaryVideo } from '../../lib/cloudinary';
 const allProjects = await getFeaturedProjects();
 const projects = allProjects.slice(0, 3);
 
@@ -57,9 +58,9 @@ function getVideoId(value: string | null | undefined): string | null {
            data-pm-slug={projects[0].slug}
            data-pm-client={projects[0].client_name || ''}>
           <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
-               style={!isNative ? `background-image: url(https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg); background-size: cover; background-position: center;` : ''}>
+               style={!isNative ? `background-image: url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg); background-size: cover; background-position: center;` : ''}>
             {isNative ? (
-              <video aria-hidden="true" src={videoUrl} class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline></video>
+              <video aria-hidden="true" src={optimizeCloudinaryVideo(videoUrl, { width: 1280 })} class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline></video>
             ) : (
               <iframe
                 data-src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
@@ -119,9 +120,9 @@ function getVideoId(value: string | null | undefined): string | null {
              data-pm-slug={project.slug}
              data-pm-client={project.client_name || ''}>
             <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
-                 style={!isNative ? `background-image: url(https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg); background-size: cover; background-position: center;` : ''}>
+                 style={!isNative ? `background-image: url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg); background-size: cover; background-position: center;` : ''}>
               {isNative ? (
-                <video aria-hidden="true" src={videoUrl} class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline></video>
+                <video aria-hidden="true" src={optimizeCloudinaryVideo(videoUrl, { width: 720 })} class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline></video>
               ) : (
               <iframe
                 data-src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}

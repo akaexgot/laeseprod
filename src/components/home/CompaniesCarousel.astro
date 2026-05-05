@@ -29,7 +29,7 @@ const companies = await getCompanies();
                                     title={`Visitar web de ${company.name}`}
                                 >
                                     <img
-                                        src={company.logo_url ? company.logo_url.replace('/upload/', '/upload/f_auto,q_auto,w_400/') : `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
+                                        src={company.logo_url ? company.logo_url.replace('/upload/', '/upload/f_auto,q_auto,w_200/') : `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
                                         alt={company.name}
                                         width="160"
                                         height="64"
