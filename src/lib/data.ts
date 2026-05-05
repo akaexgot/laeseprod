@@ -205,3 +205,9 @@ export async function getPortalClientsAdmin() {
     if (error || !data) return [];
     return data;
 }
+
+/** Placeholder for cache invalidation logic */
+export function invalidateCache(tag?: string) {
+    console.log(`[Cache] Invalidate requested for: ${tag || 'all'}`);
+    // Future: Add logic for On-demand Revalidation if using an adapter that supports it
+}

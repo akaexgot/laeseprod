@@ -237,8 +237,15 @@ if (carta.tipo === 'imagenes' || carta.tipo === 'pdf') {
             const grid = document.getElementById('imgs-grid');
             const empty = document.getElementById('imgs-empty');
             
+            let sortableImgInstance: any = null;
             function renderImgs() {
                 if(!grid) return;
+                
+                if (sortableImgInstance) {
+                    sortableImgInstance.destroy();
+                    sortableImgInstance = null;
+                }
+
                 grid.innerHTML = '';
                 if(state.imagenes.length === 0) {
                     empty?.classList.remove('hidden');
@@ -278,21 +285,33 @@ if (carta.tipo === 'imagenes' || carta.tipo === 'pdf') {
                         });
                     });
                 }
+                
+                // Re-initialize Sortable after rendering
+                // @ts-ignore
+                if (window.Sortable && grid && state.imagenes.length > 0) {
+                     // @ts-ignore
+                    sortableImgInstance = new window.Sortable(grid, {
+                        animation: 150,
+                        onEnd: function (evt: any) {
+                            if (evt.oldIndex === evt.newIndex) return;
+                            const itemEl = state.imagenes.splice(evt.oldIndex, 1)[0];
+                            state.imagenes.splice(evt.newIndex, 0, itemEl);
+                            renderImgs();
+                        },
+                    });
+                }
             }
-            renderImgs();
-
-            // @ts-ignore
-            if (window.Sortable && grid) {
-                 // @ts-ignore
-                new Sortable(grid, {
-                    animation: 150,
-                    onEnd: function (evt: any) {
-                        const itemEl = state.imagenes.splice(evt.oldIndex, 1)[0];
-                        state.imagenes.splice(evt.newIndex, 0, itemEl);
-                        renderImgs();
-                    },
-                });
+            
+            // Try to render immediately, or wait for Sortable if needed
+            function tryRenderImgs() {
+                // @ts-ignore
+                if (typeof window.Sortable === 'undefined') {
+                    setTimeout(tryRenderImgs, 100);
+                    return;
+                }
+                renderImgs();
             }
+            tryRenderImgs();
 
             if (state.tipo === 'imagenes') {
                 const fileIn = document.getElementById('file-imgs') as HTMLInputElement;

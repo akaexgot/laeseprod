@@ -18,13 +18,16 @@
         <div class="pm-body">
             <!-- Vertical Video (left) -->
             <div class="pm-video" id="pmVideoWrap">
-                <iframe
-                    id="pmIframe"
-                    class="pm-video__iframe"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
-                    allowfullscreen
-                ></iframe>
+                <div id="pmMediaContainer" class="w-full h-full relative overflow-hidden">
+                    <iframe
+                        id="pmIframe"
+                        class="pm-video__iframe vm-exclusive-video"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
+                        allowfullscreen
+                    ></iframe>
+                    <div id="pmMediaOverlay" class="absolute inset-0 z-20 bg-transparent pointer-events-auto"></div>
+                </div>
             </div>
 
             <!-- Info (right) -->
@@ -195,10 +198,48 @@
         const linkEl = document.getElementById('pmLink') as HTMLAnchorElement;
         const toggleBtn = document.getElementById('pmToggleVideo');
         const modalContainer = modal.querySelector('.pm-modal');
-
-        if (!modal || !iframe || !titleEl || !subtitleEl || !descriptionEl || !clientEl || !linkEl || !modalContainer) return;
-
         let currentData: any = null;
+
+        function setMedia(source: string, isFullPlayer: boolean = false) {
+            const container = document.getElementById('pmMediaContainer');
+            if (!container) return;
+
+            const isNative = source.includes('cloudinary.com') || source.endsWith('.mp4') || source.endsWith('.webm');
+            
+            if (isNative) {
+                container.innerHTML = `
+                    <video 
+                        id="${isFullPlayer ? 'pjFullPlayer' : 'pmIframe'}" 
+                        class="pm-video__iframe" 
+                        src="${source}" 
+                        autoplay loop muted playsinline 
+                        controls
+                        style="object-fit: ${isFullPlayer ? 'contain' : 'cover'}; background: #000; pointer-events: auto;"
+                    ></video>
+                `;
+                if (isFullPlayer) {
+                    const v = container.querySelector('video');
+                    if (v) {
+                        v.muted = false;
+                        v.play();
+                    }
+                }
+            } else {
+                const url = `https://www.youtube.com/embed/${source}?rel=0&modestbranding=1&autoplay=1&mute=${isFullPlayer ? '0' : '0'}&controls=1&showinfo=0&disablekb=1&iv_load_policy=3&enablejsapi=1&origin=${window.location.origin}${!isFullPlayer ? `&playlist=${source}&loop=1` : ''}`;
+                
+                container.innerHTML = `
+                    <iframe
+                        id="${isFullPlayer ? 'pjFullPlayer' : 'pmIframe'}"
+                        class="pm-video__iframe vm-exclusive-video"
+                        src="${url}"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
+                        allowfullscreen
+                        style="pointer-events: auto; width: 100%; height: 100%;"
+                    ></iframe>
+                `;
+            }
+        }
 
         function openModal(data: {
             title: string; subtitle: string; description: string;
@@ -217,8 +258,8 @@
             modalContainer!.classList.remove('is-full-video');
             toggleBtn?.classList.remove('hidden');
 
-            if (data.makingOfId) {
-                iframe!.src = `https://www.youtube.com/embed/${data.makingOfId}?rel=0&modestbranding=1&autoplay=1&enablejsapi=1&origin=${window.location.origin}`;
+            if (data.makingOfId || data.videoId) {
+                setMedia(data.makingOfId || data.videoId);
             }
 
             modal!.classList.add('is-open');
@@ -229,7 +270,8 @@
             modal!.classList.remove('is-open');
             document.body.style.overflow = '';
             setTimeout(() => { 
-                iframe!.src = ''; 
+                const container = document.getElementById('pmMediaContainer');
+                if (container) container.innerHTML = '';
                 modalContainer!.classList.remove('is-full-video');
             }, 350);
         }
@@ -238,7 +280,7 @@
             if (!currentData) return;
             modalContainer!.classList.add('is-full-video');
             toggleBtn.classList.add('hidden');
-            iframe!.src = `https://www.youtube.com/embed/${currentData.videoId}?rel=0&modestbranding=1&autoplay=1&enablejsapi=1&origin=${window.location.origin}`;
+            setMedia(currentData.videoId, true);
         });
 
 

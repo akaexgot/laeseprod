@@ -89,7 +89,17 @@
 }
 
 .pj-cell--quarter {
-    /* grid handles sizing */
+    flex: 1 1 50%;
+    min-height: 50vh;
+}
+@media (min-width: 1024px) {
+    .pj-screen--grid {
+        flex-wrap: wrap;
+    }
+    .pj-cell--quarter {
+        flex: 1 1 50%;
+        min-height: 50vh;
+    }
 }
 
 /* ── Video embed ──────────────────────────────── */

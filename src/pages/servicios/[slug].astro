@@ -19,16 +19,15 @@ if (!service) {
 const allServices = await getServices();
 const otherServices = allServices.filter((s: any) => s.slug !== slug).slice(0, 3);
 
-function getVideoId(value: string | null | undefined): string | null {
-    if (!value) return null;
-    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    if (match) return match[1];
-    if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
-    return null;
-}
+const isNative = (url: string | null | undefined) => !!url && (url.includes('cloudinary.com') || url.endsWith('.mp4') || url.endsWith('.webm'));
 
-const videoId = getVideoId(service.video);
-const videoVerticalId = getVideoId(service.video_vertical);
+const videoUrl = service.video;
+const videoIsNative = isNative(videoUrl);
+const videoId = !videoIsNative ? getVideoId(videoUrl) : null;
+
+const videoVerticalUrl = service.video_vertical;
+const videoVerticalIsNative = isNative(videoVerticalUrl);
+const videoVerticalId = !videoVerticalIsNative ? getVideoId(videoVerticalUrl) : null;
 ---
 
 <BaseLayout
@@ -39,9 +38,16 @@ const videoVerticalId = getVideoId(service.video_vertical);
     <!-- ═══ SCREEN 1: VIDEO HERO ═══ -->
     <section class="detail-hero" id="detail-hero">
         <div class="detail-hero__bg">
-            {videoId ? (
+            {videoIsNative ? (
+                <video 
+                    src={videoUrl} 
+                    class="detail-hero__iframe" 
+                    autoplay loop muted playsinline 
+                    style="object-fit: cover;"
+                ></video>
+            ) : videoId ? (
                 <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                     class="detail-hero__iframe"
                     frameborder="0"
                     allow="autoplay; encrypted-media"
@@ -90,20 +96,28 @@ const videoVerticalId = getVideoId(service.video_vertical);
 
             <!-- Description with optional vertical video -->
             <div class="detail-desc reveal">
-                <div class={`detail-desc__layout ${videoVerticalId ? 'detail-desc__layout--with-video' : ''}`}>
-                    {videoVerticalId && (
+                    {videoVerticalUrl || videoVerticalId ? (
                         <div class="detail-vertical-video">
                             <div class="detail-vertical-video__frame">
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${videoVerticalId}?autoplay=0&mute=1&loop=1&playlist=${videoVerticalId}&controls=1&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                                    class="detail-vertical-video__iframe"
-                                    frameborder="0"
-                                    allow="autoplay; encrypted-media"
-                                    title={`Vídeo vertical de ${service.title}`}
-                                ></iframe>
+                                {videoVerticalIsNative ? (
+                                    <video 
+                                        src={videoVerticalUrl} 
+                                        class="detail-vertical-video__iframe vm-exclusive-video" 
+                                        autoplay loop muted playsinline 
+                                        style="object-fit: cover;"
+                                    ></video>
+                                ) : (
+                                    <iframe
+                                        src={`https://www.youtube.com/embed/${videoVerticalId}?autoplay=0&mute=1&controls=1&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
+                                        class="detail-vertical-video__iframe vm-exclusive-video"
+                                        frameborder="0"
+                                        allow="autoplay; encrypted-media"
+                                        title={`Vídeo vertical de ${service.title}`}
+                                    ></iframe>
+                                )}
                             </div>
                         </div>
-                    )}
+                    ) : null}
                     <div class="detail-desc__text">
                         <h2 class="detail-desc__heading">
                             ¿Qué incluye nuestro servicio de

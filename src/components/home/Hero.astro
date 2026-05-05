@@ -15,7 +15,13 @@ function extractYouTubeId(url: string | null | undefined): string | null {
     return null;
 }
 
-const youtubeId = extractYouTubeId(settings.hero_video_desktop) || 'D91q99QK11k';
+const isNativeVideo = settings.hero_video_desktop && 
+                      (settings.hero_video_desktop.includes('cloudinary.com') || 
+                       settings.hero_video_desktop.endsWith('.mp4') || 
+                       settings.hero_video_desktop.endsWith('.webm'));
+
+const videoUrl = settings.hero_video_desktop;
+const youtubeId = !isNativeVideo ? (extractYouTubeId(videoUrl) || 'D91q99QK11k') : null;
 
 // Prepare dynamic title lines (split by newlines)
 const defaultTitle = 'Creamos\n**historias** que\nimpulsan\nmarcas';
@@ -26,20 +32,31 @@ const heroSubtitle = settings.hero_subtitle || '';
 <section
     id="hero"
     class="relative flex items-center justify-center overflow-hidden"
-    style={`height: 100vh; height: 100dvh; min-height: 600px; background: #050508 url(https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg) center/cover no-repeat;`}
+    style={!isNativeVideo ? `height: 100vh; height: 100dvh; min-height: 600px; background: #050508 url(https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg) center/cover no-repeat;` : `height: 100vh; height: 100dvh; min-height: 600px; background: #050508;`}
 >
     <!-- Fullscreen Video Background -->
     <div
         id="hero-video-container"
-        class="absolute inset-0 z-0 overflow-hidden pointer-events-none"
+        class="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-black"
     >
-        <!-- Contenedor con la clase video-bg que se encarga del tamaño y posición -->
-        <div id="hero-player-wrapper" class="video-bg opacity-0 transition-opacity duration-1000">
-            <div id="hero-player"></div>
-        </div>
+        {isNativeVideo ? (
+            <video 
+                src={videoUrl} 
+                class="absolute inset-0 w-full h-full object-cover" 
+                autoplay loop muted playsinline 
+                onloadeddata="window.dispatchEvent(new CustomEvent('vm-hero-ready'))"
+            ></video>
+        ) : (
+            <!-- Contenedor con la clase video-bg que se encarga del tamaño y posición -->
+            <div id="hero-player-wrapper" class="video-bg opacity-0 transition-opacity duration-1000">
+                <div id="hero-player"></div>
+            </div>
+        )}
 
         <div class="absolute inset-0 bg-dark/10"></div>
     </div>
+
+    {!isNativeVideo && (
 
     <script is:inline define:vars={{ youtubeId }}>
         // Carga de la API de YouTube
@@ -58,8 +75,6 @@ const heroSubtitle = settings.hero_subtitle || '';
                 playerVars: {
                     autoplay: 1,
                     mute: 1,
-                    loop: 1,
-                    playlist: youtubeId,
                     controls: 0,
                     showinfo: 0,
                     rel: 0,
@@ -70,26 +85,48 @@ const heroSubtitle = settings.hero_subtitle || '';
                 },
                 events: {
                     onReady: (event) => {
+                        // Ensure video is muted before playing
                         event.target.mute();
-                        event.target.playVideo();
                         
-                        // Add compute-pressure to allow policy to avoid browser warnings
+                        // Force allow attribute for autoplay
                         const iframe = event.target.getIframe();
                         if (iframe) {
-                            const currentAllow = iframe.getAttribute('allow') || '';
-                            if (!currentAllow.includes('compute-pressure')) {
-                                iframe.setAttribute('allow', currentAllow + (currentAllow ? '; ' : '') + 'compute-pressure');
-                            }
+                            iframe.setAttribute('allow', 'autoplay; encrypted-media; compute-pressure');
                         }
+                        
+                        event.target.playVideo();
+                        
+                        // Pre-end loop specifically for Hero to avoid YouTube UI flash
+                        setInterval(() => {
+                            try {
+                                const time = event.target.getCurrentTime();
+                                const duration = event.target.getDuration();
+                                if (duration > 0 && time >= duration - 0.4) {
+                                    const wrapper = document.getElementById('hero-player-wrapper');
+                                    if (wrapper) wrapper.style.opacity = '0';
+                                    
+                                    event.target.seekTo(0);
+                                }
+                            } catch(e) {}
+                        }, 200);
                     },
                     onStateChange: (event) => {
                         // 1 = PLAYING
-                        if (event.data === window.YT.PlayerState.PLAYING) {
+                        if (event.data === 1) {
                             const wrapper = document.getElementById('hero-player-wrapper');
                             if (wrapper) wrapper.style.opacity = '1';
                             
                             // Emitir el evento para el preloader
                             window.dispatchEvent(new CustomEvent('vm-hero-ready'));
+                        }
+                        
+                        // Fallback
+                        if (event.data === 0) {
+                            const wrapper = document.getElementById('hero-player-wrapper');
+                            if (wrapper) wrapper.style.opacity = '0';
+                            
+                            event.target.seekTo(0);
+                            event.target.playVideo();
                         }
                     }
                 }
@@ -106,6 +143,8 @@ const heroSubtitle = settings.hero_subtitle || '';
             };
         }
     </script>
+
+    )}
 
     <!-- Content (Centered) -->
     <div

@@ -19,15 +19,16 @@ describe('buildProjectScreens', () => {
     expect(screens[1].length).toBe(4); // full chunk
   });
 
-  it('discards incomplete final chunk', () => {
+  it('includes partial final chunk', () => {
     const projects = [] as any[];
     for (let i = 1; i <= 3; i++) projects.push({ id: `f${i}`, featured_home: true });
-    // 5 normal -> only first full chunk of 4 is used
+    // 5 normal -> first chunk of 4 + partial chunk of 1
     for (let i = 1; i <= 5; i++) projects.push({ id: `n${i}` });
 
     const screens = buildProjectScreens(projects);
-    expect(screens.length).toBe(2);
+    expect(screens.length).toBe(3); // featured + full chunk + partial chunk
     expect(screens[1].length).toBe(4);
+    expect(screens[2].length).toBe(1); // the leftover project is now shown
   });
 });
 

@@ -116,8 +116,18 @@ const getVal = (key: string) => settings[key] || '';
                         
                         <div class="grid grid-cols-1" style="gap: 1.5rem;">
                             <div>
-                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo de Youtube (Hero)</label>
-                                <input type="url" name="hero_video_desktop" id="hero_video_url" value={getVal('hero_video_desktop')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo de Fondo (YouTube o Cloudinary MP4)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" name="hero_video_desktop" id="hero_video_url" value={getVal('hero_video_desktop')} placeholder="https://www.youtube.com/watch?v=... o subir archivo" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                    <button type="button" onclick="document.getElementById('file-hero-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
+                                        <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Subir
+                                    </button>
+                                    <input type="file" id="file-hero-video" class="hidden" accept="video/mp4,video/webm" />
+                                </div>
+                                <div id="loading-hero-video" class="hidden items-center gap-2 mt-2 text-xs text-rose-500 font-medium">
+                                    <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo vídeo... Esto puede tardar varios minutos.
+                                </div>
                             </div>
                             
                             <!-- Video Preview Box -->
@@ -201,8 +211,18 @@ const getVal = (key: string) => settings[key] || '';
                         <p class="text-sm text-zinc-400 mt-2 mb-6">Si introduces un vídeo, ocupará la pantalla completa y hará el menú transparente de forma automática.</p>
                         <div class="grid grid-cols-1" style="gap: 1.5rem;">
                             <div>
-                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Fondo (YouTube)</label>
-                                <input type="url" name="about_hero_video" value={getVal('about_hero_video')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Fondo (YouTube o Cloudinary MP4)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" name="about_hero_video" id="about_hero_video_url" value={getVal('about_hero_video')} placeholder="https://www.youtube.com/watch?v=... o subir archivo" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                    <button type="button" onclick="document.getElementById('file-about-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
+                                        <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Subir
+                                    </button>
+                                    <input type="file" id="file-about-video" class="hidden" accept="video/mp4,video/webm" />
+                                </div>
+                                <div id="loading-about-video" class="hidden items-center gap-2 mt-2 text-xs text-rose-500 font-medium">
+                                    <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo vídeo... Esto puede tardar varios minutos.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -226,8 +246,18 @@ const getVal = (key: string) => settings[key] || '';
                         <p class="text-sm text-zinc-400 mt-2 mb-6">Si introduces un vídeo, ocupará la portada completa (diseño oscuro). Si lo dejas vacío, se usará el fondo blanco y elegante con puntos por defecto.</p>
                         <div class="grid grid-cols-1" style="gap: 1.5rem;">
                             <div>
-                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo (YouTube)</label>
-                                <input type="url" name="contact_hero_video" value={getVal('contact_hero_video')} placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Fondo (YouTube o Cloudinary MP4)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" name="contact_hero_video" id="contact_hero_video_url" value={getVal('contact_hero_video')} placeholder="https://www.youtube.com/watch?v=... o subir archivo" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                    <button type="button" onclick="document.getElementById('file-contact-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
+                                        <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Subir
+                                    </button>
+                                    <input type="file" id="file-contact-video" class="hidden" accept="video/mp4,video/webm" />
+                                </div>
+                                <div id="loading-contact-video" class="hidden items-center gap-2 mt-2 text-xs text-rose-500 font-medium">
+                                    <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo vídeo... Esto puede tardar varios minutos.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -283,6 +313,57 @@ function syncColor(pickerId: string, inputId: string) {
         syncColor('primary_color_picker', 'primary_color_input');
         syncColor('secondary_color_picker', 'secondary_color_input');
 
+        // Video Upload Logic
+        async function setupVideoUpload(inputId: string, fileInputId: string, loadingId: string) {
+            const fileInput = document.getElementById(fileInputId) as HTMLInputElement;
+            const urlInput = document.getElementById(inputId) as HTMLInputElement;
+            const loading = document.getElementById(loadingId)!;
+
+            if (!fileInput || !urlInput || !loading) return;
+
+            fileInput.addEventListener('change', async () => {
+                const file = fileInput.files?.[0];
+                if (!file) return;
+
+                loading.classList.remove('hidden');
+                loading.classList.add('flex');
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('folder', 'background_videos'); // Save in a specific folder
+
+                try {
+                    const res = await fetch('/api/admin/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        urlInput.value = data.url;
+                        if (urlInput.id === 'hero_video_url') updateYoutubePreview(data.url);
+                        
+                        // Show a quick toast
+                        const saveBtn = document.getElementById('btn-save-all');
+                        if (saveBtn) saveBtn.click(); // Auto-save after upload
+                    } else {
+                        const err = await res.json();
+                        alert('Error al subir vídeo: ' + err.error);
+                    }
+                } catch (error) {
+                    alert('Error de conexión al subir vídeo');
+                } finally {
+                    loading.classList.add('hidden');
+                    loading.classList.remove('flex');
+                    fileInput.value = ''; // Reset input
+                }
+            });
+        }
+
+        setupVideoUpload('hero_video_url', 'file-hero-video', 'loading-hero-video');
+        setupVideoUpload('about_hero_video_url', 'file-about-video', 'loading-about-video');
+        setupVideoUpload('contact_hero_video_url', 'file-contact-video', 'loading-contact-video');
+
         // YouTube Preview Logic
         const heroUrlInput = document.getElementById('hero_video_url') as HTMLInputElement;
         const heroIframe = document.getElementById('hero-preview-iframe') as HTMLIFrameElement;
@@ -298,9 +379,30 @@ function syncColor(pickerId: string, inputId: string) {
             if (videoId) {
                 heroIframe.src = `https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&mute=1&controls=0`;
                 heroIframe.classList.remove('hidden');
+            } else if (url.includes('cloudinary.com') || url.endsWith('.mp4') || url.endsWith('.webm')) {
+                // Not a youtube video, just a native video url
+                // Cannot preview easily in iframe without an HTML wrapper, hide preview box or change it to video tag
+                heroIframe.classList.add('hidden');
+                heroIframe.src = '';
+                const container = document.getElementById('hero-preview-container');
+                if (container) {
+                    let videoEl = container.querySelector('video');
+                    if (!videoEl) {
+                        videoEl = document.createElement('video');
+                        videoEl.className = 'absolute inset-0 w-full h-full object-cover';
+                        videoEl.autoplay = true;
+                        videoEl.muted = true;
+                        videoEl.loop = true;
+                        container.appendChild(videoEl);
+                    }
+                    videoEl.src = url;
+                    videoEl.style.display = 'block';
+                }
             } else {
                 heroIframe.classList.add('hidden');
                 heroIframe.src = '';
+                const videoEl = document.getElementById('hero-preview-container')?.querySelector('video');
+                if (videoEl) videoEl.style.display = 'none';
             }
         };
 

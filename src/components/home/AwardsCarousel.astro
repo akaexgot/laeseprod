@@ -12,7 +12,7 @@ const awards = await getAwards();
 {awards.length > 0 && (
 <div
     id="awards-section"
-    class="bg-white border-b border-black/5 relative overflow-hidden z-10 awards-carousel-wrap h-32 lg:h-48 flex items-center"
+    class="bg-white border-b border-black/5 relative overflow-hidden z-10 awards-carousel-wrap h-[10vh] flex items-center"
 >
     <div class="overflow-hidden w-full">
         <div class="marquee-track flex items-center gap-10 lg:gap-20">
@@ -25,13 +25,13 @@ const awards = await getAwards();
                                     href={award.website} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    class="block transition-all duration-500 hover:scale-110"
+                                    class="block transition-all duration-500"
                                     title={`Ver premio ${award.name}`}
                                 >
                                     <img
                                         src={award.image_url}
                                         alt={award.name}
-                                        class="h-24 lg:h-36 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                        class="h-10 lg:h-16 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
                                         loading="lazy"
                                         decoding="async"
                                     />
@@ -40,7 +40,7 @@ const awards = await getAwards();
                                 <img
                                     src={award.image_url}
                                     alt={award.name}
-                                    class="h-24 lg:h-36 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                    class="h-10 lg:h-16 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
                                 />
                             )}
                         </div>

@@ -245,7 +245,7 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
             <aside class="contract-sidebar">
                 <!-- WhatsApp Card -->
                 <a
-                    href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20tengo%20una%20duda%20con%20el%20contrato%20num%20${contract?.id}`}
+                    href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}?text=Hola,%20tengo%20una%20duda%20con%20el%20contrato%20num%20${contract?.id}`}
                     target="_blank"
                     rel="noopener"
                     class="support-card support-card--wa"

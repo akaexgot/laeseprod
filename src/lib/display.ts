@@ -33,8 +33,8 @@ export function toYouTubeEmbed(url?: string | null): string | null {
 /**
  * Build screens according to rules:
  * - First screen: up to 3 featured projects (`featured_home`)
- * - Subsequent screens: full chunks of 4 projects (2x2)
- * - Only full 4-item screens are included (leftovers are discarded)
+ * - Subsequent screens: chunks of up to 4 projects (2x2)
+ * - Partial chunks are included (no projects are discarded)
  */
 export function buildProjectScreens(all: Project[]): Project[][] {
   const FEATURED_LIMIT = 3;
@@ -48,7 +48,7 @@ export function buildProjectScreens(all: Project[]): Project[][] {
   const chunks: Project[][] = [];
   for (let i = 0; i < remaining.length; i += CHUNK_SIZE) {
     const chunk = remaining.slice(i, i + CHUNK_SIZE);
-    if (chunk.length === CHUNK_SIZE) chunks.push(chunk);
+    if (chunk.length > 0) chunks.push(chunk);
   }
 
   const screens: Project[][] = [];

@@ -4,6 +4,7 @@
  */
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
+import { invalidateCache } from '../../../lib/data';
 
 export const POST: APIRoute = async ({ request }) => {
     const sb = getServiceSupabase();
@@ -21,6 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
         const { data, error } = await sb.from('projects').insert(body).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+        invalidateCache("projects");
         return new Response(JSON.stringify(data), { status: 201 });
     } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });
@@ -38,6 +40,7 @@ export const PUT: APIRoute = async ({ request }) => {
 
         const { data, error } = await sb.from('projects').update(updates).eq('id', id).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+        invalidateCache("projects");
         return new Response(JSON.stringify(data), { status: 200 });
     } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });
@@ -54,6 +57,7 @@ export const DELETE: APIRoute = async ({ request }) => {
 
         const { error } = await sb.from('projects').delete().eq('id', id);
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+        invalidateCache("projects");
         return new Response(JSON.stringify({ ok: true }), { status: 200 });
     } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });

@@ -32,67 +32,7 @@ const { title, description, image, noindex } = Astro.props;
         />
     </head>
     <body class="bg-dark text-light antialiased">
-        <!-- ── PRELOADER ── -->
-        <div id="site-preloader" class="fixed inset-0 z-[9999] bg-[#0a0a0f] grid place-items-center transition-all duration-700 ease-in-out">
-            <div class="flex flex-col items-center justify-center w-full px-10">
-                <div class="preloader-logo-container relative w-32 h-32 lg:w-40 lg:h-40 flex items-center justify-center">
-                    <img src="/logo-blanco-web.png" alt="Cargando..." class="w-full h-full object-contain animate-preloader-spin" />
-                    <div class="absolute inset-0 rounded-full border-2 border-carmin/20 border-t-carmin animate-spin duration-500"></div>
-                </div>
-            </div>
-        </div>
 
-        <style>
-            #site-preloader.fade-out {
-                opacity: 0;
-                pointer-events: none;
-                visibility: hidden;
-            }
-            .animate-preloader-spin {
-                animation: preloader-pulse 2s ease-in-out infinite;
-            }
-            @keyframes preloader-pulse {
-                0%, 100% { transform: scale(0.98); opacity: 0.9; }
-                50% { transform: scale(1.02); opacity: 1; }
-            }
-        </style>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const preloader = document.getElementById('site-preloader');
-                if (!preloader) return;
-
-                const isHome = window.location.pathname === '/';
-
-                let loadingFinished = false;
-                const dismissPreloader = () => {
-                    loadingFinished = true;
-                    
-                    
-                    setTimeout(() => {
-                        preloader.classList.add('fade-out');
-                        setTimeout(() => {
-                            preloader.remove();
-                        }, 700);
-                    }, 200);
-                };
-
-                // Normal pages: wait for window.load
-                window.addEventListener('load', () => {
-                    if (!isHome) dismissPreloader();
-                });
-
-                // Home page: wait for the video signal explicitly
-                window.addEventListener('vm-hero-ready', () => {
-                    dismissPreloader();
-                });
-
-                // Safety timeout - expanded to 15s to allow high quality buffering if needed
-                setTimeout(() => {
-                    dismissPreloader();
-                }, 15000);
-            });
-        </script>
 
         <Navbar />
 
@@ -319,6 +259,130 @@ const { title, description, image, noindex } = Astro.props;
             }
 
             if (visitorName && chatNameForm) chatNameForm.style.display = 'none';
+        })();
+        </script>
+        <!-- ═══ EXCLUSIVE VIDEO PLAYBACK ═══ -->
+        <!-- Only one YouTube video plays at a time; starting one pauses all others -->
+        <script>
+        (function() {
+            /**
+             * Exclusive YouTube Playback
+             * Uses YouTube IFrame API postMessage to ensure only one video
+             * plays at a time across the entire page.
+             */
+
+            // Pause a YouTube iframe via postMessage
+            function pauseIframe(iframe) {
+                try {
+                    if (iframe.contentWindow) {
+                        iframe.contentWindow.postMessage(
+                            JSON.stringify({ event: 'command', func: 'pauseVideo', args: '' }),
+                            '*'
+                        );
+                    }
+                } catch (e) { /* cross-origin safety */ }
+            }
+
+            // Get all YouTube iframes on the page
+            function getYouTubeIframes() {
+                return Array.from(document.querySelectorAll('iframe'))
+                    .filter(f => f.src && f.src.includes('youtube.com/embed'));
+            }
+
+            // Listen for YouTube state change messages
+            window.addEventListener('message', (event) => {
+                // YouTube sends messages as JSON strings
+                let data;
+                try {
+                    data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                } catch (e) { return; }
+
+                // YouTube IFrame API event
+                if (data?.event === 'infoDelivery') {
+                    const state = data?.info?.playerState;
+                    const currentTime = data?.info?.currentTime || 0;
+                    const duration = data?.info?.duration || 0;
+                    
+                    const allIframes = getYouTubeIframes();
+                    const sourceIframe = allIframes.find(f => {
+                        try { return f.contentWindow === event.source; } catch (e) { return false; }
+                    });
+                    if (!sourceIframe) return;
+
+                    // Exclude Hero player, as it manages its own state via YT.Player API
+                    if (sourceIframe.id === 'hero-player') return;
+
+                    // PRE-END LOOPING: If it's a background video, loop it BEFORE it ends to avoid the Play button flash!
+                    if (sourceIframe.src.includes('mute=1') && duration > 0 && currentTime >= duration - 0.4) {
+                        // Fade out to mask any YouTube UI flashes during seek
+                        sourceIframe.style.transition = 'opacity 0.2s';
+                        sourceIframe.style.opacity = '0';
+                        
+                        sourceIframe.contentWindow.postMessage(
+                            JSON.stringify({ event: 'command', func: 'seekTo', args: [0, true] }), '*'
+                        );
+                        
+                        return; // Prevent further processing
+                    }
+
+                    // Fallback manual loop if it somehow reaches ENDED (0)
+                    if (state === 0 && sourceIframe.src.includes('mute=1')) {
+                        sourceIframe.style.transition = 'opacity 0.2s';
+                        sourceIframe.style.opacity = '0';
+                        
+                        sourceIframe.contentWindow.postMessage(
+                            JSON.stringify({ event: 'command', func: 'seekTo', args: [0, true] }), '*'
+                        );
+                        sourceIframe.contentWindow.postMessage(
+                            JSON.stringify({ event: 'command', func: 'playVideo', args: '' }), '*'
+                        );
+                        
+                        return;
+                    }
+
+                    // When video is playing (1), ensure it's visible (fades in)
+                    if (state === 1 && sourceIframe.src.includes('mute=1')) {
+                        if (sourceIframe.style.opacity === '0' || sourceIframe.style.opacity === '') {
+                            sourceIframe.style.transition = 'opacity 0.5s';
+                            sourceIframe.style.opacity = '1';
+                        }
+                    }
+
+                    // If a foreground video started playing (1), pause other foreground videos
+                    if (state === 1 && sourceIframe.classList.contains('vm-exclusive-video')) {
+                        allIframes.forEach(iframe => {
+                            if (iframe !== sourceIframe && iframe.classList.contains('vm-exclusive-video')) {
+                                pauseIframe(iframe);
+                            }
+                        });
+                    }
+                }
+            });
+
+            // Enable YouTube JS API listening on all iframes
+            // YouTube requires enablejsapi=1 AND we need to call addEventListener
+            // via postMessage to receive state change events
+            function enableListening() {
+                getYouTubeIframes().forEach(iframe => {
+                    try {
+                        if (iframe.contentWindow) {
+                            iframe.contentWindow.postMessage(
+                                JSON.stringify({ event: 'listening', id: iframe.id || 'yt' }),
+                                '*'
+                            );
+                        }
+                    } catch (e) { /* cross-origin safety */ }
+                });
+            }
+
+            // Run on load and periodically for lazy-loaded iframes
+            if (document.readyState === 'complete') {
+                enableListening();
+            } else {
+                window.addEventListener('load', enableListening);
+            }
+            // Re-enable for dynamically loaded iframes (e.g. lazy-loaded on scroll)
+            setInterval(enableListening, 1000);
         })();
         </script>
     </body>

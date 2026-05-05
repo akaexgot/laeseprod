@@ -17,18 +17,26 @@ if (!project) {
     return Astro.redirect('/proyectos');
 }
 
-function getVideoId(value: string | null | undefined): string | null {
-    if (!value) return null;
-    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    if (match) return match[1];
-    if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
-    return null;
-}
+const isNative = (url: string | null | undefined) => !!url && (url.includes('cloudinary.com') || url.endsWith('.mp4') || url.endsWith('.webm'));
 
-const mainVideoId = getVideoId(project.video_project);
-const expDesktopId = getVideoId(project.video_explanation_desktop);
-const expMobileId = getVideoId(project.video_explanation_mobile);
-const makingOfId = expMobileId || expDesktopId;
+const projectVideoUrl = project.video_project;
+const projectVideoIsNative = isNative(projectVideoUrl);
+const mainVideoId = !projectVideoIsNative ? getVideoId(projectVideoUrl) : null;
+
+const expDesktopUrl = project.video_explanation_desktop;
+const expMobileUrl = project.video_explanation_mobile;
+const makingOfUrl = expMobileUrl || expDesktopUrl;
+const makingOfIsNative = isNative(makingOfUrl);
+const makingOfId = !makingOfIsNative ? (getVideoId(expMobileUrl) || getVideoId(expDesktopUrl)) : null;
+
+// Final vars for Screen 1
+const hasMakingOf = !!makingOfUrl || !!makingOfId;
+const s1VideoUrl = hasMakingOf ? makingOfUrl : projectVideoUrl;
+const s1VideoId = hasMakingOf ? makingOfId : mainVideoId;
+const s1IsNative = hasMakingOf ? makingOfIsNative : projectVideoIsNative;
+const s1IsHorizontal = !hasMakingOf && !projectVideoIsNative; // If it's the main project video and it's YouTube, it's usually horizontal. 
+// Actually, if it's main project video, we use the horizontal frame.
+const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "pj-hero__video-frame--horizontal" : "");
 ---
 
 <BaseLayout title={project.title} description={project.subtitle || project.description || ''}>
@@ -40,27 +48,25 @@ const makingOfId = expMobileId || expDesktopId;
 
                 <!-- Left: Vertical Video (Making Of) -->
                 <div class="pj-hero__video-col reveal-left">
-                    {makingOfId ? (
-                        <div class="pj-hero__video-frame">
-                            <iframe
-                                src={`https://www.youtube.com/embed/${makingOfId}?rel=0&modestbranding=1&enablejsapi=1&origin=${Astro.url.origin}`}
-                                class="pj-hero__video-iframe"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
-                                allowfullscreen
-                                title="Making Of"
-                            ></iframe>
-                        </div>
-                    ) : mainVideoId ? (
-                        <div class="pj-hero__video-frame pj-hero__video-frame--horizontal">
-                            <iframe
-                                src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1&enablejsapi=1&origin=${Astro.url.origin}`}
-                                class="pj-hero__video-iframe"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
-                                allowfullscreen
-                                title={project.title}
-                            ></iframe>
+                    {s1VideoUrl || s1VideoId ? (
+                        <div class={`pj-hero__video-frame ${s1FrameClass}`}>
+                            {s1IsNative ? (
+                                <video 
+                                    src={s1VideoUrl} 
+                                    class="pj-hero__video-iframe" 
+                                    autoplay loop muted playsinline 
+                                    style="object-fit: cover;"
+                                ></video>
+                            ) : (
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${s1VideoId}?rel=0&modestbranding=1&enablejsapi=1&origin=${Astro.url.origin}`}
+                                    class="pj-hero__video-iframe"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
+                                    allowfullscreen
+                                    title={hasMakingOf ? "Making Of" : project.title}
+                                ></iframe>
+                            )}
                         </div>
                     ) : (
                         <div class="pj-hero__video-placeholder">
@@ -109,20 +115,29 @@ const makingOfId = expMobileId || expDesktopId;
         </section>
 
         <!-- ═══ SCREEN 2: Project Video — Fullscreen (plays in-place) ═══ -->
-        {mainVideoId && (
+        {projectVideoUrl || mainVideoId ? (
         <section class="pj-detail__screen pj-detail__video-screen" id="pj-video">
-            <!-- Background video (muted, autoplay, no controls) -->
+            {/* Background video (muted, autoplay, no controls) */}
             <div class="pj-video__bg" id="pjVideoBg">
-                <iframe
-                    src={`https://www.youtube.com/embed/${mainVideoId}?autoplay=1&mute=1&loop=1&playlist=${mainVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
-                    class="pj-video__bg-iframe"
-                    frameborder="0"
-                    allow="autoplay; encrypted-media; compute-pressure"
-                ></iframe>
+                {projectVideoIsNative ? (
+                    <video 
+                        src={projectVideoUrl} 
+                        class="pj-video__bg-iframe" 
+                        autoplay loop muted playsinline 
+                        style="object-fit: cover;"
+                    ></video>
+                ) : (
+                    <iframe
+                        src={`https://www.youtube.com/embed/${mainVideoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
+                        class="pj-video__bg-iframe"
+                        frameborder="0"
+                        allow="autoplay; encrypted-media; compute-pressure"
+                    ></iframe>
+                )}
             </div>
-            <!-- Overlay (hides when playing) -->
+            {/* Overlay (hides when playing) */}
             <div class="pj-video__overlay" id="pjVideoOverlay"></div>
-            <!-- Play button + info (hides when playing) -->
+            {/* Play button + info (hides when playing) */}
             <div class="pj-video__content" id="pjVideoContent">
                 <span class="pj-video__label">Reproducir proyecto</span>
                 <h2 class="pj-video__title">{project.title}</h2>
@@ -130,18 +145,29 @@ const makingOfId = expMobileId || expDesktopId;
                     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </button>
             </div>
-            <!-- Full interactive iframe (hidden until play, replaces bg) -->
-            <iframe
-                id="pjFullPlayer"
-                class="pj-video__full-player"
-                data-src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1&autoplay=1&enablejsapi=1&origin=${Astro.url.origin}`}
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
-                allowfullscreen
-                title={project.title}
-            ></iframe>
+            {/* Full interactive player (hidden until play, replaces bg) */}
+            {projectVideoIsNative ? (
+                <video 
+                    id="pjFullPlayer"
+                    class="pj-video__full-player"
+                    src={projectVideoUrl}
+                    controls
+                    playsinline
+                    style="object-fit: contain; background: #000;"
+                ></video>
+            ) : (
+                <iframe
+                    id="pjFullPlayer"
+                    class="pj-video__full-player"
+                    data-src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1&autoplay=1&enablejsapi=1&origin=${Astro.url.origin}`}
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
+                    allowfullscreen
+                    title={project.title}
+                ></iframe>
+            )}
         </section>
-        )}
+        ) : null}
 
         <!-- ═══ SCREEN 3: CONTACT FORM ═══ -->
         <section class="pj-detail__screen pj-detail__cta-screen" id="pj-cta">
@@ -459,13 +485,20 @@ const makingOfId = expMobileId || expDesktopId;
 
         /* ── In-place Play Button ── */
         const playBtn = document.getElementById('pjPlayBtn');
-        const fullPlayer = document.getElementById('pjFullPlayer') as HTMLIFrameElement;
+        const fullPlayer = document.getElementById('pjFullPlayer') as HTMLElement;
         const videoScreen = document.getElementById('pj-video');
 
         if (playBtn && fullPlayer && videoScreen) {
             playBtn.addEventListener('click', () => {
-                if (fullPlayer.dataset.src) {
-                    fullPlayer.src = fullPlayer.dataset.src;
+                if (fullPlayer.tagName === 'IFRAME') {
+                    const iframe = fullPlayer as HTMLIFrameElement;
+                    if (iframe.dataset.src) {
+                        iframe.src = iframe.dataset.src;
+                    }
+                } else if (fullPlayer.tagName === 'VIDEO') {
+                    const video = fullPlayer as HTMLVideoElement;
+                    video.play();
+                    video.muted = false;
                 }
                 fullPlayer.classList.add('is-playing');
                 videoScreen.classList.add('is-playing');

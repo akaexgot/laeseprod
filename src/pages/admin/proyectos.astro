@@ -170,8 +170,17 @@ const projects = await getProjects();
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Hero (YouTube)</label>
-                            <input type="url" id="p-video" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="URL o ID de YouTube" />
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Fondo (YouTube o Cloudinary MP4)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="p-video" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="URL YouTube o Cloudinary" />
+                                <button type="button" onclick="document.getElementById('file-p-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
+                                    <i data-lucide="upload" class="w-4 h-4"></i>
+                                </button>
+                                <input type="file" id="file-p-video" class="hidden" accept="video/mp4,video/webm" />
+                            </div>
+                            <div id="loading-p-video" class="hidden items-center gap-2 mt-2 text-xs text-rose-500 font-medium">
+                                <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo...
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of (Shorts/YouTube)</label>
@@ -305,6 +314,45 @@ const projects = await getProjects();
         }
 
         setupDropZone(dropZoneThumb, fileInputThumb, 'p-thumbnail', 'preview-thumb', 'empty-thumb', 'loading-thumb');
+
+        // Setup Video Upload
+        const fileInputVideo = document.getElementById('file-p-video') as HTMLInputElement;
+        if (fileInputVideo) {
+            fileInputVideo.addEventListener('change', async () => {
+                const file = fileInputVideo.files?.[0];
+                if (!file) return;
+
+                const loading = document.getElementById('loading-p-video')!;
+                loading.classList.remove('hidden');
+                loading.classList.add('flex');
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('folder', 'background_videos');
+
+                try {
+                    const res = await fetch('/api/admin/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        $('p-video').value = data.url;
+                        showToast('Vídeo subido correctamente', 'success');
+                    } else {
+                        const err = await res.json();
+                        showToast(err.error || 'Error al subir vídeo', 'error');
+                    }
+                } catch (error) {
+                    showToast('Error de conexión al subir vídeo', 'error');
+                } finally {
+                    loading.classList.add('hidden');
+                    loading.classList.remove('flex');
+                    fileInputVideo.value = '';
+                }
+            });
+        }
 
         async function handleUpload(file: File, inputId: string, previewId: string, emptyId: string, loadingId: string) {
             const loading = document.getElementById(loadingId)!;

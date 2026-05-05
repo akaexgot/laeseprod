@@ -66,7 +66,7 @@ const settings = await getSettings();
 
             <!-- WhatsApp -->
             <a
-                href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20saber%20más%20sobre%20vuestros%20servicios%20de%20video%20marketing.`}
+                href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}?text=Hola,%20me%20gustaría%20saber%20más%20sobre%20vuestros%20servicios%20de%20video%20marketing.`}
                 target="_blank"
                 rel="noopener"
                 class="contact-card contact-card--wa"

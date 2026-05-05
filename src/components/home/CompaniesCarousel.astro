@@ -9,7 +9,7 @@ const companies = await getCompanies();
 
 <div
     id="companies-section"
-    class="bg-white border-b border-black/5 relative overflow-hidden z-10 companies-carousel-wrap h-[15vh] flex items-center"
+    class="bg-white border-b border-black/5 relative overflow-hidden z-10 companies-carousel-wrap h-[10vh] flex items-center"
 >
     <!-- Label (compact) -->
 
@@ -25,13 +25,13 @@ const companies = await getCompanies();
                                     href={company.website} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    class="block transition-all duration-500 hover:scale-110"
+                                    class="block transition-all duration-500"
                                     title={`Visitar web de ${company.name}`}
                                 >
                                     <img
                                         src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
                                         alt={company.name}
-                                        class="h-16 lg:h-28 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                        class="h-10 lg:h-16 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
                                         loading="lazy"
                                         decoding="async"
                                     />
@@ -40,7 +40,7 @@ const companies = await getCompanies();
                                 <img
                                     src={company.logo_url || `https://placehold.co/120x40/transparent/333333?text=${company.name.replace(/\s/g, '+')}`}
                                     alt={company.name}
-                                    class="h-16 lg:h-28 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain hover:scale-110"
+                                    class="h-10 lg:h-16 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 object-contain"
                                 />
                             )}
                         </div>

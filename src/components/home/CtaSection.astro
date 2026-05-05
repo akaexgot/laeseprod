@@ -50,7 +50,7 @@ const settings = await getSettings();
       </a>
 
       <a
-        href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20hablar%20sobre%20un%20proyecto%20audiovisual.`}
+        href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}?text=Hola,%20me%20gustaría%20hablar%20sobre%20un%20proyecto%20audiovisual.`}
         target="_blank" rel="noopener"
         class="cta-btn cta-btn--wa group"
       >

@@ -33,7 +33,7 @@ const contactHeroVideoId = extractYouTubeId(settings.contact_hero_video);
         <section id="video-hero" class="relative min-h-[600px] h-screen flex flex-col items-center justify-center text-center overflow-hidden w-full">
             <div class="absolute inset-0 z-0 overflow-hidden bg-black pointer-events-none">
                 <iframe
-                    src={`https://www.youtube.com/embed/${contactHeroVideoId}?autoplay=1&mute=1&loop=1&playlist=${contactHeroVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    src={`https://www.youtube.com/embed/${contactHeroVideoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                     style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; transform: translate(-50%, -50%);"
                     frameborder="0" allow="autoplay; encrypted-media"
                     title="Vídeo de fondo de contacto"
@@ -183,7 +183,7 @@ const contactHeroVideoId = extractYouTubeId(settings.contact_hero_video);
 
                 <!-- WhatsApp -->
                 <a
-                    href={`https://wa.me/${settings.whatsapp_number}?text=Hola,%20me%20gustaría%20saber%20más%20sobre%20vuestros%20servicios%20de%20video%20marketing.`}
+                    href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}?text=Hola,%20me%20gustaría%20saber%20más%20sobre%20vuestros%20servicios%20de%20video%20marketing.`}
                     target="_blank"
                     rel="noopener"
                     class="contact-card contact-card--wa"

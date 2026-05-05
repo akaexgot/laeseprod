@@ -35,29 +35,40 @@ function getVideoId(value: string | null | undefined): string | null {
       </svg>
     </a>
   </div>
-  <div class="w-full h-[85vh] flex flex-col lg:flex-row relative">
+  <div class="w-full h-[90vh] flex flex-col lg:flex-row relative">
     <!-- Slot 0 — Left large -->
     {projects[0] && (() => {
-      const videoId = getVideoId(projects[0].video_project);
-      const makingOfId = getVideoId(projects[0].video_explanation_mobile) || getVideoId(projects[0].video_explanation_desktop) || videoId;
-      if (!videoId) return null;
+      const videoUrl = projects[0].video_project;
+      const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
+      const videoId = !isNative ? getVideoId(videoUrl) : null;
+      
+      const makingOfUrl = projects[0].video_explanation_mobile || projects[0].video_explanation_desktop;
+      const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
+      const makingOfId = !isMakingOfNative ? (getVideoId(projects[0].video_explanation_mobile) || getVideoId(projects[0].video_explanation_desktop)) : null;
+
+      if (!isNative && !videoId) return null;
       return (
         <a href={`/proyectos/${projects[0].slug}`} class="group relative w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden block reveal-left project-card"
            data-pm-title={projects[0].title}
            data-pm-subtitle={projects[0].subtitle || ''}
            data-pm-description={projects[0].description || ''}
-           data-pm-video={videoId}
-           data-pm-makingof={makingOfId}
+           data-pm-video={isNative ? videoUrl : videoId}
+           data-pm-makingof={isMakingOfNative ? makingOfUrl : makingOfId}
            data-pm-slug={projects[0].slug}
            data-pm-client={projects[0].client_name || ''}>
           <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
-               style={`background-image: url(https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg); background-size: cover; background-position: center;`}>
-            <iframe
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-              style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:177.78vh; height:56.25vw; min-width:100%; min-height:100%;"
-              frameborder="0" allow="autoplay; encrypted-media"
-              loading="lazy"
-            ></iframe>
+               style={!isNative ? `background-image: url(https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg); background-size: cover; background-position: center;` : ''}>
+            {isNative ? (
+              <video src={videoUrl} class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline></video>
+            ) : (
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
+                style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.5); width:100%; height:100%; opacity: 0; transition: opacity 1s; pointer-events: none;"
+                frameborder="0" allow="autoplay; encrypted-media"
+                onload="setTimeout(() => this.style.opacity='1', 800)"
+              ></iframe>
+              <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+            )}
             <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
           </div>
           <div class="fp-info fp-info--large relative z-40">
@@ -86,26 +97,37 @@ function getVideoId(value: string | null | undefined): string | null {
     <div class="w-full lg:w-1/2 h-1/2 lg:h-full flex flex-col reveal-right delay-2">
       {projects.slice(1, 3).map((project: any, idx: number) => {
         const slot = idx + 1;
-        const videoId = getVideoId(project.video_project);
-        const makingOfId = getVideoId(project.video_explanation_mobile) || getVideoId(project.video_explanation_desktop) || videoId;
-        if (!videoId) return null;
+        const videoUrl = project.video_project;
+        const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
+        const videoId = !isNative ? getVideoId(videoUrl) : null;
+        
+        const makingOfUrl = project.video_explanation_mobile || project.video_explanation_desktop;
+        const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
+        const makingOfId = !isMakingOfNative ? (getVideoId(project.video_explanation_mobile) || getVideoId(project.video_explanation_desktop)) : null;
+
+        if (!isNative && !videoId) return null;
         return (
-          <a href={`/proyectos/${project.slug}`} class={`group relative w-full h-1/2 overflow-hidden block border-l border-white/5 ${idx === 0 ? 'border-b border-white/5' : ''} project-card`}
+          <a href={`/proyectos/${project.slug}`} class="group relative w-full h-1/2 overflow-hidden block project-card"
              data-pm-title={project.title}
              data-pm-subtitle={project.subtitle || ''}
              data-pm-description={project.description || ''}
-             data-pm-video={videoId}
-             data-pm-makingof={makingOfId}
+             data-pm-video={isNative ? videoUrl : videoId}
+             data-pm-makingof={isMakingOfNative ? makingOfUrl : makingOfId}
              data-pm-slug={project.slug}
              data-pm-client={project.client_name || ''}>
             <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
-                 style={`background-image: url(https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg); background-size: cover; background-position: center;`}>
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:177.78vh; height:56.25vw; min-width:100%; min-height:100%;"
-                frameborder="0" allow="autoplay; encrypted-media"
-                loading="lazy"
-              ></iframe>
+                 style={!isNative ? `background-image: url(https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg); background-size: cover; background-position: center;` : ''}>
+              {isNative ? (
+                <video src={videoUrl} class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline></video>
+              ) : (
+                <iframe
+                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
+                  style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.5); width:100%; height:100%; opacity: 0; transition: opacity 1s; pointer-events: none;"
+                  frameborder="0" allow="autoplay; encrypted-media"
+                  onload="setTimeout(() => this.style.opacity='1', 800)"
+                ></iframe>
+                <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+              )}
               <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             </div>
             <div class="fp-info fp-info--small relative z-40">

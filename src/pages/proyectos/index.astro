@@ -1,7 +1,7 @@
 ---
 /**
  * Projects Listing Page — Fullpage Scroll Mosaic
- * Only shows projects with video_project. Hides incomplete groups.
+ * Only shows projects with video_project. Shows all projects regardless of group size.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import "../../styles/proyectos.css";
@@ -23,7 +23,7 @@ function getVideoId(value: string | null | undefined): string | null {
 
 // Build screens according to business rules:
 // - First screen: up to 3 featured projects (`featured_home`)
-// - Following screens: chunks of 4 (2x2). Only full chunks are included.
+// - Following screens: chunks of up to 4 projects. Partial chunks are included.
 function buildProjectScreens(all: any[]) {
     const FEATURED_LIMIT = 3;
     const CHUNK_SIZE = 4;
@@ -34,11 +34,11 @@ function buildProjectScreens(all: any[]) {
     // 2. remaining projects (preserve original order, exclude featured)
     const remaining = all.filter(p => !featured.some((f: any) => f.id === p.id));
 
-    // 3. chunk remaining into groups of CHUNK_SIZE and only keep full chunks
+    // 3. chunk remaining into groups of CHUNK_SIZE (include partial chunks)
     const chunks: any[][] = [];
     for (let i = 0; i < remaining.length; i += CHUNK_SIZE) {
         const chunk = remaining.slice(i, i + CHUNK_SIZE);
-        if (chunk.length === CHUNK_SIZE) chunks.push(chunk);
+        if (chunk.length > 0) chunks.push(chunk);
     }
 
     const screens: any[][] = [];
@@ -75,26 +75,38 @@ const screens = buildProjectScreens(projects);
                         <Fragment>
                             {/* Large cell */}
                             {(() => {
-                                const vid = getVideoId(group[0].video_project);
-                                const makingOfId = getVideoId(group[0].video_explanation_mobile) || getVideoId(group[0].video_explanation_desktop) || vid;
-                                if (!vid) return null;
+                                const videoUrl = group[0].video_project;
+                                const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
+                                const vid = !isNative ? getVideoId(videoUrl) : null;
+                                
+                                const makingOfUrl = group[0].video_explanation_mobile || group[0].video_explanation_desktop;
+                                const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
+                                const makingOfId = !isMakingOfNative ? (getVideoId(group[0].video_explanation_mobile) || getVideoId(group[0].video_explanation_desktop)) : null;
+
+                                if (!isNative && !vid) return null;
                                 return (
                                     <a href={`/proyectos/${group[0].slug}`} class="pj-cell pj-cell--large group"
                                        data-pm-title={group[0].title}
                                        data-pm-subtitle={group[0].subtitle || ''}
                                        data-pm-description={group[0].description || ''}
-                                       data-pm-video={vid}
-                                       data-pm-makingof={makingOfId}
+                                       data-pm-video={isNative ? videoUrl : vid}
+                                       data-pm-makingof={isMakingOfNative ? makingOfUrl : makingOfId}
                                        data-pm-slug={group[0].slug}
                                        data-pm-client={group[0].client_name || ''}>
                                         <div class="pj-cell__video">
-                                            <iframe
-                                                class="pj-cell__iframe"
-                                                data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                                                src=""
-                                                frameborder="0" allow="autoplay; encrypted-media"
-                                                loading="lazy"
-                                            ></iframe>
+                                            {isNative ? (
+                                                <video src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
+                                            ) : (
+                                                <iframe
+                                                    class="pj-cell__iframe"
+                                                    data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${vid}&loop=1`}
+                                                    src=""
+                                                    frameborder="0" allow="autoplay; encrypted-media"
+                                                    style="pointer-events: none; transform: translate(-50%, -50%) scale(1.5); top: 50%; left: 50%; position: absolute; width: 100%; height: 100%;"
+                                                    loading="lazy"
+                                                ></iframe>
+                                                <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+                                            )}
                                             {group[0].thumbnail && <img src={group[0].thumbnail} alt={group[0].title} class="pj-cell__thumb" loading="lazy" />}
                                         </div>
                                         <div class="pj-cell__overlay"></div>
@@ -115,26 +127,38 @@ const screens = buildProjectScreens(projects);
                             {group.length > 1 && (
                             <div class="pj-stack">
                                 {group.slice(1).map((item: any) => {
-                                    const vid = getVideoId(item.video_project);
-                                    const makingOfId = getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop) || vid;
-                                    if (!vid) return null;
+                                    const videoUrl = item.video_project;
+                                    const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
+                                    const vid = !isNative ? getVideoId(videoUrl) : null;
+                                    
+                                    const makingOfUrl = item.video_explanation_mobile || item.video_explanation_desktop;
+                                    const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
+                                    const makingOfId = !isMakingOfNative ? (getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop)) : null;
+
+                                    if (!isNative && !vid) return null;
                                     return (
                                         <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--stacked group"
                                            data-pm-title={item.title}
                                            data-pm-subtitle={item.subtitle || ''}
                                            data-pm-description={item.description || ''}
-                                           data-pm-video={vid}
-                                           data-pm-makingof={makingOfId}
+                                           data-pm-video={isNative ? videoUrl : vid}
+                                           data-pm-makingof={isMakingOfNative ? makingOfUrl : makingOfId}
                                            data-pm-slug={item.slug}
                                            data-pm-client={item.client_name || ''}>
                                             <div class="pj-cell__video">
-                                                <iframe
-                                                    class="pj-cell__iframe"
-                                                    data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                                                    src=""
-                                                    frameborder="0" allow="autoplay; encrypted-media"
-                                                    loading="lazy"
-                                                ></iframe>
+                                                {isNative ? (
+                                                    <video src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
+                                                ) : (
+                                                    <iframe
+                                                        class="pj-cell__iframe"
+                                                        data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${vid}&loop=1`}
+                                                        src=""
+                                                        frameborder="0" allow="autoplay; encrypted-media"
+                                                        style="pointer-events: none; transform: translate(-50%, -50%) scale(1.5); top: 50%; left: 50%; position: absolute; width: 100%; height: 100%;"
+                                                        loading="lazy"
+                                                    ></iframe>
+                                                    <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+                                                )}
                                                 {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
                                             </div>
                                             <div class="pj-cell__overlay"></div>
@@ -155,28 +179,40 @@ const screens = buildProjectScreens(projects);
                             )}
                         </Fragment>
                     ) : (
-                        /* 4 items: 2x2 grid */
+                        /* 1-4 items: flexible grid */
                         group.map((item: any) => {
-                            const vid = getVideoId(item.video_project);
-                            const makingOfId = getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop) || vid;
-                            if (!vid) return null;
+                            const videoUrl = item.video_project;
+                            const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
+                            const vid = !isNative ? getVideoId(videoUrl) : null;
+                            
+                            const makingOfUrl = item.video_explanation_mobile || item.video_explanation_desktop;
+                            const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
+                            const makingOfId = !isMakingOfNative ? (getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop)) : null;
+
+                            if (!isNative && !vid) return null;
                             return (
                                 <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--quarter group"
                                    data-pm-title={item.title}
                                    data-pm-subtitle={item.subtitle || ''}
                                    data-pm-description={item.description || ''}
-                                   data-pm-video={vid}
-                                   data-pm-makingof={makingOfId}
+                                   data-pm-video={isNative ? videoUrl : vid}
+                                   data-pm-makingof={isMakingOfNative ? makingOfUrl : makingOfId}
                                    data-pm-slug={item.slug}
                                    data-pm-client={item.client_name || ''}>
                                     <div class="pj-cell__video">
-                                        <iframe
-                                            class="pj-cell__iframe"
-                                            data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                                            src=""
-                                            frameborder="0" allow="autoplay; encrypted-media"
-                                            loading="lazy"
-                                        ></iframe>
+                                        {isNative ? (
+                                            <video src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
+                                        ) : (
+                                            <iframe
+                                                class="pj-cell__iframe"
+                                                data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${vid}&loop=1`}
+                                                src=""
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                style="pointer-events: none; transform: translate(-50%, -50%) scale(1.5); top: 50%; left: 50%; position: absolute; width: 100%; height: 100%;"
+                                                loading="lazy"
+                                            ></iframe>
+                                            <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+                                        )}
                                         {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
                                     </div>
                                     <div class="pj-cell__overlay"></div>
@@ -218,12 +254,19 @@ const screens = buildProjectScreens(projects);
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const iframe = entry.target as HTMLIFrameElement;
-                    if (!iframe.src || iframe.src === '' || iframe.src === window.location.href) {
-                        iframe.src = iframe.dataset.src || '';
+                    const iframe = entry.target as HTMLElement;
+                    if (iframe.tagName === 'IFRAME') {
+                        const ifr = iframe as HTMLIFrameElement;
+                        if (!ifr.src || ifr.src === '' || ifr.src === window.location.href) {
+                            ifr.src = ifr.dataset.src || '';
+                            // Delay showing the iframe to avoid YouTube UI flash (like the pause icon)
+                            setTimeout(() => {
+                                ifr.style.opacity = '1';
+                            }, 800);
+                        }
                     }
                     const thumb = iframe.closest('.pj-cell__video')?.querySelector('.pj-cell__thumb') as HTMLElement;
-                    if (thumb) setTimeout(() => { thumb.style.opacity = '0'; }, 1500);
+                    if (thumb) setTimeout(() => { thumb.style.opacity = '0'; }, 2000);
                     observer.unobserve(iframe);
                 }
             });
