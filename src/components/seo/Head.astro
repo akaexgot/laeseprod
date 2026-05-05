@@ -106,14 +106,17 @@ const websiteSchema = {
 <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 
 <!-- Preload Critical Assets -->
-<link rel="preload" href="https://fonts.gstatic.com/s/outfit/v11/QGYqz_NIveBy4dfCdA9u68nv7V0.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href={`https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`} as="image" fetchpriority="high" />
 
-<!-- Preconnect Google Fonts & YouTube -->
+<!-- Security Meta Tags -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff" />
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+
+<!-- Preconnect Google Fonts & DNS-Prefetch YouTube -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preconnect" href="https://www.youtube.com" />
-<link rel="preconnect" href="https://i.ytimg.com" />
+<link rel="dns-prefetch" href="https://www.youtube.com" />
+<link rel="dns-prefetch" href="https://i.ytimg.com" />
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 

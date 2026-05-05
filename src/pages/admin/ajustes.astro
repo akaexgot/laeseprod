@@ -377,7 +377,7 @@ function syncColor(pickerId: string, inputId: string) {
             }
             
             if (videoId) {
-                heroIframe.src = `https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&mute=1&controls=0`;
+                heroIframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?loop=1&playlist=${videoId}&mute=1&controls=0`;
                 heroIframe.classList.remove('hidden');
             } else if (url.includes('cloudinary.com') || url.endsWith('.mp4') || url.endsWith('.webm')) {
                 // Not a youtube video, just a native video url

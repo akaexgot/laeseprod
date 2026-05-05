@@ -77,11 +77,11 @@ const gradients = [
                                     <a href={`/servicios/${item.slug}`} class="pj-cell pj-cell--large group">
                                         <div class={`pj-cell__video ${vid || isNative ? '' : `bg-gradient-to-br ${gradient}`}`}>
                                             {isNative ? (
-                                                <video src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
+                                                <video aria-hidden="true" src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
                                             ) : vid ? (
                                                 <iframe
                                                     class="pj-cell__iframe"
-                                                    data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
+                                                    data-src={`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                                                     src=""
                                                     frameborder="0" allow="autoplay; encrypted-media"
                                                     loading="lazy"
@@ -119,11 +119,11 @@ const gradients = [
                                         <a href={`/servicios/${item.slug}`} class="pj-cell pj-cell--stacked group">
                                             <div class={`pj-cell__video ${vid || isNative ? '' : `bg-gradient-to-br ${gradient}`}`}>
                                                 {isNative ? (
-                                                    <video src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
+                                                    <video aria-hidden="true" src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
                                                 ) : vid ? (
                                                     <iframe
                                                         class="pj-cell__iframe"
-                                                        data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
+                                                        data-src={`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                                                         src=""
                                                         frameborder="0" allow="autoplay; encrypted-media"
                                                         loading="lazy"
@@ -161,11 +161,11 @@ const gradients = [
                                 <a href={`/servicios/${item.slug}`} class="pj-cell pj-cell--quarter group">
                                     <div class={`pj-cell__video ${vid || isNative ? '' : `bg-gradient-to-br ${gradient}`}`}>
                                         {isNative ? (
-                                            <video src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
+                                            <video aria-hidden="true" src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
                                         ) : vid ? (
                                             <iframe
                                                 class="pj-cell__iframe"
-                                                data-src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
+                                                data-src={`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                                                 src=""
                                                 frameborder="0" allow="autoplay; encrypted-media"
                                                 loading="lazy"

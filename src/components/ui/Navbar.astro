@@ -16,8 +16,8 @@ const settings = await getSettings();
             <!-- Izquierda: Logo (dual images for scroll swap) -->
             <a href="/" id="nav-logo-link" class="flex lg:flex-1 items-center justify-start group relative select-none">
                 <div class="relative h-12 lg:h-14 lg:min-w-[120px]">
-                    <img id="nav-logo-white" src="/logo-blanco-web.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:1" />
-                    <img id="nav-logo-dark" src="/logo-oscuro-web.png" alt="VideoMarketing Sevilla Logo" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:0" />
+                    <img id="nav-logo-white" src="/logo-blanco-web.png" alt="VideoMarketing Sevilla Logo" width="200" height="56" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:1" />
+                    <img id="nav-logo-dark" src="/logo-oscuro-web.png" alt="VideoMarketing Sevilla Logo" width="200" height="56" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:0" />
                 </div>
             </a>
 
@@ -114,7 +114,7 @@ const settings = await getSettings();
         bg:         'transparent',
         bgFilter:   'none',
         border:     'none',
-        linkColor:  '#6b7280',
+        linkColor:  '#525252',
         linkHover:  '#111111',
         brand:      '#111111',
         cta:        { color: '#111111', border: 'rgba(0,0,0,0.12)', bg: 'rgba(0,0,0,0.04)' },
@@ -281,33 +281,35 @@ const settings = await getSettings();
     });
 
     // ── Mobile menu ───────────────────────────────────────────────────
-    const toggle = document.getElementById('mobile-menu-toggle')!;
-    const menu   = document.getElementById('mobile-menu')!;
-    const line1  = document.getElementById('line1')!;
-    const line2  = document.getElementById('line2')!;
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const menu   = document.getElementById('mobile-menu');
+    const line1  = document.getElementById('line1');
+    const line2  = document.getElementById('line2');
     let open = false;
 
-    toggle.addEventListener('click', () => {
-        open = !open;
-        if (open) {
-            menu.classList.remove('opacity-0','pointer-events-none');
-            menu.classList.add('opacity-100','pointer-events-auto');
-            line1.classList.add('rotate-45','translate-y-[4px]');
-            line2.classList.add('-rotate-45','-translate-y-[3px]','w-6');
-            line1.style.background = '#fff';
-            line2.style.background = '#fff';
-            if (logoWhite) logoWhite.style.opacity = '1';
-            if (logoDark) logoDark.style.opacity = '0';
-            document.body.style.overflow = 'hidden';
-        } else {
-            menu.classList.add('opacity-0','pointer-events-none');
-            menu.classList.remove('opacity-100','pointer-events-auto');
-            line1.classList.remove('rotate-45','translate-y-[4px]');
-            line2.classList.remove('-rotate-45','-translate-y-[3px]','w-6');
-            document.body.style.overflow = '';
-            update(); // restaurar colores correctos tras cerrar
-        }
-    });
+    if (toggle && menu && line1 && line2) {
+        toggle.addEventListener('click', () => {
+            open = !open;
+            if (open) {
+                menu.classList.remove('opacity-0','pointer-events-none');
+                menu.classList.add('opacity-100','pointer-events-auto');
+                line1.classList.add('rotate-45','translate-y-[4px]');
+                line2.classList.add('-rotate-45','-translate-y-[3px]','w-6');
+                line1.style.background = '#fff';
+                line2.style.background = '#fff';
+                if (logoWhite) logoWhite.style.opacity = '1';
+                if (logoDark) logoDark.style.opacity = '0';
+                document.body.style.overflow = 'hidden';
+            } else {
+                menu.classList.add('opacity-0','pointer-events-none');
+                menu.classList.remove('opacity-100','pointer-events-auto');
+                line1.classList.remove('rotate-45','translate-y-[4px]');
+                line2.classList.remove('-rotate-45','-translate-y-[3px]','w-6');
+                document.body.style.overflow = '';
+                update(); // restaurar colores correctos tras cerrar
+            }
+        });
+    }
 
     // ── Secret Admin Shortcut (Triple Click on Logo) ──
     const logoLink = document.getElementById('nav-logo-link');

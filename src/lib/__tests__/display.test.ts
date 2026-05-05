@@ -44,7 +44,7 @@ describe('getVideoId / toYouTubeEmbed', () => {
   it('extracts shorts id and converts to embed', () => {
     const url = 'https://www.youtube.com/shorts/ZYXWVUTSRQP';
     expect(getVideoId(url)).toBe('ZYXWVUTSRQP');
-    expect(toYouTubeEmbed(url)).toBe('https://www.youtube.com/embed/ZYXWVUTSRQP?rel=0');
+    expect(toYouTubeEmbed(url)).toBe('https://www.youtube-nocookie.com/embed/ZYXWVUTSRQP?rel=0');
   });
 
   it('returns null for invalid urls', () => {

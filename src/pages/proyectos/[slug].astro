@@ -51,15 +51,14 @@ const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "
                     {s1VideoUrl || s1VideoId ? (
                         <div class={`pj-hero__video-frame ${s1FrameClass}`}>
                             {s1IsNative ? (
-                                <video 
-                                    src={s1VideoUrl} 
+                                <video aria-hidden="true" src={s1VideoUrl} 
                                     class="pj-hero__video-iframe" 
                                     autoplay loop muted playsinline 
                                     style="object-fit: cover;"
                                 ></video>
                             ) : (
                                 <iframe
-                                    src={`https://www.youtube.com/embed/${s1VideoId}?rel=0&modestbranding=1&enablejsapi=1&origin=${Astro.url.origin}`}
+                                    src={`https://www.youtube-nocookie.com/embed/${s1VideoId}?rel=0&modestbranding=1&enablejsapi=1&origin=${Astro.url.origin}`}
                                     class="pj-hero__video-iframe"
                                     frameborder="0"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
@@ -120,15 +119,14 @@ const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "
             {/* Background video (muted, autoplay, no controls) */}
             <div class="pj-video__bg" id="pjVideoBg">
                 {projectVideoIsNative ? (
-                    <video 
-                        src={projectVideoUrl} 
+                    <video aria-hidden="true" src={projectVideoUrl} 
                         class="pj-video__bg-iframe" 
                         autoplay loop muted playsinline 
                         style="object-fit: cover;"
                     ></video>
                 ) : (
                     <iframe
-                        src={`https://www.youtube.com/embed/${mainVideoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
+                        src={`https://www.youtube-nocookie.com/embed/${mainVideoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
                         class="pj-video__bg-iframe"
                         frameborder="0"
                         allow="autoplay; encrypted-media; compute-pressure"
@@ -159,7 +157,7 @@ const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "
                 <iframe
                     id="pjFullPlayer"
                     class="pj-video__full-player"
-                    data-src={`https://www.youtube.com/embed/${mainVideoId}?rel=0&modestbranding=1&autoplay=1&enablejsapi=1&origin=${Astro.url.origin}`}
+                    data-src={`https://www.youtube-nocookie.com/embed/${mainVideoId}?rel=0&modestbranding=1&autoplay=1&enablejsapi=1&origin=${Astro.url.origin}`}
                     frameborder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
                     allowfullscreen

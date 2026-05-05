@@ -286,7 +286,7 @@ const { title, description, image, noindex } = Astro.props;
             // Get all YouTube iframes on the page
             function getYouTubeIframes() {
                 return Array.from(document.querySelectorAll('iframe'))
-                    .filter(f => f.src && f.src.includes('youtube.com/embed'));
+                    .filter(f => f.src && f.src.includes('youtube-nocookie.com/embed'));
             }
 
             // Listen for YouTube state change messages

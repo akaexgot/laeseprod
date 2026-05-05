@@ -39,15 +39,14 @@ const videoVerticalId = !videoVerticalIsNative ? getVideoId(videoVerticalUrl) : 
     <section class="detail-hero" id="detail-hero">
         <div class="detail-hero__bg">
             {videoIsNative ? (
-                <video 
-                    src={videoUrl} 
+                <video aria-hidden="true" src={videoUrl} 
                     class="detail-hero__iframe" 
                     autoplay loop muted playsinline 
                     style="object-fit: cover;"
                 ></video>
             ) : videoId ? (
                 <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
+                    src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                     class="detail-hero__iframe"
                     frameborder="0"
                     allow="autoplay; encrypted-media"
@@ -100,15 +99,14 @@ const videoVerticalId = !videoVerticalIsNative ? getVideoId(videoVerticalUrl) : 
                         <div class="detail-vertical-video">
                             <div class="detail-vertical-video__frame">
                                 {videoVerticalIsNative ? (
-                                    <video 
-                                        src={videoVerticalUrl} 
+                                    <video aria-hidden="true" src={videoVerticalUrl} 
                                         class="detail-vertical-video__iframe vm-exclusive-video" 
                                         autoplay loop muted playsinline 
                                         style="object-fit: cover;"
                                     ></video>
                                 ) : (
                                     <iframe
-                                        src={`https://www.youtube.com/embed/${videoVerticalId}?autoplay=0&mute=1&controls=1&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
+                                        src={`https://www.youtube-nocookie.com/embed/${videoVerticalId}?autoplay=0&mute=1&controls=1&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                                         class="detail-vertical-video__iframe vm-exclusive-video"
                                         frameborder="0"
                                         allow="autoplay; encrypted-media"

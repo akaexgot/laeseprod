@@ -25,6 +25,7 @@
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
                         allowfullscreen
+                        title="Reproductor de vídeo del proyecto"
                     ></iframe>
                     <div id="pmMediaOverlay" class="absolute inset-0 z-20 bg-transparent pointer-events-auto"></div>
                 </div>
@@ -208,8 +209,7 @@
             
             if (isNative) {
                 container.innerHTML = `
-                    <video 
-                        id="${isFullPlayer ? 'pjFullPlayer' : 'pmIframe'}" 
+                    <video aria-hidden="true" id="${isFullPlayer ? 'pjFullPlayer' : 'pmIframe'}" 
                         class="pm-video__iframe" 
                         src="${source}" 
                         autoplay loop muted playsinline 
@@ -225,13 +225,14 @@
                     }
                 }
             } else {
-                const url = `https://www.youtube.com/embed/${source}?rel=0&modestbranding=1&autoplay=1&mute=${isFullPlayer ? '0' : '0'}&controls=1&showinfo=0&disablekb=1&iv_load_policy=3&enablejsapi=1&origin=${window.location.origin}${!isFullPlayer ? `&playlist=${source}&loop=1` : ''}`;
+                const url = `https://www.youtube-nocookie.com/embed/${source}?rel=0&modestbranding=1&autoplay=1&mute=${isFullPlayer ? '0' : '0'}&controls=1&showinfo=0&disablekb=1&iv_load_policy=3&enablejsapi=1&origin=${window.location.origin}${!isFullPlayer ? `&playlist=${source}&loop=1` : ''}`;
                 
                 container.innerHTML = `
                     <iframe
                         id="${isFullPlayer ? 'pjFullPlayer' : 'pmIframe'}"
                         class="pm-video__iframe vm-exclusive-video"
                         src="${url}"
+                        title="Reproductor de proyecto"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
                         allowfullscreen
