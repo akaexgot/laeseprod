@@ -48,10 +48,18 @@ export const POST: APIRoute = async ({ request }) => {
             }
         );
 
-        const data = await response.json();
+        const contentType = response.headers.get('content-type');
+        let data: any;
+        
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            return new Response(JSON.stringify({ error: `Error de Cloudinary (${response.status}): ${text.substring(0, 100)}` }), { status: response.status });
+        }
 
         if (!response.ok) {
-            return new Response(JSON.stringify({ error: data.error?.message || 'Upload failed' }), { status: response.status });
+            return new Response(JSON.stringify({ error: data.error?.message || 'Error en la subida a Cloudinary' }), { status: response.status });
         }
 
         return new Response(JSON.stringify({ 

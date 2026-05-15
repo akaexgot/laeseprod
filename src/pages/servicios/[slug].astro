@@ -8,6 +8,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
 import "../../styles/detail.css";
 import { getServiceBySlug, getServices } from "../../lib/data";
+import { getVideoId } from "../../lib/display";
+
 
 const { slug } = Astro.params;
 const service = await getServiceBySlug(slug || "");

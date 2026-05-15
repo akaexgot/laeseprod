@@ -114,8 +114,7 @@ const getVal = (key: string) => settings[key] || '';
                         <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Vídeo Principal de Inicio</h2>
                         <p class="text-sm text-zinc-400 mt-2 mb-6">El vídeo enorme que se reproduce en bucle en la página principal.</p>
                         
-                        <div class="grid grid-cols-1" style="gap: 1.5rem;">
-                            <div>
+                        <div class="grid grid-cols-1 gap-6">
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo de Fondo (YouTube o Cloudinary MP4)</label>
                                 <div class="flex gap-2">
@@ -209,8 +208,7 @@ const getVal = (key: string) => settings[key] || '';
                     <div>
                         <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Fondo de Quiénes Somos</h2>
                         <p class="text-sm text-zinc-400 mt-2 mb-6">Si introduces un vídeo, ocupará la pantalla completa y hará el menú transparente de forma automática.</p>
-                        <div class="grid grid-cols-1" style="gap: 1.5rem;">
-                            <div>
+                        <div class="grid grid-cols-1 gap-6">
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Fondo (YouTube o Cloudinary MP4)</label>
                                 <div class="flex gap-2">
@@ -244,8 +242,7 @@ const getVal = (key: string) => settings[key] || '';
                     <div>
                         <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Fondo de la Página de Contacto</h2>
                         <p class="text-sm text-zinc-400 mt-2 mb-6">Si introduces un vídeo, ocupará la portada completa (diseño oscuro). Si lo dejas vacío, se usará el fondo blanco y elegante con puntos por defecto.</p>
-                        <div class="grid grid-cols-1" style="gap: 1.5rem;">
-                            <div>
+                        <div class="grid grid-cols-1 gap-6">
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Fondo (YouTube o Cloudinary MP4)</label>
                                 <div class="flex gap-2">
@@ -328,11 +325,11 @@ function syncColor(pickerId: string, inputId: string) {
                 loading.classList.remove('hidden');
                 loading.classList.add('flex');
 
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('folder', 'background_videos'); // Save in a specific folder
-
                 try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('folder', 'background_videos');
+
                     const res = await fetch('/api/admin/upload', {
                         method: 'POST',
                         body: formData
@@ -343,19 +340,18 @@ function syncColor(pickerId: string, inputId: string) {
                         urlInput.value = data.url;
                         if (urlInput.id === 'hero_video_url') updateYoutubePreview(data.url);
                         
-                        // Show a quick toast
                         const saveBtn = document.getElementById('btn-save-all');
-                        if (saveBtn) saveBtn.click(); // Auto-save after upload
+                        if (saveBtn) (saveBtn as HTMLButtonElement).click();
                     } else {
                         const err = await res.json();
-                        alert('Error al subir vídeo: ' + err.error);
+                        alert('Error: ' + (err.error || 'Fallo al subir'));
                     }
                 } catch (error) {
-                    alert('Error de conexión al subir vídeo');
+                    alert('Error de red al subir vídeo');
                 } finally {
                     loading.classList.add('hidden');
                     loading.classList.remove('flex');
-                    fileInput.value = ''; // Reset input
+                    fileInput.value = '';
                 }
             });
         }

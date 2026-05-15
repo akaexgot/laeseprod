@@ -111,6 +111,8 @@ const projects = await getProjects();
     </div>
 </AdminLayout>
 
+</AdminLayout>
+
 <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
         <!-- Header -->
@@ -326,11 +328,11 @@ const projects = await getProjects();
                 loading.classList.remove('hidden');
                 loading.classList.add('flex');
 
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('folder', 'background_videos');
-
                 try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('folder', 'background_videos');
+
                     const res = await fetch('/api/admin/upload', {
                         method: 'POST',
                         body: formData
@@ -342,10 +344,10 @@ const projects = await getProjects();
                         showToast('Vídeo subido correctamente', 'success');
                     } else {
                         const err = await res.json();
-                        showToast(err.error || 'Error al subir vídeo', 'error');
+                        showToast('Error: ' + (err.error || 'Fallo al subir'), 'error');
                     }
                 } catch (error) {
-                    showToast('Error de conexión al subir vídeo', 'error');
+                    showToast('Error de red al subir vídeo', 'error');
                 } finally {
                     loading.classList.add('hidden');
                     loading.classList.remove('flex');
@@ -359,10 +361,11 @@ const projects = await getProjects();
             loading.classList.remove('hidden');
             loading.classList.add('flex');
 
-            const formData = new FormData();
-            formData.append('file', file);
-
             try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('folder', 'projects');
+
                 const res = await fetch('/api/admin/upload', {
                     method: 'POST',
                     body: formData
@@ -375,10 +378,10 @@ const projects = await getProjects();
                     showToast('Imagen subida correctamente', 'success');
                 } else {
                     const err = await res.json();
-                    showToast(err.error || 'Error al subir', 'error');
+                    showToast('Error: ' + (err.error || 'Fallo al subir'), 'error');
                 }
             } catch (error) {
-                showToast('Error de conexión al subir', 'error');
+                showToast('Error de red al subir imagen', 'error');
             } finally {
                 loading.classList.add('hidden');
                 loading.classList.remove('flex');

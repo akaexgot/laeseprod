@@ -277,7 +277,8 @@ const gradients = [
             e.preventDefault();
             if (isScrolling) return;
             const cur = getVisibleSectionIndex();
-            scrollTo(e.deltaY > 0 ? cur + 1 : cur - 1);
+            scrollToSection(e.deltaY > 0 ? cur + 1 : cur - 1);
+
         }, { passive: false });
 
         let touchStartY = 0;

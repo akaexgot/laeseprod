@@ -8,6 +8,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ContactFormBlock from '../../components/ui/ContactFormBlock.astro';
 import { getProjects } from '../../lib/data';
+import { getVideoId } from '../../lib/display';
+
 
 const { slug } = Astro.params;
 const projects = await getProjects();
