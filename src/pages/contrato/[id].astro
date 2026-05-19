@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getServiceSupabase } from "../../lib/supabase";
-import { replacePlaceholders } from "../../lib/contracts";
+import { INVOICE_CLIENT_FIELDS } from "../../lib/contracts";
 
 const { id } = Astro.params;
 const supabase = getServiceSupabase();
@@ -36,6 +36,10 @@ if (supabase && id) {
 
 // Prepare merged data for initial preview
 const initialData = { ...contract?.admin_data, ...contract?.client_data };
+const fiscalFieldLabels = Object.fromEntries(INVOICE_CLIENT_FIELDS.map((field) => [field.key, field.label]));
+const requiredClientFields = contract?.is_billable
+    ? [...new Set([...(template?.client_fields || []), ...INVOICE_CLIENT_FIELDS.map((field) => field.key)])]
+    : [];
 ---
 
 <BaseLayout
@@ -67,7 +71,7 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
 
                         <div class="step-indicator" id="stepper">
                             <div class="step active" data-step="0"><span>Info</span></div>
-                            <div class="step" data-step="1"><span>Fiscal</span></div>
+                            <div class={`step ${contract?.is_billable ? '' : 'step--hidden'}`} data-step="1"><span>Fiscal</span></div>
                             <div class="step" data-step="2"><span>Firma</span></div>
                             <div class="step" data-step="3"><span>Pago</span></div>
                         </div>
@@ -88,7 +92,9 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
                                         <input type="tel" id="c-phone" value={contract?.client_phone || ''} class="client-auth-input" />
                                     </div>
                                     
-                                    <button class="btn-primary" id="go-to-step-1">Continuar a datos fiscales</button>
+                                    <button class="btn-primary" id="go-to-step-1">
+                                        {contract?.is_billable ? 'Continuar a datos fiscales' : 'Continuar a revisión'}
+                                    </button>
                                     
                                     <div class="trust-info-minimal">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
@@ -103,9 +109,9 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
                                     <h3 class="step-title">Datos Fiscales</h3>
                                     <p class="step-desc">Introduce la información legal que aparecerá en el contrato y en tus facturas.</p>
                                     
-                                    {template.client_fields.map((field: string) => (
+                                    {requiredClientFields.map((field: string) => (
                                         <div class="input-group">
-                                            <label class="field-label">{field.replace(/_/g, ' ')} *</label>
+                                            <label class="field-label">{fiscalFieldLabels[field] || field.replace(/_/g, ' ')} *</label>
                                             <input type="text" class="client-data-input" data-field={field} value={contract?.client_data?.[field] || ''} />
                                         </div>
                                     ))}
@@ -203,6 +209,11 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
                                                             Descargar Contrato (PDF)
                                                         </a>
                                                     )}
+                                                    {contract.invoice_url && (
+                                                        <a href={contract.invoice_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
+                                                            Descargar Factura
+                                                        </a>
+                                                    )}
                                                     <a href="/" class="btn-primary" style="width:auto; padding-inline: 4rem;">Volver al sitio web</a>
                                                 </div>
                                             </div>
@@ -228,6 +239,11 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
                                                 {contract.pdf_url && (
                                                     <a href={contract.pdf_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
                                                         Descargar Contrato (PDF)
+                                                    </a>
+                                                )}
+                                                {contract.invoice_url && (
+                                                    <a href={contract.invoice_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
+                                                        Descargar Factura
                                                     </a>
                                                 )}
                                                 <a href="/" class="btn-primary" style="width:auto; padding-inline: 4rem;">Volver al sitio web</a>
@@ -346,6 +362,7 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
 
         .step-indicator { display: flex; justify-content: center; gap: 0.75rem; margin: 2rem 0; padding: 0 3rem; }
         .step { flex: 1; height: 3px; background: #f4f4f5; border-radius: 2px; position: relative; transition: all 0.4s ease; }
+        .step--hidden { display: none; }
         .step span { position: absolute; top: -1.25rem; left: 0; font-size: 0.6rem; text-transform: uppercase; color: #a1a1aa; font-weight: 700; letter-spacing: 0.05em; }
         .step.active { background: #e11d48; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); }
         .step.active span { color: #e11d48; }
@@ -471,6 +488,11 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
             if (!email || !email.includes('@')) { $('c-email').focus(); return; }
             if (!phone || phone.length < 9) { $('c-phone').focus(); return; }
 
+            if (!contract.is_billable) {
+                $('go-to-step-2')?.click();
+                return;
+            }
+
             setStep(1);
         });
 
@@ -584,7 +606,7 @@ const initialData = { ...contract?.admin_data, ...contract?.client_data };
         }
 
         $('back-to-step-0')?.addEventListener('click', () => setStep(0));
-        $('back-to-step-1')?.addEventListener('click', () => setStep(1));
+        $('back-to-step-1')?.addEventListener('click', () => setStep(contract.is_billable ? 1 : 0));
         
         $('clear-sig')?.addEventListener('click', () => {
             signaturePad.clear();

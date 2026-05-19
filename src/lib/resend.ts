@@ -142,11 +142,18 @@ export async function sendContactAutoReply(data: ContactFormData) {
     });
 }
 /** Notificación de Contrato firmado con PDF adjunto */
-export async function sendContractFinalizedEmail(clientEmail: string, clientName: string, pdfBuffer: Uint8Array) {
+export async function sendContractFinalizedEmail(
+    clientEmail: string,
+    clientName: string,
+    pdfBuffer: Uint8Array,
+    invoiceBuffer?: Uint8Array,
+    invoiceNumber?: number
+) {
     const content = `
         <h2 class="email-title">Tu Contrato ha sido Firmado</h2>
         <p>¡Hola <strong>${clientName}</strong>!</p>
         <p>Te enviamos adjunto a este correo la copia oficial y firmada digitalmente de tu contrato con VideoMarketing Sevilla.</p>
+        ${invoiceBuffer ? `<p>También encontrarás adjunta la factura correspondiente al pago realizado.</p>` : ''}
         <p>Este documento es legalmente vinculante y sirve como justificante de los acuerdos alcanzados.</p>
         <br/>
         <p>Si tienes cualquier duda respecto a las clausulas o los siguientes pasos, no dudes en responder a este correo.</p>
@@ -163,7 +170,11 @@ export async function sendContractFinalizedEmail(clientEmail: string, clientName
             {
                 filename: `Contrato_VideoMarketing_Sevilla_${clientName.replace(/\s+/g, '_')}.pdf`,
                 content: Buffer.from(pdfBuffer),
-            }
+            },
+            ...(invoiceBuffer ? [{
+                filename: `Factura_${invoiceNumber || ''}_VideoMarketing_Sevilla.pdf`,
+                content: Buffer.from(invoiceBuffer),
+            }] : [])
         ]
     });
 }

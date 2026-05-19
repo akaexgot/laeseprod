@@ -150,6 +150,16 @@ const getStatusLabel = (status: string) => {
                                                 <i data-lucide="file-down" class="w-4 h-4"></i>
                                             </a>
                                         )}
+                                        {contract.invoice_url && (
+                                            <a 
+                                                href={contract.invoice_url} 
+                                                target="_blank"
+                                                class="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all border border-transparent hover:border-blue-500/20"
+                                                title={`Descargar factura ${contract.invoice_number || ''}`}
+                                            >
+                                                <i data-lucide="receipt" class="w-4 h-4"></i>
+                                            </a>
+                                        )}
                                         <button 
                                             class="btn-delete p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"
                                             data-id={contract.id}

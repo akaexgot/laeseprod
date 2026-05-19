@@ -1,7 +1,12 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { getServiceSupabase } from '../../../lib/supabase';
-import { generateContractPDF, replacePlaceholders } from '../../../lib/contracts';
+import {
+    INVOICE_START_NUMBER,
+    generateContractPDF,
+    generateInvoicePDF,
+    replacePlaceholders,
+} from '../../../lib/contracts';
 import { sendContractFinalizedEmail } from '../../../lib/resend';
 import { sendOwnerNotification } from '../../../lib/notifications';
 
@@ -10,6 +15,21 @@ const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '', {
 });
 
 const endpointSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
+
+async function getNextInvoiceNumber(supabase: ReturnType<typeof getServiceSupabase>) {
+    if (!supabase) return INVOICE_START_NUMBER;
+
+    const { data, error } = await supabase
+        .from('contracts')
+        .select('invoice_number')
+        .not('invoice_number', 'is', null)
+        .order('invoice_number', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (error || !data?.invoice_number) return INVOICE_START_NUMBER;
+    return Math.max(Number(data.invoice_number) + 1, INVOICE_START_NUMBER);
+}
 
 export const POST: APIRoute = async ({ request }) => {
     const supabase = getServiceSupabase();
@@ -32,7 +52,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     if (event.type === 'checkout.session.completed') {
-        const session = event.data.object as Stripe.CheckoutSession;
+        const session = event.data.object as Stripe.Checkout.Session;
         const contractId = session.metadata?.contract_id;
 
         if (contractId) {
@@ -59,14 +79,30 @@ export const POST: APIRoute = async ({ request }) => {
                 const finalHtml = replacePlaceholders(contract.contract_templates.content, mergedData);
                 const pdfBuffer = await generateContractPDF(contract.title || 'Contrato', finalHtml, contract.signature_svg);
 
+                const paidAt = new Date();
+                const invoiceNumber = await getNextInvoiceNumber(supabase);
+                const invoiceBuffer = await generateInvoicePDF({
+                    invoiceNumber,
+                    issueDate: paidAt,
+                    clientName: contract.client_data?.CLIENTE_NOMBRE_FISCAL || contract.client_data?.NOMBRE || contract.client_email,
+                    clientCif: contract.client_data?.CLIENTE_CIF || '',
+                    clientAddress: contract.client_data?.CLIENTE_DIRECCION || '',
+                    concept: contract.contract_templates?.title || contract.title || 'Servicios audiovisuales',
+                    amount: Number(contract.amount_to_pay || 0),
+                    contractId,
+                });
+
                 // 3. Upload to Supabase Storage (Bucket 'contracts')
                 const fileName = `contrato_${contractId}.pdf`;
-                const { data: uploadData } = await supabase.storage
+                const contractFileBuffer = Buffer.from(pdfBuffer);
+                const { data: uploadData, error: uploadErr } = await supabase.storage
                     .from('contracts')
-                    .upload(fileName, pdfBuffer, {
+                    .upload(fileName, contractFileBuffer, {
                         contentType: 'application/pdf',
                         upsert: true
                     });
+
+                if (uploadErr) console.error(`Error uploading contract PDF:`, uploadErr);
 
                 let pdfUrl = '';
                 if (uploadData) {
@@ -74,32 +110,57 @@ export const POST: APIRoute = async ({ request }) => {
                     pdfUrl = urlData.publicUrl;
                 }
 
+                const invoiceFileName = `factura_${invoiceNumber}_contrato_${contractId}.pdf`;
+                const invoiceFileBuffer = Buffer.from(invoiceBuffer);
+                const { data: invoiceUploadData, error: invoiceUploadErr } = await supabase.storage
+                    .from('contracts')
+                    .upload(invoiceFileName, invoiceFileBuffer, {
+                        contentType: 'application/pdf',
+                        upsert: true
+                    });
+
+                if (invoiceUploadErr) console.error(`Error uploading invoice PDF:`, invoiceUploadErr);
+
+                let invoiceUrl = '';
+                if (invoiceUploadData) {
+                    const { data: invoiceUrlData } = supabase.storage.from('contracts').getPublicUrl(invoiceFileName);
+                    invoiceUrl = invoiceUrlData.publicUrl;
+                }
+
                 // 4. Update status and PDF URL
-                await supabase
+                const { error: updateErr } = await supabase
                     .from('contracts')
                     .update({ 
                         status: 'completed',
                         pdf_url: pdfUrl || null,
+                        invoice_number: invoiceNumber,
+                        invoice_url: invoiceUrl || null,
+                        invoice_issued_at: paidAt.toISOString(),
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', contractId);
+
+                if (updateErr) {
+                    console.error(`Error updating contract ${contractId} in DB:`, updateErr);
+                }
 
                 // 5. Send notification email to client with PDF
                 if (contract.client_email) {
                     await sendContractFinalizedEmail(
                         contract.client_email, 
-                        contract.client_data?.NOMBRE || 'Cliente', 
-                        pdfBuffer
+                        contract.client_data?.NOMBRE || contract.client_data?.CLIENTE_NOMBRE_FISCAL || 'Cliente', 
+                        pdfBuffer,
+                        invoiceBuffer,
+                        invoiceNumber
                     );
                 }
 
                 // 6. Pushover Notification to Owner
                 await sendOwnerNotification(
                     `💰 Pago RECIBIDO - Contrato Finalizado`,
-                    `El cliente ${contract.client_email} ha pagado ${contract.amount_to_pay}€. El contrato ${contract.title} ya está firmado y archivado.`
+                    `El cliente ${contract.client_email} ha pagado ${contract.amount_to_pay}€. El contrato ${contract.title} ya está firmado y archivado. Factura #${invoiceNumber} generada.`
                 );
 
-                console.log(`Contract ${contractId} completed, paid, and notified! PDF: ${pdfUrl}`);
             } catch (err) {
                 console.error(`Error processing contract ${contractId} in webhook:`, err);
             }

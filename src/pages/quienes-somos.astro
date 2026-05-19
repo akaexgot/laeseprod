@@ -21,7 +21,13 @@ function extractYouTubeId(url: string | null | undefined): string | null {
 }
 
 // Extraer video hero
-const heroVideoId = extractYouTubeId(settings.about_hero_video);
+const heroVideoUrl = settings.hero_video_desktop;
+const heroVideoIsNative = heroVideoUrl && (
+    heroVideoUrl.includes('cloudinary.com') ||
+    heroVideoUrl.endsWith('.mp4') ||
+    heroVideoUrl.endsWith('.webm')
+);
+const heroVideoId = !heroVideoIsNative ? extractYouTubeId(heroVideoUrl) : null;
 
 // Extraer video corporativo de contenido
 const corporateVideoId = extractYouTubeId(settings.about_corporate_video);
@@ -40,16 +46,29 @@ if (cleanMapUrl && cleanMapUrl.includes('<iframe')) {
 >
 
     <!-- ═══ HERO CONDICIONAL ═══ -->
-    {heroVideoId ? (
+    {heroVideoUrl && (heroVideoIsNative || heroVideoId) ? (
         <>
             <section id="video-hero" class="qs-video-hero">
                 <div class="qs-video-hero__bg">
+                    {heroVideoIsNative ? (
+                        <video
+                            aria-hidden="true"
+                            src={heroVideoUrl}
+                            class="qs-video-hero__iframe"
+                            autoplay
+                            loop
+                            muted
+                            playsinline
+                            style="object-fit: cover;"
+                        ></video>
+                    ) : (
                     <iframe
                         src={`https://www.youtube-nocookie.com/embed/${heroVideoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
                         class="qs-video-hero__iframe"
                         frameborder="0" allow="autoplay; encrypted-media; compute-pressure"
                         title="Vídeo corporativo VideoMarketing Sevilla"
                     ></iframe>
+                    )}
                 </div>
                 <!-- Gradient overlay -->
                 <div class="qs-video-hero__overlay"></div>

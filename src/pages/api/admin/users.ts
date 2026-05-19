@@ -62,8 +62,6 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ error: 'La contraseña debe tener al menos 6 caracteres' }), { status: 400 });
         }
 
-        console.log(`Intentando crear usuario: ${email}`);
-
         // 1. Create User in Supabase Auth
         const { data, error: authError } = await supabase.auth.admin.createUser({
             email,
@@ -80,8 +78,6 @@ export const POST: APIRoute = async ({ request }) => {
             console.error('No se devolvió usuario después de crear en Auth');
             return new Response(JSON.stringify({ error: 'Fallo al crear usuario en Auth (respuesta vacía)' }), { status: 500 });
         }
-
-        console.log(`Usuario creado en Auth con ID: ${data.user.id}. Creando perfil...`);
 
         // 2. Create/Update Profile (using upsert to avoid conflict with DB triggers)
         const { error: profileError } = await supabase

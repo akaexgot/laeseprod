@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
-import { generateContractPDF, replacePlaceholders } from '../../../lib/contracts';
+import { generateContractPDF, getInvoiceClientFieldKeys, replacePlaceholders } from '../../../lib/contracts';
 import { sendContractFinalizedEmail } from '../../../lib/resend';
 import { sendOwnerNotification } from '../../../lib/notifications';
 
@@ -37,6 +37,15 @@ export const PUT: APIRoute = async ({ params, request }) => {
         // 2. Prepare update data
         const isBillable = contract.is_billable;
         const newStatus = isBillable ? 'pending_payment' : 'completed';
+
+        if (isBillable) {
+            const missingFiscalFields = getInvoiceClientFieldKeys().filter((field) => !client_data?.[field]?.trim?.());
+            if (missingFiscalFields.length > 0) {
+                return new Response(JSON.stringify({
+                    error: 'Faltan datos fiscales para emitir la factura.'
+                }), { status: 400 });
+            }
+        }
 
         const { data: updated, error: updateErr } = await supabase
             .from('contracts')

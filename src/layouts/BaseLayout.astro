@@ -136,8 +136,7 @@ const { title, description, image, noindex } = Astro.props;
             // Ensure cookie is set for server-side validation (middleware)
             document.cookie = `vm_visitor_id=${visitorId}; path=/; max-age=31536000; SameSite=Lax`;
 
-            // Open/Close
-            floatingBtn.addEventListener('click', () => {
+            function openChat() {
                 if (!chatOpen) {
                     chatOpen = true;
                     chatPanel.classList.add('chat-panel--open');
@@ -147,22 +146,48 @@ const { title, description, image, noindex } = Astro.props;
                         startChat();
                     }
                 }
+            }
+
+            (window as any).vmOpenGlobalChat = openChat;
+
+            function isOpenChatTrigger(target: EventTarget | null) {
+                return target instanceof Element ? target.closest('.js-open-chat') : null;
+            }
+
+            function getTouchTrigger(e: TouchEvent) {
+                const touch = e.changedTouches[0];
+                if (!touch) return null;
+                const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                return el?.closest('.js-open-chat') || null;
+            }
+
+            // Open/Close
+            floatingBtn.addEventListener('click', () => {
+                openChat();
             });
 
-            // Also allow .js-open-chat buttons (e.g. hero buttons) to open global chat
-            document.querySelectorAll('.js-open-chat').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (!chatOpen) {
-                        chatOpen = true;
-                        chatPanel.classList.add('chat-panel--open');
-                        floatingBtn.style.display = 'none';
-                        if (visitorName && chatNameForm) {
-                            chatNameForm.style.display = 'none';
-                            startChat();
-                        }
-                    }
-                });
-            });
+            // Also allow .js-open-chat buttons (e.g. hero buttons) to open global chat.
+            // Capture pointer/touch early so mobile scroll handlers cannot swallow the CTA.
+            document.addEventListener('pointerup', (e) => {
+                const trigger = isOpenChatTrigger(e.target);
+                if (!trigger) return;
+                e.preventDefault();
+                openChat();
+            }, { capture: true });
+
+            document.addEventListener('touchend', (e) => {
+                const trigger = getTouchTrigger(e);
+                if (!trigger) return;
+                e.preventDefault();
+                openChat();
+            }, { capture: true, passive: false });
+
+            document.addEventListener('click', (e) => {
+                const trigger = isOpenChatTrigger(e.target);
+                if (!trigger) return;
+                e.preventDefault();
+                openChat();
+            }, { capture: true });
 
             chatCloseBtn?.addEventListener('click', () => {
                 chatOpen = false;

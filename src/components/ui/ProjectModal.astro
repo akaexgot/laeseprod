@@ -206,6 +206,7 @@
             if (!container) return;
 
             const isNative = source.includes('cloudinary.com') || source.endsWith('.mp4') || source.endsWith('.webm');
+            const isInstagram = /instagram\.com\/(reel|reels|p)\//.test(source);
             
             if (isNative) {
                 container.innerHTML = `
@@ -224,6 +225,23 @@
                         v.play();
                     }
                 }
+            } else if (isInstagram) {
+                // Extract reel ID and build embed URL
+                const match = source.match(/instagram\.com\/(reel|reels|p)\/([A-Za-z0-9_-]+)/);
+                const embedUrl = match ? `https://www.instagram.com/reel/${match[2]}/embed/` : source;
+                container.innerHTML = `
+                    <iframe
+                        id="${isFullPlayer ? 'pjFullPlayer' : 'pmIframe'}"
+                        class="pm-video__iframe"
+                        src="${embedUrl}"
+                        title="Instagram Reel"
+                        frameborder="0"
+                        scrolling="no"
+                        allowtransparency="true"
+                        allowfullscreen
+                        style="pointer-events: auto; width: 100%; height: 100%; border: none; overflow: hidden; background: #000;"
+                    ></iframe>
+                `;
             } else {
                 const url = `https://www.youtube-nocookie.com/embed/${source}?rel=0&modestbranding=1&autoplay=1&mute=${isFullPlayer ? '0' : '0'}&controls=1&showinfo=0&disablekb=1&iv_load_policy=3&enablejsapi=1&origin=${window.location.origin}${!isFullPlayer ? `&playlist=${source}&loop=1` : ''}`;
                 

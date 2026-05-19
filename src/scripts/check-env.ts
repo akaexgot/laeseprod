@@ -1,5 +1,14 @@
 import { config } from 'dotenv';
 config();
-console.log('PUBLIC_CLOUDINARY_CLOUD_NAME:', process.env.PUBLIC_CLOUDINARY_CLOUD_NAME ? 'OK' : 'MISSING');
-console.log('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? 'OK' : 'MISSING');
-console.log('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'OK' : 'MISSING');
+
+const requiredEnv = [
+    'PUBLIC_CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET',
+];
+
+const missing = requiredEnv.filter((key) => !process.env[key]);
+if (missing.length > 0) {
+    console.error(`Missing environment variables: ${missing.join(', ')}`);
+    process.exitCode = 1;
+}

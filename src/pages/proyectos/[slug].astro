@@ -8,7 +8,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ContactFormBlock from '../../components/ui/ContactFormBlock.astro';
 import { getProjects } from '../../lib/data';
-import { getVideoId } from '../../lib/display';
+import { getVideoId, isInstagramReel, getInstagramEmbedUrl } from '../../lib/display';
 
 
 const { slug } = Astro.params;
@@ -29,16 +29,18 @@ const expDesktopUrl = project.video_explanation_desktop;
 const expMobileUrl = project.video_explanation_mobile;
 const makingOfUrl = expMobileUrl || expDesktopUrl;
 const makingOfIsNative = isNative(makingOfUrl);
-const makingOfId = !makingOfIsNative ? (getVideoId(expMobileUrl) || getVideoId(expDesktopUrl)) : null;
+const makingOfIsInstagram = isInstagramReel(makingOfUrl);
+const makingOfInstagramEmbed = makingOfIsInstagram ? getInstagramEmbedUrl(makingOfUrl) : null;
+const makingOfId = (!makingOfIsNative && !makingOfIsInstagram) ? (getVideoId(expMobileUrl) || getVideoId(expDesktopUrl)) : null;
 
 // Final vars for Screen 1
-const hasMakingOf = !!makingOfUrl || !!makingOfId;
+const hasMakingOf = !!makingOfUrl || !!makingOfId || !!makingOfInstagramEmbed;
 const s1VideoUrl = hasMakingOf ? makingOfUrl : projectVideoUrl;
 const s1VideoId = hasMakingOf ? makingOfId : mainVideoId;
 const s1IsNative = hasMakingOf ? makingOfIsNative : projectVideoIsNative;
-const s1IsHorizontal = !hasMakingOf && !projectVideoIsNative; // If it's the main project video and it's YouTube, it's usually horizontal. 
-// Actually, if it's main project video, we use the horizontal frame.
-const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "pj-hero__video-frame--horizontal" : "");
+const s1IsInstagram = hasMakingOf ? makingOfIsInstagram : false;
+const s1InstagramEmbed = hasMakingOf ? makingOfInstagramEmbed : null;
+const s1FrameClass = (hasMakingOf && !makingOfIsNative && !makingOfIsInstagram) ? "" : (!hasMakingOf ? "pj-hero__video-frame--horizontal" : "");
 ---
 
 <BaseLayout title={project.title} description={project.subtitle || project.description || ''}>
@@ -50,9 +52,20 @@ const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "
 
                 <!-- Left: Vertical Video (Making Of) -->
                 <div class="pj-hero__video-col reveal-left">
-                    {s1VideoUrl || s1VideoId ? (
+                    {s1VideoUrl || s1VideoId || s1InstagramEmbed ? (
                         <div class={`pj-hero__video-frame ${s1FrameClass}`}>
-                            {s1IsNative ? (
+                            {s1IsInstagram && s1InstagramEmbed ? (
+                                <iframe
+                                    src={s1InstagramEmbed}
+                                    class="pj-hero__video-iframe"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    allowtransparency="true"
+                                    allowfullscreen
+                                    title="Instagram Reel"
+                                    style="border: none; overflow: hidden;"
+                                ></iframe>
+                            ) : s1IsNative ? (
                                 <video aria-hidden="true" src={s1VideoUrl} 
                                     class="pj-hero__video-iframe" 
                                     autoplay loop muted playsinline 
@@ -138,13 +151,15 @@ const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "
             {/* Overlay (hides when playing) */}
             <div class="pj-video__overlay" id="pjVideoOverlay"></div>
             {/* Play button + info (hides when playing) */}
-            <div class="pj-video__content" id="pjVideoContent">
+            <div class="pj-video__content" id="pjVideoContent" style="cursor: pointer;">
                 <span class="pj-video__label">Reproducir proyecto</span>
                 <h2 class="pj-video__title">{project.title}</h2>
                 <button class="pj-video__play-btn" id="pjPlayBtn" aria-label="Reproducir vídeo">
                     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </button>
             </div>
+            {/* Clickable overlay to trigger play from anywhere */}
+            <div class="pj-video__click-area" id="pjVideoClickArea" style="position: absolute; inset: 0; z-index: 25; cursor: pointer;"></div>
             {/* Full interactive player (hidden until play, replaces bg) */}
             {projectVideoIsNative ? (
                 <video 
@@ -240,6 +255,11 @@ const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "
 
     .pj-hero__video-iframe {
         position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+    }
+    /* Instagram embed: fill the frame and hide scrollbars */
+    .pj-hero__video-iframe[title="Instagram Reel"] {
+        overflow: hidden;
+        background: #000;
     }
 
     .pj-hero__video-placeholder {
@@ -364,7 +384,8 @@ const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "
 
     /* When playing, hide overlay and content */
     .pj-detail__video-screen.is-playing .pj-video__overlay,
-    .pj-detail__video-screen.is-playing .pj-video__content {
+    .pj-detail__video-screen.is-playing .pj-video__content,
+    .pj-detail__video-screen.is-playing .pj-video__click-area {
         opacity: 0; pointer-events: none;
     }
 
@@ -483,26 +504,59 @@ const s1FrameClass = (hasMakingOf && !makingOfIsNative) ? "" : (!hasMakingOf ? "
             }
         }, { passive: false });
 
+        /* ── Stop videos helper ── */
+        function stopVideoInContainer(container: HTMLElement) {
+            const iframes = container.querySelectorAll('iframe');
+            iframes.forEach(iframe => {
+                if (iframe.src.includes('youtube.com') || iframe.src.includes('youtube-nocookie.com')) {
+                    iframe.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                } else if (iframe.src.includes('instagram.com')) {
+                    const temp = iframe.src; iframe.src = ''; iframe.src = temp;
+                }
+            });
+            const videos = container.querySelectorAll('video');
+            videos.forEach(video => {
+                if (!video.hasAttribute('loop')) video.pause(); // Only pause non-looping interactive videos
+            });
+        }
+
+        /* ── Pause videos when scrolling to another screen ── */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    stopVideoInContainer(entry.target as HTMLElement);
+                }
+            });
+        }, { threshold: 0.2 });
+        sections.forEach(sec => observer.observe(sec));
+
         /* ── In-place Play Button ── */
         const playBtn = document.getElementById('pjPlayBtn');
+        const clickArea = document.getElementById('pjVideoClickArea');
         const fullPlayer = document.getElementById('pjFullPlayer') as HTMLElement;
         const videoScreen = document.getElementById('pj-video');
 
-        if (playBtn && fullPlayer && videoScreen) {
-            playBtn.addEventListener('click', () => {
-                if (fullPlayer.tagName === 'IFRAME') {
-                    const iframe = fullPlayer as HTMLIFrameElement;
-                    if (iframe.dataset.src) {
-                        iframe.src = iframe.dataset.src;
-                    }
-                } else if (fullPlayer.tagName === 'VIDEO') {
-                    const video = fullPlayer as HTMLVideoElement;
-                    video.play();
-                    video.muted = false;
+        const playMainVideo = () => {
+            // Stop hero video before playing main
+            stopVideoInContainer(document.getElementById('pj-hero') as HTMLElement);
+
+            if (fullPlayer.tagName === 'IFRAME') {
+                const iframe = fullPlayer as HTMLIFrameElement;
+                if (iframe.dataset.src) {
+                    iframe.src = iframe.dataset.src;
                 }
-                fullPlayer.classList.add('is-playing');
-                videoScreen.classList.add('is-playing');
-            });
+            } else if (fullPlayer.tagName === 'VIDEO') {
+                const video = fullPlayer as HTMLVideoElement;
+                video.play();
+                video.muted = false;
+            }
+            fullPlayer.classList.add('is-playing');
+            videoScreen!.classList.add('is-playing');
+        };
+
+        if (playBtn && clickArea && fullPlayer && videoScreen) {
+            playBtn.addEventListener('click', (e) => { e.stopPropagation(); playMainVideo(); });
+            clickArea.addEventListener('click', playMainVideo);
         }
 
         /* ── Force navbar transparent on project pages ── */

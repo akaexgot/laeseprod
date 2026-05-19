@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request }) => {
             'site_name', 'site_description', 'logo_url', 'primary_color', 'secondary_color',
             'font_heading', 'font_body', 'whatsapp_number', 'phone', 'email', 'address',
             'instagram', 'linkedin', 'google_maps_embed', 'hero_title', 'hero_subtitle',
-            'hero_video_desktop', 'hero_video_mobile', 'about_hero_video', 'contact_hero_video',
+            'hero_video_desktop', 'hero_video_mobile',
             'about_corporate_video', 'faq_section_enabled'
         ];
 

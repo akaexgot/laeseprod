@@ -47,6 +47,7 @@ const projects = await getProjects();
             <table class="w-full text-sm text-left" id="projects-table">
                 <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
                     <tr class="border-b border-zinc-800/50">
+                        <th class="hidden sm:table-cell w-10" style="padding: 1.25rem 0.5rem 1.25rem 1.5rem;"></th>
                         <th style="padding: 1.25rem 1.5rem;">Proyecto</th>
                         <th class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">Cliente</th>
                         <th class="hidden md:table-cell w-32" style="padding: 1.25rem 1.5rem;">Multimedia</th>
@@ -56,7 +57,12 @@ const projects = await getProjects();
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {projects.map((project: any) => (
-                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={project.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
+                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default drag-row" data-id={project.id} draggable="true" onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button') && !event.target.closest('.drag-handle')) btn.click();">
+                            <td class="hidden sm:table-cell" style="padding: 1.25rem 0.5rem 1.25rem 1.5rem;">
+                                <div class="drag-handle cursor-grab active:cursor-grabbing text-zinc-600 hover:text-zinc-300 transition-colors" style="display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                                </div>
+                            </td>
                             <td style="padding: 1.25rem 1.5rem;">
                                 <div class="flex items-center justify-between">
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -109,8 +115,6 @@ const projects = await getProjects();
             </table>
         </div>
     </div>
-</AdminLayout>
-
 </AdminLayout>
 
 <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -185,8 +189,8 @@ const projects = await getProjects();
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of (Shorts/YouTube)</label>
-                            <input type="url" id="p-makingof" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="Acepta Shorts" />
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of (YouTube Shorts / Instagram Reel)</label>
+                            <input type="url" id="p-makingof" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="URL de YouTube Short o Instagram Reel" />
                         </div>
                         <div style="padding-top: 0.5rem;">
                             <label class="flex items-center gap-2 cursor-pointer">
@@ -228,6 +232,16 @@ const projects = await getProjects();
 <!-- Toast Container -->
 <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
 
+<style>
+    .drag-row.drag-over {
+        background: rgba(225, 29, 72, 0.08) !important;
+        box-shadow: inset 0 -2px 0 0 #e11d48;
+    }
+    .drag-row[draggable="true"] {
+        user-select: none;
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- REAL-TIME SEARCH (PROJECTS) ---
@@ -252,6 +266,84 @@ const projects = await getProjects();
 
             if (totalSpan) totalSpan.textContent = visibleCount.toString();
         });
+
+        // --- DRAG & DROP REORDER ---
+        const tbody = document.querySelector('#projects-table tbody') as HTMLTableSectionElement;
+        let draggedRow: HTMLTableRowElement | null = null;
+
+        if (tbody) {
+            tbody.addEventListener('dragstart', (e) => {
+                const target = (e.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement;
+                if (!target) return;
+                draggedRow = target;
+                target.style.opacity = '0.4';
+                e.dataTransfer!.effectAllowed = 'move';
+                e.dataTransfer!.setData('text/plain', target.dataset.id || '');
+            });
+
+            tbody.addEventListener('dragend', (e) => {
+                const target = (e.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement;
+                if (target) target.style.opacity = '1';
+                draggedRow = null;
+                // Remove all drag-over styles
+                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            });
+
+            tbody.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer!.dropEffect = 'move';
+                const target = (e.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement;
+                if (!target || target === draggedRow) return;
+                
+                // Add visual indicator
+                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                target.classList.add('drag-over');
+            });
+
+            tbody.addEventListener('dragleave', (e) => {
+                const target = (e.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement;
+                if (target) target.classList.remove('drag-over');
+            });
+
+            tbody.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                const target = (e.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement;
+                if (!target || !draggedRow || target === draggedRow) return;
+
+                // Swap rows in the DOM
+                const allRows = Array.from(tbody.querySelectorAll('tr.drag-row'));
+                const dragIdx = allRows.indexOf(draggedRow);
+                const dropIdx = allRows.indexOf(target);
+
+                if (dragIdx < dropIdx) {
+                    target.parentNode!.insertBefore(draggedRow, target.nextSibling);
+                } else {
+                    target.parentNode!.insertBefore(draggedRow, target);
+                }
+
+                // Remove visual indicator
+                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+                // Persist new order
+                const newOrder = Array.from(tbody.querySelectorAll('tr.drag-row'))
+                    .map(row => (row as HTMLElement).dataset.id!);
+
+                try {
+                    const res = await fetch('/api/admin/projects', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderedIds: newOrder })
+                    });
+                    if (res.ok) {
+                        showToast('Orden actualizado', 'success');
+                    } else {
+                        showToast('Error al guardar orden', 'error');
+                    }
+                } catch {
+                    showToast('Error de conexión', 'error');
+                }
+            });
+        }
 
         const overlay = document.getElementById('modal-overlay')!;
         const $ = (id: string) => document.getElementById(id) as HTMLInputElement;

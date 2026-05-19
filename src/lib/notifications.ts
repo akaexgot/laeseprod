@@ -20,7 +20,6 @@ export async function sendOwnerNotification(title: string, message: string) {
             subject: title,
             text: message,
         });
-        console.log(`Notification sent to Pushover: ${title}`);
     } catch (error) {
         console.error('Error sending Pushover notification:', error);
     }

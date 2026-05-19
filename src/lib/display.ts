@@ -24,6 +24,20 @@ export function getVideoId(value?: string | null): string | null {
   return null;
 }
 
+/** Check if a URL is an Instagram Reel */
+export function isInstagramReel(url?: string | null): boolean {
+  if (!url) return false;
+  return /instagram\.com\/(reel|reels|p)\//.test(url.trim());
+}
+
+/** Extract a clean Instagram embed URL from a reel/post URL */
+export function getInstagramEmbedUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const match = url.trim().match(/instagram\.com\/(reel|reels|p)\/([A-Za-z0-9_-]+)/);
+  if (!match) return null;
+  return `https://www.instagram.com/reel/${match[2]}/embed/`;
+}
+
 export function toYouTubeEmbed(url?: string | null): string | null {
   const id = getVideoId(url);
   if (!id) return null;
@@ -60,5 +74,7 @@ export function buildProjectScreens(all: Project[]): Project[][] {
 export default {
   getVideoId,
   toYouTubeEmbed,
+  isInstagramReel,
+  getInstagramEmbedUrl,
   buildProjectScreens,
 };

@@ -214,10 +214,8 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
     };
 
     function initializeSwipers() {
-        console.log("DEBUG: Iniciando inicialización de Swipers...");
         
         if (typeof window.Swiper === 'undefined') {
-            console.log("DEBUG: Swiper no encontrado en window, reintentando en 200ms...");
             setTimeout(initializeSwipers, 200);
             return;
         }
@@ -225,12 +223,9 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
         const cartaEl = document.querySelector('.carta-swiper');
         const numSlides = document.querySelectorAll('.carta-swiper .swiper-slide').length;
         
-        console.log("DEBUG: Elemento .carta-swiper:", cartaEl);
-        console.log("DEBUG: Numero de slides detectadas:", numSlides);
 
         if (cartaEl && numSlides > 0) {
             if (cartaEl.swiper) {
-                console.log("DEBUG: Destruyendo instancia de Swiper previa...");
                 cartaEl.swiper.destroy(true, true);
             }
 
@@ -249,7 +244,7 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
                 });
 
             } catch (err) {
-                console.error("DEBUG: ERROR al crear Swiper Carta:", err);
+                console.error("Error al crear Swiper Carta:", err);
             }
         }
 
@@ -290,14 +285,13 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
                     newPrev.addEventListener('click', () => manualSwiperInstance.slidePrev(400));
                 }
             } catch (err) {
-                console.error("DEBUG: ERROR al crear Swiper Manual:", err);
+                console.error("Error al crear Swiper Manual:", err);
             }
         }
     }
 
     // Compatibilidad total con Astro ViewTransitions y recargas nativas
     document.addEventListener('astro:page-load', () => {
-        console.log("DEBUG: Evento astro:page-load detectado");
         initializeSwipers();
     });
     

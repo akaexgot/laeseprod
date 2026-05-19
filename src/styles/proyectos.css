@@ -32,23 +32,24 @@
 
 /* ── Grid layout (2x2 blocks) ────────────────── */
 .pj-screen--grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(50vh, auto);
 }
 @media (min-width: 1024px) {
     .pj-screen--grid {
-        flex-direction: row;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+        grid-auto-rows: minmax(0, 1fr);
     }
 }
-
-.pj-group-vertical {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+.pj-cell--quarter {
+    min-height: 50vh;
 }
-
-.pj-cell--half {
-    flex: 1;
+@media (min-width: 1024px) {
+    .pj-cell--quarter {
+        min-height: 0;
+    }
 }
 
 /* ── Stack (2 stacked cells) ─────────────────── */
@@ -88,19 +89,7 @@
     flex: 1;
 }
 
-.pj-cell--quarter {
-    flex: 1 1 50%;
-    min-height: 50vh;
-}
-@media (min-width: 1024px) {
-    .pj-screen--grid {
-        flex-wrap: wrap;
-    }
-    .pj-cell--quarter {
-        flex: 1 1 50%;
-        min-height: 50vh;
-    }
-}
+
 
 /* ── Video embed ──────────────────────────────── */
 .pj-cell__video {
@@ -132,6 +121,29 @@
     object-fit: cover;
     z-index: 2;
     transition: opacity 0.8s ease;
+}
+
+/* Always visible thumbnail for non-featured cells */
+.pj-cell__thumb--visible {
+    opacity: 1 !important;
+    transition: transform 0.8s ease;
+}
+.pj-cell:hover .pj-cell__thumb--visible {
+    transform: scale(1.04);
+}
+
+.pj-cell__thumb--generated {
+    transform: scale(1.16);
+}
+.pj-cell:hover .pj-cell__thumb--generated {
+    transform: scale(1.22);
+}
+
+/* Placeholder when no thumbnail exists */
+.pj-cell__placeholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
 }
 
 /* ── Overlay ──────────────────────────────────── */

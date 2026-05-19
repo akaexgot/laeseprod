@@ -97,6 +97,7 @@ const videoVerticalId = !videoVerticalIsNative ? getVideoId(videoVerticalUrl) : 
 
             <!-- Description with optional vertical video -->
             <div class="detail-desc reveal">
+                <div class={`detail-desc__layout ${(videoVerticalUrl || videoVerticalId) ? 'detail-desc__layout--with-video' : ''}`}>
                     {videoVerticalUrl || videoVerticalId ? (
                         <div class="detail-vertical-video">
                             <div class="detail-vertical-video__frame">

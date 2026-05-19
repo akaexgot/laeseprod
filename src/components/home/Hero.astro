@@ -5,6 +5,7 @@
  */
 import { getSettings } from "../../lib/data";
 import { optimizeCloudinaryVideo } from "../../lib/cloudinary";
+import "../../styles/contacto.css";
 const settings = await getSettings();
 
 // Extract YouTube ID from any URL format
@@ -40,7 +41,7 @@ const heroSubtitle = settings.hero_subtitle || '';
     <!-- Fullscreen Video Background -->
     <div
         id="hero-video-container"
-        class="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-black"
+        class="absolute inset-0 z-0 overflow-hidden bg-black pointer-events-none"
     >
         {isNativeVideo ? (
             <video aria-hidden="true" src={videoUrl} 
@@ -55,7 +56,7 @@ const heroSubtitle = settings.hero_subtitle || '';
             </div>
         )}
 
-        <div class="absolute inset-0 bg-dark/10"></div>
+        <div class="absolute inset-0 bg-dark/10 pointer-events-none"></div>
     </div>
 
     {!isNativeVideo && (
@@ -184,8 +185,7 @@ const heroSubtitle = settings.hero_subtitle || '';
 
         <!-- Headline -->
         <h1
-            class="text-editorial-lg text-white text-center mb-10 uppercase tracking-tight drop-shadow-2xl px-4"
-            style="line-height: 1.15 !important;"
+            class="hero-title pointer-events-none"
         >
             {titleLines.map((line: string, idx: number) => {
                 const isLeft = idx % 2 !== 0;
@@ -196,14 +196,14 @@ const heroSubtitle = settings.hero_subtitle || '';
                 const parts = line.split(/(\*\*.*?\*\*)/g);
                 
                 return (
-                    <div class="mb-4 last:mb-0">
+                    <div class="hero-title__line">
                         <span 
-                            class={`inline-block ${animClass} opacity-0`}
+                            class={`hero-title__text ${animClass} opacity-0`}
                             style={`animation-fill-mode: forwards; animation-delay: ${delay}`}
                         >
                             {parts.map((part: string) => {
                                 if (part.startsWith('**') && part.endsWith('**')) {
-                                    return <span class="text-gradient-carmin italic pr-2">{part.slice(2, -2)}</span>;
+                                    return <span class="hero-title__accent">{part.slice(2, -2)}</span>;
                                 }
                                 return part;
                             })}
@@ -215,7 +215,7 @@ const heroSubtitle = settings.hero_subtitle || '';
 
         {heroSubtitle && (
             <p 
-                class="text-zinc-400 text-lg md:text-xl max-w-2xl animate-fade-up opacity-0"
+                class="hero-subtitle text-white text-lg md:text-xl max-w-2xl animate-fade-up opacity-0 pointer-events-none"
                 style={`animation-fill-mode: forwards; animation-delay: ${(0.3 + titleLines.length * 0.2).toFixed(1)}s`}
             >
                 {heroSubtitle}
@@ -224,19 +224,16 @@ const heroSubtitle = settings.hero_subtitle || '';
 
         {/* CTA Buttons */}
         <div 
-            class="flex flex-wrap items-center justify-center gap-4 mt-20 lg:mt-36 animate-fade-up opacity-0"
-            style={`animation-fill-mode: forwards; animation-delay: ${(0.5 + titleLines.length * 0.2).toFixed(1)}s`}
+            class="hero-actions"
+            style={`z-index: 99999; animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: ${(0.5 + titleLines.length * 0.2).toFixed(1)}s; opacity: 0;`}
         >
-            <button type="button" class="js-open-chat hero-cta hero-cta--primary group">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                </svg>
-                <span>Hablar en tiempo real</span>
-            </button>
-            <a href="/contacto" class="hero-cta hero-cta--secondary group">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                </svg>
+            <div class="hero-action-wrap hero-action-wrap--chat">
+                <a href="#global-chat-panel" class="hero-action hero-action--chat" tabindex="-1" aria-hidden="true">
+                    <span>Hablar en tiempo real</span>
+                </a>
+                <button type="button" class="hero-action-hitbox js-open-chat" aria-label="Hablar en tiempo real"></button>
+            </div>
+            <a href="/contacto" class="hero-action hero-action--contact">
                 <span>Ir al formulario</span>
             </a>
         </div>
@@ -244,7 +241,7 @@ const heroSubtitle = settings.hero_subtitle || '';
 
     <!-- Scroll Indicator -->
     <div
-        class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 animate-fade-up"
+        class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 animate-fade-up pointer-events-none"
         style="animation-delay: 0.8s"
     >
         <span
@@ -260,6 +257,58 @@ const heroSubtitle = settings.hero_subtitle || '';
     </div>
 </section>
 
+<script>
+    const heroChatCta = document.querySelector('.hero-action-hitbox');
+    const heroChatWrap = document.querySelector('.hero-action-wrap--chat');
+
+    function getHeroPoint(e: Event) {
+        if (e instanceof PointerEvent || e instanceof MouseEvent) {
+            return { x: e.clientX, y: e.clientY };
+        }
+        if (e instanceof TouchEvent) {
+            const touch = e.changedTouches[0] || e.touches[0];
+            if (touch) return { x: touch.clientX, y: touch.clientY };
+        }
+        return null;
+    }
+
+    function openHeroChat(e: Event) {
+        e.preventDefault();
+        e.stopPropagation();
+        const openGlobalChat = (window as any).vmOpenGlobalChat;
+        if (typeof openGlobalChat === 'function') {
+            openGlobalChat();
+            return;
+        }
+        document.getElementById('floating-chat-btn')?.click();
+    }
+
+    function isInsideHeroChatCta(e: Event) {
+        if (!(heroChatWrap instanceof HTMLElement)) return false;
+        const point = getHeroPoint(e);
+        if (!point) return false;
+
+        const rect = heroChatWrap.getBoundingClientRect();
+        return (
+            point.x >= rect.left &&
+            point.x <= rect.right &&
+            point.y >= rect.top &&
+            point.y <= rect.bottom
+        );
+    }
+
+    function openHeroChatFromCoordinates(e: Event) {
+        if (!isInsideHeroChatCta(e)) return;
+        openHeroChat(e);
+    }
+
+    heroChatCta?.addEventListener('pointerdown', openHeroChat, { capture: true });
+    heroChatCta?.addEventListener('touchstart', openHeroChat, { capture: true, passive: false });
+    heroChatCta?.addEventListener('click', openHeroChat, { capture: true });
+    document.addEventListener('pointerdown', openHeroChatFromCoordinates, { capture: true });
+    document.addEventListener('touchstart', openHeroChatFromCoordinates, { capture: true, passive: false });
+</script>
+
 <style>
     .video-bg {
         position: absolute;
@@ -272,6 +321,213 @@ const heroSubtitle = settings.hero_subtitle || '';
         min-height: 100dvh;
         min-width: 177.77vh;
         pointer-events: none;
+    }
+
+    #hero .js-open-chat > * {
+        pointer-events: none;
+    }
+
+    .hero-title {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.34rem;
+        width: min(100%, 68rem);
+        margin: 0 auto;
+        padding: 0 1rem;
+        color: #fff;
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.7rem;
+        font-weight: 900;
+        line-height: 0.98;
+        letter-spacing: 0;
+        text-align: center;
+        text-transform: uppercase;
+        text-wrap: balance;
+        filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.5));
+    }
+
+    .hero-title::before {
+        content: "";
+        width: 5rem;
+        height: 0.18rem;
+        margin-bottom: 0.45rem;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, transparent, #e8364f, #c9a962, transparent);
+        box-shadow: 0 0 24px rgba(232, 54, 79, 0.45);
+    }
+
+    .hero-title__line {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        overflow: visible;
+    }
+
+    .hero-title__text {
+        position: relative;
+        display: inline-block;
+        padding: 0.02em 0.04em 0.08em;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+        text-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.12),
+            0 12px 34px rgba(0, 0, 0, 0.62);
+    }
+
+    .hero-title__line:nth-child(odd) .hero-title__text {
+        transform-origin: left center;
+    }
+
+    .hero-title__line:nth-child(even) .hero-title__text {
+        transform-origin: right center;
+    }
+
+    .hero-title__accent {
+        position: relative;
+        display: inline-block;
+        padding: 0 0.08em 0.04em;
+        color: #fff;
+        font-style: italic;
+        text-shadow:
+            0 0 18px rgba(232, 54, 79, 0.7),
+            0 10px 32px rgba(155, 27, 48, 0.6);
+    }
+
+    .hero-title__accent::before {
+        content: "";
+        position: absolute;
+        left: 0.02em;
+        right: 0.02em;
+        bottom: 0.05em;
+        z-index: -1;
+        height: 0.34em;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, rgba(155, 27, 48, 0.92), rgba(232, 54, 79, 0.98), rgba(201, 169, 98, 0.78));
+        transform: skewX(-10deg);
+        box-shadow: 0 10px 32px rgba(232, 54, 79, 0.35);
+    }
+
+    @media (min-width: 640px) {
+        .hero-title {
+            gap: 0.45rem;
+            font-size: 4rem;
+            line-height: 0.94;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .hero-title {
+            gap: 0.5rem;
+            font-size: 5.3rem;
+        }
+    }
+
+    .hero-subtitle {
+        margin-top: clamp(0.95rem, 2vh, 1.4rem);
+        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .hero-actions {
+        position: relative;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.85rem;
+        width: 100%;
+        max-width: 23rem;
+        margin-top: clamp(0.95rem, 2vh, 1.4rem);
+        padding: 0 1rem;
+    }
+
+    .hero-action-wrap {
+        position: relative;
+        z-index: 100000;
+        display: block;
+        width: 100%;
+        isolation: isolate;
+    }
+
+    .hero-action {
+        position: relative;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 3.25rem;
+        padding: 0.95rem 1.45rem;
+        border: 0;
+        border-radius: 9999px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 800;
+        line-height: 1;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        isolation: isolate;
+    }
+
+    .hero-action-hitbox {
+        position: absolute;
+        inset: -2px;
+        z-index: 2147483647;
+        display: block;
+        width: calc(100% + 4px);
+        height: calc(100% + 4px);
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.001);
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    .hero-action > * {
+        pointer-events: none;
+    }
+
+    .hero-action--chat {
+        background: #e11d48;
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(225, 29, 72, 0.38);
+    }
+
+    .hero-action--contact {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    @media (min-width: 640px) {
+        .hero-actions {
+            flex-direction: row;
+            max-width: none;
+            margin-top: clamp(0.95rem, 2vh, 1.4rem);
+        }
+
+        .hero-action {
+            width: auto;
+            min-width: 13.5rem;
+        }
+
+        .hero-action-wrap {
+            width: auto;
+        }
     }
 
     @keyframes scroll-down {

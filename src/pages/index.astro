@@ -32,8 +32,10 @@ import CtaSection from "../components/home/CtaSection.astro";
 		const sections = Array.from(document.querySelectorAll('section'));
 		if (sections.length === 0) return;
 
-		// Solo activar scroll snap en escritorio (>1024px)
-		if (window.innerWidth <= 1024) return;
+		// Solo activar scroll snap en escritorio real. En tablets/moviles grandes,
+		// los touchmove con preventDefault pueden cancelar el click sintetico.
+		const hasDesktopPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+		if (window.innerWidth <= 1024 || !hasDesktopPointer) return;
 
 		let isScrolling = false;
 		let scrollTimeout: ReturnType<typeof setTimeout>;
@@ -65,7 +67,12 @@ import CtaSection from "../components/home/CtaSection.astro";
             }, 1300);
 		}
 
+		function isInteractiveTarget(target: EventTarget | null) {
+			return target instanceof Element && Boolean(target.closest('a, button, input, textarea, select, label, [role="button"]'));
+		}
+
 		window.addEventListener('wheel', (e) => {
+			if (isInteractiveTarget(e.target)) return;
 			e.preventDefault();
 			if (isScrolling) return;
 
@@ -79,14 +86,17 @@ import CtaSection from "../components/home/CtaSection.astro";
 
 		let touchStartY = 0;
 		window.addEventListener('touchstart', (e) => {
+			if (isInteractiveTarget(e.target)) return;
 			touchStartY = e.changedTouches[0].screenY;
 		}, { passive: false });
 
 		window.addEventListener('touchmove', (e) => {
+			if (isInteractiveTarget(e.target)) return;
 			e.preventDefault();
 		}, { passive: false });
 
 		window.addEventListener('touchend', (e) => {
+			if (isInteractiveTarget(e.target)) return;
 			if (isScrolling) return;
 			
 			const touchEndY = e.changedTouches[0].screenY;

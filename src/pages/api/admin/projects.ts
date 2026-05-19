@@ -47,6 +47,29 @@ export const PUT: APIRoute = async ({ request }) => {
     }
 };
 
+export const PATCH: APIRoute = async ({ request }) => {
+    const sb = getServiceSupabase();
+    if (!sb) return new Response(JSON.stringify({ error: 'DB not configured' }), { status: 500 });
+
+    try {
+        const { orderedIds } = await request.json();
+        if (!Array.isArray(orderedIds) || orderedIds.length === 0) {
+            return new Response(JSON.stringify({ error: 'orderedIds array required' }), { status: 400 });
+        }
+
+        // Update each project's order based on its position in the array
+        const updates = orderedIds.map((id: string, index: number) =>
+            sb.from('projects').update({ order: index }).eq('id', id)
+        );
+        await Promise.all(updates);
+
+        invalidateCache("projects");
+        return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    } catch (e: any) {
+        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+    }
+};
+
 export const DELETE: APIRoute = async ({ request }) => {
     const sb = getServiceSupabase();
     if (!sb) return new Response(JSON.stringify({ error: 'DB not configured' }), { status: 500 });

@@ -53,13 +53,13 @@ const getVal = (key: string) => settings[key] || '';
                     Datos de Contacto
                 </button>
             </li>
-            <li>
+            <li class="hidden">
                 <button type="button" class="tab-btn w-full flex items-center rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50" style="padding: 0.75rem 1rem; gap: 0.75rem;" data-target="tab-about">
                     <i data-lucide="users" class="w-5 h-5 text-zinc-500"></i>
                     Sección Quiénes Somos
                 </button>
             </li>
-            <li>
+            <li class="hidden">
                 <button type="button" class="tab-btn w-full flex items-center rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50" style="padding: 0.75rem 1rem; gap: 0.75rem;" data-target="tab-contact-page">
                     <i data-lucide="image" class="w-5 h-5 text-zinc-500"></i>
                     Sección Contacto
@@ -212,7 +212,7 @@ const getVal = (key: string) => settings[key] || '';
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Fondo (YouTube o Cloudinary MP4)</label>
                                 <div class="flex gap-2">
-                                    <input type="text" name="about_hero_video" id="about_hero_video_url" value={getVal('about_hero_video')} placeholder="https://www.youtube.com/watch?v=... o subir archivo" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                    <input type="text" id="about_hero_video_url" value={getVal('about_hero_video')} placeholder="https://www.youtube.com/watch?v=... o subir archivo" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                                     <button type="button" onclick="document.getElementById('file-about-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
                                         <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Subir
                                     </button>
@@ -246,7 +246,7 @@ const getVal = (key: string) => settings[key] || '';
                             <div>
                                 <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo Fondo (YouTube o Cloudinary MP4)</label>
                                 <div class="flex gap-2">
-                                    <input type="text" name="contact_hero_video" id="contact_hero_video_url" value={getVal('contact_hero_video')} placeholder="https://www.youtube.com/watch?v=... o subir archivo" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                    <input type="text" id="contact_hero_video_url" value={getVal('contact_hero_video')} placeholder="https://www.youtube.com/watch?v=... o subir archivo" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                                     <button type="button" onclick="document.getElementById('file-contact-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
                                         <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Subir
                                     </button>
@@ -357,8 +357,6 @@ function syncColor(pickerId: string, inputId: string) {
         }
 
         setupVideoUpload('hero_video_url', 'file-hero-video', 'loading-hero-video');
-        setupVideoUpload('about_hero_video_url', 'file-about-video', 'loading-about-video');
-        setupVideoUpload('contact_hero_video_url', 'file-contact-video', 'loading-contact-video');
 
         // YouTube Preview Logic
         const heroUrlInput = document.getElementById('hero_video_url') as HTMLInputElement;
