@@ -171,7 +171,7 @@ export async function generateContractPDF(title: string, htmlContent: string, si
         const { width } = pages[i].getSize();
         
         // Left side: Company info
-        pages[i].drawText(`VideoMarketing Sevilla | www.videomarketingsevilla.reviseo.es`, {
+        pages[i].drawText(`VideoMarketing Sevilla | www.videomarketingsevilla.com`, {
             x: margin,
             y: 20,
             size: 8,
