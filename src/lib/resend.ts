@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { formatInvoiceNumber } from './contracts';
 
 export const resend = new Resend(import.meta.env.RESEND_API_KEY);
 const defaultFromEmail = 'no-reply@videomarketingsevilla.com';
@@ -179,7 +180,7 @@ export async function sendContractFinalizedEmail(
     `;
 
     const invoiceFilename = invoiceNumber
-        ? `Factura_${invoiceNumber}_VideoMarketing_Sevilla.pdf`
+        ? `Factura_${formatInvoiceNumber(invoiceNumber)}_VideoMarketing_Sevilla.pdf`
         : 'Factura_VideoMarketing_Sevilla.pdf';
 
     return sendEmailOrThrow({

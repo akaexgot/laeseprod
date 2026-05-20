@@ -27,10 +27,12 @@ export function extractPlaceholders(content: string): string[] {
 }
 
 export const INVOICE_START_NUMBER = 20000;
+export const INVOICE_SERIES = 'F';
+export const INVOICE_VAT_RATE = 0.21;
 
 export const INVOICE_COMPANY = {
     name: 'LAESE PRODUCCIONES S.L.',
-    cif: 'B-72757990',
+    cif: 'B72757990',
     address: 'c/ Nuestra Señora de Valme 23, 41701, Dos Hermanas (Sevilla)',
     iban: 'ES84 0182 3135 2202 0161 7430',
 };
@@ -43,6 +45,27 @@ export const INVOICE_CLIENT_FIELDS = [
 
 export function getInvoiceClientFieldKeys() {
     return INVOICE_CLIENT_FIELDS.map((field) => field.key);
+}
+
+export function formatInvoiceNumber(invoiceNumber: number) {
+    return `${INVOICE_SERIES}-${invoiceNumber}`;
+}
+
+export function calculateSpanishVatFromGross(total: number, vatRate = INVOICE_VAT_RATE) {
+    const gross = Math.round(Number(total || 0) * 100) / 100;
+    const taxableBase = Math.round((gross / (1 + vatRate)) * 100) / 100;
+    const vatAmount = Math.round((gross - taxableBase) * 100) / 100;
+
+    return {
+        taxableBase,
+        vatRate,
+        vatAmount,
+        total: gross,
+    };
+}
+
+function formatEuro(amount: number) {
+    return `${amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR`;
 }
 
 /**
@@ -206,7 +229,8 @@ interface InvoicePdfInput {
 }
 
 /**
- * Generates a simple invoice PDF for paid contracts.
+ * Generates a complete Spanish invoice PDF for paid contracts.
+ * The Stripe amount is treated as the final total with 21% IVA included.
  */
 export async function generateInvoicePDF(input: InvoicePdfInput) {
     const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
@@ -223,24 +247,26 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
     const lightLine = rgb(0.88, 0.88, 0.9);
 
     const date = input.issueDate.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' });
-    const amount = Number(input.amount || 0);
-    const amountText = `${amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR`;
+    const invoiceRef = formatInvoiceNumber(input.invoiceNumber);
+    const vat = calculateSpanishVatFromGross(input.amount);
+    const vatPercent = `${Math.round(vat.vatRate * 100)}%`;
 
     page.drawText('FACTURA', { x: margin, y: height - 72, size: 30, font: fontBold, color: dark });
-    page.drawText(`No ${input.invoiceNumber}`, { x: margin, y: height - 100, size: 12, font: fontBold, color: carmin });
-    page.drawText(`Fecha: ${date}`, { x: margin, y: height - 120, size: 10, font: fontMain, color: muted });
+    page.drawText(`Numero: ${invoiceRef}`, { x: margin, y: height - 100, size: 12, font: fontBold, color: carmin });
+    page.drawText(`Fecha de expedicion: ${date}`, { x: margin, y: height - 120, size: 10, font: fontMain, color: muted });
+    page.drawText(`Fecha de operacion: ${date}`, { x: margin, y: height - 136, size: 10, font: fontMain, color: muted });
 
     const sellerX = margin;
     const buyerX = width / 2 + 10;
-    let y = height - 175;
+    let y = height - 185;
 
     page.drawText('Emisor', { x: sellerX, y, size: 11, font: fontBold, color: dark });
-    page.drawText('Cliente', { x: buyerX, y, size: 11, font: fontBold, color: dark });
+    page.drawText('Destinatario', { x: buyerX, y, size: 11, font: fontBold, color: dark });
     y -= 22;
 
     [
         INVOICE_COMPANY.name,
-        `CIF: ${INVOICE_COMPANY.cif}`,
+        `NIF/CIF: ${INVOICE_COMPANY.cif}`,
         INVOICE_COMPANY.address,
         `IBAN: ${INVOICE_COMPANY.iban}`,
     ].forEach((line) => {
@@ -248,7 +274,7 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
         y -= 15;
     });
 
-    y = height - 197;
+    y = height - 207;
     [
         input.clientName,
         `CIF/NIF: ${input.clientCif}`,
@@ -263,8 +289,10 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
     page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 1, color: lightLine });
     y -= 28;
 
-    page.drawText('Concepto', { x: margin, y, size: 10, font: fontBold, color: muted });
-    page.drawText('Importe', { x: width - margin - 80, y, size: 10, font: fontBold, color: muted });
+    page.drawText('Descripcion', { x: margin, y, size: 10, font: fontBold, color: muted });
+    page.drawText('Base imponible', { x: width - margin - 190, y, size: 9, font: fontBold, color: muted });
+    page.drawText('IVA', { x: width - margin - 92, y, size: 9, font: fontBold, color: muted });
+    page.drawText('Total', { x: width - margin - 40, y, size: 9, font: fontBold, color: muted });
     y -= 18;
     page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 1, color: lightLine });
     y -= 28;
@@ -275,15 +303,41 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
         size: 10,
         font: fontMain,
         color: dark,
-        maxWidth: 330,
+        maxWidth: 260,
     });
-    page.drawText(amountText, { x: width - margin - 95, y, size: 10, font: fontMain, color: dark });
+    page.drawText(formatEuro(vat.taxableBase), { x: width - margin - 190, y, size: 9, font: fontMain, color: dark });
+    page.drawText(vatPercent, { x: width - margin - 92, y, size: 9, font: fontMain, color: dark });
+    page.drawText(formatEuro(vat.total), { x: width - margin - 72, y, size: 9, font: fontMain, color: dark });
 
-    y -= 90;
-    page.drawLine({ start: { x: width - margin - 180, y }, end: { x: width - margin, y }, thickness: 1, color: lightLine });
-    y -= 26;
-    page.drawText('Total factura', { x: width - margin - 180, y, size: 12, font: fontBold, color: dark });
-    page.drawText(amountText, { x: width - margin - 95, y, size: 12, font: fontBold, color: carmin });
+    y -= 70;
+    const totalsX = width - margin - 210;
+    page.drawLine({ start: { x: totalsX, y }, end: { x: width - margin, y }, thickness: 1, color: lightLine });
+    y -= 24;
+    page.drawText('Base imponible', { x: totalsX, y, size: 10, font: fontMain, color: dark });
+    page.drawText(formatEuro(vat.taxableBase), { x: width - margin - 95, y, size: 10, font: fontMain, color: dark });
+    y -= 20;
+    page.drawText(`IVA ${vatPercent}`, { x: totalsX, y, size: 10, font: fontMain, color: dark });
+    page.drawText(formatEuro(vat.vatAmount), { x: width - margin - 95, y, size: 10, font: fontMain, color: dark });
+    y -= 24;
+    page.drawText('Total factura', { x: totalsX, y, size: 12, font: fontBold, color: dark });
+    page.drawText(formatEuro(vat.total), { x: width - margin - 95, y, size: 12, font: fontBold, color: carmin });
+
+    y -= 45;
+    page.drawText('Forma de pago: Stripe / tarjeta bancaria.', {
+        x: margin,
+        y,
+        size: 9,
+        font: fontMain,
+        color: muted,
+    });
+    y -= 16;
+    page.drawText('Importes calculados con IVA incluido en el total cobrado.', {
+        x: margin,
+        y,
+        size: 8,
+        font: fontMain,
+        color: muted,
+    });
 
     page.drawText('Factura generada automáticamente tras la confirmación del pago.', {
         x: margin,
@@ -295,4 +349,3 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
 
     return await pdfDoc.save();
 }
-

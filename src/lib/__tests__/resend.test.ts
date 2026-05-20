@@ -37,7 +37,7 @@ describe('sendContractFinalizedEmail', () => {
       contentType: 'application/pdf',
     });
     expect(payload.attachments[1]).toMatchObject({
-      filename: 'Factura_20000_VideoMarketing_Sevilla.pdf',
+      filename: 'Factura_F-20000_VideoMarketing_Sevilla.pdf',
       contentType: 'application/pdf',
     });
     expect(Buffer.isBuffer(payload.attachments[0].content)).toBe(true);
