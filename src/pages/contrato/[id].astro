@@ -553,17 +553,22 @@ const hasClientDataStep = requiredClientFields.length > 0;
                 signaturePad = new SignaturePad(canvas, {
                     backgroundColor: 'rgba(0,0,0,0)',
                     penColor: '#000000',
-                    throttle: 16
+                    throttle: 0
                 });
                 
                 resizeSignatureCanvas = function () {
-                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
                     const rect = canvas.getBoundingClientRect();
-                    canvas.width = rect.width * ratio;
-                    canvas.height = rect.height * ratio;
-                    const context = canvas.getContext("2d");
-                    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-                    signaturePad.clear();
+                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                    const newWidth = Math.round(rect.width * ratio);
+                    const newHeight = Math.round(rect.height * ratio);
+                    
+                    if (canvas.width !== newWidth || canvas.height !== newHeight) {
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        const context = canvas.getContext("2d");
+                        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+                        signaturePad.clear();
+                    }
                 };
                 window.addEventListener("resize", resizeSignatureCanvas);
                 // Delay resize to ensure element is rendered

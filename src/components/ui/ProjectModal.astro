@@ -58,9 +58,9 @@
     .pm-overlay {
         position: fixed; inset: 0; z-index: 9990;
         display: flex; align-items: center; justify-content: center;
-        opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
+        opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 0.35s ease, visibility 0.35s ease;
     }
-    .pm-overlay.is-open { opacity: 1; pointer-events: all; }
+    .pm-overlay.is-open { opacity: 1; pointer-events: all; visibility: visible; }
 
     .pm-backdrop {
         position: absolute; inset: 0;
