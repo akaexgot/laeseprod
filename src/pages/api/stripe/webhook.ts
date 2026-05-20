@@ -102,13 +102,14 @@ export const POST: APIRoute = async ({ request }) => {
                         upsert: true
                     });
 
-                if (uploadErr) console.error(`Error uploading contract PDF:`, uploadErr);
+                if (uploadErr) throw uploadErr;
 
                 let pdfUrl = '';
                 if (uploadData) {
                     const { data: urlData } = supabase.storage.from('contracts').getPublicUrl(fileName);
                     pdfUrl = urlData.publicUrl;
                 }
+                if (!pdfUrl) throw new Error('No se pudo generar la URL publica del contrato');
 
                 const invoiceFileName = `factura_${invoiceNumber}_contrato_${contractId}.pdf`;
                 const invoiceFileBuffer = Buffer.from(invoiceBuffer);
@@ -119,13 +120,14 @@ export const POST: APIRoute = async ({ request }) => {
                         upsert: true
                     });
 
-                if (invoiceUploadErr) console.error(`Error uploading invoice PDF:`, invoiceUploadErr);
+                if (invoiceUploadErr) throw invoiceUploadErr;
 
                 let invoiceUrl = '';
                 if (invoiceUploadData) {
                     const { data: invoiceUrlData } = supabase.storage.from('contracts').getPublicUrl(invoiceFileName);
                     invoiceUrl = invoiceUrlData.publicUrl;
                 }
+                if (!invoiceUrl) throw new Error('No se pudo generar la URL publica de la factura');
 
                 // 4. Send notification email to client with PDF and invoice
                 if (contract.client_email) {
