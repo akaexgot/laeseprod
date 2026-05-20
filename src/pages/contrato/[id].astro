@@ -148,8 +148,8 @@ const hasClientDataStep = requiredClientFields.length > 0;
                                         <p class="signature-hint">Utiliza el dedo o el ratón para firmar dentro del recuadro.</p>
                                         <div class="signature-canvas-wrap">
                                             <canvas id="signature-pad"></canvas>
-                                            <button class="btn-clear-sig" id="clear-sig">Limpiar firma</button>
                                         </div>
+                                        <button class="btn-clear-sig" id="clear-sig">Limpiar firma</button>
                                     </div>
 
                                     <div class="flex-actions" style="margin-top: 2rem;">
@@ -206,17 +206,19 @@ const hasClientDataStep = requiredClientFields.length > 0;
                                                 </div>
 
                                                 <div class="success-actions">
-                                                    {contract.pdf_url && (
-                                                        <a href={contract.pdf_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
-                                                            Descargar Contrato (PDF)
-                                                        </a>
-                                                    )}
-                                                    {contract.invoice_url && (
-                                                        <a href={contract.invoice_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
-                                                            Descargar Factura
-                                                        </a>
-                                                    )}
-                                                    <a href="/" class="btn-primary" style="width:auto; padding-inline: 4rem;">Volver al sitio web</a>
+                                                    <a href="/" class="btn-primary success-home-link">Volver al sitio web</a>
+                                                    <div class="success-downloads">
+                                                        {contract.pdf_url && (
+                                                            <a href={contract.pdf_url} target="_blank" class="btn-secondary download-button">
+                                                                Descargar Contrato (PDF)
+                                                            </a>
+                                                        )}
+                                                        {contract.invoice_url && (
+                                                            <a href={contract.invoice_url} target="_blank" class="btn-secondary download-button">
+                                                                Descargar Factura
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -238,17 +240,19 @@ const hasClientDataStep = requiredClientFields.length > 0;
                                             </p>
                                             
                                             <div class="success-actions">
-                                                {contract.pdf_url && (
-                                                    <a href={contract.pdf_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
-                                                        Descargar Contrato (PDF)
-                                                    </a>
-                                                )}
-                                                {contract.invoice_url && (
-                                                    <a href={contract.invoice_url} target="_blank" class="btn-secondary" style="border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff;">
-                                                        Descargar Factura
-                                                    </a>
-                                                )}
-                                                <a href="/" class="btn-primary" style="width:auto; padding-inline: 4rem;">Volver al sitio web</a>
+                                                <a href="/" class="btn-primary success-home-link">Volver al sitio web</a>
+                                                <div class="success-downloads">
+                                                    {contract.pdf_url && (
+                                                        <a href={contract.pdf_url} target="_blank" class="btn-secondary download-button">
+                                                            Descargar Contrato (PDF)
+                                                        </a>
+                                                    )}
+                                                    {contract.invoice_url && (
+                                                        <a href={contract.invoice_url} target="_blank" class="btn-secondary download-button">
+                                                            Descargar Factura
+                                                        </a>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -396,11 +400,11 @@ const hasClientDataStep = requiredClientFields.length > 0;
         .terms-label input { width: 1.25rem; height: 1.25rem; accent-color: #e11d48; margin-top: 0.2rem; }
         .terms-text { font-size: 0.85rem; color: #3f3f46; line-height: 1.5; }
 
-        .signature-container { margin-bottom: 3rem; }
+        .signature-container { margin-bottom: 3rem; display: flex; flex-direction: column; gap: 0.75rem; }
         .signature-hint { font-size: 0.8rem; color: #71717a; margin-bottom: 1rem; text-align: center; }
-        .signature-canvas-wrap { background: #fdfdfd; border: 1px solid #e4e4e7; border-radius: 1.5rem; position: relative; overflow: hidden; height: 250px; z-index: 4; pointer-events: auto; }
-        canvas { width: 100%; height: 250px; touch-action: none; cursor: crosshair; display: block; position: relative; z-index: 5; pointer-events: auto; }
-        .btn-clear-sig { position: absolute; bottom: 1rem; right: 1rem; z-index: 6; background: #fff; border: 1px solid #e4e4e7; color: #a1a1aa; padding: 0.4rem 0.8rem; font-size: 0.7rem; font-weight: 700; border-radius: 0.5rem; cursor: pointer; pointer-events: auto; }
+        .signature-canvas-wrap { background: #fdfdfd; border: 1px solid #e4e4e7; border-radius: 1.5rem; position: relative; overflow: hidden; height: 250px; z-index: 4; pointer-events: auto; touch-action: none; }
+        canvas { width: 100%; height: 100%; min-height: 250px; touch-action: none; cursor: crosshair; display: block; position: relative; z-index: 5; pointer-events: auto; }
+        .btn-clear-sig { align-self: flex-end; background: #fff; border: 1px solid #e4e4e7; color: #71717a; padding: 0.55rem 0.95rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.5rem; cursor: pointer; pointer-events: auto; }
 
         /* Sidebar Styles */
         .contract-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
@@ -432,6 +436,10 @@ const hasClientDataStep = requiredClientFields.length > 0;
         .payment-amount { font-family: 'Outfit', sans-serif; font-size: 3.5rem; font-weight: 800; color: #09090b; }
         .trust-badges { display: flex; justify-content: center; gap: 1.5rem; margin: 1.5rem 0; opacity: 0.7; }
         .badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.65rem; color: #71717a; font-weight: 700; text-transform: uppercase; }
+        .success-actions { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; margin-top: 2rem; position: relative; z-index: 3; }
+        .success-home-link { width: min(100%, 620px); padding-inline: 4rem; }
+        .success-downloads { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; width: 100%; }
+        .download-button { border-color: #27272a; width: auto; min-width: 220px; background: #09090b; color: #fff; text-align: center; }
 
         .error-card { background: #09090b; border-color: #1a1a1c; padding: 5rem 2rem; color: #fff; }
         .error-title { font-family: 'Outfit', sans-serif; font-size: 1.75rem; margin-bottom: 0.5rem; }
@@ -461,6 +469,7 @@ const hasClientDataStep = requiredClientFields.length > 0;
         const steps = ['step-0', 'step-1', 'step-2', 'step-3'];
         let currentStep = 0;
         let signaturePad = null;
+        let resizeSignatureCanvas = () => {};
 
         if (hasClientDataStep && !contract.is_billable) {
             const nextButton = $('go-to-step-1');
@@ -535,7 +544,7 @@ const hasClientDataStep = requiredClientFields.length > 0;
 
             // Re-trigger resize now that it's visible
             setTimeout(() => {
-                if (signaturePad) resizeCanvas();
+                if (signaturePad) resizeSignatureCanvas();
             }, 50);
 
             // Init Signature Pad if not done
@@ -547,16 +556,18 @@ const hasClientDataStep = requiredClientFields.length > 0;
                     throttle: 16
                 });
                 
-                function resizeCanvas() {
+                resizeSignatureCanvas = function () {
                     const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                    canvas.width = canvas.offsetWidth * ratio;
-                    canvas.height = canvas.offsetHeight * ratio;
-                    canvas.getContext("2d").scale(ratio, ratio);
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width * ratio;
+                    canvas.height = rect.height * ratio;
+                    const context = canvas.getContext("2d");
+                    context.setTransform(ratio, 0, 0, ratio, 0, 0);
                     signaturePad.clear();
-                }
-                window.addEventListener("resize", resizeCanvas);
+                };
+                window.addEventListener("resize", resizeSignatureCanvas);
                 // Delay resize to ensure element is rendered
-                setTimeout(resizeCanvas, 50);
+                setTimeout(resizeSignatureCanvas, 50);
                 
                 const checkStatus = () => {
                     const hasFirma = !signaturePad.isEmpty();

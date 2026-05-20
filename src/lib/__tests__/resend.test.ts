@@ -61,4 +61,27 @@ describe('sendContractFinalizedEmail', () => {
       )
     ).rejects.toThrow('Error enviando contrato finalizado: Invalid attachment');
   });
+
+  it('sends the completed contract and invoice to the owner email', async () => {
+    const { sendContractCompletedOwnerEmail } = await import('../resend');
+
+    await sendContractCompletedOwnerEmail(
+      'cliente@example.com',
+      'Cliente Test',
+      'Contrato Demo',
+      new Uint8Array([37, 80, 68, 70]),
+      new Uint8Array([37, 80, 68, 70, 45]),
+      20001
+    );
+
+    expect(sendMock).toHaveBeenCalledTimes(1);
+    const payload = sendMock.mock.calls[0][0];
+
+    expect(payload.to).toBe('laeseprod@gmail.com');
+    expect(payload.replyTo).toBe('cliente@example.com');
+    expect(payload.subject).toContain('Contrato Demo');
+    expect(payload.attachments).toHaveLength(2);
+    expect(payload.attachments[0].filename).toBe('Contrato_VideoMarketing_Sevilla_Cliente_Test.pdf');
+    expect(payload.attachments[1].filename).toBe('Factura_F-20001_VideoMarketing_Sevilla.pdf');
+  });
 });

@@ -3,6 +3,7 @@ import { formatInvoiceNumber } from './contracts';
 
 export const resend = new Resend(import.meta.env.RESEND_API_KEY);
 const defaultFromEmail = 'no-reply@videomarketingsevilla.com';
+const ownerEmail = 'laeseprod@gmail.com';
 
 async function sendEmailOrThrow(
     payload: Parameters<typeof resend.emails.send>[0],
@@ -201,4 +202,50 @@ export async function sendContractFinalizedEmail(
             }] : [])
         ]
     }, 'Error enviando contrato finalizado');
+}
+
+/** Notificacion al dueno con contrato completado y documentos adjuntos */
+export async function sendContractCompletedOwnerEmail(
+    clientEmail: string,
+    clientName: string,
+    contractTitle: string,
+    pdfBuffer: Uint8Array,
+    invoiceBuffer?: Uint8Array,
+    invoiceNumber?: number
+) {
+    const content = `
+        <h2 class="email-title">Contrato completado</h2>
+        <p>El cliente <strong>${clientName}</strong> ha completado el proceso del contrato.</p>
+        <table class="data-table">
+          <tr><td class="data-label">Cliente</td><td class="data-value">${clientName}</td></tr>
+          <tr><td class="data-label">Email</td><td class="data-value"><a href="mailto:${clientEmail}" style="color: #E8364F; text-decoration: none;">${clientEmail}</a></td></tr>
+          <tr><td class="data-label">Contrato</td><td class="data-value">${contractTitle}</td></tr>
+          ${invoiceNumber ? `<tr><td class="data-label">Factura</td><td class="data-value">${formatInvoiceNumber(invoiceNumber)}</td></tr>` : ''}
+        </table>
+        <p>Adjuntamos la copia firmada del contrato${invoiceBuffer ? ' y la factura emitida' : ''} para que puedas archivarlo.</p>
+    `;
+
+    const invoiceFilename = invoiceNumber
+        ? `Factura_${formatInvoiceNumber(invoiceNumber)}_VideoMarketing_Sevilla.pdf`
+        : 'Factura_VideoMarketing_Sevilla.pdf';
+
+    return sendEmailOrThrow({
+        from: `Contratos | VideoMarketing Sevilla <${defaultFromEmail}>`,
+        to: ownerEmail,
+        replyTo: clientEmail,
+        subject: `Contrato completado: ${contractTitle}`,
+        html: getEmailShell('Contrato completado', content),
+        attachments: [
+            {
+                filename: `Contrato_VideoMarketing_Sevilla_${clientName.replace(/\s+/g, '_')}.pdf`,
+                content: Buffer.from(pdfBuffer),
+                contentType: 'application/pdf',
+            },
+            ...(invoiceBuffer ? [{
+                filename: invoiceFilename,
+                content: Buffer.from(invoiceBuffer),
+                contentType: 'application/pdf',
+            }] : [])
+        ]
+    }, 'Error enviando copia de contrato al dueno');
 }

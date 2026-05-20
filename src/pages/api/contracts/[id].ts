@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
 import { generateContractPDF, getInvoiceClientFieldKeys, replacePlaceholders } from '../../../lib/contracts';
-import { sendContractFinalizedEmail } from '../../../lib/resend';
+import { sendContractCompletedOwnerEmail, sendContractFinalizedEmail } from '../../../lib/resend';
 import { sendOwnerNotification } from '../../../lib/notifications';
 
 /**
@@ -88,8 +88,15 @@ export const PUT: APIRoute = async ({ params, request }) => {
                     signature_svg
                 );
 
-                // Send Email to Client
-                await sendContractFinalizedEmail(client_email, client_data.NOMBRE || client_email, pdfBuffer);
+                // Send Email to Client and Owner
+                const clientName = client_data.NOMBRE || client_data.CLIENTE_NOMBRE_FISCAL || client_email;
+                await sendContractFinalizedEmail(client_email, clientName, pdfBuffer);
+                await sendContractCompletedOwnerEmail(
+                    client_email,
+                    clientName,
+                    contract.title || contract.contract_templates?.title || 'Contrato VideoMarketing Sevilla',
+                    pdfBuffer
+                );
 
                 // Pushover Notification
                 await sendOwnerNotification(

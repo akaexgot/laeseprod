@@ -7,7 +7,7 @@ import {
     generateInvoicePDF,
     replacePlaceholders,
 } from '../../../lib/contracts';
-import { sendContractFinalizedEmail } from '../../../lib/resend';
+import { sendContractCompletedOwnerEmail, sendContractFinalizedEmail } from '../../../lib/resend';
 import { sendOwnerNotification } from '../../../lib/notifications';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '', {
@@ -129,11 +129,20 @@ export const POST: APIRoute = async ({ request }) => {
                 }
                 if (!invoiceUrl) throw new Error('No se pudo generar la URL publica de la factura');
 
-                // 4. Send notification email to client with PDF and invoice
+                // 4. Send notification emails with PDF and invoice
+                const clientName = contract.client_data?.NOMBRE || contract.client_data?.CLIENTE_NOMBRE_FISCAL || 'Cliente';
                 if (contract.client_email) {
                     await sendContractFinalizedEmail(
                         contract.client_email, 
-                        contract.client_data?.NOMBRE || contract.client_data?.CLIENTE_NOMBRE_FISCAL || 'Cliente', 
+                        clientName, 
+                        pdfBuffer,
+                        invoiceBuffer,
+                        invoiceNumber
+                    );
+                    await sendContractCompletedOwnerEmail(
+                        contract.client_email,
+                        clientName,
+                        contract.title || contract.contract_templates?.title || 'Contrato VideoMarketing Sevilla',
                         pdfBuffer,
                         invoiceBuffer,
                         invoiceNumber
