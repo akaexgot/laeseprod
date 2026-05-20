@@ -166,6 +166,24 @@ export async function generateContractPDF(title: string, htmlContent: string, si
             else if (/^<\s*br\s*>/.test(tag)) pushBreak(false);
         });
 
+    const cleanRuns: TextRun[] = [];
+    for (const run of runs) {
+        if (run.newLine) {
+            if (cleanRuns.length === 0) continue;
+            const lastRun = cleanRuns[cleanRuns.length - 1];
+            if (lastRun.newLine) {
+                if (run.paragraphGap) {
+                    lastRun.paragraphGap = true;
+                }
+                continue;
+            }
+        }
+        cleanRuns.push(run);
+    }
+    while (cleanRuns.length > 0 && cleanRuns[cleanRuns.length - 1].newLine) {
+        cleanRuns.pop();
+    }
+
     const getFontForRun = (run: TextRun) => {
         if (run.bold && run.italic) return fontBoldItalic;
         if (run.bold) return fontBold;
@@ -202,7 +220,7 @@ export async function generateContractPDF(title: string, htmlContent: string, si
         ensurePageSpace(120);
     };
 
-    for (const run of runs) {
+    for (const run of cleanRuns) {
         if (run.newLine) {
             newLine(run.paragraphGap ? 7 : 0);
             continue;
@@ -286,9 +304,9 @@ export async function generateContractPDF(title: string, htmlContent: string, si
             });
 
             try {
-                const sealPath = path.join(process.cwd(), 'selloEmpresa.jpg');
+                const sealPath = path.join(process.cwd(), 'firmaysello.png');
                 const sealImageBytes = await fs.readFile(sealPath);
-                const sealImage = await pdfDoc.embedJpg(sealImageBytes);
+                const sealImage = await pdfDoc.embedPng(sealImageBytes);
                 const sealScale = Math.min(
                     signatureBoxWidth / sealImage.width,
                     signatureBoxHeight / sealImage.height
