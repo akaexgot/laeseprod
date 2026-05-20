@@ -3,6 +3,23 @@ import { Resend } from 'resend';
 export const resend = new Resend(import.meta.env.RESEND_API_KEY);
 const defaultFromEmail = 'no-reply@videomarketingsevilla.com';
 
+async function sendEmailOrThrow(
+    payload: Parameters<typeof resend.emails.send>[0],
+    context: string
+) {
+    const result = await resend.emails.send(payload);
+
+    if (result.error) {
+        throw new Error(`${context}: ${result.error.message}`);
+    }
+
+    if (!result.data?.id) {
+        throw new Error(`${context}: Resend no devolvio un ID de email`);
+    }
+
+    return result;
+}
+
 export interface ContactFormData {
     name: string;
     email: string;
@@ -85,13 +102,13 @@ export async function sendContactNotification(data: ContactFormData) {
         </div>
     `;
 
-    return resend.emails.send({
+    return sendEmailOrThrow({
         from: `VideoMarketing Sevilla <${defaultFromEmail}>`,
         to: toEmail,
         replyTo: email,
         subject: `🔥 Nuevo Lead Web: ${name}${company ? ` (${company})` : ''}`,
         html: getEmailShell('Nuevo mensaje de contacto', content)
-    });
+    }, 'Error enviando notificacion de contacto');
 }
 
 /** Notificación al Administrador (Chat en Vivo) */
@@ -113,12 +130,12 @@ export async function sendChatNotification(visitorName: string, message: string,
         </div>
     `;
 
-    return resend.emails.send({
+    return sendEmailOrThrow({
         from: `Chat en Vivo <${defaultFromEmail}>`,
         to: toEmail,
         subject: `💬 Nuevo chat web: ${visitorName}`,
         html: getEmailShell('Nuevo chat iniciado', content)
-    });
+    }, 'Error enviando notificacion de chat');
 }
 
 /** Auto-respuesta cordial de Cortesía al Cliente */
@@ -134,12 +151,12 @@ export async function sendContactAutoReply(data: ContactFormData) {
         <p style="color: #666; font-style: italic;">— Producción Visual VideoMarketing Sevilla</p>
     `;
 
-    return resend.emails.send({
+    return sendEmailOrThrow({
         from: `VideoMarketing Sevilla <${defaultFromEmail}>`,
         to: data.email,
         subject: 'Hemos recibido tu solicitud de presupuesto',
         html: getEmailShell('Notificación VideoMarketing Sevilla', content)
-    });
+    }, 'Error enviando autorespuesta de contacto');
 }
 /** Notificación de Contrato firmado con PDF adjunto */
 export async function sendContractFinalizedEmail(
@@ -161,7 +178,11 @@ export async function sendContractFinalizedEmail(
         <p style="color: #666; font-style: italic;">— Gestión de Proyectos VideoMarketing Sevilla</p>
     `;
 
-    return resend.emails.send({
+    const invoiceFilename = invoiceNumber
+        ? `Factura_${invoiceNumber}_VideoMarketing_Sevilla.pdf`
+        : 'Factura_VideoMarketing_Sevilla.pdf';
+
+    return sendEmailOrThrow({
         from: `Contratos | VideoMarketing Sevilla <${defaultFromEmail}>`,
         to: clientEmail,
         subject: `Documento Firmado: Contrato VideoMarketing Sevilla`,
@@ -170,11 +191,13 @@ export async function sendContractFinalizedEmail(
             {
                 filename: `Contrato_VideoMarketing_Sevilla_${clientName.replace(/\s+/g, '_')}.pdf`,
                 content: Buffer.from(pdfBuffer),
+                contentType: 'application/pdf',
             },
             ...(invoiceBuffer ? [{
-                filename: `Factura_${invoiceNumber || ''}_VideoMarketing_Sevilla.pdf`,
+                filename: invoiceFilename,
                 content: Buffer.from(invoiceBuffer),
+                contentType: 'application/pdf',
             }] : [])
         ]
-    });
+    }, 'Error enviando contrato finalizado');
 }

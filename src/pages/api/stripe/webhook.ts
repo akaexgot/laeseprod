@@ -127,7 +127,18 @@ export const POST: APIRoute = async ({ request }) => {
                     invoiceUrl = invoiceUrlData.publicUrl;
                 }
 
-                // 4. Update status and PDF URL
+                // 4. Send notification email to client with PDF and invoice
+                if (contract.client_email) {
+                    await sendContractFinalizedEmail(
+                        contract.client_email, 
+                        contract.client_data?.NOMBRE || contract.client_data?.CLIENTE_NOMBRE_FISCAL || 'Cliente', 
+                        pdfBuffer,
+                        invoiceBuffer,
+                        invoiceNumber
+                    );
+                }
+
+                // 5. Update status and PDF URL after Resend accepts the email
                 const { error: updateErr } = await supabase
                     .from('contracts')
                     .update({ 
@@ -140,20 +151,7 @@ export const POST: APIRoute = async ({ request }) => {
                     })
                     .eq('id', contractId);
 
-                if (updateErr) {
-                    console.error(`Error updating contract ${contractId} in DB:`, updateErr);
-                }
-
-                // 5. Send notification email to client with PDF
-                if (contract.client_email) {
-                    await sendContractFinalizedEmail(
-                        contract.client_email, 
-                        contract.client_data?.NOMBRE || contract.client_data?.CLIENTE_NOMBRE_FISCAL || 'Cliente', 
-                        pdfBuffer,
-                        invoiceBuffer,
-                        invoiceNumber
-                    );
-                }
+                if (updateErr) throw updateErr;
 
                 // 6. Pushover Notification to Owner
                 await sendOwnerNotification(
@@ -163,6 +161,7 @@ export const POST: APIRoute = async ({ request }) => {
 
             } catch (err) {
                 console.error(`Error processing contract ${contractId} in webhook:`, err);
+                return new Response('Error processing checkout session', { status: 500 });
             }
         }
     }
