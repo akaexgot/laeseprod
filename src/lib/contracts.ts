@@ -29,11 +29,12 @@ export function extractPlaceholders(content: string): string[] {
 export const INVOICE_START_NUMBER = 20000;
 export const INVOICE_SERIES = 'F';
 export const INVOICE_VAT_RATE = 0.21;
+export const INVOICE_FIXED_CONCEPT = 'Prestacion de servicios audiovisuales.';
 
 export const INVOICE_COMPANY = {
     name: 'LAESE PRODUCCIONES S.L.',
     cif: 'B72757990',
-    address: 'c/ Nuestra Señora de Valme 23, 41701, Dos Hermanas (Sevilla)',
+    address: 'c/ Nuestra Señora de Valme 23, 41701, Dos Hermanas',
     iban: 'ES84 0182 3135 2202 0161 7430',
 };
 
@@ -297,7 +298,7 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
     page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 1, color: lightLine });
     y -= 28;
 
-    page.drawText(input.concept || 'Pago de servicios audiovisuales', {
+    page.drawText(INVOICE_FIXED_CONCEPT, {
         x: margin,
         y,
         size: 10,

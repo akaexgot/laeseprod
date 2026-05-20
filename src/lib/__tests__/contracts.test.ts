@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateSpanishVatFromGross, formatInvoiceNumber } from '../contracts';
+import { INVOICE_COMPANY, INVOICE_FIXED_CONCEPT, calculateSpanishVatFromGross, formatInvoiceNumber } from '../contracts';
 
 describe('invoice helpers', () => {
   it('formats invoice numbers with the fiscal series', () => {
@@ -13,5 +13,10 @@ describe('invoice helpers', () => {
       vatAmount: 130.17,
       total: 750,
     });
+  });
+
+  it('uses the fixed invoice concept and a single-line issuer address', () => {
+    expect(INVOICE_FIXED_CONCEPT).toBe('Prestacion de servicios audiovisuales.');
+    expect(INVOICE_COMPANY.address).toBe('c/ Nuestra Señora de Valme 23, 41701, Dos Hermanas');
   });
 });

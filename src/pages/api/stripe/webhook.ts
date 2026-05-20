@@ -87,7 +87,7 @@ export const POST: APIRoute = async ({ request }) => {
                     clientName: contract.client_data?.CLIENTE_NOMBRE_FISCAL || contract.client_data?.NOMBRE || contract.client_email,
                     clientCif: contract.client_data?.CLIENTE_CIF || '',
                     clientAddress: contract.client_data?.CLIENTE_DIRECCION || '',
-                    concept: contract.contract_templates?.title || contract.title || 'Servicios audiovisuales',
+                    concept: 'Prestacion de servicios audiovisuales.',
                     amount: Number(contract.amount_to_pay || 0),
                     contractId,
                 });
