@@ -37,14 +37,19 @@ export const PUT: APIRoute = async ({ params, request }) => {
         // 2. Prepare update data
         const isBillable = contract.is_billable;
         const newStatus = isBillable ? 'pending_payment' : 'completed';
+        const requiredClientFields = [
+            ...(contract.contract_templates?.client_fields || []),
+            ...(isBillable ? getInvoiceClientFieldKeys() : [])
+        ];
+        const missingClientFields = [...new Set(requiredClientFields)]
+            .filter((field) => !client_data?.[field]?.trim?.());
 
-        if (isBillable) {
-            const missingFiscalFields = getInvoiceClientFieldKeys().filter((field) => !client_data?.[field]?.trim?.());
-            if (missingFiscalFields.length > 0) {
-                return new Response(JSON.stringify({
-                    error: 'Faltan datos fiscales para emitir la factura.'
-                }), { status: 400 });
-            }
+        if (missingClientFields.length > 0) {
+            return new Response(JSON.stringify({
+                error: isBillable
+                    ? 'Faltan datos fiscales para emitir la factura.'
+                    : 'Faltan datos requeridos para completar el contrato.'
+            }), { status: 400 });
         }
 
         const { data: updated, error: updateErr } = await supabase

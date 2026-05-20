@@ -37,9 +37,11 @@ if (supabase && id) {
 // Prepare merged data for initial preview
 const initialData = { ...contract?.admin_data, ...contract?.client_data };
 const fiscalFieldLabels = Object.fromEntries(INVOICE_CLIENT_FIELDS.map((field) => [field.key, field.label]));
+const templateClientFields = template?.client_fields || [];
 const requiredClientFields = contract?.is_billable
-    ? [...new Set([...(template?.client_fields || []), ...INVOICE_CLIENT_FIELDS.map((field) => field.key)])]
-    : [];
+    ? [...new Set([...templateClientFields, ...INVOICE_CLIENT_FIELDS.map((field) => field.key)])]
+    : templateClientFields;
+const hasClientDataStep = requiredClientFields.length > 0;
 ---
 
 <BaseLayout
@@ -71,9 +73,9 @@ const requiredClientFields = contract?.is_billable
 
                         <div class="step-indicator" id="stepper">
                             <div class="step active" data-step="0"><span>Info</span></div>
-                            <div class={`step ${contract?.is_billable ? '' : 'step--hidden'}`} data-step="1"><span>Fiscal</span></div>
+                            <div class={`step ${hasClientDataStep ? '' : 'step--hidden'}`} data-step="1"><span>{contract?.is_billable ? 'Fiscal' : 'Datos'}</span></div>
                             <div class="step" data-step="2"><span>Firma</span></div>
-                            <div class="step" data-step="3"><span>Pago</span></div>
+                            <div class={`step ${contract?.is_billable ? '' : 'step--hidden'}`} data-step="3"><span>Pago</span></div>
                         </div>
 
                         <div class="card-body">
@@ -449,7 +451,7 @@ const requiredClientFields = contract?.is_billable
 
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-    <script define:vars={{ contract, template, id }}>
+    <script define:vars={{ contract, template, id, hasClientDataStep }}>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
@@ -459,6 +461,11 @@ const requiredClientFields = contract?.is_billable
         const steps = ['step-0', 'step-1', 'step-2', 'step-3'];
         let currentStep = 0;
         let signaturePad = null;
+
+        if (hasClientDataStep && !contract.is_billable) {
+            const nextButton = $('go-to-step-1');
+            if (nextButton) nextButton.textContent = 'Continuar a tus datos';
+        }
 
         function setStep(n, options = {}) {
             const { scroll = true } = options;
@@ -495,7 +502,7 @@ const requiredClientFields = contract?.is_billable
             if (!email || !email.includes('@')) { $('c-email').focus(); return; }
             if (!phone || phone.length < 9) { $('c-phone').focus(); return; }
 
-            if (!contract.is_billable) {
+            if (!hasClientDataStep) {
                 $('go-to-step-2')?.click();
                 return;
             }
@@ -615,7 +622,7 @@ const requiredClientFields = contract?.is_billable
         window.scrollTo(0, 0);
 
         $('back-to-step-0')?.addEventListener('click', () => setStep(0));
-        $('back-to-step-1')?.addEventListener('click', () => setStep(contract.is_billable ? 1 : 0));
+        $('back-to-step-1')?.addEventListener('click', () => setStep(hasClientDataStep ? 1 : 0));
 
         document.querySelectorAll('.input-group').forEach((group) => {
             group.addEventListener('pointerdown', (event) => {
