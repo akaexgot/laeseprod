@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { INVOICE_COMPANY, INVOICE_FIXED_CONCEPT, calculateSpanishVatFromGross, formatInvoiceNumber } from '../contracts';
+import {
+  INVOICE_COMPANY,
+  INVOICE_FIXED_CONCEPT,
+  calculateSpanishVatFromGross,
+  formatInvoiceNumber,
+  generateContractPDF,
+} from '../contracts';
 
 describe('invoice helpers', () => {
   it('formats invoice numbers with the fiscal series', () => {
@@ -18,5 +24,12 @@ describe('invoice helpers', () => {
   it('uses the fixed invoice concept and a single-line issuer address', () => {
     expect(INVOICE_FIXED_CONCEPT).toBe('Prestacion de servicios audiovisuales.');
     expect(INVOICE_COMPANY.address).toBe('c/ Nuestra Señora de Valme 23, 41701, Dos Hermanas');
+  });
+
+  it('generates signed contracts with the company seal asset available', async () => {
+    const signaturePng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const pdf = await generateContractPDF('Contrato test', '<p>Contenido de prueba</p>', signaturePng);
+
+    expect(pdf.length).toBeGreaterThan(1000);
   });
 });

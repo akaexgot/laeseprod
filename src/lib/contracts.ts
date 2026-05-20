@@ -152,34 +152,79 @@ export async function generateContractPDF(title: string, htmlContent: string, si
             y = height - margin;
         }
 
-        page.drawText('FIRMADO DIGITALMENTE POR EL CLIENTE:', { 
+        page.drawText('FIRMAS:', { 
             x: margin, 
             y, 
             size: 9, 
             font: fontBold,
             color: rgb(0.4, 0.4, 0.4)
         });
-        y -= 80;
+        y -= 22;
+
+        const signatureBoxWidth = 210;
+        const signatureBoxHeight = 80;
+        const companySealX = width - margin - signatureBoxWidth;
+        const signatureImageY = y - signatureBoxHeight;
+
+        page.drawText('Cliente', {
+            x: margin,
+            y,
+            size: 8,
+            font: fontBold,
+            color: rgb(0.45, 0.45, 0.45)
+        });
+
+        page.drawText('LAESE PRODUCCIONES S.L.', {
+            x: companySealX,
+            y,
+            size: 8,
+            font: fontBold,
+            color: rgb(0.45, 0.45, 0.45)
+        });
 
         try {
             // PNG signature from DataURL
             const base64Data = signatureDataUrl.split(',')[1];
             const sigImageBytes = Buffer.from(base64Data, 'base64');
             const sigImage = await pdfDoc.embedPng(sigImageBytes);
-            const dims = sigImage.scale(0.4);
+            const sigScale = Math.min(
+                signatureBoxWidth / sigImage.width,
+                signatureBoxHeight / sigImage.height
+            );
+            const dims = sigImage.scale(sigScale);
             
             page.drawImage(sigImage, {
                 x: margin,
-                y: y,
+                y: signatureImageY + (signatureBoxHeight - dims.height) / 2,
                 width: dims.width,
                 height: dims.height,
             });
+
+            try {
+                const sealPath = path.join(process.cwd(), 'selloEmpresa.jpg');
+                const sealImageBytes = await fs.readFile(sealPath);
+                const sealImage = await pdfDoc.embedJpg(sealImageBytes);
+                const sealScale = Math.min(
+                    signatureBoxWidth / sealImage.width,
+                    signatureBoxHeight / sealImage.height
+                );
+                const sealDims = sealImage.scale(sealScale);
+
+                page.drawImage(sealImage, {
+                    x: companySealX,
+                    y: signatureImageY + (signatureBoxHeight - sealDims.height) / 2,
+                    width: sealDims.width,
+                    height: sealDims.height,
+                });
+            } catch (sealError) {
+                console.error('Error embedding company seal in PDF:', sealError);
+            }
             
             // Signature date
             const dateStr = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });
             page.drawText(`Fecha: ${dateStr}`, {
                 x: margin,
-                y: y - 20,
+                y: signatureImageY - 18,
                 size: 8,
                 font: fontMain,
                 color: rgb(0.5, 0.5, 0.5)
