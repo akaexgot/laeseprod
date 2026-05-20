@@ -39,8 +39,8 @@ export const INVOICE_COMPANY = {
 };
 
 export const INVOICE_CLIENT_FIELDS = [
-    { key: 'CLIENTE_NOMBRE_FISCAL', label: 'Nombre de empresa / razón social' },
-    { key: 'CLIENTE_CIF', label: 'CIF / NIF' },
+    { key: 'CLIENTE_NOMBRE_FISCAL', label: 'Nombre empresa / razón social / nombre completo' },
+    { key: 'CLIENTE_CIF', label: 'NIF / DNI / CIF' },
     { key: 'CLIENTE_DIRECCION', label: 'Dirección fiscal' },
 ];
 
@@ -83,66 +83,151 @@ export async function generateContractPDF(title: string, htmlContent: string, si
     
     const fontMain = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+    const fontBoldItalic = await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique);
     
     const margin = 50;
     let y = height - margin;
 
-    // --- Content Rendering ---
-    // Extract text from HTML (simple replacement for tags)
-    // In a production environment with complex HTML, we'd use a dedicated HTML-to-PDF engine
-    const cleanText = htmlContent
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<p>/gi, '\n')
-        .replace(/<\/p>/gi, '\n')
-        .replace(/<strong>/gi, '')
-        .replace(/<\/strong>/gi, '')
-        .replace(/<[^>]*>?/gm, '');
+    const decodeHtml = (text: string) => text
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'");
 
-    const sections = cleanText.split('\n');
-    const fontSize = 10;
-    const lineHeight = fontSize * 1.6;
+    type TextStyle = {
+        bold: boolean;
+        italic: boolean;
+        underline: boolean;
+        strike: boolean;
+        size: number;
+        indent: number;
+    };
 
-    for (const section of sections) {
-        const text = section.trim();
-        if (!text) {
-            y -= lineHeight;
+    type TextRun = TextStyle & {
+        text: string;
+        newLine?: boolean;
+        paragraphGap?: boolean;
+    };
+
+    const baseStyle: TextStyle = {
+        bold: false,
+        italic: false,
+        underline: false,
+        strike: false,
+        size: 10,
+        indent: 0,
+    };
+
+    const runs: TextRun[] = [];
+    const styleStack: TextStyle[] = [{ ...baseStyle }];
+    const currentStyle = () => ({ ...styleStack[styleStack.length - 1] });
+    const pushText = (text: string) => {
+        const normalized = decodeHtml(text).replace(/\s+/g, ' ');
+        if (normalized.trim()) runs.push({ ...currentStyle(), text: normalized });
+    };
+    const pushBreak = (paragraphGap = false) => runs.push({ ...currentStyle(), text: '', newLine: true, paragraphGap });
+    const pushStyle = (changes: Partial<TextStyle>) => styleStack.push({ ...currentStyle(), ...changes });
+    const popStyle = () => { if (styleStack.length > 1) styleStack.pop(); };
+
+    htmlContent
+        .replace(/<br\s*\/?>/gi, '<br>')
+        .split(/(<[^>]+>)/g)
+        .forEach((token) => {
+            if (!token) return;
+            if (!token.startsWith('<')) {
+                pushText(token);
+                return;
+            }
+
+            const tag = token.toLowerCase();
+            if (/^<\s*(strong|b)\b/.test(tag)) pushStyle({ bold: true });
+            else if (/^<\s*\/\s*(strong|b)\s*>/.test(tag)) popStyle();
+            else if (/^<\s*(em|i)\b/.test(tag)) pushStyle({ italic: true });
+            else if (/^<\s*\/\s*(em|i)\s*>/.test(tag)) popStyle();
+            else if (/^<\s*u\b/.test(tag)) pushStyle({ underline: true });
+            else if (/^<\s*\/\s*u\s*>/.test(tag)) popStyle();
+            else if (/^<\s*(s|strike)\b/.test(tag)) pushStyle({ strike: true });
+            else if (/^<\s*\/\s*(s|strike)\s*>/.test(tag)) popStyle();
+            else if (/^<\s*h1\b/.test(tag)) { pushBreak(true); pushStyle({ bold: true, size: 18 }); }
+            else if (/^<\s*h2\b/.test(tag)) { pushBreak(true); pushStyle({ bold: true, size: 15 }); }
+            else if (/^<\s*h3\b/.test(tag)) { pushBreak(true); pushStyle({ bold: true, size: 12 }); }
+            else if (/^<\s*\/\s*h[1-3]\s*>/.test(tag)) { popStyle(); pushBreak(true); }
+            else if (/^<\s*p\b/.test(tag)) pushBreak(true);
+            else if (/^<\s*\/\s*p\s*>/.test(tag)) pushBreak(true);
+            else if (/^<\s*blockquote\b/.test(tag)) { pushBreak(true); pushStyle({ italic: true, indent: 18 }); }
+            else if (/^<\s*\/\s*blockquote\s*>/.test(tag)) { popStyle(); pushBreak(true); }
+            else if (/^<\s*li\b/.test(tag)) {
+                pushBreak(false);
+                runs.push({ ...currentStyle(), indent: 16, text: '- ' });
+            } else if (/^<\s*\/\s*li\s*>/.test(tag)) pushBreak(false);
+            else if (/^<\s*br\s*>/.test(tag)) pushBreak(false);
+        });
+
+    const getFontForRun = (run: TextRun) => {
+        if (run.bold && run.italic) return fontBoldItalic;
+        if (run.bold) return fontBold;
+        if (run.italic) return fontItalic;
+        return fontMain;
+    };
+
+    const drawStyledText = (text: string, xPos: number, yPos: number, run: TextRun) => {
+        const font = getFontForRun(run);
+        page.drawText(text, { x: xPos, y: yPos, size: run.size, font, color: rgb(0.15, 0.15, 0.15) });
+        const textWidth = font.widthOfTextAtSize(text, run.size);
+        if (run.underline) {
+            page.drawLine({ start: { x: xPos, y: yPos - 2 }, end: { x: xPos + textWidth, y: yPos - 2 }, thickness: 0.5, color: rgb(0.15, 0.15, 0.15) });
+        }
+        if (run.strike) {
+            page.drawLine({ start: { x: xPos, y: yPos + run.size * 0.35 }, end: { x: xPos + textWidth, y: yPos + run.size * 0.35 }, thickness: 0.5, color: rgb(0.15, 0.15, 0.15) });
+        }
+        return textWidth;
+    };
+
+    let x = margin;
+    let currentLineHeight = 16;
+    const maxTextWidth = width - (margin * 2);
+    const ensurePageSpace = (needed = 24) => {
+        if (y < margin + needed) {
+            page = pdfDoc.addPage([595.28, 841.89]);
+            y = height - margin;
+        }
+    };
+    const newLine = (gap = 0) => {
+        y -= currentLineHeight + gap;
+        x = margin;
+        currentLineHeight = 16;
+        ensurePageSpace(120);
+    };
+
+    for (const run of runs) {
+        if (run.newLine) {
+            newLine(run.paragraphGap ? 7 : 0);
             continue;
         }
 
-        // Split text into lines to fit page width
-        const words = text.split(' ');
-        let currentLine = '';
-
+        const words = run.text.split(/(\s+)/).filter(Boolean);
         for (const word of words) {
-            const testLine = currentLine + (currentLine ? ' ' : '') + word;
-            const testWidth = fontMain.widthOfTextAtSize(testLine, fontSize);
+            const isSpace = /^\s+$/.test(word);
+            const drawable = isSpace ? ' ' : word;
+            const runX = x === margin ? margin + run.indent : x;
+            const font = getFontForRun(run);
+            const wordWidth = font.widthOfTextAtSize(drawable, run.size);
 
-            if (testWidth > width - (margin * 2)) {
-                // Draw current line and start new one
-                if (y < margin + 100) {
-                    page = pdfDoc.addPage([595.28, 841.89]);
-                    y = height - margin;
-                }
-                page.drawText(currentLine, { x: margin, y, size: fontSize, font: fontMain, color: rgb(0.15, 0.15, 0.15) });
-                y -= lineHeight;
-                currentLine = word;
-            } else {
-                currentLine = testLine;
+            if (!isSpace && runX + wordWidth > margin + maxTextWidth) {
+                newLine();
             }
-        }
+            if (isSpace && x === margin) continue;
 
-        // Draw last line of section
-        if (currentLine) {
-            if (y < margin + 100) {
-                page = pdfDoc.addPage([595.28, 841.89]);
-                y = height - margin;
-            }
-            page.drawText(currentLine, { x: margin, y, size: fontSize, font: fontMain, color: rgb(0.15, 0.15, 0.15) });
-            y -= lineHeight;
+            const drawX = x === margin ? margin + run.indent : x;
+            currentLineHeight = Math.max(currentLineHeight, run.size * 1.55);
+            x = drawX + drawStyledText(drawable, drawX, y, run);
         }
-        
-        y -= 10; // Extra spacing between sections
     }
+
+    if (x !== margin) newLine(10);
 
     // --- Signature ---
     if (signatureDataUrl) {

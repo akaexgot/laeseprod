@@ -88,6 +88,34 @@ export const PUT: APIRoute = async ({ params, request }) => {
                     signature_svg
                 );
 
+                const fileName = `contrato_${id}.pdf`;
+                const { data: uploadData, error: uploadErr } = await supabase.storage
+                    .from('contracts')
+                    .upload(fileName, Buffer.from(pdfBuffer), {
+                        contentType: 'application/pdf',
+                        upsert: true
+                    });
+
+                if (uploadErr) throw uploadErr;
+
+                let pdfUrl = '';
+                if (uploadData) {
+                    const { data: urlData } = supabase.storage.from('contracts').getPublicUrl(fileName);
+                    pdfUrl = urlData.publicUrl;
+                }
+                if (!pdfUrl) throw new Error('No se pudo generar la URL publica del contrato');
+
+                const { error: pdfUpdateErr } = await supabase
+                    .from('contracts')
+                    .update({
+                        pdf_url: pdfUrl,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', id);
+
+                if (pdfUpdateErr) throw pdfUpdateErr;
+                updated.pdf_url = pdfUrl;
+
                 // Send Email to Client and Owner
                 const clientName = client_data.NOMBRE || client_data.CLIENTE_NOMBRE_FISCAL || client_email;
                 await sendContractFinalizedEmail(client_email, clientName, pdfBuffer);

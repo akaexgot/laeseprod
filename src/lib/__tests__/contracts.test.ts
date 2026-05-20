@@ -28,7 +28,11 @@ describe('invoice helpers', () => {
 
   it('generates signed contracts with the company seal asset available', async () => {
     const signaturePng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-    const pdf = await generateContractPDF('Contrato test', '<p>Contenido de prueba</p>', signaturePng);
+    const pdf = await generateContractPDF(
+      'Contrato test',
+      '<h2>Titulo</h2><p>Texto <strong>negrita</strong>, <em>cursiva</em> y <u>subrayado</u>.</p><ul><li>Clausula uno</li></ul>',
+      signaturePng
+    );
 
     expect(pdf.length).toBeGreaterThan(1000);
   });

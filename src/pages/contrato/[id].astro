@@ -677,6 +677,10 @@ const hasClientDataStep = requiredClientFields.length > 0;
                 });
 
                 if (res.ok) {
+                    if (!contract.is_billable) {
+                        window.location.href = `/contrato/${id}?status=success`;
+                        return;
+                    }
                     setStep(3);
                 } else {
                     const err = await res.json();
