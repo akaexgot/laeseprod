@@ -450,13 +450,18 @@ const requiredClientFields = contract?.is_billable
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <script define:vars={{ contract, template, id }}>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
         const $ = (id) => document.getElementById(id);
         const urlParams = new URLSearchParams(window.location.search);
         const steps = ['step-0', 'step-1', 'step-2', 'step-3'];
         let currentStep = 0;
         let signaturePad = null;
 
-        function setStep(n) {
+        function setStep(n, options = {}) {
+            const { scroll = true } = options;
             currentStep = n;
             steps.forEach((s, idx) => {
                 const el = $(s);
@@ -468,7 +473,9 @@ const requiredClientFields = contract?.is_billable
                     else stepEl.classList.remove('active');
                 }
             });
-            window.scrollTo({ top: 100, behavior: 'smooth' });
+            if (scroll) {
+                window.scrollTo({ top: 100, behavior: 'smooth' });
+            }
         }
 
         function replaceVariables(text, data) {
@@ -582,7 +589,7 @@ const requiredClientFields = contract?.is_billable
                 setInterval(checkStatus, 500);
 
                 if (urlParams.get('status') === 'cancel') {
-                    setStep(3);
+                    setStep(3, { scroll: false });
                     showToast('El pago ha sido cancelado.', 'error');
                 }
             }
@@ -590,20 +597,22 @@ const requiredClientFields = contract?.is_billable
 
         // Initialize state
         if (urlParams.get('status') === 'success') {
-            setStep(3);
+            setStep(3, { scroll: false });
             const checkoutBox = $('payment-checkout-box');
             const successMsg = $('payment-success-msg');
             if (checkoutBox) checkoutBox.style.display = 'none';
             if (successMsg) successMsg.style.display = 'block';
             showToast('¡Pago realizado con éxito!', 'success');
         } else if (urlParams.get('status') === 'cancel') {
-            setStep(3);
+            setStep(3, { scroll: false });
             showToast('El pago ha sido cancelado.', 'error');
         } else if (contract.status === 'completed' || contract.status === 'paid') {
-            setStep(3);
+            setStep(3, { scroll: false });
         } else {
-            setStep(0);
+            setStep(0, { scroll: false });
         }
+
+        window.scrollTo(0, 0);
 
         $('back-to-step-0')?.addEventListener('click', () => setStep(0));
         $('back-to-step-1')?.addEventListener('click', () => setStep(contract.is_billable ? 1 : 0));
