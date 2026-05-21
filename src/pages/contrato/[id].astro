@@ -37,9 +37,10 @@ if (supabase && id) {
 // Prepare merged data for initial preview
 const initialData = { ...contract?.admin_data, ...contract?.client_data };
 const fiscalFieldLabels = Object.fromEntries(INVOICE_CLIENT_FIELDS.map((field) => [field.key, field.label]));
+const invoiceFieldKeys = INVOICE_CLIENT_FIELDS.map((field) => field.key);
 const templateClientFields = template?.client_fields || [];
 const requiredClientFields = contract?.is_billable
-    ? [...new Set([...templateClientFields, ...INVOICE_CLIENT_FIELDS.map((field) => field.key)])]
+    ? [...new Set([...templateClientFields, ...invoiceFieldKeys])]
     : templateClientFields;
 const hasClientDataStep = requiredClientFields.length > 0;
 ---
@@ -108,12 +109,21 @@ const hasClientDataStep = requiredClientFields.length > 0;
                             <!-- STEP 1: FISCAL INFO -->
                             <div id="step-1" style="display: none;">
                                 <div class="form-grid">
-                                    <h3 class="step-title">Datos Fiscales</h3>
-                                    <p class="step-desc">Introduce la información legal que aparecerá en el contrato y en tus facturas.</p>
+                                    <h3 class="step-title">{contract?.is_billable ? 'Datos fiscales para factura' : 'Datos legales'}</h3>
+                                    <p class="step-desc">
+                                        {contract?.is_billable
+                                            ? 'Estos datos son necesarios para emitir la factura del pago y completar el contrato.'
+                                            : 'Introduce la información legal que aparecerá en el contrato.'}
+                                    </p>
                                     
                                     {requiredClientFields.map((field: string) => (
                                         <div class="input-group">
-                                            <label class="field-label">{fiscalFieldLabels[field] || field.replace(/_/g, ' ')} *</label>
+                                            <label class="field-label field-label--with-badge">
+                                                <span>{fiscalFieldLabels[field] || field.replace(/_/g, ' ')} *</span>
+                                                {invoiceFieldKeys.includes(field) && (
+                                                    <span class="invoice-field-badge">Factura</span>
+                                                )}
+                                            </label>
                                             <input type="text" class="client-data-input" data-field={field} value={contract?.client_data?.[field] || ''} />
                                         </div>
                                     ))}
@@ -381,6 +391,8 @@ const hasClientDataStep = requiredClientFields.length > 0;
         .form-grid { display: flex; flex-direction: column; gap: 1.5rem; max-width: 100%; position: relative; z-index: 3; }
         .input-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; z-index: 4; }
         .field-label { font-size: 0.7rem; text-transform: uppercase; color: #71717a; font-weight: 700; letter-spacing: 0.05em; }
+        .field-label--with-badge { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+        .invoice-field-badge { display: inline-flex; align-items: center; border-radius: 999px; background: #ffe4e6; color: #be123c; padding: 0.18rem 0.5rem; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.04em; }
         
         input { width: 100%; padding: 0.875rem 1.25rem; background: #fafafa; border: 1.5px solid #e4e4e7; border-radius: 0.75rem; color: #09090b; font-size: 0.95rem; transition: all 0.2s; box-sizing: border-box; position: relative; z-index: 5; pointer-events: auto; user-select: text; }
         input:focus { outline: none; border-color: #e11d48; background: #ffffff; box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.05); }
