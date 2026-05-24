@@ -46,11 +46,11 @@ function getVideoPoster(url: string | null | undefined): string | null {
         const isNative = videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
         const videoId = !isNative ? extractYouTubeId(videoUrl) : null;
         const posterUrl = getVideoPoster(videoUrl);
-        const posterClass = !isNative && videoId ? 'sct-card__img sct-card__img--youtube-poster' : 'sct-card__img';
+        const posterStyle = !isNative && videoId ? 'transform: scale(1.34);' : '';
         if (!isNative && !videoId) return null;
         return (
           <a href={`/sectores/${sector.slug}`} class="sct-card reveal" style={`animation-delay: ${idx * 0.1}s`}>
-            {posterUrl && <img src={posterUrl} alt="" class={posterClass} loading="lazy" decoding="async" aria-hidden="true" />}
+            {posterUrl && <img src={posterUrl} alt="" class="sct-card__img" style={posterStyle} loading="lazy" decoding="async" aria-hidden="true" />}
             <div class="sct-card__gradient"></div>
             <div class="sct-card__content">
               <h3 class="sct-card__title">{sector.title}</h3>
@@ -306,20 +306,12 @@ function getVideoPoster(url: string | null | undefined): string | null {
     transform: translate(-50%, -50%);
   }
 
-  .sct-card__img--youtube-poster {
-    transform: scale(1.34);
-  }
-
   .sct-card:active .sct-card__img {
     transform: scale(1.05);
   }
 
   .sct-card:active .sct-card__img--youtube {
     transform: translate(-50%, -50%) scale(1.04);
-  }
-
-  .sct-card:active .sct-card__img--youtube-poster {
-    transform: scale(1.42);
   }
 
   .sct-card__gradient {
