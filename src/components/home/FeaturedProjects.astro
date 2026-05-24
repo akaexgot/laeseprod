@@ -19,6 +19,15 @@ function getVideoId(value: string | null | undefined): string | null {
   if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
   return null;
 }
+
+function getVideoPoster(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (value.includes('cloudinary.com') && /\.(mp4|webm)(\?.*)?$/.test(value)) {
+    return value.replace(/\.(mp4|webm)(\?.*)?$/, '.jpg');
+  }
+  const videoId = getVideoId(value);
+  return videoId ? `https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp` : null;
+}
 ---
 
 {projects.length > 0 && (
@@ -42,6 +51,7 @@ function getVideoId(value: string | null | undefined): string | null {
       const videoUrl = projects[0].video_project;
       const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
       const videoId = !isNative ? getVideoId(videoUrl) : null;
+      const posterUrl = projects[0].thumbnail || getVideoPoster(videoUrl);
       
       const makingOfUrl = projects[0].video_explanation_mobile || projects[0].video_explanation_desktop;
       const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
@@ -58,9 +68,9 @@ function getVideoId(value: string | null | undefined): string | null {
            data-pm-slug={projects[0].slug}
            data-pm-client={projects[0].client_name || ''}>
           <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
-               style={!isNative ? `background-image: url(https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp); background-size: cover; background-position: center;` : ''}>
+               style={posterUrl ? `background-image: url(${posterUrl}); background-size: cover; background-position: center;` : ''}>
             {isNative ? (
-              <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 1280 })} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
+              <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 1280 })} poster={posterUrl || undefined} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
             ) : (
               <iframe
                 data-src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
@@ -104,6 +114,7 @@ function getVideoId(value: string | null | undefined): string | null {
         const videoUrl = project.video_project;
         const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
         const videoId = !isNative ? getVideoId(videoUrl) : null;
+        const posterUrl = project.thumbnail || getVideoPoster(videoUrl);
         
         const makingOfUrl = project.video_explanation_mobile || project.video_explanation_desktop;
         const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
@@ -120,9 +131,9 @@ function getVideoId(value: string | null | undefined): string | null {
              data-pm-slug={project.slug}
              data-pm-client={project.client_name || ''}>
             <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
-                 style={!isNative ? `background-image: url(https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp); background-size: cover; background-position: center;` : ''}>
+                 style={posterUrl ? `background-image: url(${posterUrl}); background-size: cover; background-position: center;` : ''}>
               {isNative ? (
-                <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 720 })} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
+                <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 720 })} poster={posterUrl || undefined} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
               ) : (
               <iframe
                 data-src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}

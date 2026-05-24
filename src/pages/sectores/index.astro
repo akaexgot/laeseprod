@@ -16,6 +16,15 @@ function getVideoId(value: string | null | undefined): string | null {
   return null;
 }
 
+function getVideoThumbnail(videoUrl: string | null | undefined): string | null {
+  if (!videoUrl) return null;
+  if (videoUrl.includes('cloudinary.com') && /\.(mp4|webm)(\?.*)?$/.test(videoUrl)) {
+    return videoUrl.replace(/\.(mp4|webm)(\?.*)?$/, '.jpg');
+  }
+  const videoId = getVideoId(videoUrl);
+  return videoId ? `https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp` : null;
+}
+
 function groupIntoScreens(items: any[]) {
   const screens: any[][] = [];
   let i = 0;
@@ -72,6 +81,7 @@ const gradients = [
                                 const videoUrl = item.video;
                                 const isNative = videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
                                 const vid = !isNative ? getVideoId(videoUrl) : null;
+                                const posterUrl = item.thumbnail || getVideoThumbnail(videoUrl);
                                 const gradient = gradients[0 % gradients.length];
                                 return (
                                     <a href={`/sectores/${item.slug}`} class="pj-cell pj-cell--large group">
@@ -91,7 +101,7 @@ const gradients = [
                                                     {item.icon}
                                                 </span>
                                             )}
-                                            {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                            {posterUrl && <img src={posterUrl} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
                                         </div>
                                         <div class="pj-cell__overlay"></div>
                                         <div class="pj-cell__info">
@@ -114,6 +124,7 @@ const gradients = [
                                     const videoUrl = item.video;
                                     const isNative = videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
                                     const vid = !isNative ? getVideoId(videoUrl) : null;
+                                    const posterUrl = item.thumbnail || getVideoThumbnail(videoUrl);
                                     const gradient = gradients[(idx + 1) % gradients.length];
                                     return (
                                         <a href={`/sectores/${item.slug}`} class="pj-cell pj-cell--stacked group">
@@ -133,7 +144,7 @@ const gradients = [
                                                         {item.icon}
                                                     </span>
                                                 )}
-                                                {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                                {posterUrl && <img src={posterUrl} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
                                             </div>
                                             <div class="pj-cell__overlay"></div>
                                             <div class="pj-cell__info">
@@ -156,6 +167,7 @@ const gradients = [
                             const videoUrl = item.video;
                             const isNative = videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
                             const vid = !isNative ? getVideoId(videoUrl) : null;
+                            const posterUrl = item.thumbnail || getVideoThumbnail(videoUrl);
                             const gradient = gradients[idx % gradients.length];
                             return (
                                 <a href={`/sectores/${item.slug}`} class="pj-cell pj-cell--quarter group">
@@ -175,7 +187,7 @@ const gradients = [
                                                 {item.icon}
                                             </span>
                                         )}
-                                        {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                        {posterUrl && <img src={posterUrl} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
                                     </div>
                                     <div class="pj-cell__overlay"></div>
                                     <div class="pj-cell__info">
@@ -222,6 +234,9 @@ const gradients = [
 <script>
     /* ── Lazy-load YouTube iframes ── */
     document.addEventListener('DOMContentLoaded', () => {
+        const shouldLoadDecorativeVideos = window.matchMedia('(min-width: 1025px) and (hover: hover) and (pointer: fine)').matches;
+        if (!shouldLoadDecorativeVideos) return;
+
         const lazyIframes = document.querySelectorAll('.pj-cell__iframe[data-src]');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {

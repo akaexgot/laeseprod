@@ -17,6 +17,15 @@ function extractYouTubeId(url: string | null | undefined): string | null {
   if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim();
   return null;
 }
+
+function getVideoPoster(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.includes('cloudinary.com') && /\.(mp4|webm)(\?.*)?$/.test(url)) {
+    return url.replace(/\.(mp4|webm)(\?.*)?$/, '.jpg');
+  }
+  const videoId = extractYouTubeId(url);
+  return videoId ? `https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp` : null;
+}
 ---
 
 {services.length > 0 && (
@@ -36,23 +45,11 @@ function extractYouTubeId(url: string | null | undefined): string | null {
         const videoUrl = service.video;
         const isNative = videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
         const videoId = !isNative ? extractYouTubeId(videoUrl) : null;
+        const posterUrl = getVideoPoster(videoUrl);
         if (!isNative && !videoId) return null;
         return (
           <a href={`/servicios/${service.slug}`} class="svc-card reveal" style={`animation-delay: ${idx * 0.1}s`}>
-            {isNative ? (
-               <video aria-hidden="true" src={optimizeCloudinaryVideo(videoUrl, { width: 720 })} class="svc-card__img" style="object-fit: cover;" autoplay loop muted playsinline></video>
-            ) : (
-               <iframe
-                 title={`Vídeo de ${service.title}`}
-                 src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
-                 class="svc-card__img svc-card__img--youtube"
-                 style="pointer-events: none;"
-                 frameborder="0"
-                 allow="autoplay; encrypted-media"
-                 tabindex="-1"
-                 aria-hidden="true"
-               ></iframe>
-            )}
+            {posterUrl && <img src={posterUrl} alt="" class="svc-card__img" loading="lazy" decoding="async" aria-hidden="true" />}
             <div class="svc-card__gradient"></div>
             <div class="svc-card__content">
               <h3 class="svc-card__title">{service.title}</h3>
