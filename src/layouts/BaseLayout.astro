@@ -402,14 +402,32 @@ const { title, description, image, noindex } = Astro.props;
                 });
             }
 
-            // Run on load and periodically for lazy-loaded iframes
-            if (document.readyState === 'complete') {
-                enableListening();
-            } else {
-                window.addEventListener('load', enableListening);
+            let listeningInterval: ReturnType<typeof setInterval> | null = null;
+
+            function hasPlayableYouTubeIframes() {
+                return getYouTubeIframes().length > 0;
             }
-            // Re-enable for dynamically loaded iframes (e.g. lazy-loaded on scroll)
-            setInterval(enableListening, 1000);
+
+            function startListeningLoop() {
+                enableListening();
+                if (!listeningInterval && hasPlayableYouTubeIframes()) {
+                    listeningInterval = setInterval(() => {
+                        if (!hasPlayableYouTubeIframes()) {
+                            if (listeningInterval) clearInterval(listeningInterval);
+                            listeningInterval = null;
+                            return;
+                        }
+                        enableListening();
+                    }, 3000);
+                }
+            }
+
+            // Run on load and periodically only while YouTube iframes exist.
+            if (document.readyState === 'complete') {
+                startListeningLoop();
+            } else {
+                window.addEventListener('load', startListeningLoop);
+            }
         })();
         </script>
     </body>

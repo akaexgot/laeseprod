@@ -62,6 +62,13 @@ const heroSubtitle = settings.hero_subtitle || '';
     {!isNativeVideo && (
 
     <script is:inline define:vars={{ youtubeId }}>
+        const isMobileLike = window.matchMedia('(max-width: 1024px), (hover: none), (pointer: coarse)').matches;
+
+        // En movil dejamos la imagen de portada estatica. El player de YouTube en
+        // background puede disparar consumo de memoria junto con los demas videos.
+        if (isMobileLike) {
+            window.dispatchEvent(new CustomEvent('vm-hero-ready'));
+        } else {
         // Carga de la API de YouTube diferida para no penalizar el rendimiento inicial (Lighthouse)
         function loadYouTubeAPI() {
             if (!window.YT) {
@@ -161,6 +168,7 @@ const heroSubtitle = settings.hero_subtitle || '';
                 if (previousOnReady) previousOnReady();
                 initHeroPlayer();
             };
+        }
         }
     </script>
 

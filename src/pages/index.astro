@@ -135,6 +135,9 @@ import CtaSection from "../components/home/CtaSection.astro";
 <script>
 	/* ── Lazy-load YouTube iframes on section visibility ── */
 	document.addEventListener('DOMContentLoaded', () => {
+		const shouldLoadDecorativeVideos = window.matchMedia('(min-width: 1025px) and (hover: hover) and (pointer: fine)').matches;
+		if (!shouldLoadDecorativeVideos) return;
+
 		const lazyIframes = document.querySelectorAll('iframe[data-src]');
 		if (lazyIframes.length === 0) return;
 

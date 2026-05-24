@@ -60,7 +60,7 @@ function getVideoId(value: string | null | undefined): string | null {
           <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
                style={!isNative ? `background-image: url(https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp); background-size: cover; background-position: center;` : ''}>
             {isNative ? (
-              <video aria-hidden="true" src={optimizeCloudinaryVideo(videoUrl, { width: 1280 })} class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline></video>
+              <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 1280 })} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
             ) : (
               <iframe
                 data-src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
@@ -122,7 +122,7 @@ function getVideoId(value: string | null | undefined): string | null {
             <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
                  style={!isNative ? `background-image: url(https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp); background-size: cover; background-position: center;` : ''}>
               {isNative ? (
-                <video aria-hidden="true" src={optimizeCloudinaryVideo(videoUrl, { width: 720 })} class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline></video>
+                <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 720 })} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
               ) : (
               <iframe
                 data-src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
@@ -237,7 +237,21 @@ function getVideoId(value: string | null | undefined): string | null {
       }
     });
 
-    // Lazy load real para iframes de YouTube
+    const shouldLoadDecorativeVideos = window.matchMedia('(min-width: 1025px) and (hover: hover) and (pointer: fine)').matches;
+    if (!shouldLoadDecorativeVideos) return;
+
+    document.querySelectorAll('video.project-native-video[data-src]').forEach(video => {
+      const el = video as HTMLVideoElement;
+      const src = el.dataset.src;
+      if (!src) return;
+      el.src = src;
+      el.autoplay = true;
+      el.muted = true;
+      el.playsInline = true;
+      el.play().catch(() => {});
+    });
+
+    // Lazy load real para iframes de YouTube en escritorio.
     const lazyIframes = document.querySelectorAll('iframe.lazy-iframe');
     if ('IntersectionObserver' in window && lazyIframes.length > 0) {
       const observer = new IntersectionObserver((entries) => {
