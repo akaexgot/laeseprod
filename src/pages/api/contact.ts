@@ -3,11 +3,29 @@
  * POST /api/contact
  */
 import type { APIRoute } from 'astro';
+import { validateCaptcha } from '../../lib/captcha';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
         const data = await request.json();
-        const { name, email, phone, company, message } = data;
+        const {
+            name,
+            email,
+            phone,
+            company,
+            message,
+            captchaToken,
+            captchaAnswer,
+            website,
+            formStartedAt,
+        } = data;
+
+        if (!validateCaptcha({ token: captchaToken, answer: captchaAnswer, website, startedAt: formStartedAt })) {
+            return new Response(JSON.stringify({ error: 'Verificacion anti-spam incorrecta' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
 
         // Validate required fields
         if (!name || !email || !message) {

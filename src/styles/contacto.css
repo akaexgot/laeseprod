@@ -203,6 +203,14 @@
     gap: 0.4rem;
 }
 
+.contact-form__field--trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
 .contact-form__label {
     font-size: 0.8125rem;
     font-weight: 600;

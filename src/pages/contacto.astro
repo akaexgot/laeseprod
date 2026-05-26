@@ -7,8 +7,10 @@ import FaqsSection from "../components/home/FaqsSection.astro";
 import "../styles/contacto.css";
 import "../styles/contacto-chat.css";
 import { getSettings } from "../lib/data";
+import { createCaptchaChallenge } from "../lib/captcha";
 
 const settings = await getSettings();
+const captcha = createCaptchaChallenge();
 
 function extractYouTubeId(url: string | null | undefined): string | null {
     if (!url) return null;
@@ -197,6 +199,23 @@ const sharedHeroVideoId = !sharedHeroVideoIsNative ? extractYouTubeId(sharedHero
                                   placeholder="Cuéntanos sobre tu proyecto: qué necesitas, plazos, presupuesto aproximado..."></textarea>
                     </div>
 
+                    <div class="contact-form__field contact-form__field--trap" aria-hidden="true">
+                        <label for="contact-website" class="contact-form__label">Web</label>
+                        <input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" />
+                    </div>
+
+                    <input type="hidden" name="captchaToken" value={captcha.token} />
+                    <input type="hidden" name="formStartedAt" value={captcha.startedAt} />
+
+                    <div class="contact-form__field">
+                        <label for="contact-captcha" class="contact-form__label">
+                            Anti-spam: cuanto es {captcha.question}? *
+                        </label>
+                        <input type="number" id="contact-captcha" name="captchaAnswer" required
+                               class="contact-form__input" inputmode="numeric" autocomplete="off"
+                               placeholder="Respuesta" />
+                    </div>
+
                     <div id="form-status" class="contact-form__status hidden"></div>
 
                     <button type="submit" id="contact-submit" class="contact-form__submit">
@@ -376,9 +395,10 @@ const sharedHeroVideoId = !sharedHeroVideoIsNative ? extractYouTubeId(sharedHero
                 status.className = "contact-form__status contact-form__status--success";
                 form.reset();
             } else {
-                throw new Error("Error sending");
+                const payload = await res.json().catch(() => null);
+                throw new Error(payload?.error || "Error sending");
             }
-        } catch {
+        } catch (error) {
             status.textContent = "❌ Error al enviar. Intenta de nuevo o contáctanos por WhatsApp.";
             status.className = "contact-form__status contact-form__status--error";
         }
