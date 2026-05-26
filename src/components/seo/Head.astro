@@ -1,39 +1,54 @@
 ---
 /**
  * SEO Head Component
- * Generates all meta tags, Open Graph, schema.org markup
+ * Generates meta tags, Open Graph, Twitter cards and JSON-LD markup.
  */
+import { getPageSeo, getSettings } from "../../lib/data";
+import { absoluteUrl, canonicalFromUrl, cleanPath, getSiteUrl } from "../../lib/seo";
+
 interface Props {
   title?: string;
   description?: string;
   image?: string;
+  imageAlt?: string;
   url?: string;
   type?: 'website' | 'article';
   noindex?: boolean;
+  structuredData?: Record<string, any> | Array<Record<string, any> | null> | null;
 }
 
-import { getSettings } from "../../lib/data";
-
 const settings = await getSettings();
+const pageSeo = await getPageSeo(cleanPath(Astro.url.pathname));
 
+const siteUrl = getSiteUrl();
 const siteName = settings.site_name || 'VideoMarketing Sevilla';
-const defaultDescription = settings.site_description || 'Productora audiovisual especializada en video marketing para empresas en Sevilla, Cádiz y toda España. Spots, vídeos corporativos y contenido para redes sociales.';
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://videomarketingsevilla.com';
+const defaultDescription = settings.site_description || 'Productora audiovisual especializada en video marketing para empresas en Sevilla, Cadiz y toda Espana.';
 
 const {
   title,
-  description = defaultDescription,
-  image = `${siteUrl}/logo2.png`,
+  description,
+  image,
+  imageAlt,
   url = Astro.url.href,
   type = 'website',
   noindex = false,
+  structuredData,
 } = Astro.props;
+
+const rawTitle = pageSeo?.title || title;
+const fullTitle = rawTitle
+  ? (rawTitle.includes(siteName) || rawTitle.includes('|') ? rawTitle : `${rawTitle} | ${siteName}`)
+  : `${siteName} | Productora Audiovisual en Sevilla`;
+
+const metaDescription = pageSeo?.description || description || defaultDescription;
+const canonicalUrl = pageSeo?.canonical_url || canonicalFromUrl(url);
+const resolvedImage = absoluteUrl(pageSeo?.og_image || image || settings.logo_url || '/logo2.png') || `${siteUrl}/logo2.png`;
+const resolvedImageAlt = imageAlt || `${siteName} - productora audiovisual en Sevilla`;
+const shouldNoindex = noindex || pageSeo?.no_index === true;
+const themeColor = settings.primary_color || '#9B1B30';
 
 const youtubeId = settings.hero_video_desktop?.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/)?.[1] || 'D91q99QK11k';
 
-const fullTitle = title ? `${title} | ${siteName}` : `${siteName} — Productora Audiovisual en Sevilla`;
-
-// LocalBusiness Schema
 const localBusinessSchema = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
@@ -41,12 +56,15 @@ const localBusinessSchema = {
   name: siteName,
   description: defaultDescription,
   url: siteUrl,
+  logo: absoluteUrl(settings.logo_url || '/logo2.png'),
+  image: resolvedImage,
   telephone: settings.phone || '+34600000000',
   email: settings.email || 'info@videomarketingsevilla.es',
   address: {
     '@type': 'PostalAddress',
+    streetAddress: settings.address || 'Sevilla',
     addressLocality: 'Sevilla',
-    addressRegion: 'Andalucía',
+    addressRegion: 'Andalucia',
     addressCountry: 'ES',
   },
   geo: {
@@ -56,54 +74,79 @@ const localBusinessSchema = {
   },
   areaServed: [
     { '@type': 'City', name: 'Sevilla' },
-    { '@type': 'City', name: 'Cádiz' },
-    { '@type': 'Country', name: 'España' },
+    { '@type': 'City', name: 'Cadiz' },
+    { '@type': 'AdministrativeArea', name: 'Andalucia' },
+    { '@type': 'Country', name: 'ES' },
   ],
-  priceRange: '€€€',
-  image: image,
+  priceRange: 'EUR',
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: settings.phone || '+34600000000',
+    email: settings.email || 'info@videomarketingsevilla.es',
+    contactType: 'sales',
+    areaServed: 'ES',
+    availableLanguage: ['es'],
+  },
   sameAs: [
     settings.instagram,
     settings.linkedin,
   ].filter(Boolean),
 };
 
-// Website Schema
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
+  '@id': `${siteUrl}/#website`,
   name: siteName,
   url: siteUrl,
+  publisher: { '@id': `${siteUrl}/#business` },
+  inLanguage: 'es-ES',
 };
+
+const extraStructuredData = Array.isArray(structuredData)
+  ? structuredData.filter(Boolean)
+  : structuredData ? [structuredData] : [];
+
+const schemaItems = [
+  localBusinessSchema,
+  websiteSchema,
+  ...extraStructuredData,
+];
 ---
 
 <!-- Primary Meta Tags -->
 <title>{fullTitle}</title>
-<meta name="title" content={fullTitle} />
-<meta name="description" content={description} />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta charset="UTF-8" />
-{noindex && <meta name="robots" content="noindex, nofollow" />}
-<link rel="canonical" href={url} />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="title" content={fullTitle} />
+<meta name="description" content={metaDescription} />
+<meta name="robots" content={shouldNoindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"} />
+<meta name="theme-color" content={themeColor} />
+<meta name="format-detection" content="telephone=no" />
+<link rel="canonical" href={canonicalUrl} />
 
-<!-- Open Graph / Facebook -->
+<!-- Open Graph -->
 <meta property="og:type" content={type} />
-<meta property="og:url" content={url} />
+<meta property="og:url" content={canonicalUrl} />
 <meta property="og:title" content={fullTitle} />
-<meta property="og:description" content={description} />
-<meta property="og:image" content={image} />
+<meta property="og:description" content={metaDescription} />
+<meta property="og:image" content={resolvedImage} />
+<meta property="og:image:alt" content={resolvedImageAlt} />
 <meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content="es_ES" />
 
 <!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={url} />
-<meta property="twitter:title" content={fullTitle} />
-<meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={image} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalUrl} />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={metaDescription} />
+<meta name="twitter:image" content={resolvedImage} />
+<meta name="twitter:image:alt" content={resolvedImageAlt} />
 
 <!-- Schema.org -->
-<script type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} />
-<script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+{schemaItems.map((schema) => (
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+))}
 
 <!-- Preload Critical Assets -->
 <link rel="preload" href={`https://i.ytimg.com/vi_webp/${youtubeId}/hqdefault.webp`} as="image" fetchpriority="high" />
@@ -113,7 +156,7 @@ const websiteSchema = {
 <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
 
-<!-- Preconnect Google Fonts & DNS-Prefetch YouTube -->
+<!-- Preconnect Google Fonts & DNS-Prefetch Media -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://i.ytimg.com" crossorigin />

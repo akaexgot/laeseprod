@@ -18,6 +18,22 @@ export async function getSettings() {
     return data;
 }
 
+/** Fetch custom SEO metadata for a public page */
+export async function getPageSeo(pagePath: string) {
+    if (!supabase) return null;
+
+    const normalizedPath = pagePath.length > 1 ? pagePath.replace(/\/+$/, '') : '/';
+
+    const { data, error } = await supabase
+        .from('pages_seo')
+        .select('*')
+        .eq('page_path', normalizedPath)
+        .maybeSingle();
+
+    if (error || !data) return null;
+    return data;
+}
+
 /** Fetch navigation items */
 export async function getNavigation() {
     if (!supabase) return fallback.navigation;

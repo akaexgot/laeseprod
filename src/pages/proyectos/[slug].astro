@@ -9,6 +9,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ContactFormBlock from '../../components/ui/ContactFormBlock.astro';
 import { getProjects } from '../../lib/data';
 import { getVideoId, isInstagramReel, getInstagramEmbedUrl } from '../../lib/display';
+import { buildBreadcrumbSchema, buildProjectSchemas, getVideoThumbnail } from '../../lib/seo';
 
 
 const { slug } = Astro.params;
@@ -41,9 +42,25 @@ const s1IsNative = hasMakingOf ? makingOfIsNative : projectVideoIsNative;
 const s1IsInstagram = hasMakingOf ? makingOfIsInstagram : false;
 const s1InstagramEmbed = hasMakingOf ? makingOfInstagramEmbed : null;
 const s1FrameClass = (hasMakingOf && !makingOfIsNative && !makingOfIsInstagram) ? "" : (!hasMakingOf ? "pj-hero__video-frame--horizontal" : "");
+const pagePath = `/proyectos/${project.slug}`;
+const pageImage = project.thumbnail || getVideoThumbnail(project.video_project);
+const structuredData = [
+    buildBreadcrumbSchema([
+        { name: 'Inicio', path: '/' },
+        { name: 'Proyectos', path: '/proyectos' },
+        { name: project.title, path: pagePath },
+    ]),
+    ...buildProjectSchemas(project, pagePath),
+];
 ---
 
-<BaseLayout title={project.title} description={project.subtitle || project.description || ''}>
+<BaseLayout
+    title={project.title}
+    description={project.subtitle || project.description || ''}
+    image={pageImage}
+    type="article"
+    structuredData={structuredData}
+>
     <article class="pj-detail" data-project-page>
 
         <!-- ═══ SCREEN 1: Hero — Vertical video + Project Info ═══ -->

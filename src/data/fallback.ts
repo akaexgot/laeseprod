@@ -229,6 +229,8 @@ export const companies = [
     { id: '6', name: 'Tech Sevilla', logo_url: '', website: '', order: 6 },
 ];
 
+export const faqs = [];
+
 export const footerData = {
     description: 'Productora audiovisual especializada en video marketing para empresas. Creamos contenido que impulsa marcas.',
     copyright: '© 2024 VideoMarketing Sevilla. Todos los derechos reservados.',

@@ -5,6 +5,7 @@
  * Respects the global faq_section_enabled setting
  */
 import { getFaqs, getSettings } from "../../lib/data";
+import { buildFaqSchema } from "../../lib/seo";
 const faqs = await getFaqs();
 const settings = await getSettings();
 
@@ -12,7 +13,10 @@ const settings = await getSettings();
 if (!settings.faq_section_enabled) return null;
 
 if (faqs.length === 0) return null;
+const faqSchema = buildFaqSchema(faqs);
 ---
+
+{faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
 
 <section id="faq-section" class="faq-section">
     <div class="section-container">

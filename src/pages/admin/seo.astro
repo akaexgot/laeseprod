@@ -1,104 +1,225 @@
 ---
 /**
  * Admin - SEO Management
- * Edit meta tags, schema, pages SEO
+ * Edit page titles, descriptions, canonical URLs, OG images and noindex flags.
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getServiceSupabase } from "../../lib/supabase";
-import { getUserFromCookie } from "../../lib/auth";
 
-// SSR auth is handled by middleware
-const serviceSupabase = getServiceSupabase()!;
+const serviceSupabase = getServiceSupabase();
+
+const pageDefinitions = [
+    { path: "/", name: "Home" },
+    { path: "/proyectos", name: "Proyectos" },
+    { path: "/servicios", name: "Servicios" },
+    { path: "/sectores", name: "Sectores" },
+    { path: "/quienes-somos", name: "Quienes Somos" },
+    { path: "/contacto", name: "Contacto" },
+    { path: "/privacidad", name: "Privacidad" },
+    { path: "/aviso-legal", name: "Aviso Legal" },
+    { path: "/cookies", name: "Cookies" },
+];
+
+const { data: seoRows = [] } = serviceSupabase
+    ? await serviceSupabase
+        .from("pages_seo")
+        .select("*")
+        .in("page_path", pageDefinitions.map((page) => page.path))
+    : { data: [] };
+
+const seoByPath = new Map((seoRows || []).map((row: any) => [row.page_path, row]));
 ---
 
 <AdminLayout title="SEO" activeSection="seo">
-    <!-- SEO Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3" style="gap: 1rem; margin-bottom: 2rem;">
         <div class="glass rounded-2xl" style="padding: 1.5rem;">
-            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">
-                Estado SEO
-            </h3>
-            <p class="text-green-400 text-sm">✓ Schema.org activo</p>
-            <p class="text-green-400 text-sm">✓ Open Graph configurado</p>
-            <p class="text-green-400 text-sm">✓ Sitemap generado</p>
-        </div>
-        <div class="glass rounded-2xl" style="padding: 1.5rem;">
-            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">
-                Palabras Clave
-            </h3>
-            <div class="flex flex-wrap" style="gap: 0.375rem; margin-top: 0.5rem;">
-                <span
-                    class="bg-carmin/10 text-carmin-light rounded-full text-xs"
-                    style="padding: 0.125rem 0.5rem;"
-                    >video marketing sevilla</span
-                >
-                <span
-                    class="bg-carmin/10 text-carmin-light rounded-full text-xs"
-                    style="padding: 0.125rem 0.5rem;"
-                    >productora audiovisual</span
-                >
-                <span
-                    class="bg-carmin/10 text-carmin-light rounded-full text-xs"
-                    style="padding: 0.125rem 0.5rem;"
-                    >videos para empresas</span
-                >
-            </div>
+            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">Estado SEO</h3>
+            <p class="text-green-400 text-sm">Schema.org activo</p>
+            <p class="text-green-400 text-sm">Open Graph configurado</p>
+            <p class="text-green-400 text-sm">Sitemap generado</p>
         </div>
         <div class="glass rounded-2xl" style="padding: 1.5rem;">
             <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">URLs</h3>
-            <p class="text-light-muted text-sm">
-                Sitemap: <a
-                    href="/sitemap.xml"
-                    class="text-carmin-light hover:underline">/sitemap.xml</a>
-            </p>
-            <p class="text-light-muted text-sm">
-                Robots: <a
-                    href="/robots.txt"
-                    class="text-carmin-light hover:underline">/robots.txt</a>
-            </p>
+            <p class="text-light-muted text-sm">Sitemap: <a href="/sitemap.xml" class="text-carmin-light hover:underline">/sitemap.xml</a></p>
+            <p class="text-light-muted text-sm">Robots: <a href="/robots.txt" class="text-carmin-light hover:underline">/robots.txt</a></p>
+        </div>
+        <div class="glass rounded-2xl" style="padding: 1.5rem;">
+            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">Meta editable</h3>
+            <p class="text-light-muted text-sm">Los cambios se aplican al Head publico al guardar cada pagina.</p>
         </div>
     </div>
 
-    <!-- Pages SEO Editor -->
-    <h2 class="text-lg font-[Outfit] font-semibold text-white" style="margin-bottom: 1rem;">
-        Meta por Página
-    </h2>
-    <div class="flex flex-col" style="gap: 0.75rem;">
-        {
-            [
-                { path: "/", title: "Home", hasCustom: true },
-                { path: "/proyectos", title: "Proyectos", hasCustom: true },
-                { path: "/servicios", title: "Servicios", hasCustom: true },
-                { path: "/sectores", title: "Sectores", hasCustom: true },
-                {
-                    path: "/quienes-somos",
-                    title: "Quiénes Somos",
-                    hasCustom: false,
-                },
-                { path: "/contacto", title: "Contacto", hasCustom: false },
-            ].map((page) => (
-                <div class="glass rounded-2xl flex items-center justify-between hover:border-carmin/20 transition-all duration-300" style="padding: 1.25rem;">
-                    <div class="flex items-center" style="gap: 0.75rem;">
-                        <span
-                            class:list={[
-                                "w-2 h-2 rounded-full",
-                                page.hasCustom
-                                    ? "bg-green-400"
-                                    : "bg-yellow-400",
-                            ]}
-                        />
+    <h2 class="text-lg font-[Outfit] font-semibold text-white" style="margin-bottom: 1rem;">Meta por pagina</h2>
+
+    <div class="flex flex-col" style="gap: 1rem;">
+        {pageDefinitions.map((page) => {
+            const seo = seoByPath.get(page.path) as any;
+
+            return (
+                <form class="seo-form glass rounded-2xl" data-path={page.path} style="padding: 1.25rem; display: grid; gap: 1rem;">
+                    <div class="flex items-center justify-between" style="gap: 1rem;">
                         <div>
-                            <h3 class="text-white text-sm font-medium">
-                                {page.title}
-                            </h3>
+                            <h3 class="text-white text-sm font-medium">{page.name}</h3>
                             <p class="text-light-subtle text-xs">{page.path}</p>
                         </div>
+                        <span class="seo-status text-xs text-light-muted"></span>
                     </div>
-                    <button class="text-sm text-light-muted hover:text-white hover:bg-dark-card rounded-xl transition-all" style="padding: 0.5rem 1rem;">
-                        Editar meta
-                    </button>
-                </div>
-            ))
-        }
+
+                    <label class="seo-field">
+                        <span>Titulo SEO</span>
+                        <input name="title" type="text" value={seo?.title || ""} placeholder={`${page.name} | VideoMarketing Sevilla`} />
+                    </label>
+
+                    <label class="seo-field">
+                        <span>Descripcion</span>
+                        <textarea name="description" rows="3" placeholder="Descripcion para Google y redes sociales">{seo?.description || ""}</textarea>
+                    </label>
+
+                    <div class="seo-grid">
+                        <label class="seo-field">
+                            <span>Imagen OG</span>
+                            <input name="og_image" type="url" value={seo?.og_image || ""} placeholder="https://..." />
+                        </label>
+
+                        <label class="seo-field">
+                            <span>Canonical</span>
+                            <input name="canonical_url" type="url" value={seo?.canonical_url || ""} placeholder={`https://videomarketingsevilla.com${page.path === "/" ? "" : page.path}`} />
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between" style="gap: 1rem;">
+                        <label class="seo-check">
+                            <input name="no_index" type="checkbox" checked={seo?.no_index === true} />
+                            <span>No indexar esta pagina</span>
+                        </label>
+
+                        <button type="submit" class="seo-save">Guardar SEO</button>
+                    </div>
+                </form>
+            );
+        })}
     </div>
 </AdminLayout>
+
+<style>
+    .seo-field {
+        display: grid;
+        gap: 0.45rem;
+        color: #a1a1aa;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .seo-field input,
+    .seo-field textarea {
+        width: 100%;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(0,0,0,0.24);
+        color: #fff;
+        border-radius: 0.75rem;
+        padding: 0.75rem 0.9rem;
+        font: inherit;
+        outline: none;
+    }
+
+    .seo-field input:focus,
+    .seo-field textarea:focus {
+        border-color: rgba(225,29,72,0.65);
+        box-shadow: 0 0 0 3px rgba(225,29,72,0.12);
+    }
+
+    .seo-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    @media (min-width: 900px) {
+        .seo-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .seo-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #a1a1aa;
+        font-size: 0.85rem;
+    }
+
+    .seo-check input {
+        accent-color: #e11d48;
+    }
+
+    .seo-save {
+        background: #e11d48;
+        color: #fff;
+        border: none;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .seo-save:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+</style>
+
+<script>
+    document.querySelectorAll<HTMLFormElement>(".seo-form").forEach((form) => {
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const button = form.querySelector<HTMLButtonElement>(".seo-save");
+            const status = form.querySelector<HTMLElement>(".seo-status");
+            const formData = new FormData(form);
+
+            if (button) {
+                button.disabled = true;
+                button.textContent = "Guardando...";
+            }
+            if (status) {
+                status.textContent = "";
+                status.className = "seo-status text-xs text-light-muted";
+            }
+
+            try {
+                const response = await fetch("/api/admin/seo", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        page_path: form.dataset.path,
+                        title: formData.get("title"),
+                        description: formData.get("description"),
+                        og_image: formData.get("og_image"),
+                        canonical_url: formData.get("canonical_url"),
+                        no_index: formData.get("no_index") === "on",
+                    }),
+                });
+
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => null);
+                    throw new Error(payload?.error || "No se pudo guardar");
+                }
+
+                if (status) {
+                    status.textContent = "Guardado";
+                    status.className = "seo-status text-xs text-green-400";
+                }
+            } catch (error) {
+                if (status) {
+                    status.textContent = error instanceof Error ? error.message : "Error";
+                    status.className = "seo-status text-xs text-red-400";
+                }
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = "Guardar SEO";
+                }
+            }
+        });
+    });
+</script>

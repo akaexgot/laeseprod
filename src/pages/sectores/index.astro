@@ -5,6 +5,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import "../../styles/proyectos.css";
 import { getSectors } from "../../lib/data";
+import { buildBreadcrumbSchema, buildItemListSchema } from "../../lib/seo";
 
 const sectors = await getSectors();
 
@@ -41,6 +42,13 @@ function groupIntoScreens(items: any[]) {
 }
 
 const screens = groupIntoScreens(sectors);
+const structuredData = [
+  buildBreadcrumbSchema([
+    { name: 'Inicio', path: '/' },
+    { name: 'Sectores', path: '/sectores' },
+  ]),
+  buildItemListSchema('Sectores para video marketing', sectors, '/sectores'),
+];
 
 const gradients = [
     "from-carmin-900/40 to-carmin-700/10",
@@ -55,6 +63,7 @@ const gradients = [
 <BaseLayout
   title="Sectores"
   description="Conocemos tu industria. Adaptamos nuestro lenguaje visual a cada sector para maximizar el impacto."
+  structuredData={structuredData}
 >
 
     {sectors.length === 0 ? (

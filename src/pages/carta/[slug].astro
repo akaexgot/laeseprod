@@ -51,6 +51,7 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
 
 <BaseLayout 
     title={`${carta.nombre} | VideoMarketing Sevilla`}
+    noindex={true}
     description={`Carta de servicios y precios de ${carta.nombre}`}
 >
     <!-- Cargamos Swiper siempre para evitar fallos de navegación de Astro -->

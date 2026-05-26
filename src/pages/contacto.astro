@@ -8,9 +8,22 @@ import "../styles/contacto.css";
 import "../styles/contacto-chat.css";
 import { getSettings } from "../lib/data";
 import { createCaptchaChallenge } from "../lib/captcha";
+import { buildBreadcrumbSchema, getSiteUrl } from "../lib/seo";
 
 const settings = await getSettings();
 const captcha = createCaptchaChallenge();
+const structuredData = [
+    buildBreadcrumbSchema([
+        { name: 'Inicio', path: '/' },
+        { name: 'Contacto', path: '/contacto' },
+    ]),
+    {
+        '@context': 'https://schema.org',
+        '@type': 'ContactPage',
+        name: 'Contacto VideoMarketing Sevilla',
+        url: `${getSiteUrl()}/contacto`,
+    },
+];
 
 function extractYouTubeId(url: string | null | undefined): string | null {
     if (!url) return null;
@@ -31,6 +44,7 @@ const sharedHeroVideoId = !sharedHeroVideoIsNative ? extractYouTubeId(sharedHero
 
 <BaseLayout
     title="Contacto"
+    structuredData={structuredData}
     description="Contacta con VideoMarketing Sevilla. Cuéntanos tu proyecto de video marketing y te enviamos un presupuesto personalizado."
 >
 

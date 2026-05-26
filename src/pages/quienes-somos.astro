@@ -7,8 +7,21 @@ import "../styles/quienes-somos.css";
 import { getSettings } from "../lib/data";
 import CompaniesCarousel from "../components/home/CompaniesCarousel.astro";
 import AwardsCarousel from "../components/home/AwardsCarousel.astro";
+import { buildBreadcrumbSchema, getSiteUrl } from "../lib/seo";
 
 const settings = await getSettings();
+const structuredData = [
+    buildBreadcrumbSchema([
+        { name: 'Inicio', path: '/' },
+        { name: 'Quienes Somos', path: '/quienes-somos' },
+    ]),
+    {
+        '@context': 'https://schema.org',
+        '@type': 'AboutPage',
+        name: 'Quienes Somos | VideoMarketing Sevilla',
+        url: `${getSiteUrl()}/quienes-somos`,
+    },
+];
 
 import "../styles/contacto.css";
 
@@ -41,6 +54,7 @@ if (cleanMapUrl && cleanMapUrl.includes('<iframe')) {
 ---
 
 <BaseLayout
+    structuredData={structuredData}
     title="Quiénes Somos"
     description="Conoce a VideoMarketing Sevilla. Somos una productora audiovisual especializada en video marketing para empresas en Sevilla y toda España."
 >

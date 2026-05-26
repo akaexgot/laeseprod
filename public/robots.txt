@@ -3,5 +3,8 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 Disallow: /portal-cliente
+Disallow: /portal-clientes
+Disallow: /contrato/
+Disallow: /carta/
 
 Sitemap: https://videomarketingsevilla.com/sitemap.xml

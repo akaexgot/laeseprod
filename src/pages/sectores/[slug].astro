@@ -9,6 +9,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import "../../styles/detail.css";
 import { getSectorBySlug, getSectors } from "../../lib/data";
 import { getVideoId } from "../../lib/display";
+import { buildBreadcrumbSchema, buildSectorSchema, getVideoThumbnail } from "../../lib/seo";
 
 
 const { slug } = Astro.params;
@@ -30,10 +31,21 @@ const videoId = !videoIsNative ? getVideoId(videoUrl) : null;
 const videoVerticalUrl = sector.video_vertical;
 const videoVerticalIsNative = isNative(videoVerticalUrl);
 const videoVerticalId = !videoVerticalIsNative ? getVideoId(videoVerticalUrl) : null;
+const pagePath = `/sectores/${sector.slug}`;
+const structuredData = [
+    buildBreadcrumbSchema([
+        { name: 'Inicio', path: '/' },
+        { name: 'Sectores', path: '/sectores' },
+        { name: sector.title, path: pagePath },
+    ]),
+    buildSectorSchema(sector, pagePath),
+];
 ---
 
 <BaseLayout
     title={`Video Marketing para ${sector.title} en Sevilla`}
+    image={sector.thumbnail || getVideoThumbnail(sector.video)}
+    structuredData={structuredData}
     description={`Producción audiovisual especializada en ${sector.title.toLowerCase()}. ${sector.description}`}
 >
 

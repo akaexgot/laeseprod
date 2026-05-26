@@ -61,6 +61,7 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     "/admin/mensajes": "mensajes",
     "/admin/chat": "chat",
     "/admin/ajustes": "ajustes",
+    "/admin/seo": "seo",
     "/admin/usuarios": "usuarios",
     "/admin": "dashboard", 
     // API mappings
@@ -69,6 +70,7 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     "/api/admin/sectores": "sectores",
     "/api/admin/companies": "empresas",
     "/api/admin/awards": "ajustes",
+    "/api/admin/seo": "seo",
     "/api/admin/users": "usuarios",
     "/api/chat": "chat",
   };

@@ -15,10 +15,14 @@ interface Props {
     title?: string;
     description?: string;
     image?: string;
+    imageAlt?: string;
+    url?: string;
+    type?: 'website' | 'article';
     noindex?: boolean;
+    structuredData?: Record<string, any> | Array<Record<string, any> | null> | null;
 }
 
-const { title, description, image, noindex } = Astro.props;
+const { title, description, image, imageAlt, url, type, noindex, structuredData } = Astro.props;
 ---
 
 <!doctype html>
@@ -28,7 +32,11 @@ const { title, description, image, noindex } = Astro.props;
             title={title}
             description={description}
             image={image}
+            imageAlt={imageAlt}
+            url={url}
+            type={type}
             noindex={noindex}
+            structuredData={structuredData}
         />
     </head>
     <body class="bg-dark text-light antialiased">

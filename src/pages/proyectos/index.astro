@@ -7,6 +7,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import "../../styles/proyectos.css";
 import ContactFormBlock from '../../components/ui/ContactFormBlock.astro';
 import { getProjects } from '../../lib/data';
+import { buildBreadcrumbSchema, buildItemListSchema } from '../../lib/seo';
 
 const allProjects = await getProjects();
 
@@ -70,10 +71,18 @@ function buildProjectScreens(all: any[]) {
 }
 
 const screens = buildProjectScreens(projects);
+const structuredData = [
+    buildBreadcrumbSchema([
+        { name: 'Inicio', path: '/' },
+        { name: 'Proyectos', path: '/proyectos' },
+    ]),
+    buildItemListSchema('Proyectos de video marketing', projects, '/proyectos'),
+];
 ---
 
 <BaseLayout
   title="Proyectos"
+  structuredData={structuredData}
   description="Descubre nuestros proyectos de video marketing. Producción audiovisual para empresas en Sevilla, Cádiz y toda España."
 >
 
