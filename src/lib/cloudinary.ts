@@ -7,13 +7,9 @@ export function optimizeCloudinaryVideo(url: string | null | undefined, options:
 
     const { width = 1280, quality = 'auto', bitRate = '3m' } = options;
     
-    // Transformations: 
-    // f_auto: automatic format (WebM/MP4)
-    // q_auto: automatic quality
-    // vc_h265: use H.265 if supported
-    // w_X: resize
-    // br_X: limit bitrate to save bandwidth
-    const transformation = `f_auto,q_${quality},vc_h265,w_${width},br_${bitRate}`;
+    // Let Cloudinary pick the best compatible format/codec for each browser.
+    // Forcing H.265 can render as a black video on unsupported clients.
+    const transformation = `f_auto,q_${quality},w_${width},br_${bitRate}`;
     
     if (url.includes('/upload/')) {
         return url.replace('/upload/', `/upload/${transformation}/`);
