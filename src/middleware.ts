@@ -6,8 +6,7 @@ const PROTECTED = ["/admin", "/api/admin"];
 const PUBLIC = ["/admin/login"];
 
 export const onRequest = defineMiddleware(async ({ request, cookies, redirect, locals }, next) => {
-  const { pathname, searchParams } = new URL(request.url);
-  const host = request.headers.get("host") || "";
+  const { pathname, searchParams, host } = new URL(request.url);
 
   if (
     import.meta.env.PROD &&
