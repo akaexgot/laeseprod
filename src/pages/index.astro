@@ -10,6 +10,27 @@ import FeaturedProjects from "../components/home/FeaturedProjects.astro";
 import ServicesSection from "../components/home/ServicesSection.astro";
 import SectorsSection from "../components/home/SectorsSection.astro";
 import CtaSection from "../components/home/CtaSection.astro";
+import {
+	getCompanies,
+	getFeaturedProjects,
+	getFooterData,
+	getNavigation,
+	getPageSeo,
+	getSectors,
+	getServices,
+	getSettings,
+} from "../lib/data";
+
+await Promise.allSettled([
+	getSettings(),
+	getPageSeo("/"),
+	getNavigation(),
+	getFeaturedProjects(),
+	getCompanies(),
+	getServices(),
+	getSectors(),
+	getFooterData(),
+]);
 ---
 
 <BaseLayout>

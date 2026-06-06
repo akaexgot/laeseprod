@@ -6,7 +6,8 @@ import { supabase, getServiceSupabase } from './supabase';
 import * as fallback from '../data/fallback';
 
 const PUBLIC_DATA_TTL_MS = 5 * 60 * 1000;
-const PUBLIC_QUERY_TIMEOUT_MS = Number(import.meta.env.SUPABASE_QUERY_TIMEOUT_MS || 800);
+const PUBLIC_QUERY_TIMEOUT_MS = Number(import.meta.env.SUPABASE_QUERY_TIMEOUT_MS || 2500);
+const PUBLIC_FALLBACK_TTL_MS = 10 * 1000;
 
 type CacheEntry<T> = {
     expiresAt: number;
@@ -14,6 +15,8 @@ type CacheEntry<T> = {
 };
 
 const publicDataCache = new Map<string, CacheEntry<unknown>>();
+
+class PublicQueryTimeoutError extends Error {}
 
 function cachedPublicData<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
     const now = Date.now();
@@ -34,11 +37,11 @@ function cachedPublicData<T>(key: string, fetcher: () => Promise<T>): Promise<T>
     return promise;
 }
 
-async function withPublicTimeout<T>(promise: PromiseLike<T>, fallbackValue: T): Promise<T> {
+async function withPublicTimeout<T>(promise: PromiseLike<T>): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    const timeout = new Promise<T>((resolve) => {
-        timeoutId = setTimeout(() => resolve(fallbackValue), PUBLIC_QUERY_TIMEOUT_MS);
+    const timeout = new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new PublicQueryTimeoutError('Public query timeout')), PUBLIC_QUERY_TIMEOUT_MS);
     });
 
     const result = await Promise.race([promise, timeout]);
@@ -53,13 +56,17 @@ function publicQuery<T>(
     fallbackValue: T
 ): Promise<T> {
     return cachedPublicData(key, async () => {
-        const { data, error } = await withPublicTimeout(query, {
-            data: null,
-            error: new Error(`${key} query timeout`),
+        const { data, error } = await withPublicTimeout(query);
+
+        if (error) throw error;
+        return data;
+    }).catch(() => {
+        publicDataCache.set(key, {
+            expiresAt: Date.now() + PUBLIC_FALLBACK_TTL_MS,
+            promise: Promise.resolve(fallbackValue),
         });
 
-        if (error || data === null) return fallbackValue;
-        return data;
+        return fallbackValue;
     });
 }
 
