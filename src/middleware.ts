@@ -7,6 +7,22 @@ const PUBLIC = ["/admin/login"];
 
 export const onRequest = defineMiddleware(async ({ request, cookies, redirect, locals }, next) => {
   const { pathname, searchParams } = new URL(request.url);
+  const host = request.headers.get("host") || "";
+
+  if (
+    import.meta.env.PROD &&
+    request.method === "GET" &&
+    pathname === "/" &&
+    (host === "localhost:3000" || host === "127.0.0.1:3000")
+  ) {
+    return new Response("ok", {
+      status: 200,
+      headers: {
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "no-store",
+      },
+    });
+  }
 
   // Sensitive chat actions that need admin protection
   const isAdminChatAction = pathname === "/api/chat" && searchParams.get('list') === '1';
