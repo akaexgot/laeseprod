@@ -5,37 +5,20 @@
 import { supabase, getServiceSupabase } from './supabase';
 import * as fallback from '../data/fallback';
 
-const PUBLIC_DATA_TTL_MS = 5 * 60 * 1000;
+const PUBLIC_DATA_TTL_MS = Number(import.meta.env.PUBLIC_DATA_TTL_MS || 30 * 60 * 1000);
 const PUBLIC_QUERY_TIMEOUT_MS = Number(import.meta.env.SUPABASE_QUERY_TIMEOUT_MS || 2500);
-const PUBLIC_FALLBACK_TTL_MS = 10 * 1000;
+const PUBLIC_ERROR_COOLDOWN_MS = Number(import.meta.env.PUBLIC_ERROR_COOLDOWN_MS || 60 * 1000);
 
 type CacheEntry<T> = {
+    value?: T;
     expiresAt: number;
-    promise: Promise<T>;
+    retryAt: number;
+    promise?: Promise<T>;
 };
 
 const publicDataCache = new Map<string, CacheEntry<unknown>>();
 
 class PublicQueryTimeoutError extends Error {}
-
-function cachedPublicData<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
-    const now = Date.now();
-    const entry = publicDataCache.get(key) as CacheEntry<T> | undefined;
-
-    if (entry && entry.expiresAt > now) return entry.promise;
-
-    const promise = fetcher().catch((error) => {
-        publicDataCache.delete(key);
-        throw error;
-    });
-
-    publicDataCache.set(key, {
-        expiresAt: now + PUBLIC_DATA_TTL_MS,
-        promise,
-    });
-
-    return promise;
-}
 
 async function withPublicTimeout<T>(promise: PromiseLike<T>): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -52,22 +35,58 @@ async function withPublicTimeout<T>(promise: PromiseLike<T>): Promise<T> {
 
 function publicQuery<T>(
     key: string,
-    query: PromiseLike<{ data: T | null; error: unknown }>,
+    queryFactory: () => PromiseLike<{ data: T | null; error: unknown }>,
     fallbackValue: T
 ): Promise<T> {
-    return cachedPublicData(key, async () => {
-        const { data, error } = await withPublicTimeout(query);
+    const now = Date.now();
+    const entry = publicDataCache.get(key) as CacheEntry<T> | undefined;
+
+    if (entry?.value !== undefined && entry.expiresAt > now) {
+        return Promise.resolve(entry.value);
+    }
+
+    if (entry?.promise) {
+        return entry.promise.catch(() => entry.value ?? fallbackValue);
+    }
+
+    if (entry && now < entry.retryAt) {
+        return Promise.resolve(entry.value ?? fallbackValue);
+    }
+
+    const promise = (async () => {
+        const { data, error } = await withPublicTimeout(queryFactory());
 
         if (error) throw error;
-        return data;
-    }).catch(() => {
+        if (data === null) throw new Error(`${key} returned no data`);
+
         publicDataCache.set(key, {
-            expiresAt: Date.now() + PUBLIC_FALLBACK_TTL_MS,
-            promise: Promise.resolve(fallbackValue),
+            value: data,
+            expiresAt: Date.now() + PUBLIC_DATA_TTL_MS,
+            retryAt: 0,
         });
 
-        return fallbackValue;
+        return data;
+    }).catch(() => {
+        const previous = publicDataCache.get(key) as CacheEntry<T> | undefined;
+        const value = previous?.value ?? fallbackValue;
+
+        publicDataCache.set(key, {
+            value,
+            expiresAt: previous?.value !== undefined ? previous.expiresAt : Date.now() + PUBLIC_ERROR_COOLDOWN_MS,
+            retryAt: Date.now() + PUBLIC_ERROR_COOLDOWN_MS,
+        });
+
+        return value;
     });
+
+    publicDataCache.set(key, {
+        value: entry?.value,
+        expiresAt: entry?.expiresAt ?? 0,
+        retryAt: entry?.retryAt ?? 0,
+        promise,
+    });
+
+    return promise;
 }
 
 /** Fetch site settings */
@@ -76,7 +95,7 @@ export async function getSettings() {
 
     return publicQuery(
         'settings',
-        supabase.from('settings').select('*').single(),
+        () => supabase.from('settings').select('*').single(),
         fallback.siteSettings
     );
 }
@@ -89,7 +108,7 @@ export async function getPageSeo(pagePath: string) {
 
     return publicQuery(
         `page-seo:${normalizedPath}`,
-        supabase.from('pages_seo').select('*').eq('page_path', normalizedPath).maybeSingle(),
+        () => supabase.from('pages_seo').select('*').eq('page_path', normalizedPath).maybeSingle(),
         null
     );
 }
@@ -100,7 +119,7 @@ export async function getNavigation() {
 
     return publicQuery(
         'navigation',
-        supabase.from('navigation').select('*').order('order', { ascending: true }),
+        () => supabase.from('navigation').select('*').order('order', { ascending: true }),
         fallback.navigation
     );
 }
@@ -111,7 +130,7 @@ export async function getProjects() {
 
     return publicQuery(
         'projects',
-        supabase.from('projects').select('*').order('order', { ascending: true }),
+        () => supabase.from('projects').select('*').order('order', { ascending: true }),
         fallback.projects
     );
 }
@@ -122,7 +141,7 @@ export async function getFeaturedProjects() {
 
     return publicQuery(
         'featured-projects',
-        supabase.from('projects').select('*').eq('featured_home', true).order('order', { ascending: true }),
+        () => supabase.from('projects').select('*').eq('featured_home', true).order('order', { ascending: true }),
         fallback.projects.filter(p => p.featured_home)
     );
 }
@@ -133,7 +152,7 @@ export async function getProjectBySlug(slug: string) {
 
     return publicQuery(
         `project:${slug}`,
-        supabase.from('projects').select('*').eq('slug', slug).single(),
+        () => supabase.from('projects').select('*').eq('slug', slug).single(),
         null
     );
 }
@@ -144,7 +163,7 @@ export async function getServices() {
 
     return publicQuery(
         'services',
-        supabase.from('services').select('*').order('order', { ascending: true }),
+        () => supabase.from('services').select('*').order('order', { ascending: true }),
         fallback.services
     );
 }
@@ -155,7 +174,7 @@ export async function getServiceBySlug(slug: string) {
 
     return publicQuery(
         `service:${slug}`,
-        supabase.from('services').select('*').eq('slug', slug).single(),
+        () => supabase.from('services').select('*').eq('slug', slug).single(),
         null
     );
 }
@@ -166,7 +185,7 @@ export async function getSectors() {
 
     return publicQuery(
         'sectors',
-        supabase.from('sectors').select('*').order('order', { ascending: true }),
+        () => supabase.from('sectors').select('*').order('order', { ascending: true }),
         fallback.sectors
     );
 }
@@ -177,7 +196,7 @@ export async function getSectorBySlug(slug: string) {
 
     return publicQuery(
         `sector:${slug}`,
-        supabase.from('sectors').select('*').eq('slug', slug).single(),
+        () => supabase.from('sectors').select('*').eq('slug', slug).single(),
         null
     );
 }
@@ -188,7 +207,7 @@ export async function getCompanies() {
 
     return publicQuery(
         'companies',
-        supabase.from('companies').select('*').order('order', { ascending: true }),
+        () => supabase.from('companies').select('*').order('order', { ascending: true }),
         fallback.companies
     );
 }
@@ -199,7 +218,7 @@ export async function getAwards() {
 
     return publicQuery(
         'awards',
-        supabase.from('awards').select('*').order('order', { ascending: true }),
+        () => supabase.from('awards').select('*').order('order', { ascending: true }),
         []
     );
 }
@@ -210,7 +229,7 @@ export async function getFaqs() {
 
     return publicQuery(
         'faqs',
-        supabase.from('faqs').select('*').eq('is_active', true).order('order', { ascending: true }),
+        () => supabase.from('faqs').select('*').eq('is_active', true).order('order', { ascending: true }),
         fallback.faqs || []
     );
 }
@@ -221,7 +240,7 @@ export async function getFooterData() {
 
     return publicQuery(
         'footer',
-        supabase.from('footer').select('*').single(),
+        () => supabase.from('footer').select('*').single(),
         fallback.footerData
     );
 }
@@ -232,7 +251,7 @@ export async function getPortalClients() {
 
     return publicQuery(
         'portal-clients',
-        supabase.from('portal_clients').select('*').order('created_at', { ascending: true }),
+        () => supabase.from('portal_clients').select('*').order('created_at', { ascending: true }),
         []
     );
 }
