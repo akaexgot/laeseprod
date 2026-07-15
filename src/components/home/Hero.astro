@@ -176,8 +176,8 @@ const heroSubtitle = settings.hero_subtitle || '';
                         
                         event.target.playVideo();
                         
-                        // Pre-end loop specifically for Hero to avoid YouTube UI flash
-                        setInterval(() => {
+                        // Pre-end loop specifically for Hero to avoid YouTube UI flash.
+                        const heroLoopInterval = window.setInterval(() => {
                             try {
                                 const time = event.target.getCurrentTime();
                                 const duration = event.target.getDuration();
@@ -188,7 +188,11 @@ const heroSubtitle = settings.hero_subtitle || '';
                                     event.target.seekTo(0);
                                 }
                             } catch(e) {}
-                        }, 200);
+                        }, 800);
+
+                        window.addEventListener('pagehide', () => {
+                            window.clearInterval(heroLoopInterval);
+                        }, { once: true });
                     },
                     onStateChange: (event) => {
                         // 1 = PLAYING

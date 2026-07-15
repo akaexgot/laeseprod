@@ -151,17 +151,19 @@ const structuredData = [
             {/* Background video (muted, autoplay, no controls) */}
             <div class="pj-video__bg" id="pjVideoBg">
                 {projectVideoIsNative ? (
-                    <video aria-hidden="true" src={projectVideoUrl} 
+                    <video aria-hidden="true" data-src={projectVideoUrl} 
                         class="pj-video__bg-iframe" 
-                        autoplay loop muted playsinline 
+                        loop muted playsinline preload="none"
                         style="object-fit: cover;"
                     ></video>
                 ) : (
                     <iframe
-                        src={`https://www.youtube-nocookie.com/embed/${mainVideoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
+                        data-src={`https://www.youtube-nocookie.com/embed/${mainVideoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${Astro.url.origin}`}
+                        src=""
                         class="pj-video__bg-iframe"
                         frameborder="0"
                         allow="autoplay; encrypted-media; compute-pressure"
+                        loading="lazy"
                     ></iframe>
                 )}
             </div>
@@ -182,9 +184,10 @@ const structuredData = [
                 <video 
                     id="pjFullPlayer"
                     class="pj-video__full-player"
-                    src={projectVideoUrl}
+                    data-src={projectVideoUrl}
                     controls
                     playsinline
+                    preload="none"
                     style="object-fit: contain; background: #000;"
                 ></video>
             ) : (
@@ -547,6 +550,20 @@ const structuredData = [
         }, { threshold: 0.2 });
         sections.forEach(sec => observer.observe(sec));
 
+        const shouldLoadBackgroundVideo = window.matchMedia('(min-width: 1025px)').matches;
+        if (shouldLoadBackgroundVideo) {
+            const bgMedia = document.querySelector<HTMLElement>('.pj-video__bg-iframe[data-src]');
+            if (bgMedia instanceof HTMLVideoElement) {
+                bgMedia.src = bgMedia.dataset.src || '';
+                bgMedia.autoplay = true;
+                bgMedia.muted = true;
+                bgMedia.playsInline = true;
+                bgMedia.play().catch(() => {});
+            } else if (bgMedia instanceof HTMLIFrameElement) {
+                bgMedia.src = bgMedia.dataset.src || '';
+            }
+        }
+
         /* ── In-place Play Button ── */
         const playBtn = document.getElementById('pjPlayBtn');
         const clickArea = document.getElementById('pjVideoClickArea');
@@ -564,6 +581,9 @@ const structuredData = [
                 }
             } else if (fullPlayer.tagName === 'VIDEO') {
                 const video = fullPlayer as HTMLVideoElement;
+                if (!video.src && video.dataset.src) {
+                    video.src = video.dataset.src;
+                }
                 video.play();
                 video.muted = false;
             }
