@@ -94,8 +94,8 @@ function getVideoPoster(url: string | null | undefined): string | null {
           <div class="w-full h-full rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.3)] relative overflow-hidden group border border-white/20 bg-dark">
             {isNative ? (
               <video aria-hidden="true" class="video-iframe opacity-100 transition-opacity duration-700 z-10 pointer-events-none"
-                data-src={optimizeCloudinaryVideo(videoUrl, { width: 1080 })}
-                src={optimizeCloudinaryVideo(videoUrl, { width: 1080 })}
+                data-src={optimizeCloudinaryVideo(videoUrl, { width: 1440, quality: 'auto:best', bitRate: '5m' })}
+                src={optimizeCloudinaryVideo(videoUrl, { width: 1440, quality: 'auto:best', bitRate: '5m' })}
                 style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover;"
                 autoplay loop muted playsinline
               ></video>

@@ -66,7 +66,7 @@ function publicQuery<T>(
         });
 
         return data;
-    }).catch(() => {
+    })().catch(() => {
         const previous = publicDataCache.get(key) as CacheEntry<T> | undefined;
         const value = previous?.value ?? fallbackValue;
 
@@ -248,10 +248,16 @@ export async function getFooterData() {
 /** Fetch portal clients (public — RLS filters active only) */
 export async function getPortalClients() {
     if (!supabase) return [];
+    const sb = supabase;
 
     return publicQuery(
         'portal-clients',
-        () => supabase.from('portal_clients').select('*').order('created_at', { ascending: true }),
+        () => sb
+            .from('portal_clients')
+            .select('*')
+            .order('order', { ascending: true })
+            .order('created_at', { ascending: true })
+            .order('id', { ascending: true }),
         []
     );
 }
@@ -264,14 +270,31 @@ export async function getPortalClientsAdmin() {
     const { data, error } = await sb
         .from('portal_clients')
         .select('*')
-        .order('created_at', { ascending: true });
+        .order('order', { ascending: true })
+        .order('created_at', { ascending: true })
+        .order('id', { ascending: true });
 
     if (error || !data) return [];
     return data;
 }
 
-/** Placeholder for cache invalidation logic */
+/** Invalidate in-memory public data cache after admin mutations */
 export function invalidateCache(tag?: string) {
-    void tag;
-    // Future: Add logic for On-demand Revalidation if using an adapter that supports it
+    if (!tag) {
+        publicDataCache.clear();
+        return;
+    }
+
+    publicDataCache.delete(tag);
+
+    if (tag === 'projects') {
+        publicDataCache.delete('featured-projects');
+        for (const key of publicDataCache.keys()) {
+            if (key.startsWith('project:')) publicDataCache.delete(key);
+        }
+    }
+
+    if (tag === 'portal-clients') {
+        publicDataCache.delete('portal-clients');
+    }
 }

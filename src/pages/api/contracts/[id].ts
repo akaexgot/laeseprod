@@ -60,6 +60,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
                 client_data,
                 signature_svg,
                 status: newStatus,
+                payment_status: 'unpaid',
                 updated_at: new Date().toISOString()
             })
             .eq('id', id)

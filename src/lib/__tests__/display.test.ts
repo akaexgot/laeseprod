@@ -41,6 +41,10 @@ describe('getVideoId / toYouTubeEmbed', () => {
     expect(getVideoId('https://youtu.be/ABCDEFGHIJK')).toBe('ABCDEFGHIJK');
   });
 
+  it('extracts youtube-nocookie embed id', () => {
+    expect(getVideoId('https://www.youtube-nocookie.com/embed/abcdefghijk?rel=0')).toBe('abcdefghijk');
+  });
+
   it('extracts shorts id and converts to embed', () => {
     const url = 'https://www.youtube.com/shorts/ZYXWVUTSRQP';
     expect(getVideoId(url)).toBe('ZYXWVUTSRQP');

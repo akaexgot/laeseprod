@@ -1,23 +1,37 @@
 ---
 /**
- * Admin - SEO Management
- * Edit page titles, descriptions, canonical URLs, OG images and noindex flags.
+ * Admin - SEO and Google tracking management
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getServiceSupabase } from "../../lib/supabase";
 
+type PageDefinition = {
+    path: string;
+    name: string;
+    group: string;
+};
+
+type SeoRow = {
+    page_path: string;
+    title: string | null;
+    description: string | null;
+    og_image: string | null;
+    canonical_url: string | null;
+    no_index: boolean | null;
+};
+
 const serviceSupabase = getServiceSupabase();
 
-const pageDefinitions = [
-    { path: "/", name: "Home" },
-    { path: "/proyectos", name: "Proyectos" },
-    { path: "/servicios", name: "Servicios" },
-    { path: "/sectores", name: "Sectores" },
-    { path: "/quienes-somos", name: "Quienes Somos" },
-    { path: "/contacto", name: "Contacto" },
-    { path: "/privacidad", name: "Privacidad" },
-    { path: "/aviso-legal", name: "Aviso Legal" },
-    { path: "/cookies", name: "Cookies" },
+const pageDefinitions: PageDefinition[] = [
+    { path: "/", name: "Home", group: "Principal" },
+    { path: "/proyectos", name: "Proyectos", group: "Contenido" },
+    { path: "/servicios", name: "Servicios", group: "Contenido" },
+    { path: "/sectores", name: "Sectores", group: "Contenido" },
+    { path: "/quienes-somos", name: "Quienes Somos", group: "Empresa" },
+    { path: "/contacto", name: "Contacto", group: "Conversion" },
+    { path: "/privacidad", name: "Privacidad", group: "Legal" },
+    { path: "/aviso-legal", name: "Aviso Legal", group: "Legal" },
+    { path: "/cookies", name: "Cookies", group: "Legal" },
 ];
 
 const { data: seoRows = [] } = serviceSupabase
@@ -27,117 +41,543 @@ const { data: seoRows = [] } = serviceSupabase
         .in("page_path", pageDefinitions.map((page) => page.path))
     : { data: [] };
 
-const seoByPath = new Map((seoRows || []).map((row: any) => [row.page_path, row]));
+const seoByPath = new Map((seoRows as SeoRow[]).map((row) => [row.page_path, row]));
+
+const gtmId = String(import.meta.env.PUBLIC_GTM_ID || "").trim();
+const ga4MeasurementId = String(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID || "").trim();
+const googleAdsId = String(import.meta.env.PUBLIC_GOOGLE_ADS_ID || "").trim();
+const googleAdsConversionLabel = String(import.meta.env.PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || "").trim();
+const trackingMode = gtmId
+    ? "Google Tag Manager"
+    : ga4MeasurementId || googleAdsId
+        ? "Google tag directo"
+        : "Sin configurar";
+const adsIdLooksValid = !googleAdsId || /^AW-\d+$/i.test(googleAdsId);
+
+function hasSeoData(seo: SeoRow | undefined) {
+    return Boolean(seo?.title || seo?.description || seo?.og_image || seo?.canonical_url || seo?.no_index);
+}
+
+function fieldState(value: string) {
+    return value ? "Configurado" : "Pendiente";
+}
 ---
 
 <AdminLayout title="SEO" activeSection="seo">
-    <div class="grid grid-cols-1 md:grid-cols-3" style="gap: 1rem; margin-bottom: 2rem;">
-        <div class="glass rounded-2xl" style="padding: 1.5rem;">
-            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">Estado SEO</h3>
-            <p class="text-green-400 text-sm">Schema.org activo</p>
-            <p class="text-green-400 text-sm">Open Graph configurado</p>
-            <p class="text-green-400 text-sm">Sitemap generado</p>
+    <section class="seo-hero-panel">
+        <div>
+            <span class="seo-eyebrow">Busqueda y medicion</span>
+            <h2>SEO tecnico y seguimiento</h2>
+            <p>Gestiona metadatos por pagina, revisa indexacion y deja Google Ads preparado desde variables de entorno.</p>
         </div>
-        <div class="glass rounded-2xl" style="padding: 1.5rem;">
-            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">URLs</h3>
-            <p class="text-light-muted text-sm">Sitemap: <a href="/sitemap.xml" class="text-carmin-light hover:underline">/sitemap.xml</a></p>
-            <p class="text-light-muted text-sm">Robots: <a href="/robots.txt" class="text-carmin-light hover:underline">/robots.txt</a></p>
+        <div class="seo-hero-actions">
+            <a href="/sitemap.xml" target="_blank" rel="noopener">Sitemap</a>
+            <a href="/robots.txt" target="_blank" rel="noopener">Robots</a>
+            <a href="/" target="_blank" rel="noopener">Ver web</a>
         </div>
-        <div class="glass rounded-2xl" style="padding: 1.5rem;">
-            <h3 class="text-white font-[Outfit] font-semibold" style="margin-bottom: 0.25rem;">Meta editable</h3>
-            <p class="text-light-muted text-sm">Los cambios se aplican al Head publico al guardar cada pagina.</p>
+    </section>
+
+    <section class="seo-summary-grid" aria-label="Estado SEO">
+        <div class="seo-summary-item">
+            <i data-lucide="file-check-2"></i>
+            <div>
+                <span>Schema.org</span>
+                <strong>Activo</strong>
+            </div>
         </div>
-    </div>
+        <div class="seo-summary-item">
+            <i data-lucide="share-2"></i>
+            <div>
+                <span>Open Graph</span>
+                <strong>Editable</strong>
+            </div>
+        </div>
+        <div class="seo-summary-item">
+            <i data-lucide="route"></i>
+            <div>
+                <span>Sitemap XML</span>
+                <strong>Generado</strong>
+            </div>
+        </div>
+        <div class="seo-summary-item">
+            <i data-lucide="badge-check"></i>
+            <div>
+                <span>Google</span>
+                <strong>{trackingMode}</strong>
+            </div>
+        </div>
+    </section>
 
-    <h2 class="text-lg font-[Outfit] font-semibold text-white" style="margin-bottom: 1rem;">Meta por pagina</h2>
+    <section class="seo-google-panel">
+        <div class="seo-panel-heading">
+            <div>
+                <span class="seo-eyebrow">Punto 9</span>
+                <h3>Google Ads y Analytics</h3>
+            </div>
+            <span class:list={["seo-pill", trackingMode === "Sin configurar" ? "seo-pill--muted" : "seo-pill--ok"]}>
+                {trackingMode}
+            </span>
+        </div>
 
-    <div class="flex flex-col" style="gap: 1rem;">
-        {pageDefinitions.map((page) => {
-            const seo = seoByPath.get(page.path) as any;
+        <div class="seo-google-grid">
+            <div class="seo-google-card">
+                <span>GTM</span>
+                <strong>{fieldState(gtmId)}</strong>
+                <code>PUBLIC_GTM_ID</code>
+            </div>
+            <div class="seo-google-card">
+                <span>GA4</span>
+                <strong>{fieldState(ga4MeasurementId)}</strong>
+                <code>PUBLIC_GA4_MEASUREMENT_ID</code>
+            </div>
+            <div class:list={["seo-google-card", !adsIdLooksValid ? "seo-google-card--warning" : ""]}>
+                <span>Google Ads</span>
+                <strong>{fieldState(googleAdsId)}</strong>
+                <code>PUBLIC_GOOGLE_ADS_ID</code>
+            </div>
+            <div class="seo-google-card">
+                <span>Conversion label</span>
+                <strong>{fieldState(googleAdsConversionLabel)}</strong>
+                <code>PUBLIC_GOOGLE_ADS_CONVERSION_LABEL</code>
+            </div>
+        </div>
 
-            return (
-                <form class="seo-form glass rounded-2xl" data-path={page.path} style="padding: 1.25rem; display: grid; gap: 1rem;">
-                    <div class="flex items-center justify-between" style="gap: 1rem;">
-                        <div>
-                            <h3 class="text-white text-sm font-medium">{page.name}</h3>
-                            <p class="text-light-subtle text-xs">{page.path}</p>
+        <div class="seo-google-notes">
+            <p><strong>Base instalada:</strong> si configuras GTM se carga solo Tag Manager; si no hay GTM se carga Google tag directo con GA4 y/o Ads.</p>
+            <p><strong>Consent Mode:</strong> arranca en denegado y expone <code>window.vmGoogleConsent.acceptAll()</code> para conectarlo a un banner de cookies.</p>
+            <p><strong>Conversiones:</strong> queda preparado el helper, pero no se dispara ningun evento hasta confirmar que acciones cuentan como conversion.</p>
+            {!adsIdLooksValid && <p class="seo-warning">El ID de Google Ads normalmente debe tener formato AW-XXXXXXXXXX.</p>}
+        </div>
+    </section>
+
+    <section class="seo-workspace">
+        <aside class="seo-page-list" aria-label="Paginas SEO">
+            <div class="seo-list-title">
+                <span>Paginas</span>
+                <small>{pageDefinitions.length} URLs</small>
+            </div>
+            {pageDefinitions.map((page, index) => {
+                const seo = seoByPath.get(page.path);
+                const filled = hasSeoData(seo);
+
+                return (
+                    <button
+                        type="button"
+                        class:list={["seo-page-option", index === 0 ? "is-active" : ""]}
+                        data-seo-index={String(index)}
+                        aria-selected={index === 0 ? "true" : "false"}
+                    >
+                        <span class="seo-page-main">
+                            <strong>{page.name}</strong>
+                            <small>{page.path}</small>
+                        </span>
+                        <span class="seo-page-meta">
+                            <em>{page.group}</em>
+                            <span class:list={["seo-dot", filled ? "seo-dot--ok" : ""]}></span>
+                        </span>
+                    </button>
+                );
+            })}
+        </aside>
+
+        <div class="seo-editor-stack">
+            {pageDefinitions.map((page, index) => {
+                const seo = seoByPath.get(page.path);
+
+                return (
+                    <form
+                        class="seo-form"
+                        data-path={page.path}
+                        data-seo-panel={String(index)}
+                        hidden={index !== 0}
+                    >
+                        <div class="seo-form-header">
+                            <div>
+                                <span class="seo-eyebrow">{page.group}</span>
+                                <h3>{page.name}</h3>
+                                <p>{page.path}</p>
+                            </div>
+                            <span class="seo-status"></span>
                         </div>
-                        <span class="seo-status text-xs text-light-muted"></span>
-                    </div>
 
-                    <label class="seo-field">
-                        <span>Titulo SEO</span>
-                        <input name="title" type="text" value={seo?.title || ""} placeholder={`${page.name} | VideoMarketing Sevilla`} />
-                    </label>
-
-                    <label class="seo-field">
-                        <span>Descripcion</span>
-                        <textarea name="description" rows="3" placeholder="Descripcion para Google y redes sociales">{seo?.description || ""}</textarea>
-                    </label>
-
-                    <div class="seo-grid">
                         <label class="seo-field">
-                            <span>Imagen OG</span>
-                            <input name="og_image" type="url" value={seo?.og_image || ""} placeholder="https://..." />
+                            <span>Titulo SEO</span>
+                            <input name="title" type="text" value={seo?.title || ""} placeholder={`${page.name} | VideoMarketing Sevilla`} />
                         </label>
 
                         <label class="seo-field">
-                            <span>Canonical</span>
-                            <input name="canonical_url" type="url" value={seo?.canonical_url || ""} placeholder={`https://videomarketingsevilla.com${page.path === "/" ? "" : page.path}`} />
-                        </label>
-                    </div>
-
-                    <div class="flex items-center justify-between" style="gap: 1rem;">
-                        <label class="seo-check">
-                            <input name="no_index" type="checkbox" checked={seo?.no_index === true} />
-                            <span>No indexar esta pagina</span>
+                            <span>Descripcion</span>
+                            <textarea name="description" rows="4" placeholder="Descripcion para Google y redes sociales">{seo?.description || ""}</textarea>
                         </label>
 
-                        <button type="submit" class="seo-save">Guardar SEO</button>
-                    </div>
-                </form>
-            );
-        })}
-    </div>
+                        <div class="seo-grid">
+                            <label class="seo-field">
+                                <span>Imagen OG</span>
+                                <input name="og_image" type="url" value={seo?.og_image || ""} placeholder="https://..." />
+                            </label>
+
+                            <label class="seo-field">
+                                <span>Canonical</span>
+                                <input name="canonical_url" type="url" value={seo?.canonical_url || ""} placeholder={`https://videomarketingsevilla.com${page.path === "/" ? "" : page.path}`} />
+                            </label>
+                        </div>
+
+                        <div class="seo-form-footer">
+                            <label class="seo-check">
+                                <input name="no_index" type="checkbox" checked={seo?.no_index === true} />
+                                <span>No indexar esta pagina</span>
+                            </label>
+
+                            <button type="submit" class="seo-save">
+                                <i data-lucide="save"></i>
+                                <span>Guardar SEO</span>
+                            </button>
+                        </div>
+                    </form>
+                );
+            })}
+        </div>
+    </section>
 </AdminLayout>
 
 <style>
+    .seo-hero-panel,
+    .seo-google-panel,
+    .seo-page-list,
+    .seo-form {
+        border: 1px solid rgba(255,255,255,0.08);
+        background:
+            linear-gradient(135deg, rgba(39,39,42,0.92), rgba(9,9,11,0.98)),
+            #09090b;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.24);
+    }
+
+    .seo-hero-panel {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .seo-eyebrow {
+        display: inline-flex;
+        color: #fb7185;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-bottom: 0.45rem;
+    }
+
+    .seo-hero-panel h2,
+    .seo-panel-heading h3,
+    .seo-form-header h3 {
+        color: #fff;
+        font-family: Outfit, Inter, sans-serif;
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.05;
+    }
+
+    .seo-hero-panel h2 {
+        font-size: clamp(1.75rem, 3vw, 2.6rem);
+    }
+
+    .seo-hero-panel p,
+    .seo-form-header p,
+    .seo-google-notes p {
+        color: #a1a1aa;
+        margin: 0.5rem 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .seo-hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .seo-hero-actions a,
+    .seo-save {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.05);
+        color: #f4f4f5;
+        border-radius: 0.5rem;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-decoration: none;
+        transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .seo-hero-actions a:hover,
+    .seo-save:hover {
+        border-color: rgba(244,63,94,0.55);
+        background: rgba(244,63,94,0.15);
+        transform: translateY(-1px);
+    }
+
+    .seo-summary-grid,
+    .seo-google-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .seo-summary-item,
+    .seo-google-card {
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(24,24,27,0.7);
+        border-radius: 0.65rem;
+        padding: 1rem;
+    }
+
+    .seo-summary-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .seo-summary-item i {
+        width: 1.2rem;
+        height: 1.2rem;
+        color: #fb7185;
+    }
+
+    .seo-summary-item span,
+    .seo-google-card span {
+        display: block;
+        color: #71717a;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .seo-summary-item strong,
+    .seo-google-card strong {
+        display: block;
+        color: #fff;
+        font-size: 0.95rem;
+        margin-top: 0.15rem;
+    }
+
+    .seo-google-panel {
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .seo-panel-heading,
+    .seo-form-header,
+    .seo-form-footer,
+    .seo-list-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .seo-pill {
+        border-radius: 999px;
+        padding: 0.35rem 0.6rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+    }
+
+    .seo-pill--ok {
+        color: #86efac;
+        background: rgba(34,197,94,0.12);
+        border: 1px solid rgba(34,197,94,0.2);
+    }
+
+    .seo-pill--muted {
+        color: #d4d4d8;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .seo-google-grid {
+        margin-top: 1rem;
+    }
+
+    .seo-google-card code {
+        display: inline-flex;
+        margin-top: 0.7rem;
+        color: #fda4af;
+        font-size: 0.75rem;
+        word-break: break-all;
+    }
+
+    .seo-google-card--warning {
+        border-color: rgba(251,191,36,0.35);
+    }
+
+    .seo-warning {
+        color: #fbbf24 !important;
+    }
+
+    .seo-workspace {
+        display: grid;
+        grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .seo-page-list,
+    .seo-form {
+        border-radius: 0.75rem;
+        padding: 1rem;
+    }
+
+    .seo-list-title {
+        margin-bottom: 0.75rem;
+    }
+
+    .seo-list-title span {
+        color: #fff;
+        font-weight: 800;
+    }
+
+    .seo-list-title small {
+        color: #71717a;
+        font-weight: 700;
+    }
+
+    .seo-page-option {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        border: 1px solid transparent;
+        background: transparent;
+        color: #f4f4f5;
+        border-radius: 0.55rem;
+        padding: 0.75rem;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .seo-page-option + .seo-page-option {
+        margin-top: 0.35rem;
+    }
+
+    .seo-page-option:hover,
+    .seo-page-option.is-active {
+        background: rgba(244,63,94,0.12);
+        border-color: rgba(244,63,94,0.28);
+    }
+
+    .seo-page-main strong,
+    .seo-page-main small,
+    .seo-page-meta em {
+        display: block;
+    }
+
+    .seo-page-main strong {
+        font-size: 0.88rem;
+    }
+
+    .seo-page-main small,
+    .seo-page-meta em {
+        color: #71717a;
+        font-size: 0.74rem;
+        font-style: normal;
+        margin-top: 0.18rem;
+    }
+
+    .seo-page-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .seo-dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        background: #52525b;
+        box-shadow: 0 0 0 4px rgba(82,82,91,0.14);
+    }
+
+    .seo-dot--ok {
+        background: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34,197,94,0.14);
+    }
+
+    .seo-editor-stack {
+        min-width: 0;
+    }
+
+    .seo-form[hidden] {
+        display: none !important;
+    }
+
+    .seo-form {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .seo-status {
+        color: #a1a1aa;
+        font-size: 0.78rem;
+        font-weight: 800;
+    }
+
+    .seo-status.is-ok {
+        color: #4ade80;
+    }
+
+    .seo-status.is-error {
+        color: #fb7185;
+    }
+
     .seo-field {
         display: grid;
         gap: 0.45rem;
         color: #a1a1aa;
         font-size: 0.8rem;
-        font-weight: 600;
+        font-weight: 700;
     }
 
     .seo-field input,
     .seo-field textarea {
         width: 100%;
         border: 1px solid rgba(255,255,255,0.08);
-        background: rgba(0,0,0,0.24);
+        background: rgba(0,0,0,0.28);
         color: #fff;
-        border-radius: 0.75rem;
-        padding: 0.75rem 0.9rem;
+        border-radius: 0.55rem !important;
+        padding: 0.78rem 0.9rem !important;
         font: inherit;
         outline: none;
     }
 
+    .seo-field textarea {
+        resize: vertical;
+    }
+
     .seo-field input:focus,
     .seo-field textarea:focus {
-        border-color: rgba(225,29,72,0.65);
-        box-shadow: 0 0 0 3px rgba(225,29,72,0.12);
+        border-color: rgba(244,63,94,0.65);
+        box-shadow: 0 0 0 3px rgba(244,63,94,0.12);
     }
 
     .seo-grid {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 1rem;
-    }
-
-    @media (min-width: 900px) {
-        .seo-grid {
-            grid-template-columns: 1fr 1fr;
-        }
     }
 
     .seo-check {
@@ -146,6 +586,7 @@ const seoByPath = new Map((seoRows || []).map((row: any) => [row.page_path, row]
         gap: 0.5rem;
         color: #a1a1aa;
         font-size: 0.85rem;
+        font-weight: 700;
     }
 
     .seo-check input {
@@ -153,37 +594,76 @@ const seoByPath = new Map((seoRows || []).map((row: any) => [row.page_path, row]
     }
 
     .seo-save {
+        border-color: rgba(225,29,72,0.6);
         background: #e11d48;
         color: #fff;
-        border: none;
-        border-radius: 0.75rem;
-        padding: 0.75rem 1.1rem;
-        font-weight: 700;
         cursor: pointer;
     }
 
+    .seo-save i {
+        width: 1rem;
+        height: 1rem;
+    }
+
     .seo-save:disabled {
-        opacity: 0.6;
+        opacity: 0.65;
         cursor: not-allowed;
+        transform: none;
+    }
+
+    @media (max-width: 980px) {
+        .seo-hero-panel,
+        .seo-panel-heading,
+        .seo-form-footer {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .seo-summary-grid,
+        .seo-google-grid,
+        .seo-workspace,
+        .seo-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
 <script>
-    document.querySelectorAll<HTMLFormElement>(".seo-form").forEach((form) => {
+    const seoButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".seo-page-option"));
+    const seoForms = Array.from(document.querySelectorAll<HTMLFormElement>(".seo-form"));
+
+    function activateSeoPanel(index: string) {
+        seoButtons.forEach((button) => {
+            const active = button.dataset.seoIndex === index;
+            button.classList.toggle("is-active", active);
+            button.setAttribute("aria-selected", active ? "true" : "false");
+        });
+
+        seoForms.forEach((form) => {
+            form.hidden = form.dataset.seoPanel !== index;
+        });
+    }
+
+    seoButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            activateSeoPanel(button.dataset.seoIndex || "0");
+        });
+    });
+
+    seoForms.forEach((form) => {
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
 
             const button = form.querySelector<HTMLButtonElement>(".seo-save");
+            const buttonLabel = button?.querySelector("span");
             const status = form.querySelector<HTMLElement>(".seo-status");
             const formData = new FormData(form);
 
-            if (button) {
-                button.disabled = true;
-                button.textContent = "Guardando...";
-            }
+            if (button) button.disabled = true;
+            if (buttonLabel) buttonLabel.textContent = "Guardando...";
             if (status) {
                 status.textContent = "";
-                status.className = "seo-status text-xs text-light-muted";
+                status.className = "seo-status";
             }
 
             try {
@@ -207,18 +687,19 @@ const seoByPath = new Map((seoRows || []).map((row: any) => [row.page_path, row]
 
                 if (status) {
                     status.textContent = "Guardado";
-                    status.className = "seo-status text-xs text-green-400";
+                    status.className = "seo-status is-ok";
                 }
+
+                const activeButton = seoButtons.find((item) => item.dataset.seoIndex === form.dataset.seoPanel);
+                activeButton?.querySelector(".seo-dot")?.classList.add("seo-dot--ok");
             } catch (error) {
                 if (status) {
                     status.textContent = error instanceof Error ? error.message : "Error";
-                    status.className = "seo-status text-xs text-red-400";
+                    status.className = "seo-status is-error";
                 }
             } finally {
-                if (button) {
-                    button.disabled = false;
-                    button.textContent = "Guardar SEO";
-                }
+                if (button) button.disabled = false;
+                if (buttonLabel) buttonLabel.textContent = "Guardar SEO";
             }
         });
     });

@@ -5,20 +5,9 @@
  */
 import { getFeaturedProjects } from '../../lib/data';
 import { optimizeCloudinaryVideo } from '../../lib/cloudinary';
+import { getVideoId } from '../../lib/display';
 const allProjects = await getFeaturedProjects();
 const projects = allProjects.slice(0, 3);
-
-/**
- * Extract YouTube ID from any URL format.
- * Returns null if no valid ID found.
- */
-function getVideoId(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if (match) return match[1];
-  if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
-  return null;
-}
 
 function getVideoPoster(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -26,7 +15,7 @@ function getVideoPoster(value: string | null | undefined): string | null {
     return value.replace(/\.(mp4|webm)(\?.*)?$/, '.jpg');
   }
   const videoId = getVideoId(value);
-  return videoId ? `https://i.ytimg.com/vi_webp/${videoId}/hqdefault.webp` : null;
+  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
 }
 ---
 
@@ -70,7 +59,7 @@ function getVideoPoster(value: string | null | undefined): string | null {
           <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
                style={posterUrl ? `background-image: url(${posterUrl}); background-size: cover; background-position: center;` : ''}>
             {isNative ? (
-              <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 1280 })} poster={posterUrl || undefined} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
+              <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 1920, quality: 'auto:best', bitRate: '6m' })} poster={posterUrl || undefined} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
             ) : (
               <iframe
                 data-src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
@@ -132,8 +121,8 @@ function getVideoPoster(value: string | null | undefined): string | null {
              data-pm-client={project.client_name || ''}>
             <div class="absolute inset-0 z-0 bg-dark pointer-events-none group-hover:scale-105 transition-transform duration-1000"
                  style={posterUrl ? `background-image: url(${posterUrl}); background-size: cover; background-position: center;` : ''}>
-              {isNative ? (
-                <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 720 })} poster={posterUrl || undefined} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
+             {isNative ? (
+                <video aria-hidden="true" data-src={optimizeCloudinaryVideo(videoUrl, { width: 1280, quality: 'auto:best', bitRate: '5m' })} poster={posterUrl || undefined} class="project-native-video absolute inset-0 w-full h-full object-cover" loop muted playsinline preload="none"></video>
               ) : (
               <iframe
                 data-src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${videoId}&loop=1`}
@@ -220,6 +209,13 @@ function getVideoPoster(value: string | null | undefined): string | null {
     .fp-info--small { padding: 0 2rem 4rem 4rem; }
   }
   .fp-explore { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.25rem; }
+  .project-native-video {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .project-native-video.is-ready {
+    opacity: 1;
+  }
 </style>
 
 <script>
@@ -255,10 +251,15 @@ function getVideoPoster(value: string | null | undefined): string | null {
       const el = video as HTMLVideoElement;
       const src = el.dataset.src;
       if (!src) return;
+      const markReady = () => el.classList.add('is-ready');
+      el.addEventListener('loadeddata', markReady, { once: true });
+      el.addEventListener('canplay', markReady, { once: true });
+      el.addEventListener('playing', markReady, { once: true });
       el.src = src;
       el.autoplay = true;
       el.muted = true;
       el.playsInline = true;
+      if (el.readyState >= 2) markReady();
       el.play().catch(() => {});
     });
 

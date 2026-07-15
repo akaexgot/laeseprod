@@ -5,7 +5,7 @@
 export function optimizeCloudinaryVideo(url: string | null | undefined, options: { width?: number; quality?: string; bitRate?: string } = {}) {
     if (!url || !url.includes('cloudinary.com')) return url;
 
-    const { width = 1280, quality = 'auto', bitRate = '3m' } = options;
+    const { width = 1920, quality = 'auto:best', bitRate = '6m' } = options;
     
     // Let Cloudinary pick the best compatible format/codec for each browser.
     // Forcing H.265 can render as a black video on unsupported clients.

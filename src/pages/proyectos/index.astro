@@ -1,33 +1,42 @@
 ---
 /**
  * Projects Listing Page — Fullpage Scroll Mosaic
- * Only shows projects with video_project. Shows all projects regardless of group size.
+ * Shows projects with a playable video or a usable thumbnail. Shows all projects regardless of group size.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import "../../styles/proyectos.css";
 import ContactFormBlock from '../../components/ui/ContactFormBlock.astro';
 import { getProjects } from '../../lib/data';
+import { getVideoId } from '../../lib/display';
+import { optimizeCloudinaryVideo } from '../../lib/cloudinary';
 import { buildBreadcrumbSchema, buildItemListSchema } from '../../lib/seo';
 
 const allProjects = await getProjects();
 
-// Only show projects that have a video
-const projects = allProjects.filter((p: any) => p.video_project);
+type ProjectListItem = {
+    id: string;
+    title?: string;
+    subtitle?: string | null;
+    slug?: string;
+    description?: string | null;
+    video_project?: string | null;
+    video_explanation_desktop?: string | null;
+    video_explanation_mobile?: string | null;
+    thumbnail?: string | null;
+    client_name?: string | null;
+    featured_home?: boolean | null;
+};
 
-function getVideoId(value: string | null | undefined): string | null {
-    if (!value) return null;
-    const match = value.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    if (match) return match[1];
-    if (/^[A-Za-z0-9_-]{11}$/.test(value.trim())) return value.trim();
-    return null;
+function isNativeVideo(value: string | null | undefined): boolean {
+    return !!value && (value.includes('cloudinary.com') || /\.(mp4|webm)(\?.*)?$/i.test(value));
 }
 
 /** Generate a poster/thumbnail from a video URL without loading the video */
 function getVideoThumbnail(videoUrl: string | null | undefined): string | null {
     if (!videoUrl) return null;
     // Cloudinary: swap extension to .jpg for first-frame thumbnail
-    if (videoUrl.includes('cloudinary.com') && (videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'))) {
-        return videoUrl.replace(/\.(mp4|webm)$/, '.jpg');
+    if (videoUrl.includes('cloudinary.com') && /\.(mp4|webm)(\?.*)?$/i.test(videoUrl)) {
+        return videoUrl.replace(/\.(mp4|webm)(\?.*)?$/i, '.jpg');
     }
     // YouTube: use thumbnail API
     const ytId = getVideoId(videoUrl);
@@ -44,10 +53,34 @@ function getYouTubeThumbnailFallbacks(videoUrl: string | null | undefined): stri
     ];
 }
 
+function hasRenderableProjectMedia(project: ProjectListItem): boolean {
+    return Boolean(project.thumbnail || isNativeVideo(project.video_project) || getVideoId(project.video_project));
+}
+
+function getProjectModalAttrs(
+    project: ProjectListItem,
+    mainVideo: string | null | undefined,
+    makingOf: string | null | undefined,
+) {
+    if (!mainVideo && !makingOf) return {};
+
+    return {
+        'data-pm-title': project.title || '',
+        'data-pm-subtitle': project.subtitle || '',
+        'data-pm-description': project.description || '',
+        'data-pm-video': mainVideo || '',
+        'data-pm-makingof': makingOf || '',
+        'data-pm-slug': project.slug || '',
+        'data-pm-client': project.client_name || '',
+    };
+}
+
+const projects = (allProjects as ProjectListItem[]).filter((project) => project.slug && hasRenderableProjectMedia(project));
+
 // Build screens according to business rules:
 // - First screen: up to 3 featured projects (`featured_home`)
 // - Following screens: chunks of up to 6 projects. Partial chunks are included.
-function buildProjectScreens(all: any[]) {
+function buildProjectScreens(all: ProjectListItem[]) {
     const FEATURED_LIMIT = 3;
     const CHUNK_SIZE = 6;
 
@@ -55,16 +88,16 @@ function buildProjectScreens(all: any[]) {
     const featured = all.filter(p => p.featured_home).slice(0, FEATURED_LIMIT);
 
     // 2. remaining projects (preserve original order, exclude featured)
-    const remaining = all.filter(p => !featured.some((f: any) => f.id === p.id));
+    const remaining = all.filter(p => !featured.some((f) => f.id === p.id));
 
     // 3. chunk remaining into groups of CHUNK_SIZE (include partial chunks)
-    const chunks: any[][] = [];
+    const chunks: ProjectListItem[][] = [];
     for (let i = 0; i < remaining.length; i += CHUNK_SIZE) {
         const chunk = remaining.slice(i, i + CHUNK_SIZE);
         if (chunk.length > 0) chunks.push(chunk);
     }
 
-    const screens: any[][] = [];
+    const screens: ProjectListItem[][] = [];
     if (featured.length > 0) screens.push(featured);
     screens.push(...chunks);
     return screens;
@@ -95,7 +128,7 @@ const structuredData = [
         </section>
     ) : (
         screens.map((group, screenIdx) => {
-            const isFirst = screenIdx === 0 && group.some((p: any) => p.featured_home);
+            const isFirst = screenIdx === 0 && group.some((p) => p.featured_home);
             const count = group.length;
             // First screen with featured: split layout. All others: 2 columns x 3 rows.
             const layoutClass = isFirst && count >= 3 ? 'pj-screen--split' : 'pj-screen--grid';
@@ -107,28 +140,28 @@ const structuredData = [
                             {/* Large cell */}
                             {(() => {
                                 const videoUrl = group[0].video_project;
-                                const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
+                                const isNative = isNativeVideo(videoUrl);
+                                const nativeVideoUrl = isNative ? optimizeCloudinaryVideo(videoUrl, { width: 1920, quality: 'auto:best', bitRate: '6m' }) : null;
                                 const vid = !isNative ? getVideoId(videoUrl) : null;
+                                const mainVideo = isNative ? videoUrl : vid;
+                                const hasCustomThumbnail = !!group[0].thumbnail;
+                                const posterUrl = group[0].thumbnail || getVideoThumbnail(videoUrl);
+                                const fallbackPosters = !hasCustomThumbnail ? getYouTubeThumbnailFallbacks(videoUrl) : [];
                                 
                                 const makingOfUrl = group[0].video_explanation_mobile || group[0].video_explanation_desktop;
-                                const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
+                                const isMakingOfNative = isNativeVideo(makingOfUrl);
                                 const isMakingOfInstagram = !!makingOfUrl && /instagram\.com\/(reel|reels|p)\//.test(makingOfUrl);
                                 const makingOfId = (!isMakingOfNative && !isMakingOfInstagram) ? (getVideoId(group[0].video_explanation_mobile) || getVideoId(group[0].video_explanation_desktop)) : null;
+                                const makingOf = (isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId;
 
-                                if (!isNative && !vid) return null;
+                                if (!posterUrl && !mainVideo) return null;
                                 return (
                                     <a href={`/proyectos/${group[0].slug}`} class="pj-cell pj-cell--large group"
-                                       data-pm-title={group[0].title}
-                                       data-pm-subtitle={group[0].subtitle || ''}
-                                       data-pm-description={group[0].description || ''}
-                                       data-pm-video={isNative ? videoUrl : vid}
-                                       data-pm-makingof={(isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId}
-                                       data-pm-slug={group[0].slug}
-                                       data-pm-client={group[0].client_name || ''}>
+                                       {...getProjectModalAttrs(group[0], mainVideo, makingOf)}>
                                         <div class="pj-cell__video">
                                             {isNative ? (
-                                                <video aria-hidden="true" src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
-                                            ) : (
+                                                <video aria-hidden="true" data-src={nativeVideoUrl} class="pj-cell__iframe pj-cell__native-video" loop muted playsinline preload="none" poster={posterUrl || undefined} style="object-fit: cover;"></video>
+                                            ) : vid ? (
                                                 <iframe
                                                     class="pj-cell__iframe"
                                                     data-src={`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${vid}&loop=1`}
@@ -138,8 +171,26 @@ const structuredData = [
                                                     loading="lazy"
                                                 ></iframe>
                                                 <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+                                            ) : posterUrl ? (
+                                                <img
+                                                    src={posterUrl}
+                                                    alt={group[0].title}
+                                                    class={`pj-cell__thumb pj-cell__thumb--visible ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
+                                                    data-fallback-srcs={fallbackPosters.join('|')}
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <div class="pj-cell__placeholder"></div>
                                             )}
-                                            {group[0].thumbnail && <img src={group[0].thumbnail} alt={group[0].title} class="pj-cell__thumb" loading="lazy" />}
+                                            {mainVideo && posterUrl && (
+                                                <img
+                                                    src={posterUrl}
+                                                    alt={group[0].title}
+                                                    class={`pj-cell__thumb pj-cell__thumb--video-poster ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
+                                                    data-fallback-srcs={fallbackPosters.join('|')}
+                                                    loading="lazy"
+                                                />
+                                            )}
                                         </div>
                                         <div class="pj-cell__overlay"></div>
                                         <div class="pj-cell__info">
@@ -158,30 +209,30 @@ const structuredData = [
                             {/* Stacked cells */}
                             {group.length > 1 && (
                             <div class="pj-stack">
-                                {group.slice(1).map((item: any) => {
+                                {group.slice(1).map((item) => {
                                     const videoUrl = item.video_project;
-                                    const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
+                                    const isNative = isNativeVideo(videoUrl);
+                                    const nativeVideoUrl = isNative ? optimizeCloudinaryVideo(videoUrl, { width: 1280, quality: 'auto:best', bitRate: '5m' }) : null;
                                     const vid = !isNative ? getVideoId(videoUrl) : null;
+                                    const mainVideo = isNative ? videoUrl : vid;
+                                    const hasCustomThumbnail = !!item.thumbnail;
+                                    const posterUrl = item.thumbnail || getVideoThumbnail(videoUrl);
+                                    const fallbackPosters = !hasCustomThumbnail ? getYouTubeThumbnailFallbacks(videoUrl) : [];
                                     
                                     const makingOfUrl = item.video_explanation_mobile || item.video_explanation_desktop;
-                                    const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
+                                    const isMakingOfNative = isNativeVideo(makingOfUrl);
                                     const isMakingOfInstagram = !!makingOfUrl && /instagram\.com\/(reel|reels|p)\//.test(makingOfUrl);
                                     const makingOfId = (!isMakingOfNative && !isMakingOfInstagram) ? (getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop)) : null;
+                                    const makingOf = (isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId;
 
-                                    if (!isNative && !vid) return null;
+                                    if (!posterUrl && !mainVideo) return null;
                                     return (
                                         <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--stacked group"
-                                           data-pm-title={item.title}
-                                           data-pm-subtitle={item.subtitle || ''}
-                                           data-pm-description={item.description || ''}
-                                           data-pm-video={isNative ? videoUrl : vid}
-                                           data-pm-makingof={(isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId}
-                                           data-pm-slug={item.slug}
-                                           data-pm-client={item.client_name || ''}>
+                                           {...getProjectModalAttrs(item, mainVideo, makingOf)}>
                                             <div class="pj-cell__video">
                                                 {isNative ? (
-                                                    <video aria-hidden="true" src={videoUrl} class="pj-cell__iframe" autoplay loop muted playsinline style="object-fit: cover; opacity: 1;"></video>
-                                                ) : (
+                                                    <video aria-hidden="true" data-src={nativeVideoUrl} class="pj-cell__iframe pj-cell__native-video" loop muted playsinline preload="none" poster={posterUrl || undefined} style="object-fit: cover;"></video>
+                                                ) : vid ? (
                                                     <iframe
                                                         class="pj-cell__iframe"
                                                         data-src={`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${vid}&loop=1`}
@@ -191,8 +242,26 @@ const structuredData = [
                                                         loading="lazy"
                                                     ></iframe>
                                                     <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+                                                ) : posterUrl ? (
+                                                    <img
+                                                        src={posterUrl}
+                                                        alt={item.title}
+                                                        class={`pj-cell__thumb pj-cell__thumb--visible ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
+                                                        data-fallback-srcs={fallbackPosters.join('|')}
+                                                        loading="lazy"
+                                                    />
+                                                ) : (
+                                                    <div class="pj-cell__placeholder"></div>
                                                 )}
-                                                {item.thumbnail && <img src={item.thumbnail} alt={item.title} class="pj-cell__thumb" loading="lazy" />}
+                                                {mainVideo && posterUrl && (
+                                                    <img
+                                                        src={posterUrl}
+                                                        alt={item.title}
+                                                        class={`pj-cell__thumb pj-cell__thumb--video-poster ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
+                                                        data-fallback-srcs={fallbackPosters.join('|')}
+                                                        loading="lazy"
+                                                    />
+                                                )}
                                             </div>
                                             <div class="pj-cell__overlay"></div>
                                             <div class="pj-cell__info">
@@ -213,29 +282,25 @@ const structuredData = [
                         </Fragment>
                     ) : (
                         /* Non-featured: show thumbnail only, no autoplay video */
-                        group.map((item: any) => {
+                        group.map((item) => {
                             const videoUrl = item.video_project;
-                            const isNative = !!videoUrl && (videoUrl.includes('cloudinary.com') || videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm'));
+                            const isNative = isNativeVideo(videoUrl);
                             const vid = !isNative ? getVideoId(videoUrl) : null;
+                            const mainVideo = isNative ? videoUrl : vid;
                             
                             const makingOfUrl = item.video_explanation_mobile || item.video_explanation_desktop;
-                            const isMakingOfNative = !!makingOfUrl && (makingOfUrl.includes('cloudinary.com') || makingOfUrl.endsWith('.mp4') || makingOfUrl.endsWith('.webm'));
+                            const isMakingOfNative = isNativeVideo(makingOfUrl);
                             const isMakingOfInstagram = !!makingOfUrl && /instagram\.com\/(reel|reels|p)\//.test(makingOfUrl);
                             const makingOfId = (!isMakingOfNative && !isMakingOfInstagram) ? (getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop)) : null;
+                            const makingOf = (isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId;
 
-                            if (!item.thumbnail && !isNative && !vid) return null;
                             const hasCustomThumbnail = !!item.thumbnail;
                             const posterUrl = item.thumbnail || getVideoThumbnail(videoUrl);
                             const fallbackPosters = !hasCustomThumbnail ? getYouTubeThumbnailFallbacks(videoUrl) : [];
+                            if (!posterUrl && !mainVideo) return null;
                             return (
                                 <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--quarter group"
-                                   data-pm-title={item.title}
-                                   data-pm-subtitle={item.subtitle || ''}
-                                   data-pm-description={item.description || ''}
-                                   data-pm-video={isNative ? videoUrl : vid}
-                                   data-pm-makingof={(isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId}
-                                   data-pm-slug={item.slug}
-                                   data-pm-client={item.client_name || ''}>
+                                   {...getProjectModalAttrs(item, mainVideo, makingOf)}>
                                     <div class="pj-cell__video">
                                         {posterUrl ? (
                                             <img
@@ -304,8 +369,47 @@ const structuredData = [
         });
     });
 
+    /* ── Keep native video posters visible until a real frame is ready ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        const canAutoplayProjectVideos = window.matchMedia('(min-width: 1024px)').matches;
+
+        document.querySelectorAll<HTMLVideoElement>('video.pj-cell__native-video').forEach((video) => {
+            const poster = video.closest('.pj-cell__video')?.querySelector<HTMLElement>('.pj-cell__thumb--video-poster');
+
+            if (!canAutoplayProjectVideos) {
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
+                return;
+            }
+
+            if (!video.src && video.dataset.src) {
+                video.src = video.dataset.src;
+            }
+
+            video.autoplay = true;
+            video.muted = true;
+            video.playsInline = true;
+            video.play().catch(() => {});
+
+            if (!poster) return;
+
+            const hidePoster = () => {
+                poster.classList.add('is-hidden');
+            };
+
+            video.addEventListener('loadeddata', hidePoster, { once: true });
+            video.addEventListener('canplay', hidePoster, { once: true });
+            video.addEventListener('playing', hidePoster, { once: true });
+
+            if (video.readyState >= 2) hidePoster();
+        });
+    });
+
     /* ── Lazy-load YouTube iframes ── */
     document.addEventListener('DOMContentLoaded', () => {
+        if (!window.matchMedia('(min-width: 1024px)').matches) return;
+
         const lazyIframes = document.querySelectorAll('.pj-cell__iframe[data-src]');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {

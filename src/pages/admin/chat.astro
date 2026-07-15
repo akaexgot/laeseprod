@@ -4,11 +4,6 @@
  * View conversations and reply to visitors in real time
  */
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { getServiceSupabase } from "../../lib/supabase";
-import { getUserFromCookie } from "../../lib/auth";
-
-// SSR auth is handled by middleware
-const serviceSupabase = getServiceSupabase()!;
 ---
 
 <AdminLayout title="Chat en Vivo" activeSection="chat">
@@ -146,9 +141,62 @@ const serviceSupabase = getServiceSupabase()!;
     const adminInputArea = document.getElementById('admin-input-area')!;
     const adminInput = document.getElementById('admin-input') as HTMLInputElement;
     const adminSend = document.getElementById('admin-send') as HTMLButtonElement;
+    let hasLoadedConversations = false;
+
+    type Conversation = {
+        id: string;
+        visitor_name?: string;
+        updated_at?: string;
+        last_message?: string;
+        last_sender?: 'visitor' | 'admin' | string;
+    };
+
+    function escapeHtml(value: unknown) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function setConversationsState(state: 'loading' | 'empty' | 'error', countText: string, content: string) {
+        convList.dataset.state = state;
+        convCount.textContent = countText;
+        convList.innerHTML = content;
+    }
+
+    function renderConversationsLoading() {
+        setConversationsState('loading', 'Cargando...', `
+            <div class="p-6 text-center text-zinc-500 text-xs flex flex-col items-center">
+                <svg class="w-8 h-8 mb-3 text-zinc-700 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z"></path></svg>
+                <p>Cargando conversaciones...</p>
+            </div>
+        `);
+    }
+
+    function renderConversationsEmpty() {
+        setConversationsState('empty', '0 conversaciones', `
+            <div class="p-6 text-center text-zinc-500 text-xs flex flex-col items-center">
+                <svg class="w-9 h-9 mb-3 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-1M5 14l-2 2V6a2 2 0 012-2h10a2 2 0 012 2v6a2 2 0 01-2 2H9l-4 4v-4z"></path></svg>
+                <p class="text-zinc-300 font-medium">No hay conversaciones todavia.</p>
+                <p class="mt-1 leading-relaxed">Las nuevas conversaciones apareceran aqui cuando un usuario inicie un chat.</p>
+            </div>
+        `);
+    }
+
+    function renderConversationsError(message: string) {
+        setConversationsState('error', 'Error al cargar', `
+            <div class="p-6 text-center text-red-400 text-xs flex flex-col items-center">
+                <svg class="w-8 h-8 mb-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m0 3.75h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path></svg>
+                <p class="font-medium">No se pudieron cargar las conversaciones.</p>
+                <p class="mt-1 text-red-300/80 leading-relaxed">${escapeHtml(message)}</p>
+            </div>
+        `);
+    }
 
     // Load conversations
-    async function loadConversations() {
+    async function loadConversationsLegacy() {
         try {
             const res = await fetch('/api/chat?list=1');
             const conversations = await res.json();
@@ -215,6 +263,82 @@ const serviceSupabase = getServiceSupabase()!;
         }
     }
 
+    async function loadConversations() {
+        if (!hasLoadedConversations) renderConversationsLoading();
+
+        try {
+            const res = await fetch('/api/chat?list=1', { credentials: 'same-origin' });
+            const payload = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                renderConversationsError(payload?.error || 'La peticion al servidor ha fallado.');
+                return;
+            }
+
+            if (!Array.isArray(payload)) {
+                renderConversationsError('La respuesta del servidor no tiene el formato esperado.');
+                return;
+            }
+
+            const conversations = payload as Conversation[];
+            hasLoadedConversations = true;
+            convList.dataset.state = 'list';
+            convCount.textContent = `${conversations.length} conversacion${conversations.length !== 1 ? 'es' : ''}`;
+
+            if (conversations.length === 0) {
+                renderConversationsEmpty();
+                return;
+            }
+
+            convList.innerHTML = conversations.map((conv) => {
+                const isActive = conv.id === activeConversationId;
+                const updatedAt = conv.updated_at ? new Date(conv.updated_at) : null;
+                const date = updatedAt && !Number.isNaN(updatedAt.getTime())
+                    ? updatedAt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                    : '';
+                const visitorName = conv.visitor_name?.trim() || 'Visitante';
+                const lastMessage = conv.last_message || '';
+                const lastText = lastMessage
+                    ? (lastMessage.length > 40 ? lastMessage.substring(0, 40) + '...' : lastMessage)
+                    : 'Sin mensajes';
+                const senderLabel = conv.last_sender === 'visitor' ? 'Visitante: ' : conv.last_sender === 'admin' ? 'Admin: ' : '';
+
+                return `
+                    <button
+                        class="w-full text-left hover:bg-zinc-800/30 transition-colors ${isActive ? 'bg-zinc-800/50 border-l-2 border-l-rose-500' : ''}"
+                        data-conv-id="${escapeHtml(conv.id)}"
+                        data-conv-name="${escapeHtml(visitorName)}"
+                        style="padding: 1rem;"
+                    >
+                        <div class="flex items-center" style="gap: 0.75rem;">
+                            <div class="bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center flex-shrink-0" style="width: 2.5rem; height: 2.5rem;">
+                                <span class="text-rose-400 text-sm font-bold">${escapeHtml(visitorName.charAt(0).toUpperCase() || '?')}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-zinc-100 text-sm font-medium truncate">${escapeHtml(visitorName)}</span>
+                                    <span class="text-zinc-500 text-[10px] flex-shrink-0">${escapeHtml(date)}</span>
+                                </div>
+                                <p class="text-zinc-400 text-xs mt-0.5 truncate">${escapeHtml(senderLabel + lastText)}</p>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            convList.querySelectorAll('button[data-conv-id]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = (btn as HTMLElement).dataset.convId!;
+                    const name = (btn as HTMLElement).dataset.convName!;
+                    selectConversation(id, name);
+                });
+            });
+        } catch (err) {
+            console.error('Load conversations error:', err);
+            renderConversationsError('No se ha podido conectar con el servidor.');
+        }
+    }
+
     const closeConvBtn = document.getElementById('close-conv-btn') as HTMLButtonElement;
     const chatLayout = document.querySelector('.chat-layout') as HTMLElement;
     const chatBackBtn = document.getElementById('chat-back-btn') as HTMLButtonElement;
@@ -226,6 +350,7 @@ const serviceSupabase = getServiceSupabase()!;
 
     function selectConversation(id: string, name: string) {
         activeConversationId = id;
+        resetChatStatusColor();
         chatName.textContent = name;
         chatAvatar.textContent = name.charAt(0).toUpperCase();
         chatStatus.textContent = 'Conversación activa';
@@ -250,7 +375,24 @@ const serviceSupabase = getServiceSupabase()!;
     // Modal elements
     const confirmOverlay = document.getElementById('confirm-overlay')!;
     const confirmCancel = document.getElementById('confirm-cancel')!;
-    const confirmYes = document.getElementById('confirm-yes')!;
+    const confirmYes = document.getElementById('confirm-yes') as HTMLButtonElement;
+
+    function showChatError(message: string) {
+        chatStatus.textContent = message;
+        chatStatus.classList.remove('text-zinc-400');
+        chatStatus.classList.add('text-red-400');
+
+        const errorNotice = document.createElement('div');
+        errorNotice.className = 'text-center text-red-400 text-sm py-8 flex flex-col items-center';
+        errorNotice.textContent = message;
+        adminMessages.innerHTML = '';
+        adminMessages.appendChild(errorNotice);
+    }
+
+    function resetChatStatusColor() {
+        chatStatus.classList.remove('text-red-400');
+        chatStatus.classList.add('text-zinc-400');
+    }
 
     // Close conversation handler
     closeConvBtn.addEventListener('click', () => {
@@ -265,16 +407,27 @@ const serviceSupabase = getServiceSupabase()!;
     confirmYes.addEventListener('click', async () => {
         if (!activeConversationId) return;
         confirmOverlay.classList.add('hidden');
+        confirmYes.disabled = true;
+        confirmYes.textContent = 'Cerrando...';
 
         try {
             const res = await fetch('/api/chat', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'close', conversation_id: activeConversationId }),
             });
+            const payload = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                showChatError(payload?.error || 'No se pudo cerrar la conversacion.');
+                return;
+            }
+
             if (res.ok) {
                 // Reset UI
                 activeConversationId = null;
+                resetChatStatusColor();
                 chatName.textContent = 'Conversación cerrada';
                 chatStatus.textContent = 'Selecciona otra conversación';
                 chatAvatar.textContent = '✓';
@@ -293,6 +446,10 @@ const serviceSupabase = getServiceSupabase()!;
             }
         } catch (err) {
             console.error('Error closing conversation:', err);
+            showChatError('Error de conexion al cerrar la conversacion.');
+        } finally {
+            confirmYes.disabled = false;
+            confirmYes.textContent = 'Cerrar Chat';
         }
     });
 
@@ -301,6 +458,11 @@ const serviceSupabase = getServiceSupabase()!;
         try {
             const res = await fetch(`/api/chat?conversation_id=${activeConversationId}`);
             const messages = await res.json();
+
+            if (!res.ok || !Array.isArray(messages)) {
+                showChatError(messages?.error || 'No se pudieron cargar los mensajes.');
+                return;
+            }
 
             if (messages.length === 0) {
                 adminMessages.innerHTML = `
@@ -369,8 +531,9 @@ const serviceSupabase = getServiceSupabase()!;
         adminSend.disabled = true;
 
         try {
-            await fetch('/api/chat', {
+            const res = await fetch('/api/chat', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'send',
@@ -379,10 +542,16 @@ const serviceSupabase = getServiceSupabase()!;
                     message: text,
                 }),
             });
+            if (!res.ok) {
+                const payload = await res.json().catch(() => null);
+                showChatError(payload?.error || 'No se pudo enviar la respuesta.');
+                return;
+            }
             await loadAdminMessages();
             await loadConversations();
         } catch (err) {
             console.error('Send admin message error:', err);
+            showChatError('Error de conexion al enviar la respuesta.');
         }
     }
 

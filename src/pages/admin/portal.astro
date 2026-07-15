@@ -37,6 +37,7 @@ const clients = await getPortalClientsAdmin();
             <table class="w-full text-sm text-left" id="clients-table">
                 <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
                     <tr class="border-b border-zinc-800/50">
+                        <th class="hidden sm:table-cell w-10" style="padding: 1.25rem 0.5rem 1.25rem 1.5rem;"></th>
                         <th style="padding: 1.25rem 1.5rem;">Cliente</th>
                         <th class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">Dropbox</th>
                         <th class="hidden md:table-cell" style="padding: 1.25rem 1.5rem;">Estado</th>
@@ -53,7 +54,12 @@ const clients = await getPortalClientsAdmin();
                         </tr>
                     ) : (
                         clients.map((client: any) => (
-                            <tr class="transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default" data-id={client.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button') && !event.target.closest('a')) btn.click();">
+                            <tr class="transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default drag-row" data-id={client.id} draggable="true" onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button') && !event.target.closest('a') && !event.target.closest('.drag-handle')) btn.click();">
+                                <td class="hidden sm:table-cell" style="padding: 1.25rem 0.5rem 1.25rem 1.5rem;">
+                                    <div class="drag-handle cursor-grab active:cursor-grabbing text-zinc-600 hover:text-zinc-300 transition-colors" style="display: flex; align-items: center; justify-content: center;" title="Arrastrar para ordenar">
+                                        <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                                    </div>
+                                </td>
                                 <td style="padding: 1.25rem 1.5rem;">
                                     <div class="flex items-center justify-between">
                                         <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -126,8 +132,6 @@ const clients = await getPortalClientsAdmin();
             </table>
         </div>
     </div>
-</AdminLayout>
-
 <!-- Create/Edit Modal -->
 <div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-lg shadow-2xl overflow-hidden">
@@ -239,6 +243,13 @@ const clients = await getPortalClientsAdmin();
 </div>
 
 <style>
+    .drag-row.drag-over {
+        background: rgba(225, 29, 72, 0.08) !important;
+        box-shadow: inset 0 -2px 0 0 #e11d48;
+    }
+    .drag-row[draggable="true"] {
+        user-select: none;
+    }
     .drop-zone.ready .drop-zone-content {
         border-color: #e11d48;
         background-color: rgba(225, 29, 72, 0.05);
@@ -260,7 +271,6 @@ const clients = await getPortalClientsAdmin();
             <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
         </div>
     </div>
-</div>
 </div>
 
 <!-- Toast Container -->
@@ -307,6 +317,84 @@ const clients = await getPortalClientsAdmin();
 
         function closeModal() {
             overlay.classList.add('hidden');
+        }
+
+        // Manual ordering for portal clients
+        const tbody = document.querySelector('#clients-table tbody') as HTMLTableSectionElement | null;
+        if (tbody) {
+            let draggedRow: HTMLTableRowElement | null = null;
+
+            tbody.addEventListener('dragstart', (event) => {
+                const target = (event.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement | null;
+                if (!target) return;
+                draggedRow = target;
+                target.classList.add('opacity-50');
+                if (event.dataTransfer) {
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', target.dataset.id || '');
+                }
+            });
+
+            tbody.addEventListener('dragend', () => {
+                draggedRow?.classList.remove('opacity-50');
+                draggedRow = null;
+                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            });
+
+            tbody.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+                const target = (event.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement | null;
+                if (!target || target === draggedRow) return;
+
+                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                target.classList.add('drag-over');
+            });
+
+            tbody.addEventListener('dragleave', (event) => {
+                const target = (event.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement | null;
+                target?.classList.remove('drag-over');
+            });
+
+            tbody.addEventListener('drop', async (event) => {
+                event.preventDefault();
+                const target = (event.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement | null;
+                if (!target || !draggedRow || target === draggedRow) return;
+
+                const rows = Array.from(tbody.querySelectorAll('tr.drag-row'));
+                const dragIndex = rows.indexOf(draggedRow);
+                const dropIndex = rows.indexOf(target);
+
+                if (dragIndex < dropIndex) {
+                    target.parentNode?.insertBefore(draggedRow, target.nextSibling);
+                } else {
+                    target.parentNode?.insertBefore(draggedRow, target);
+                }
+
+                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+                const orderedIds = Array.from(tbody.querySelectorAll('tr.drag-row'))
+                    .map(row => (row as HTMLElement).dataset.id)
+                    .filter((id): id is string => Boolean(id));
+
+                try {
+                    const res = await fetch('/api/admin/portal', {
+                        method: 'PATCH',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderedIds })
+                    });
+
+                    if (res.ok) {
+                        showToast('Orden actualizado', 'success');
+                    } else {
+                        const error = await res.json().catch(() => null);
+                        showToast(error?.error || 'Error al guardar orden', 'error');
+                    }
+                } catch {
+                    showToast('Error de conexión al guardar orden', 'error');
+                }
+            });
         }
 
         function updateLogoPreview() {
@@ -459,6 +547,8 @@ const clients = await getPortalClientsAdmin();
 
         function openConfirm(id: string) {
             pendingDeleteId = id;
+            confirmYes.textContent = 'Eliminar';
+            (confirmYes as HTMLButtonElement).disabled = false;
             confirmOverlay.classList.remove('hidden');
         }
         function closeConfirm() {
@@ -477,6 +567,7 @@ const clients = await getPortalClientsAdmin();
             try {
                 const res = await fetch('/api/admin/portal', {
                     method: 'DELETE',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id }),
                 });
@@ -560,6 +651,7 @@ const clients = await getPortalClientsAdmin();
             try {
                 const res = await fetch('/api/admin/portal', {
                     method: isEdit ? 'PUT' : 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body),
                 });

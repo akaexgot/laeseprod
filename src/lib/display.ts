@@ -4,14 +4,14 @@ export type Project = {
   slug?: string;
   featured_home?: boolean;
   video_project?: string | null;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export function getVideoId(value?: string | null): string | null {
   if (!value) return null;
   const v = value.trim();
   // support watch?v=, embed/, shorts/, youtu.be/ and raw IDs
-  const match = v.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  const match = v.match(/(?:(?:youtube(?:-nocookie)?\.com)\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if (match) return match[1];
   if (/^[A-Za-z0-9_-]{11}$/.test(v)) return v;
   try {

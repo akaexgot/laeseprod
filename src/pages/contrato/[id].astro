@@ -43,6 +43,8 @@ const requiredClientFields = contract?.is_billable
     ? [...new Set([...templateClientFields, ...invoiceFieldKeys])]
     : templateClientFields;
 const hasClientDataStep = requiredClientFields.length > 0;
+const paymentStatus = contract?.payment_status || 'unpaid';
+const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 'processing';
 ---
 
 <BaseLayout
@@ -183,7 +185,11 @@ const hasClientDataStep = requiredClientFields.length > 0;
                                     {contract?.is_billable && contract.status !== 'completed' && contract.status !== 'paid' ? (
                                         <div id="payment-checkout-box" class="w-full">
                                             <h2 class="success-title">Firma Guardada</h2>
-                                            <p class="final-desc">Tu firma se ha registrado correctamente. Solo falta completar el pago inicial para finalizar.</p>
+                                            <p class="final-desc">
+                                                {isAwaitingAsyncPayment
+                                                    ? 'Tu pago esta pendiente de confirmacion. Si elegiste transferencia, sigue las instrucciones bancarias de Stripe.'
+                                                    : 'Tu firma se ha registrado correctamente. Solo falta completar el pago inicial para finalizar.'}
+                                            </p>
                                             
                                             <div class="payment-card">
                                                 <p class="payment-desc">Depósito inicial a abonar:</p>
@@ -192,7 +198,7 @@ const hasClientDataStep = requiredClientFields.length > 0;
                                                 <div class="trust-badges">
                                                     <div class="badge">
                                                         <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                                        <span>Pago Seguro SSL</span>
+                                                        <span>Tarjeta, Bizum, Klarna o transferencia</span>
                                                     </div>
                                                     <div class="badge">
                                                         <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
@@ -203,17 +209,17 @@ const hasClientDataStep = requiredClientFields.length > 0;
                                                 <button class="btn-primary btn-pay" id="btn-pay">
                                                     Proceder al pago seguro
                                                 </button>
-                                                <p class="security-info">Tus datos bancarios nunca se guardan en nuestros servidores. El pago es procesado íntegramente por Stripe.</p>
+                                                <p class="security-info">Tus datos bancarios nunca se guardan en nuestros servidores. Puedes pagar con tarjeta, Apple Pay, Link, Bizum, Klarna o transferencia bancaria desde Stripe.</p>
                                             </div>
                                         </div>
 
                                         <div id="payment-success-msg" style="display:none;" class="w-full">
                                             <div class="final-success">
-                                                <h2 class="success-title">Contrato Firmado</h2>
-                                                <p class="final-desc">¡Pago recibido correctamente! El proceso se ha completado. En breve recibirás una copia en tu correo electrónico ({contract?.client_email || 'el correo proporcionado'}).</p>
+                                                <h2 class="success-title">Pago pendiente de confirmacion</h2>
+                                                <p class="final-desc">Stripe ha registrado la operacion. Si has pagado con transferencia, el contrato y la factura se enviaran cuando Stripe confirme que el dinero se ha recibido.</p>
                                                 
                                                 <div class="success-icon">
-                                                    <svg class="w-20 h-20 text-emerald-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    <svg class="w-20 h-20 text-amber-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>
                                                 </div>
 
                                                 <div class="success-actions">
@@ -632,13 +638,16 @@ const hasClientDataStep = requiredClientFields.length > 0;
         });
 
         // Initialize state
-        if (urlParams.get('status') === 'success') {
+        if (urlParams.get('status') === 'processing' || (contract.is_billable && urlParams.get('status') === 'success')) {
             setStep(3, { scroll: false });
             const checkoutBox = $('payment-checkout-box');
             const successMsg = $('payment-success-msg');
             if (checkoutBox) checkoutBox.style.display = 'none';
             if (successMsg) successMsg.style.display = 'block';
-            showToast('¡Pago realizado con éxito!', 'success');
+            showToast('Pago registrado. Esperando confirmacion de Stripe.', 'success');
+        } else if (urlParams.get('status') === 'success') {
+            setStep(3, { scroll: false });
+            showToast('Contrato firmado correctamente.', 'success');
         } else if (urlParams.get('status') === 'cancel') {
             setStep(3, { scroll: false });
             showToast('El pago ha sido cancelado.', 'error');
@@ -730,7 +739,8 @@ const hasClientDataStep = requiredClientFields.length > 0;
                     const { url } = await res.json();
                     window.location.href = url;
                 } else {
-                    showToast('Error al crear la sesión de pago.', 'error');
+                    const err = await res.json().catch(() => null);
+                    showToast(err?.error || 'Error al crear la sesion de pago.', 'error');
                     btn.disabled = false;
                     btn.textContent = 'Proceder al pago seguro';
                 }

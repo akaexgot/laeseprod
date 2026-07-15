@@ -13,7 +13,7 @@ const serviceSupabase = getServiceSupabase()!;
 
 const settings = await getSettings();
 // Helper stringifier para rellenar
-const getVal = (key: string) => settings[key] || '';
+const getVal = (key: string) => String((settings as Record<string, unknown>)[key] ?? '');
 ---
 
 <AdminLayout title="Ajustes Generales" activeSection="ajustes">
@@ -112,11 +112,11 @@ const getVal = (key: string) => settings[key] || '';
                 <div id="tab-hero" class="tab-content hidden space-y-8">
                     <div>
                         <h2 class="text-lg font-semibold text-zinc-50 mb-1 border-b border-zinc-800 pb-3">Vídeo Principal de Inicio</h2>
-                        <p class="text-sm text-zinc-400 mt-2 mb-6">El vídeo enorme que se reproduce en bucle en la página principal.</p>
+                        <p class="text-sm text-zinc-400 mt-2 mb-6">Gestiona el vídeo de fondo del home para escritorio y móvil. Si no hay vídeo móvil, se usará el horizontal.</p>
                         
                         <div class="grid grid-cols-1 gap-6">
                             <div>
-                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">URL del Vídeo de Fondo (YouTube o Cloudinary MP4)</label>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Vídeo horizontal / escritorio (YouTube o Cloudinary MP4)</label>
                                 <div class="flex gap-2">
                                     <input type="text" name="hero_video_desktop" id="hero_video_url" value={getVal('hero_video_desktop')} placeholder="https://www.youtube.com/watch?v=... o subir archivo" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
                                     <button type="button" onclick="document.getElementById('file-hero-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
@@ -128,16 +128,43 @@ const getVal = (key: string) => settings[key] || '';
                                     <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo vídeo... Esto puede tardar varios minutos.
                                 </div>
                             </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Vídeo móvil / vertical (opcional)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" name="hero_video_mobile" id="hero_video_mobile_url" value={getVal('hero_video_mobile')} placeholder="https://... o subir vídeo vertical" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors text-sm" />
+                                    <button type="button" onclick="document.getElementById('file-hero-video-mobile').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
+                                        <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Subir
+                                    </button>
+                                    <input type="file" id="file-hero-video-mobile" class="hidden" accept="video/mp4,video/webm" />
+                                </div>
+                                <p class="text-xs text-zinc-500 mt-2">Si lo dejas vacío, el home móvil usará el vídeo horizontal como fallback.</p>
+                                <div id="loading-hero-video-mobile" class="hidden items-center gap-2 mt-2 text-xs text-rose-500 font-medium">
+                                    <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo vídeo vertical... Esto puede tardar varios minutos.
+                                </div>
+                            </div>
                             
                             <!-- Video Preview Box -->
-                            <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-3">
-                                <p class="text-xs font-medium text-zinc-500 mb-2 uppercase tracking-wide">Vista previa en directo</p>
-                                <div class="aspect-video bg-black rounded-md overflow-hidden relative shadow-inner ring-1 ring-white/10" id="hero-preview-container">
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center text-zinc-600">
-                                        <i data-lucide="youtube" class="w-12 h-12 mb-2 opacity-50"></i>
-                                        <span class="text-sm font-medium">Introduce un enlace válido de YouTube</span>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-3">
+                                    <p class="text-xs font-medium text-zinc-500 mb-2 uppercase tracking-wide">Vista previa escritorio</p>
+                                    <div class="aspect-video bg-black rounded-md overflow-hidden relative shadow-inner ring-1 ring-white/10" id="hero-preview-container">
+                                        <div class="absolute inset-0 flex flex-col items-center justify-center text-zinc-600">
+                                            <i data-lucide="youtube" class="w-12 h-12 mb-2 opacity-50"></i>
+                                            <span class="text-sm font-medium">Introduce un enlace o sube un vídeo</span>
+                                        </div>
+                                        <iframe id="hero-preview-iframe" class="absolute inset-0 w-full h-full hidden" src="" title="Previsualización escritorio" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                     </div>
-                                    <iframe id="hero-preview-iframe" class="absolute inset-0 w-full h-full hidden" src="" title="Previsualización" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                </div>
+                                <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-3">
+                                    <p class="text-xs font-medium text-zinc-500 mb-2 uppercase tracking-wide">Vista previa móvil</p>
+                                    <div class="mx-auto bg-black rounded-md overflow-hidden relative shadow-inner ring-1 ring-white/10" id="hero-mobile-preview-container" style="aspect-ratio: 9 / 16; max-height: 360px;">
+                                        <div class="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 px-4 text-center">
+                                            <i data-lucide="smartphone" class="w-10 h-10 mb-2 opacity-50"></i>
+                                            <span class="text-sm font-medium">Sin vídeo móvil: usará el horizontal</span>
+                                        </div>
+                                        <iframe id="hero-mobile-preview-iframe" class="absolute inset-0 w-full h-full hidden" src="" title="Previsualización móvil" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -319,7 +346,7 @@ function syncColor(pickerId: string, inputId: string) {
                     if (res.ok) {
                         const data = await res.json();
                         urlInput.value = data.url;
-                        if (urlInput.id === 'hero_video_url') updateYoutubePreview(data.url);
+                        updateVideoPreview(urlInput.id, data.url);
                         
                         const saveBtn = document.getElementById('btn-save-all');
                         if (saveBtn) (saveBtn as HTMLButtonElement).click();
@@ -338,61 +365,76 @@ function syncColor(pickerId: string, inputId: string) {
         }
 
         setupVideoUpload('hero_video_url', 'file-hero-video', 'loading-hero-video');
+        setupVideoUpload('hero_video_mobile_url', 'file-hero-video-mobile', 'loading-hero-video-mobile');
 
-        // YouTube Preview Logic
+        // Video Preview Logic
         const heroUrlInput = document.getElementById('hero_video_url') as HTMLInputElement;
-        const heroIframe = document.getElementById('hero-preview-iframe') as HTMLIFrameElement;
+        const heroMobileUrlInput = document.getElementById('hero_video_mobile_url') as HTMLInputElement;
         
-        const updateYoutubePreview = (url: string) => {
+        const getPreviewElements = (inputId: string) => {
+            const isMobile = inputId === 'hero_video_mobile_url';
+            return {
+                container: document.getElementById(isMobile ? 'hero-mobile-preview-container' : 'hero-preview-container'),
+                iframe: document.getElementById(isMobile ? 'hero-mobile-preview-iframe' : 'hero-preview-iframe') as HTMLIFrameElement | null,
+            };
+        };
+
+        const updateVideoPreview = (inputId: string, url: string) => {
+            const { container, iframe } = getPreviewElements(inputId);
+            if (!container || !iframe) return;
+
             let videoId = '';
             if (url.includes('youtube.com/watch?v=')) {
                 videoId = url.split('v=')[1].split('&')[0];
             } else if (url.includes('youtu.be/')) {
                 videoId = url.split('youtu.be/')[1].split('?')[0];
+            } else if (url.includes('youtube-nocookie.com/embed/')) {
+                videoId = url.split('/embed/')[1].split('?')[0];
             }
+
+            const existingVideo = container.querySelector('video');
             
             if (videoId) {
-                heroIframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?loop=1&playlist=${videoId}&mute=1&controls=0`;
-                heroIframe.classList.remove('hidden');
+                if (existingVideo) existingVideo.style.display = 'none';
+                iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?loop=1&playlist=${videoId}&mute=1&controls=0`;
+                iframe.classList.remove('hidden');
             } else if (url.includes('cloudinary.com') || url.endsWith('.mp4') || url.endsWith('.webm')) {
-                // Not a youtube video, just a native video url
-                // Cannot preview easily in iframe without an HTML wrapper, hide preview box or change it to video tag
-                heroIframe.classList.add('hidden');
-                heroIframe.src = '';
-                const container = document.getElementById('hero-preview-container');
-                if (container) {
-                    let videoEl = container.querySelector('video');
-                    if (!videoEl) {
-                        videoEl = document.createElement('video');
-                        videoEl.className = 'absolute inset-0 w-full h-full object-cover';
-                        videoEl.autoplay = true;
-                        videoEl.muted = true;
-                        videoEl.loop = true;
-                        container.appendChild(videoEl);
-                    }
-                    videoEl.src = url;
-                    videoEl.style.display = 'block';
+                iframe.classList.add('hidden');
+                iframe.src = '';
+                let videoEl = existingVideo;
+                if (!videoEl) {
+                    videoEl = document.createElement('video');
+                    videoEl.className = 'absolute inset-0 w-full h-full object-cover';
+                    videoEl.autoplay = true;
+                    videoEl.muted = true;
+                    videoEl.loop = true;
+                    videoEl.playsInline = true;
+                    container.appendChild(videoEl);
                 }
+                videoEl.src = url;
+                videoEl.style.display = 'block';
             } else {
-                heroIframe.classList.add('hidden');
-                heroIframe.src = '';
-                const videoEl = document.getElementById('hero-preview-container')?.querySelector('video');
-                if (videoEl) videoEl.style.display = 'none';
+                iframe.classList.add('hidden');
+                iframe.src = '';
+                if (existingVideo) existingVideo.style.display = 'none';
             }
         };
 
         // Initialize preview if exists
-        if (heroUrlInput?.value) updateYoutubePreview(heroUrlInput.value);
+        if (heroUrlInput?.value) updateVideoPreview(heroUrlInput.id, heroUrlInput.value);
+        if (heroMobileUrlInput?.value) updateVideoPreview(heroMobileUrlInput.id, heroMobileUrlInput.value);
 
         // Debounce for URL input
         let previewTimeout: ReturnType<typeof setTimeout>;
-        heroUrlInput?.addEventListener('input', (e) => {
+        const bindPreviewInput = (input: HTMLInputElement | null) => input?.addEventListener('input', (e) => {
             clearTimeout(previewTimeout);
             const url = (e.target as HTMLInputElement).value;
             previewTimeout = setTimeout(() => {
-                updateYoutubePreview(url);
+                updateVideoPreview(input.id, url);
             }, 600);
         });
+        bindPreviewInput(heroUrlInput);
+        bindPreviewInput(heroMobileUrlInput);
 
         // Form Submit
         const saveBtn = document.getElementById('btn-save-all');

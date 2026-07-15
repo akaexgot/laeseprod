@@ -1,0 +1,98 @@
+---
+const gtmId = String(import.meta.env.PUBLIC_GTM_ID || '').trim();
+const ga4MeasurementId = String(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID || '').trim();
+const googleAdsId = String(import.meta.env.PUBLIC_GOOGLE_ADS_ID || '').trim();
+const googleAdsConversionLabel = String(import.meta.env.PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || '').trim();
+
+const useGtm = Boolean(gtmId);
+const directTagIds = useGtm
+    ? []
+    : Array.from(new Set([ga4MeasurementId, googleAdsId].filter(Boolean)));
+const firstDirectTagId = directTagIds[0] || '';
+const shouldLoadTracking = useGtm || Boolean(firstDirectTagId);
+
+const grantedConsent = {
+    ad_storage: 'granted',
+    analytics_storage: 'granted',
+    ad_user_data: 'granted',
+    ad_personalization: 'granted',
+};
+
+const deniedConsent = {
+    ad_storage: 'denied',
+    analytics_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    wait_for_update: 500,
+};
+
+const consentBootstrap = `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+window.gtag = window.gtag || gtag;
+gtag('consent', 'default', ${JSON.stringify(deniedConsent)});
+try {
+  var storedGoogleConsent = window.localStorage.getItem('vm_google_consent');
+  if (storedGoogleConsent === 'granted') {
+    gtag('consent', 'update', ${JSON.stringify(grantedConsent)});
+  } else if (storedGoogleConsent === 'denied') {
+    gtag('consent', 'update', ${JSON.stringify(deniedConsent)});
+  }
+} catch (error) {}
+window.vmGoogleConsent = {
+  acceptAll: function() {
+    gtag('consent', 'update', ${JSON.stringify(grantedConsent)});
+    try { window.localStorage.setItem('vm_google_consent', 'granted'); } catch (error) {}
+  },
+  denyAll: function() {
+    gtag('consent', 'update', ${JSON.stringify(deniedConsent)});
+    try { window.localStorage.setItem('vm_google_consent', 'denied'); } catch (error) {}
+  }
+};
+`;
+
+const gtmScript = `
+${consentBootstrap}
+(function(w,d,s,l,i){
+  w[l]=w[l]||[];
+  w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+  var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),
+      dl=l!='dataLayer'?'&l='+l:'';
+  j.async=true;
+  j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+  f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer',${JSON.stringify(gtmId)});
+`;
+
+const directGtagScript = `
+${consentBootstrap}
+gtag('js', new Date());
+${directTagIds.map((tagId) => `gtag('config', ${JSON.stringify(tagId)}, { send_page_view: true });`).join('\n')}
+window.vmGoogleTracking = {
+  googleAdsId: ${JSON.stringify(googleAdsId)},
+  defaultConversionLabel: ${JSON.stringify(googleAdsConversionLabel)},
+  trackGoogleAdsConversion: function(label, params) {
+    var conversionLabel = label || this.defaultConversionLabel;
+    if (!window.gtag || !this.googleAdsId || !conversionLabel) return false;
+    gtag('event', 'conversion', Object.assign({
+      send_to: this.googleAdsId + '/' + conversionLabel
+    }, params || {}));
+    return true;
+  }
+};
+`;
+---
+
+{shouldLoadTracking && (
+    <>
+        {useGtm ? (
+            <script is:inline set:html={gtmScript}></script>
+        ) : (
+            <>
+                <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${firstDirectTagId}`}></script>
+                <script is:inline set:html={directGtagScript}></script>
+            </>
+        )}
+    </>
+)}

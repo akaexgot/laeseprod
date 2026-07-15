@@ -133,9 +133,12 @@ CREATE TABLE IF NOT EXISTS portal_clients (
   dropbox_link TEXT,
   password_hash TEXT NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
+  "order" INT DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_portal_clients_order ON portal_clients("order", created_at, id);
 
 -- =====================================================
 -- 8. CONTACTS (Form submissions)

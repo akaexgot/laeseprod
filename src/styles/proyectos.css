@@ -10,6 +10,13 @@
     overflow: hidden;
     background: #0a0a0f;
 }
+@media (max-width: 1023px) {
+    .pj-screen {
+        height: auto;
+        min-height: 100svh;
+        overflow: visible;
+    }
+}
 
 /* ── Split layout (1 large + 2 stacked) ──────── */
 .pj-screen--split {
@@ -89,6 +96,22 @@
     flex: 1;
 }
 
+@media (max-width: 1023px) {
+    .pj-cell--large,
+    .pj-cell--stacked,
+    .pj-cell--quarter {
+        min-height: 50svh;
+    }
+
+    .pj-screen--first .pj-cell--large {
+        min-height: 60svh;
+    }
+
+    .pj-stack {
+        min-height: 100svh;
+    }
+}
+
 
 
 /* ── Video embed ──────────────────────────────── */
@@ -127,6 +150,9 @@
 .pj-cell__thumb--visible {
     opacity: 1 !important;
     transition: transform 0.8s ease;
+}
+.pj-cell__thumb--video-poster.is-hidden {
+    opacity: 0;
 }
 .pj-cell:hover .pj-cell__thumb--visible {
     transform: scale(1.04);
