@@ -33,11 +33,11 @@ describe('sendContractFinalizedEmail', () => {
     expect(payload.to).toBe('cliente@example.com');
     expect(payload.attachments).toHaveLength(2);
     expect(payload.attachments[0]).toMatchObject({
-      filename: 'Contrato_VideoMarketing_Sevilla_Cliente_Test.pdf',
+      filename: 'Contrato_LaesePROD_Cliente_Test.pdf',
       contentType: 'application/pdf',
     });
     expect(payload.attachments[1]).toMatchObject({
-      filename: 'Factura_F-20000_VideoMarketing_Sevilla.pdf',
+      filename: 'Factura_F-20000_LaesePROD.pdf',
       contentType: 'application/pdf',
     });
     expect(Buffer.isBuffer(payload.attachments[0].content)).toBe(true);
@@ -81,7 +81,7 @@ describe('sendContractFinalizedEmail', () => {
     expect(payload.replyTo).toBe('cliente@example.com');
     expect(payload.subject).toContain('Contrato Demo');
     expect(payload.attachments).toHaveLength(2);
-    expect(payload.attachments[0].filename).toBe('Contrato_VideoMarketing_Sevilla_Cliente_Test.pdf');
-    expect(payload.attachments[1].filename).toBe('Factura_F-20001_VideoMarketing_Sevilla.pdf');
+    expect(payload.attachments[0].filename).toBe('Contrato_LaesePROD_Cliente_Test.pdf');
+    expect(payload.attachments[1].filename).toBe('Factura_F-20001_LaesePROD.pdf');
   });
 });

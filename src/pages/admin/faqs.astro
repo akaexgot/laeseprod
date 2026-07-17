@@ -1,441 +1,70 @@
 ---
-/**
- * Admin - FAQs Management
- * Manage questions and answers with global toggle
- */
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { getFaqs, getSettings } from "../../lib/data";
-import { getServiceSupabase } from "../../lib/supabase";
-
-const faqs = await getFaqs();
-const settings = await getSettings();
-const faqEnabled = settings.faq_section_enabled !== false;
+import { getFaqs, getServices, getSettings } from "../../lib/data";
+const [services, settings] = await Promise.all([getServices(), getSettings()]);
+const grouped = await Promise.all(services.map(async (service: any) => ({ service, faqs: await getFaqs(service.id, true) })));
 ---
 
-<AdminLayout title="Preguntas Frecuentes" activeSection="faqs">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="margin-bottom: 3.5rem !important;">
-        <div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">Preguntas Frecuentes</h1>
-            <p class="text-zinc-400 text-sm" style="margin-top: 0.75rem !important;">Gestiona las dudas habituales de tus clientes. Total: <span class="text-zinc-100 font-medium">{faqs.length}</span></p>
-        </div>
-        <button id="btn-add"
-            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
-            style="padding: 0.5rem 1rem; gap: 0.5rem;"
-        >
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            Nueva pregunta
-        </button>
-    </div>
-
-    <!-- Toggle FAQ Section -->
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm" style="margin-bottom: 2rem !important; padding: 1.25rem 1.5rem;">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center">
-                    <i data-lucide="eye" class="w-4.5 h-4.5 text-zinc-400"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-semibold text-zinc-100">Mostrar sección FAQ en la web</p>
-                    <p class="text-xs text-zinc-500" style="margin-top: 2px;">Actívalo para que las preguntas frecuentes aparezcan en servicios, sectores y contacto.</p>
-                </div>
-            </div>
-            <button id="faq-toggle" 
-                class={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-rose-500/30 ${faqEnabled ? 'bg-rose-600' : 'bg-zinc-700'}`}
-                data-enabled={faqEnabled.toString()}
-                title={faqEnabled ? 'Desactivar sección FAQ' : 'Activar sección FAQ'}
-            >
-                <span class={`inline-block h-5 w-5 rounded-full bg-white shadow-lg transform transition-transform duration-300 ${faqEnabled ? 'translate-x-6' : 'translate-x-1'}`}></span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Divider -->
-    <div style="margin-bottom: 2rem !important;"></div>
-
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left" id="faqs-table">
-                <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
-                    <tr class="border-b border-zinc-800/50">
-                        <th style="padding: 1.25rem 1.5rem;">Pregunta / Respuesta</th>
-                        <th class="hidden md:table-cell w-24 text-center" style="padding: 1.25rem 1.5rem;">Orden</th>
-                        <th class="hidden sm:table-cell w-28 text-center" style="padding: 1.25rem 1.5rem;">Estado</th>
-                        <th class="text-right hidden sm:table-cell w-24" style="padding: 1.25rem 1.5rem;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-zinc-800">
+<AdminLayout title="Preguntas frecuentes" activeSection="faqs">
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+        <div><h1 class="text-2xl font-bold text-white">FAQ por servicio</h1><p class="text-sm text-zinc-400 mt-2">Bodas y Videoclips se gestionan de forma independiente.</p></div>
+        <label class="flex items-center gap-3 text-sm text-zinc-300"><input id="faq-enabled" type="checkbox" checked={settings.faq_section_enabled !== false} class="w-4 h-4" />Mostrar FAQ en la web</label>
+    </header>
+    <div class="grid xl:grid-cols-2 gap-8">
+        {grouped.map(({ service, faqs }) => (
+            <section>
+                <div class="flex items-center gap-3 mb-4"><i data-lucide={service.slug === "bodas" ? "heart" : "music-2"} class="w-5 h-5 text-white"></i><h2 class="text-xl font-semibold text-white">{service.title}</h2><span class="text-xs text-zinc-500">{faqs.length}</span></div>
+                <div class="space-y-4">
                     {faqs.map((faq: any) => (
-                        <tr class="hover:bg-zinc-800/30 transition-colors group mobile-row-click sm:cursor-default" data-id={faq.id} onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button')) btn.click();">
-                            <td style="padding: 1.25rem 1.5rem;">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex flex-col gap-1">
-                                        <span class="font-medium text-zinc-100 line-clamp-1">{faq.question}</span>
-                                        <p class="text-zinc-500 text-xs line-clamp-1">{faq.answer}</p>
-                                    </div>
-                                    <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
-                                </div>
-                            </td>
-                            <td class="hidden md:table-cell text-center" style="padding: 1.25rem 1.5rem;">
-                                <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium">{faq.order}</span>
-                            </td>
-                            <td class="hidden sm:table-cell text-center" style="padding: 1.25rem 1.5rem;">
-                                {faq.is_active ? (
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
-                                        Activa
-                                    </span>
-                                ) : (
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-zinc-800 text-zinc-500 text-[10px] font-bold uppercase tracking-wider border border-zinc-700">
-                                        Oculta
-                                    </span>
-                                )}
-                            </td>
-                            <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
-                                <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button class="p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all btn-edit"
-                                        data-id={faq.id} data-question={faq.question} data-answer={faq.answer} data-order={faq.order} data-active={faq.is_active.toString()}
-                                        title="Editar">
-                                        <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
-                                    </button>
-                                    <button class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={faq.id} title="Eliminar">
-                                        <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                        <form class="faq-editor bg-zinc-900 border border-zinc-800 rounded-lg p-5 space-y-4" data-id={faq.id} data-service-id={service.id}>
+                            <div class="flex items-center justify-between"><strong class="text-sm text-zinc-200">Editar pregunta</strong><button type="button" class="delete-faq text-zinc-500 hover:text-red-400" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+                            <label class="faq-field">Pregunta<input name="question" value={faq.question} required /></label>
+                            <label class="faq-field">Respuesta<textarea name="answer" rows="4" required>{faq.answer}</textarea></label>
+                            <div class="grid grid-cols-2 gap-4"><label class="faq-field">Orden<input type="number" name="order" min="0" value={faq.order ?? 0} /></label><label class="flex items-center gap-2 pt-6 text-sm text-zinc-300"><input type="checkbox" name="is_active" checked={faq.is_active} />Activa</label></div>
+                            <button type="submit" class="w-full py-2 bg-white text-black rounded font-semibold text-sm">Guardar</button>
+                        </form>
                     ))}
-                </tbody>
-            </table>
-        </div>
+                    <form class="faq-editor bg-zinc-950 border border-dashed border-zinc-700 rounded-lg p-5 space-y-4" data-service-id={service.id}>
+                        <strong class="text-sm text-zinc-200">Nueva pregunta</strong>
+                        <label class="faq-field">Pregunta<input name="question" required /></label>
+                        <label class="faq-field">Respuesta<textarea name="answer" rows="4" required></textarea></label>
+                        <div class="grid grid-cols-2 gap-4"><label class="faq-field">Orden<input type="number" name="order" min="0" value="0" /></label><label class="flex items-center gap-2 pt-6 text-sm text-zinc-300"><input type="checkbox" name="is_active" checked />Activa</label></div>
+                        <button type="submit" class="w-full py-2 bg-white text-black rounded font-semibold text-sm">Añadir</button>
+                    </form>
+                </div>
+            </section>
+        ))}
     </div>
-
-    {faqs.length === 0 && (
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col items-center justify-center text-center" style="padding: 3rem; margin-top: 1.5rem;">
-            <div class="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center border border-zinc-800 mb-4">
-                <i data-lucide="help-circle" class="w-6 h-6 text-zinc-500"></i>
-            </div>
-            <h3 class="text-zinc-100 font-semibold mb-1">No hay preguntas frecuentes</h3>
-            <p class="text-zinc-400 text-sm mb-6 max-w-sm">Añade dudas comunes para ayudar a tus clientes potenciales.</p>
-        </div>
-    )}
-
+    <p id="faq-status" class="fixed bottom-6 right-6 z-50 px-4 py-3 bg-white text-black rounded shadow-xl text-sm font-semibold hidden" aria-live="polite"></p>
 </AdminLayout>
 
-<!-- Modal Form -->
-<div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-        
-        <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
-            <h3 id="modal-title" class="text-lg font-bold text-white tracking-tight">Nueva pregunta</h3>
-            <button id="modal-close" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
-
-        <input type="hidden" id="faq-id" />
-        
-        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
-            <div>
-                <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Pregunta *</label>
-                <input type="text" id="faq-question" required 
-                    class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none rounded-md px-3 py-2 text-sm"
-                    placeholder="Ej: ¿Qué servicios audiovisuales ofrecemos?"
-                />
-            </div>
-            
-            <div>
-                <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Respuesta *</label>
-                <textarea id="faq-answer" required rows="5"
-                    class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none resize-none rounded-md px-3 py-2 text-sm"
-                    placeholder="Describe la respuesta detallada..."
-                ></textarea>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div>
-                    <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Orden</label>
-                    <input type="number" id="faq-order" value="0" min="0"
-                        class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none rounded-md px-3 py-2 text-sm"
-                    />
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest" style="margin-bottom: 0.5rem;">Estado</label>
-                    <select id="faq-active" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all outline-none rounded-md px-3 py-2 text-sm">
-                        <option value="true">Activa</option>
-                        <option value="false">Oculta</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end items-center relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
-            <p id="modal-error" class="text-rose-400 text-xs font-medium absolute left-6 hidden"></p>
-            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto">Eliminar</button>
-            <button type="button" id="btn-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
-            <button type="button" id="btn-submit" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-lg transition-all flex items-center gap-2" style="padding: 0.5rem 1.25rem;">
-                <span>Guardar</span>
-                <i data-lucide="check" class="w-4 h-4"></i>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
-        <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-            </div>
-            <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
-            <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
-        </div>
-        <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
-            <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
-            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
-        </div>
-    </div>
-</div>
-
-<!-- Toast Container -->
-<div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+<style>
+    .faq-field { display: grid; gap: .4rem; color: #d4d4d8; font-size: .75rem; font-weight: 600; }
+    .faq-field input, .faq-field textarea { width: 100%; padding: .6rem .7rem; color: #fff; background: #09090b; border: 1px solid #3f3f46; border-radius: 4px; }
+</style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const overlay = document.getElementById('modal-overlay')!;
-        const modalId = document.getElementById('faq-id') as HTMLInputElement;
-        const modalQuestion = document.getElementById('faq-question') as HTMLInputElement;
-        const modalAnswer = document.getElementById('faq-answer') as HTMLTextAreaElement;
-        const modalOrder = document.getElementById('faq-order') as HTMLInputElement;
-        const modalActive = document.getElementById('faq-active') as HTMLSelectElement;
-        const modalTitle = document.getElementById('modal-title')!;
-        const modalError = document.getElementById('modal-error')!;
-        const modalDeleteBtn = document.getElementById('modal-delete')!;
-        const btnAdd = document.getElementById('btn-add');
-        const btnCancel = document.getElementById('btn-cancel');
-        const btnClose = document.getElementById('modal-close');
-        const btnSubmit = document.getElementById('btn-submit');
-
-        function openModal(data: any = null) {
-            modalError.classList.add('hidden');
-            if (data) {
-                modalTitle.textContent = 'Editar pregunta';
-                modalId.value = data.id;
-                modalQuestion.value = data.question;
-                modalAnswer.value = data.answer;
-                modalOrder.value = data.order;
-                modalActive.value = data.active;
-                modalDeleteBtn.classList.remove('hidden');
-            } else {
-                modalTitle.textContent = 'Nueva pregunta';
-                modalId.value = '';
-                modalQuestion.value = '';
-                modalAnswer.value = '';
-                modalOrder.value = '0';
-                modalActive.value = 'true';
-                modalDeleteBtn.classList.add('hidden');
-            }
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal() {
-            overlay.classList.add('hidden');
-            overlay.classList.remove('flex');
-            document.body.style.overflow = '';
-        }
-
-        btnAdd?.addEventListener('click', () => openModal());
-        btnCancel?.addEventListener('click', closeModal);
-        btnClose?.addEventListener('click', closeModal);
-        // overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); }); // Disabled closing on click outside
-
-        document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const d = (btn as HTMLElement).dataset;
-                openModal({ ...d });
-            });
+    const toast = document.getElementById('faq-status')!;
+    function showStatus(message: string) { toast.textContent = message; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 2500); }
+    document.querySelectorAll<HTMLFormElement>('.faq-editor').forEach((form) => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const values = Object.fromEntries(new FormData(form));
+            const body = { ...values, id: form.dataset.id || undefined, service_id: form.dataset.serviceId, order: Number(values.order || 0), is_active: (form.elements.namedItem('is_active') as HTMLInputElement).checked };
+            const response = await fetch('/api/admin/faqs', { method: form.dataset.id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) return showStatus(result.error || 'No se pudo guardar.');
+            showStatus('FAQ guardada.'); setTimeout(() => window.location.reload(), 500);
         });
-
-        // ── DELETE CONFIRMATION LOGIC ───────────────────────
-        const confirmOverlay = document.getElementById('confirm-overlay')!;
-        const confirmYes = document.getElementById('confirm-yes')!;
-        const confirmCancel = document.getElementById('confirm-cancel')!;
-        let pendingDeleteId: string | null = null;
-
-        function openConfirm(id: string) {
-            pendingDeleteId = id;
-            confirmOverlay.classList.remove('hidden');
-            confirmOverlay.classList.add('flex');
-        }
-        function closeConfirm() {
-            pendingDeleteId = null;
-            confirmOverlay.classList.add('hidden');
-            confirmOverlay.classList.remove('flex');
-        }
-        confirmCancel.addEventListener('click', closeConfirm);
-        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
-
-        confirmYes.addEventListener('click', async () => {
-            if (!pendingDeleteId) return;
-            confirmYes.textContent = 'Eliminando...';
-            (confirmYes as HTMLButtonElement).disabled = true;
-            
-            try {
-                const res = await fetch('/api/admin/faqs', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: pendingDeleteId })
-                });
-                if (res.ok) {
-                    showToast('Pregunta eliminada correctamente', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    showToast('Error al eliminar', 'error');
-                    closeConfirm();
-                    confirmYes.textContent = 'Eliminar';
-                    (confirmYes as HTMLButtonElement).disabled = false;
-                }
-            } catch (err) {
-                showToast('Error de conexión', 'error');
-                closeConfirm();
-            }
+        form.querySelector<HTMLButtonElement>('.delete-faq')?.addEventListener('click', async () => {
+            if (!confirm('¿Eliminar esta pregunta?')) return;
+            const response = await fetch('/api/admin/faqs', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: form.dataset.id }) });
+            if (response.ok) form.remove(); else showStatus('No se pudo eliminar.');
         });
-
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openConfirm((btn as HTMLElement).dataset.id!);
-            });
-        });
-
-        modalDeleteBtn.addEventListener('click', () => {
-            const id = modalId.value;
-            if (id) {
-                closeModal();
-                openConfirm(id);
-            }
-        });
-
-        // ── TOAST LOGIC ────────────────────────────────────
-        function showToast(message: string, type: 'error' | 'success' = 'error') {
-            const container = document.getElementById('toast-container')!;
-            const toast = document.createElement('div');
-            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
-                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
-            }`;
-            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
-            toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center">
-                <i data-lucide="${type === 'success' ? 'check' : 'x'}" class="w-5 h-5"></i>
-            </div><span>${message}</span>`;
-            container.appendChild(toast);
-            // @ts-ignore
-            if (window.lucide) window.lucide.createIcons();
-            setTimeout(() => { 
-                toast.style.animation = 'toast-out 0.3s ease-in forwards'; 
-                setTimeout(() => toast.remove(), 300); 
-            }, 4000);
-        }
-
-        // ── SAVE LOGIC ─────────────────────────────────────
-        btnSubmit?.addEventListener('click', async () => {
-            const question = modalQuestion.value.trim();
-            const answer = modalAnswer.value.trim();
-            
-            if (!question || !answer) {
-                modalError.textContent = 'Pregunta y respuesta obligatorias';
-                modalError.classList.remove('hidden');
-                return;
-            }
-
-            const oHtml = btnSubmit.innerHTML;
-            btnSubmit.innerHTML = 'Guardando...';
-            btnSubmit.setAttribute('disabled', 'true');
-
-            const id = modalId.value;
-            const data = {
-                id: id || undefined,
-                question,
-                answer,
-                order: parseInt(modalOrder.value) || 0,
-                is_active: modalActive.value === 'true'
-            };
-
-            try {
-                const res = await fetch('/api/admin/faqs', {
-                    method: id ? 'PUT' : 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if (res.ok) {
-                    showToast(id ? 'Pregunta actualizada' : 'Pregunta creada', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    const err = await res.json();
-                    modalError.textContent = err.error || 'Error al guardar';
-                    modalError.classList.remove('hidden');
-                    btnSubmit.innerHTML = oHtml;
-                    btnSubmit.removeAttribute('disabled');
-                    // @ts-ignore
-                    if (window.lucide) window.lucide.createIcons();
-                }
-            } catch (err) {
-                modalError.textContent = 'Error de red';
-                modalError.classList.remove('hidden');
-                btnSubmit.innerHTML = oHtml;
-                btnSubmit.removeAttribute('disabled');
-            }
-        });
-
-        // ── FAQ TOGGLE LOGIC ──────────────────────────────
-        const faqToggle = document.getElementById('faq-toggle');
-        faqToggle?.addEventListener('click', async () => {
-            const currentlyEnabled = faqToggle.dataset.enabled === 'true';
-            const newState = !currentlyEnabled;
-            const dot = faqToggle.querySelector('span')!;
-
-            // Optimistic UI update
-            faqToggle.dataset.enabled = newState.toString();
-            if (newState) {
-                faqToggle.classList.remove('bg-zinc-700');
-                faqToggle.classList.add('bg-rose-600');
-                dot.classList.remove('translate-x-1');
-                dot.classList.add('translate-x-6');
-            } else {
-                faqToggle.classList.remove('bg-rose-600');
-                faqToggle.classList.add('bg-zinc-700');
-                dot.classList.remove('translate-x-6');
-                dot.classList.add('translate-x-1');
-            }
-
-            try {
-                const res = await fetch('/api/admin/settings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ faq_section_enabled: newState })
-                });
-                if (res.ok) {
-                    showToast(newState ? 'Sección FAQ activada' : 'Sección FAQ desactivada', 'success');
-                } else {
-                    // Revert on error
-                    faqToggle.dataset.enabled = currentlyEnabled.toString();
-                    if (currentlyEnabled) {
-                        faqToggle.classList.remove('bg-zinc-700');
-                        faqToggle.classList.add('bg-rose-600');
-                        dot.classList.remove('translate-x-1');
-                        dot.classList.add('translate-x-6');
-                    } else {
-                        faqToggle.classList.remove('bg-rose-600');
-                        faqToggle.classList.add('bg-zinc-700');
-                        dot.classList.remove('translate-x-6');
-                        dot.classList.add('translate-x-1');
-                    }
-                    showToast('Error al cambiar el estado', 'error');
-                }
-            } catch {
-                showToast('Error de conexión', 'error');
-            }
-        });
+    });
+    document.getElementById('faq-enabled')?.addEventListener('change', async (event) => {
+        const enabled = (event.target as HTMLInputElement).checked;
+        const response = await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ faq_section_enabled: enabled }) });
+        showStatus(response.ok ? 'Visibilidad actualizada.' : 'No se pudo actualizar.');
     });
 </script>

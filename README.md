@@ -1,43 +1,34 @@
-# Astro Starter Kit: Minimal
+# LaesePROD
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Web y panel de gestion para LaesePROD, una productora audiovisual centrada en bodas y videoclips.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Requisitos
 
-## 🚀 Project Structure
+- Node.js 20 o superior
+- Un proyecto nuevo de Supabase
+- Credenciales opcionales de Resend y Stripe para correo, contratos y pagos
 
-Inside of your Astro project, you'll see the following folders and files:
+## Puesta en marcha
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+1. Instala las dependencias con `npm install`.
+2. Copia las variables de `.env.example` a `.env` y completa las credenciales.
+3. Ejecuta una sola vez [`supabase/schema.sql`](supabase/schema.sql) en el SQL Editor de un proyecto vacio de Supabase.
+4. Crea el primer usuario desde Supabase Authentication y sigue [`supabase/README.md`](supabase/README.md) para concederle acceso de administrador.
+5. Arranca el entorno local con `npm run dev`.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+La web publica estara en `http://localhost:4321` y el panel en `http://localhost:4321/admin/login`.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Comandos
 
-Any static assets, like images, can be placed in the `public/` directory.
+| Comando | Uso |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Compilacion de produccion |
+| `npm run test -- --run` | Pruebas automatizadas |
+| `npm exec astro check` | Comprobacion de Astro y TypeScript |
 
-## 🧞 Commands
+## Contenido editable
 
-All commands are run from the root of the project, from a terminal:
+Desde el panel se gestionan proyectos, los dos servicios fijos, FAQs independientes por servicio, contacto y resumen del estudio, videos, SEO, footer, portal de clientes, contratos, cartas, chat y usuarios.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Los recursos actuales son provisionales. El logotipo definitivo, los videos y los textos pueden sustituirse desde el panel sin tocar el codigo.

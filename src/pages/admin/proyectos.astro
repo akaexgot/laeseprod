@@ -610,7 +610,7 @@ const projects = await getProjects();
                         if (featuredCount >= 3) {
                             showToast('Límite de 3 destacados alcanzado. Desmarca uno primero.', 'error');
                             btn.innerHTML = state ? '<i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>' : '<i data-lucide="star" class="w-4 h-4 text-zinc-600"></i>';
-                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            if (typeof (window as any).lucide !== 'undefined') (window as any).lucide.createIcons();
                             return;
                         }
                     }

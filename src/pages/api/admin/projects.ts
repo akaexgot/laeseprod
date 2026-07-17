@@ -38,6 +38,23 @@ function createSlug(title: string) {
         .replace(/(^-|-$)/g, '');
 }
 
+async function validateFeaturedLimit(sb: ReturnType<typeof getServiceSupabase>, projectId?: string) {
+    if (!sb) return null;
+
+    let query = sb
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('featured_home', true);
+
+    if (projectId) query = query.neq('id', projectId);
+
+    const { count, error } = await query;
+    if (error) return error.message;
+    if ((count || 0) >= 3) return 'Solo puedes tener 3 proyectos destacados. Desmarca uno primero.';
+
+    return null;
+}
+
 export const POST: APIRoute = async ({ request }) => {
     const sb = getServiceSupabase();
     if (!sb) return new Response(JSON.stringify({ error: 'DB not configured' }), { status: 500 });
@@ -48,6 +65,10 @@ export const POST: APIRoute = async ({ request }) => {
         // Auto-generate slug from title if not provided
         if (!payload.slug && typeof payload.title === 'string' && payload.title.trim()) {
             payload.slug = createSlug(payload.title);
+        }
+        if (payload.featured_home === true) {
+            const limitError = await validateFeaturedLimit(sb);
+            if (limitError) return new Response(JSON.stringify({ error: limitError }), { status: 400 });
         }
         const { data, error } = await sb.from('projects').insert(payload).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
@@ -70,6 +91,11 @@ export const PUT: APIRoute = async ({ request }) => {
 
         if (!updates.slug && typeof updates.title === 'string' && updates.title.trim()) {
             updates.slug = createSlug(updates.title);
+        }
+
+        if (updates.featured_home === true) {
+            const limitError = await validateFeaturedLimit(sb, id);
+            if (limitError) return new Response(JSON.stringify({ error: limitError }), { status: 400 });
         }
 
         if (Object.prototype.hasOwnProperty.call(updates, 'thumbnail') && updates.thumbnail === null) {

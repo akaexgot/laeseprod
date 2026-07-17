@@ -92,7 +92,7 @@ export const POST: APIRoute = async ({ request, url }) => {
                     price_data: {
                         currency: 'eur',
                         product_data: {
-                            name: `Pago: ${contract.contract_templates?.title || 'Contrato VideoMarketing Sevilla'}`,
+                            name: `Pago: ${contract.contract_templates?.title || 'Contrato LaesePROD'}`,
                             description: `Servicio: ${contract.admin_data?.SERVICIO || 'Producción Audiovisual'}`,
                         },
                         unit_amount: amountCents,

@@ -1,300 +1,424 @@
--- =====================================================
--- VIDEOMARKETING SEVILLA — Complete Supabase Schema
--- Run this in Supabase SQL Editor
--- =====================================================
+-- LaesePROD - instalacion completa de Supabase desde cero
+-- Ejecutar una sola vez en el SQL Editor de un proyecto Supabase nuevo.
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+BEGIN;
 
--- =====================================================
--- 1. SETTINGS (Global site configuration)
--- =====================================================
-CREATE TABLE IF NOT EXISTS settings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  site_name TEXT NOT NULL DEFAULT 'VideoMarketing Sevilla',
-  site_description TEXT,
-  logo_url TEXT,
-  primary_color TEXT DEFAULT '#9B1B30',
-  secondary_color TEXT DEFAULT '#C42847',
-  font_heading TEXT DEFAULT 'Outfit',
-  font_body TEXT DEFAULT 'Inter',
-  whatsapp_number TEXT,
-  phone TEXT,
-  email TEXT,
-  address TEXT,
-  instagram TEXT,
-  linkedin TEXT,
-  google_maps_embed TEXT,
-  hero_title TEXT DEFAULT 'Creamos historias que impulsan tu marca',
-  hero_subtitle TEXT DEFAULT 'Productora audiovisual especializada en video marketing para empresas',
-  hero_video_desktop TEXT,
-  hero_video_mobile TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- =====================================================
--- 2. NAVIGATION
--- =====================================================
-CREATE TABLE IF NOT EXISTS navigation (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  label TEXT NOT NULL,
-  href TEXT NOT NULL,
-  "order" INT NOT NULL DEFAULT 0,
-  is_visible BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_navigation_order ON navigation("order");
-
--- =====================================================
--- 3. PROJECTS
--- =====================================================
-CREATE TABLE IF NOT EXISTS projects (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title TEXT NOT NULL,
-  subtitle TEXT,
-  slug TEXT NOT NULL UNIQUE,
-  description TEXT,
-  video_project TEXT,
-  video_explanation_desktop TEXT,
-  video_explanation_mobile TEXT,
-  thumbnail TEXT,
-  client_name TEXT,
-  client_logo TEXT,
-  featured_home BOOLEAN DEFAULT FALSE,
-  "order" INT DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE UNIQUE INDEX idx_projects_slug ON projects(slug);
-CREATE INDEX idx_projects_featured ON projects(featured_home) WHERE featured_home = TRUE;
-CREATE INDEX idx_projects_order ON projects("order");
-
--- =====================================================
--- 4. SERVICES
--- =====================================================
-CREATE TABLE IF NOT EXISTS services (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title TEXT NOT NULL,
-  slug TEXT NOT NULL UNIQUE,
-  description TEXT,
-  icon TEXT DEFAULT '🎬',
-  video TEXT,
-  preview_seconds INT DEFAULT 3,
-  "order" INT DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE UNIQUE INDEX idx_services_slug ON services(slug);
-CREATE INDEX idx_services_order ON services("order");
-
--- =====================================================
--- 5. SECTORS
--- =====================================================
-CREATE TABLE IF NOT EXISTS sectors (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title TEXT NOT NULL,
-  slug TEXT NOT NULL UNIQUE,
-  description TEXT,
-  icon TEXT DEFAULT '🏢',
-  video TEXT,
-  "order" INT DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE UNIQUE INDEX idx_sectors_slug ON sectors(slug);
-CREATE INDEX idx_sectors_order ON sectors("order");
-
--- =====================================================
--- 6. COMPANIES (Logo carousel)
--- =====================================================
-CREATE TABLE IF NOT EXISTS companies (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  logo_url TEXT,
-  website TEXT,
-  "order" INT DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_companies_order ON companies("order");
-
--- =====================================================
--- 7. PORTAL CLIENTS
--- =====================================================
-CREATE TABLE IF NOT EXISTS portal_clients (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_name TEXT NOT NULL,
-  image TEXT,
-  dropbox_link TEXT,
-  password_hash TEXT NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE,
-  "order" INT DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_portal_clients_order ON portal_clients("order", created_at, id);
-
--- =====================================================
--- 8. CONTACTS (Form submissions)
--- =====================================================
-CREATE TABLE IF NOT EXISTS contacts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  phone TEXT,
-  company TEXT,
-  message TEXT NOT NULL,
-  is_read BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_contacts_created ON contacts(created_at DESC);
-CREATE INDEX idx_contacts_unread ON contacts(is_read) WHERE is_read = FALSE;
-
--- =====================================================
--- 9. PAGES SEO (Custom meta per page)
--- =====================================================
-CREATE TABLE IF NOT EXISTS pages_seo (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  page_path TEXT NOT NULL UNIQUE,
-  title TEXT,
-  description TEXT,
-  og_image TEXT,
-  canonical_url TEXT,
-  no_index BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE UNIQUE INDEX idx_pages_seo_path ON pages_seo(page_path);
-
--- =====================================================
--- 10. FOOTER
--- =====================================================
-CREATE TABLE IF NOT EXISTS footer (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  description TEXT,
-  copyright TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS footer_links (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  label TEXT NOT NULL,
-  href TEXT NOT NULL,
-  "order" INT DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- =====================================================
--- ROW LEVEL SECURITY (RLS)
--- =====================================================
-
--- Enable RLS on all tables
-ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE navigation ENABLE ROW LEVEL SECURITY;
-ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE services ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sectors ENABLE ROW LEVEL SECURITY;
-ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
-ALTER TABLE portal_clients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pages_seo ENABLE ROW LEVEL SECURITY;
-ALTER TABLE footer ENABLE ROW LEVEL SECURITY;
-ALTER TABLE footer_links ENABLE ROW LEVEL SECURITY;
-
--- Public read access for content tables
-CREATE POLICY "Public read settings" ON settings FOR SELECT USING (true);
-CREATE POLICY "Public read navigation" ON navigation FOR SELECT USING (true);
-CREATE POLICY "Public read projects" ON projects FOR SELECT USING (true);
-CREATE POLICY "Public read services" ON services FOR SELECT USING (true);
-CREATE POLICY "Public read sectors" ON sectors FOR SELECT USING (true);
-CREATE POLICY "Public read companies" ON companies FOR SELECT USING (true);
-CREATE POLICY "Public read pages_seo" ON pages_seo FOR SELECT USING (true);
-CREATE POLICY "Public read footer" ON footer FOR SELECT USING (true);
-CREATE POLICY "Public read footer_links" ON footer_links FOR SELECT USING (true);
-
--- Portal clients: only show active, hide password_hash
-CREATE POLICY "Public read portal_clients" ON portal_clients
-  FOR SELECT USING (is_active = true);
-
--- Contacts: public insert only
-CREATE POLICY "Public insert contacts" ON contacts
-  FOR INSERT WITH CHECK (true);
-
--- Admin policies (authenticated users can do everything)
-CREATE POLICY "Admin full access settings" ON settings FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access navigation" ON navigation FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access projects" ON projects FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access services" ON services FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access sectors" ON sectors FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access companies" ON companies FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access portal_clients" ON portal_clients FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access contacts" ON contacts FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access pages_seo" ON pages_seo FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access footer" ON footer FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full access footer_links" ON footer_links FOR ALL USING (auth.role() = 'authenticated');
-
--- =====================================================
--- UPDATED_AT TRIGGER
--- =====================================================
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.update_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
 BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
+  NEW.updated_at = now();
+    RETURN NEW;
+    END;
+    $$;
+
+    CREATE TABLE public.settings (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        site_name text NOT NULL DEFAULT 'LaesePROD',
+          site_description text NOT NULL DEFAULT 'Productora audiovisual especializada en bodas y videoclips.',
+            logo_url text,
+              primary_color text NOT NULL DEFAULT '#000000',
+                secondary_color text NOT NULL DEFAULT '#FFFFFF',
+                  font_heading text NOT NULL DEFAULT 'Impact',
+                    font_body text NOT NULL DEFAULT 'Arial',
+                      whatsapp_number text,
+                        phone text,
+                          email text,
+                            address text,
+                              instagram text,
+                                linkedin text,
+                                  google_maps_embed text,
+                                    hero_video_desktop text,
+                                      hero_video_mobile text,
+                                        contact_hero_video text,
+                                          about_summary text,
+                                            contract_terms_text text NOT NULL DEFAULT 'Al continuar, aceptas la política de privacidad y los términos de servicio de LaesePROD.',
+                                              faq_section_enabled boolean NOT NULL DEFAULT true,
+                                                created_at timestamptz NOT NULL DEFAULT now(),
+                                                  updated_at timestamptz NOT NULL DEFAULT now()
+                                                  );
+
+                                                  CREATE TABLE public.navigation (
+                                                    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                      label text NOT NULL,
+                                                        href text NOT NULL UNIQUE,
+                                                          "order" integer NOT NULL DEFAULT 0,
+                                                            is_visible boolean NOT NULL DEFAULT true,
+                                                              created_at timestamptz NOT NULL DEFAULT now()
+                                                              );
+
+                                                              CREATE TABLE public.projects (
+                                                                id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                  title text NOT NULL,
+                                                                    subtitle text,
+                                                                      slug text NOT NULL UNIQUE,
+                                                                        description text,
+                                                                          video_project text,
+                                                                            video_explanation_desktop text,
+                                                                              video_explanation_mobile text,
+                                                                                thumbnail text,
+                                                                                  client_name text,
+                                                                                    client_logo text,
+                                                                                      featured_home boolean NOT NULL DEFAULT false,
+                                                                                        "order" integer NOT NULL DEFAULT 0,
+                                                                                          created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                            updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                            );
+
+                                                                                            CREATE TABLE public.services (
+                                                                                              id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                title text NOT NULL,
+                                                                                                  slug text NOT NULL UNIQUE CHECK (slug IN ('bodas', 'videoclips')),
+                                                                                                    description text,
+                                                                                                      video text,
+                                                                                                        video_vertical text,
+                                                                                                          preview_seconds integer NOT NULL DEFAULT 3 CHECK (preview_seconds >= 0),
+                                                                                                            "order" integer NOT NULL DEFAULT 0,
+                                                                                                              created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                );
+
+                                                                                                                CREATE TABLE public.faqs (
+                                                                                                                  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                    service_id uuid NOT NULL REFERENCES public.services(id) ON DELETE CASCADE,
+                                                                                                                      question text NOT NULL,
+                                                                                                                        answer text NOT NULL,
+                                                                                                                          "order" integer NOT NULL DEFAULT 0,
+                                                                                                                            is_active boolean NOT NULL DEFAULT true,
+                                                                                                                              created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                );
+
+                                                                                                                                CREATE TABLE public.contacts (
+                                                                                                                                  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                    name text NOT NULL,
+                                                                                                                                      phone text NOT NULL,
+                                                                                                                                        email text NOT NULL,
+                                                                                                                                          idea text,
+                                                                                                                                            status text NOT NULL DEFAULT 'nuevo' CHECK (status IN ('nuevo', 'leido')),
+                                                                                                                                              created_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                              );
+
+                                                                                                                                              CREATE TABLE public.pages_seo (
+                                                                                                                                                id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                  page_path text NOT NULL UNIQUE,
+                                                                                                                                                    title text,
+                                                                                                                                                      description text,
+                                                                                                                                                        og_image text,
+                                                                                                                                                          canonical_url text,
+                                                                                                                                                            no_index boolean NOT NULL DEFAULT false,
+                                                                                                                                                              created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                );
+
+                                                                                                                                                                CREATE TABLE public.footer (
+                                                                                                                                                                  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                    description text,
+                                                                                                                                                                      copyright text,
+                                                                                                                                                                        created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                          updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                          );
+
+                                                                                                                                                                          CREATE TABLE public.portal_clients (
+                                                                                                                                                                            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                              client_name text NOT NULL,
+                                                                                                                                                                                image text,
+                                                                                                                                                                                  image_type text NOT NULL DEFAULT 'logo' CHECK (image_type IN ('logo', 'image')),
+                                                                                                                                                                                    dropbox_link text,
+                                                                                                                                                                                      password_hash text NOT NULL,
+                                                                                                                                                                                        is_active boolean NOT NULL DEFAULT true,
+                                                                                                                                                                                          "order" integer NOT NULL DEFAULT 0,
+                                                                                                                                                                                            created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                                              updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                              );
+
+                                                                                                                                                                                              CREATE VIEW public.portal_clients_public AS
+                                                                                                                                                                                              SELECT id, client_name, image, image_type, is_active, "order", created_at
+                                                                                                                                                                                              FROM public.portal_clients
+                                                                                                                                                                                              WHERE is_active = true;
+
+                                                                                                                                                                                              CREATE TABLE public.profiles (
+                                                                                                                                                                                                id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+                                                                                                                                                                                                  email text NOT NULL,
+                                                                                                                                                                                                    is_admin boolean NOT NULL DEFAULT false,
+                                                                                                                                                                                                      permissions text[] NOT NULL DEFAULT '{}',
+                                                                                                                                                                                                        created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                                                          updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                          );
+
+                                                                                                                                                                                                          CREATE OR REPLACE FUNCTION public.handle_new_user()
+                                                                                                                                                                                                          RETURNS trigger
+                                                                                                                                                                                                          LANGUAGE plpgsql
+                                                                                                                                                                                                          SECURITY DEFINER
+                                                                                                                                                                                                          SET search_path = public
+                                                                                                                                                                                                          AS $$
+                                                                                                                                                                                                          BEGIN
+                                                                                                                                                                                                            INSERT INTO public.profiles (id, email)
+                                                                                                                                                                                                              VALUES (NEW.id, COALESCE(NEW.email, ''))
+                                                                                                                                                                                                                ON CONFLICT (id) DO NOTHING;
+                                                                                                                                                                                                                  RETURN NEW;
+                                                                                                                                                                                                                  END;
+                                                                                                                                                                                                                  $$;
+
+                                                                                                                                                                                                                  CREATE TRIGGER on_auth_user_created
+                                                                                                                                                                                                                  AFTER INSERT ON auth.users
+                                                                                                                                                                                                                  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+                                                                                                                                                                                                                  CREATE TABLE public.contract_templates (
+                                                                                                                                                                                                                    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                                                                      title text NOT NULL,
+                                                                                                                                                                                                                        content text NOT NULL,
+                                                                                                                                                                                                                          admin_fields text[] NOT NULL DEFAULT '{}',
+                                                                                                                                                                                                                            client_fields text[] NOT NULL DEFAULT '{}',
+                                                                                                                                                                                                                              created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                                                                                updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                                                );
+
+                                                                                                                                                                                                                                CREATE TABLE public.contracts (
+                                                                                                                                                                                                                                  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                                                                                    template_id uuid REFERENCES public.contract_templates(id) ON DELETE SET NULL,
+                                                                                                                                                                                                                                      status text NOT NULL DEFAULT 'pending_client' CHECK (status IN ('pending_client', 'pending_payment', 'paid', 'completed')),
+                                                                                                                                                                                                                                        total_amount numeric(10,2) NOT NULL DEFAULT 0,
+                                                                                                                                                                                                                                          amount_to_pay numeric(10,2) NOT NULL DEFAULT 0,
+                                                                                                                                                                                                                                            admin_data jsonb NOT NULL DEFAULT '{}',
+                                                                                                                                                                                                                                              client_data jsonb NOT NULL DEFAULT '{}',
+                                                                                                                                                                                                                                                client_email text,
+                                                                                                                                                                                                                                                  client_phone text,
+                                                                                                                                                                                                                                                    signature_svg text,
+                                                                                                                                                                                                                                                      payment_id text,
+                                                                                                                                                                                                                                                        stripe_customer_id text,
+                                                                                                                                                                                                                                                          payment_intent_id text,
+                                                                                                                                                                                                                                                            payment_status text NOT NULL DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'pending', 'processing', 'paid', 'failed', 'expired')),
+                                                                                                                                                                                                                                                              payment_method text,
+                                                                                                                                                                                                                                                                paid_at timestamptz,
+                                                                                                                                                                                                                                                                  is_billable boolean NOT NULL DEFAULT false,
+                                                                                                                                                                                                                                                                    billable_amount numeric(10,2) NOT NULL DEFAULT 0,
+                                                                                                                                                                                                                                                                      pdf_url text,
+                                                                                                                                                                                                                                                                        invoice_number integer UNIQUE,
+                                                                                                                                                                                                                                                                          invoice_url text,
+                                                                                                                                                                                                                                                                            invoice_issued_at timestamptz,
+                                                                                                                                                                                                                                                                              created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                                                                                                                                updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                                                                                                );
+
+                                                                                                                                                                                                                                                                                CREATE TABLE public.chat_conversations (
+                                                                                                                                                                                                                                                                                  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                                                                                                                                    visitor_id text NOT NULL,
+                                                                                                                                                                                                                                                                                      visitor_name text NOT NULL DEFAULT 'Visitante',
+                                                                                                                                                                                                                                                                                        status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'closed')),
+                                                                                                                                                                                                                                                                                          created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                                                                                                                                            updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                                                                                                            );
+
+                                                                                                                                                                                                                                                                                            CREATE TABLE public.chat_messages (
+                                                                                                                                                                                                                                                                                              id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                                                                                                                                                conversation_id uuid NOT NULL REFERENCES public.chat_conversations(id) ON DELETE CASCADE,
+                                                                                                                                                                                                                                                                                                  sender_type text NOT NULL CHECK (sender_type IN ('visitor', 'admin')),
+                                                                                                                                                                                                                                                                                                    message text NOT NULL CHECK (char_length(message) <= 1000),
+                                                                                                                                                                                                                                                                                                      created_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                                                                                                                      );
+
+                                                                                                                                                                                                                                                                                                      CREATE TABLE public.cartas (
+                                                                                                                                                                                                                                                                                                        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                                                                                                                                                          nombre text NOT NULL,
+                                                                                                                                                                                                                                                                                                            slug text NOT NULL UNIQUE,
+                                                                                                                                                                                                                                                                                                              tipo text NOT NULL CHECK (tipo IN ('imagenes', 'pdf', 'manual')),
+                                                                                                                                                                                                                                                                                                                video_url text,
+                                                                                                                                                                                                                                                                                                                  created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                                                                                                                                                                    updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                                                                                                                                    );
+
+                                                                                                                                                                                                                                                                                                                    CREATE TABLE public.carta_imagenes (
+                                                                                                                                                                                                                                                                                                                      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                                                                                                                                                                        carta_id uuid NOT NULL REFERENCES public.cartas(id) ON DELETE CASCADE,
+                                                                                                                                                                                                                                                                                                                          url text NOT NULL,
+                                                                                                                                                                                                                                                                                                                            orden integer NOT NULL DEFAULT 0,
+                                                                                                                                                                                                                                                                                                                              created_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                                                                                                                                              );
+
+                                                                                                                                                                                                                                                                                                                              CREATE TABLE public.carta_bloques (
+                                                                                                                                                                                                                                                                                                                                id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                                                                                                                                                                                  carta_id uuid NOT NULL REFERENCES public.cartas(id) ON DELETE CASCADE,
+                                                                                                                                                                                                                                                                                                                                    titulo text NOT NULL,
+                                                                                                                                                                                                                                                                                                                                      orden integer NOT NULL DEFAULT 0,
+                                                                                                                                                                                                                                                                                                                                        visible boolean NOT NULL DEFAULT true,
+                                                                                                                                                                                                                                                                                                                                          created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                                                                                                                                                                                            updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                                                                                                                                                            );
+
+                                                                                                                                                                                                                                                                                                                                            CREATE TABLE public.carta_servicios (
+                                                                                                                                                                                                                                                                                                                                              id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                                                                                                                                                                                                                                                                                                                                                bloque_id uuid NOT NULL REFERENCES public.carta_bloques(id) ON DELETE CASCADE,
+                                                                                                                                                                                                                                                                                                                                                  nombre text NOT NULL,
+                                                                                                                                                                                                                                                                                                                                                    precio text,
+                                                                                                                                                                                                                                                                                                                                                      descripcion text,
+                                                                                                                                                                                                                                                                                                                                                        orden integer NOT NULL DEFAULT 0,
+                                                                                                                                                                                                                                                                                                                                                          created_at timestamptz NOT NULL DEFAULT now(),
+                                                                                                                                                                                                                                                                                                                                                            updated_at timestamptz NOT NULL DEFAULT now()
+                                                                                                                                                                                                                                                                                                                                                            );
+
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_navigation_order ON public.navigation("order");
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_projects_order ON public.projects("order");
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_services_order ON public.services("order");
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_faqs_service_order ON public.faqs(service_id, "order");
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_contacts_created ON public.contacts(created_at DESC);
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_portal_clients_order ON public.portal_clients("order", created_at, id);
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_contracts_payment_status ON public.contracts(payment_status);
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_contracts_payment_intent ON public.contracts(payment_intent_id);
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_chat_conversations_visitor ON public.chat_conversations(visitor_id, status);
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_chat_messages_conversation ON public.chat_messages(conversation_id, created_at);
+                                                                                            CREATE INDEX idx_carta_imagenes_order ON public.carta_imagenes(carta_id, orden);
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_carta_bloques_order ON public.carta_bloques(carta_id, orden);
+                                                                                                                                                                                                                                                                                                                                                            CREATE INDEX idx_carta_servicios_order ON public.carta_servicios(bloque_id, orden);
+
+                                                                                                                                                                                                                                                                                                                                                            CREATE OR REPLACE FUNCTION public.limit_featured_projects()
+                                                                                                                                                                                                                                                                                                                                                            RETURNS trigger
+                                                                                                                                                                                                                                                                                                                                                            LANGUAGE plpgsql
+                                                                                                                                                                                                                                                                                                                                                            AS $$
+                                                                                                                                                                                                                                                                                                                                                            BEGIN
+                                                                                                                                                                                                                                                                                                                                                              IF NEW.featured_home = true AND (
+                                                                                                                                                                                                                                                                                                                                                                SELECT count(*)
+                                                                                                                                                                                                                                                                                                                                                                FROM public.projects
+                                                                                                                                                                                                                                                                                                                                                                WHERE featured_home = true
+                                                                                                                                                                                                                                                                                                                                                                  AND id IS DISTINCT FROM NEW.id
+                                                                                                                                                                                                                                                                                                                                                              ) >= 3 THEN
+                                                                                                                                                                                                                                                                                                                                                                RAISE EXCEPTION 'Solo se pueden marcar 3 proyectos destacados.';
+                                                                                                                                                                                                                                                                                                                                                              END IF;
+                                                                                                                                                                                                                                                                                                                                                              RETURN NEW;
+                                                                                                                                                                                                                                                                                                                                                            END;
+                                                                                                                                                                                                                                                                                                                                                            $$;
+
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER projects_limit_featured
+                                                                                                                                                                                                                                                                                                                                                            BEFORE INSERT OR UPDATE OF featured_home ON public.projects
+                                                                                                                                                                                                                                                                                                                                                            FOR EACH ROW EXECUTE FUNCTION public.limit_featured_projects();
+
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER settings_updated_at BEFORE UPDATE ON public.settings FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER projects_updated_at BEFORE UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER services_updated_at BEFORE UPDATE ON public.services FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER faqs_updated_at BEFORE UPDATE ON public.faqs FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER pages_seo_updated_at BEFORE UPDATE ON public.pages_seo FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER footer_updated_at BEFORE UPDATE ON public.footer FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER portal_clients_updated_at BEFORE UPDATE ON public.portal_clients FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER contract_templates_updated_at BEFORE UPDATE ON public.contract_templates FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER contracts_updated_at BEFORE UPDATE ON public.contracts FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER chat_conversations_updated_at BEFORE UPDATE ON public.chat_conversations FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER cartas_updated_at BEFORE UPDATE ON public.cartas FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER carta_bloques_updated_at BEFORE UPDATE ON public.carta_bloques FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                            CREATE TRIGGER carta_servicios_updated_at BEFORE UPDATE ON public.carta_servicios FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.navigation ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.faqs ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.contacts ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.pages_seo ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.footer ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.portal_clients ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.contract_templates ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.chat_conversations ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.cartas ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.carta_imagenes ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.carta_bloques ENABLE ROW LEVEL SECURITY;
+                                                                                                                                                                                                                                                                                                                                                            ALTER TABLE public.carta_servicios ENABLE ROW LEVEL SECURITY;
+
+                                                                                                                                                                                                                                                                                                                                                            CREATE POLICY public_read_settings ON public.settings FOR SELECT TO anon, authenticated USING (true);
+                                                                                                                                                                                                                                                                                                                                                            CREATE POLICY public_read_navigation ON public.navigation FOR SELECT TO anon, authenticated USING (is_visible = true);
+                                                                                                                                                                                                                                                                                                                                                            CREATE POLICY public_read_projects ON public.projects FOR SELECT TO anon, authenticated USING (true);
+                                                                                                                                                                                                                                                                                                                                                            CREATE POLICY public_read_services ON public.services FOR SELECT TO anon, authenticated USING (true);
+                                                                                                                                                                                                                                                                                                                                                            CREATE POLICY public_read_faqs ON public.faqs FOR SELECT TO anon, authenticated USING (is_active = true);
+                                                                                                                                                                                                                                                                                                                                                            CREATE POLICY public_read_pages_seo ON public.pages_seo FOR SELECT TO anon, authenticated USING (true);
+                                                                                                                                                                                                                                                                                                                                                            CREATE POLICY public_read_footer ON public.footer FOR SELECT TO anon, authenticated USING (true);
+                                                                                                                                                                                                                                                                                                                                                            CREATE POLICY profile_read_own ON public.profiles FOR SELECT TO authenticated USING (id = auth.uid());
+
+                                                                                                                                                                                                                                                                                                                                                            GRANT SELECT ON public.settings, public.navigation, public.projects, public.services,
+                                                                                                                                                                                                                                                                                                                                                              public.faqs, public.pages_seo, public.footer TO anon, authenticated;
+
+                                                                                                                                                                                                                                                                                                                                                              REVOKE ALL ON public.portal_clients FROM anon, authenticated;
+                                                                                                                                                                                                                                                                                                                                                              GRANT SELECT ON public.portal_clients_public TO anon, authenticated;
+
+DO $$
+BEGIN
+  IF to_regclass('storage.buckets') IS NOT NULL THEN
+    EXECUTE $storage$
+      INSERT INTO storage.buckets (id, name, public)
+      VALUES ('contracts', 'contracts', true)
+      ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public
+    $storage$;
+  ELSE
+    RAISE NOTICE 'storage.buckets no existe; crea el bucket "contracts" manualmente si usas Supabase Storage.';
+  END IF;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
-CREATE TRIGGER settings_updated_at BEFORE UPDATE ON settings FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER services_updated_at BEFORE UPDATE ON services FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER sectors_updated_at BEFORE UPDATE ON sectors FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER portal_clients_updated_at BEFORE UPDATE ON portal_clients FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER pages_seo_updated_at BEFORE UPDATE ON pages_seo FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER footer_updated_at BEFORE UPDATE ON footer FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+                                                                                                                                                                                                                                                                                                                                                              DO $$
+                                                                                                                                                                                                                                                                                                                                                              BEGIN
+                                                                                                                                                                                                                                                                                                                                                                IF NOT EXISTS (
+                                                                                                                                                                                                                                                                                                                                                                    SELECT 1 FROM pg_publication_tables
+                                                                                                                                                                                                                                                                                                                                                                        WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'chat_messages'
+                                                                                                                                                                                                                                                                                                                                                                          ) THEN
+                                                                                                                                                                                                                                                                                                                                                                              ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_messages;
+                                                                                                                                                                                                                                                                                                                                                                                END IF;
+                                                                                                                                                                                                                                                                                                                                                                                END;
+                                                                                                                                                                                                                                                                                                                                                                                $$;
 
--- =====================================================
--- SEED DATA
--- =====================================================
+                                                                                                                                                                                                                                                                                                                                                                                INSERT INTO public.settings (
+                                                                                                                                                                                                                                                                                                                                                                                  site_name, site_description, primary_color, secondary_color, font_heading, font_body,
+                                                                                                                                                                                                                                                                                                                                                                                    email, phone, whatsapp_number, address, hero_video_desktop, contact_hero_video, about_summary
+                                                                                                                                                                                                                                                                                                                                                                                    ) VALUES (
+                                                                                                                                                                                                                                                                                                                                                                                      'LaesePROD',
+                                                                                                                                                                                                                                                                                                                                                                                        'Productora audiovisual especializada en bodas y videoclips.',
+                                                                                                                                                                                                                                                                                                                                                                                          '#000000', '#FFFFFF', 'Impact', 'Arial',
+                                                                                                                                                                                                                                                                                                                                                                                            'laeseprod@gmail.com', '+34 600 000 000', '34600000000', 'Sevilla, España',
+                                                                                                                                                                                                                                                                                                                                                                                              'https://www.youtube.com/watch?v=D91q99QK11k',
+                                                                                                                                                                                                                                                                                                                                                                                                'https://www.youtube.com/watch?v=D91q99QK11k',
+                                                                                                                                                                                                                                                                                                                                                                                                  'Somos una productora audiovisual centrada en bodas y videoclips. Trabajamos cada proyecto de forma cercana, ágil y con una mirada cinematográfica.'
+                                                                                                                                                                                                                                                                                                                                                                                                  );
 
--- Insert default settings
-INSERT INTO settings (site_name, site_description, email, phone, whatsapp_number, address, hero_title, hero_subtitle)
-VALUES (
-  'VideoMarketing Sevilla',
-  'Productora audiovisual especializada en video marketing para empresas en Sevilla, Cádiz y toda España.',
-  'info@videomarketingsevilla.es',
-  '+34 600 000 000',
-  '34600000000',
-  'Sevilla, España',
-  'Creamos historias que impulsan tu marca',
-  'Productora audiovisual especializada en video marketing para empresas'
-);
+                                                                                                                                                                                                                                                                                                                                                                                                  INSERT INTO public.navigation (label, href, "order") VALUES
+                                                                                                                                                                                                                                                                                                                                                                                                    ('Inicio', '/', 1),
+                                                                                                                                                                                                                                                                                                                                                                                                      ('Proyectos', '/proyectos', 2),
+                                                                                                                                                                                                                                                                                                                                                                                                        ('Servicios', '/servicios', 3),
+                                                                                                                                                                                                                                                                                                                                                                                                          ('Contacto', '/contacto', 4);
 
--- Insert navigation
-INSERT INTO navigation (label, href, "order") VALUES
-  ('Inicio', '/', 1),
-  ('Proyectos', '/proyectos', 2),
-  ('Servicios', '/servicios', 3),
-  ('Sectores', '/sectores', 4),
-  ('Quiénes Somos', '/quienes-somos', 5),
-  ('Contacto', '/contacto', 6);
+                                                                                                                                                                                                                                                                                                                                                                                                          INSERT INTO public.services (id, title, slug, description, video, "order") VALUES
+                                                                                                                                                                                                                                                                                                                                                                                                            ('11111111-1111-4111-8111-111111111111', 'Bodas', 'bodas', 'Películas de boda naturales, cuidadas y hechas para volver a sentir cada momento.', 'https://www.youtube.com/watch?v=D91q99QK11k', 1),
+                                                                                                                                                                                                                                                                                                                                                                                                              ('22222222-2222-4222-8222-222222222222', 'Videoclips', 'videoclips', 'Piezas visuales para artistas que convierten una canción en una imagen con identidad propia.', 'https://www.youtube.com/watch?v=D91q99QK11k', 2);
 
--- Insert footer
-INSERT INTO footer (description, copyright)
-VALUES (
-  'Productora audiovisual especializada en video marketing para empresas. Creamos contenido que impulsa marcas.',
-  '© 2024 VideoMarketing Sevilla. Todos los derechos reservados.'
-);
+                                                                                                                                                                                                                                                                                                                                                                                                              INSERT INTO public.faqs (service_id, question, answer, "order") VALUES
+                                                                                                                                                                                                                                                                                                                                                                                                                ('11111111-1111-4111-8111-111111111111', '¿Con cuánta antelación deberíamos reservar?', 'Lo ideal es consultar la disponibilidad cuanto antes, especialmente para fechas de temporada alta.', 1),
+                                                                                                                                                                                                                                                                                                                                                                                                                  ('22222222-2222-4222-8222-222222222222', '¿Podéis desarrollar la idea creativa?', 'Sí. Podemos partir de una idea cerrada o construir el concepto visual junto al artista.', 1);
 
-INSERT INTO footer_links (label, href, "order") VALUES
-  ('Política de Privacidad', '/privacidad', 1),
-  ('Aviso Legal', '/aviso-legal', 2),
-  ('Cookies', '/cookies', 3);
+                                                                                                                                                                                                                                                                                                                                                                                                                  INSERT INTO public.projects (title, slug, description, video_project, featured_home, "order") VALUES
+                                                                                                                                                                                                                                                                                                                                                                                                                    ('Proyecto provisional 01', 'proyecto-01', 'Contenido provisional editable desde el panel.', 'https://www.youtube.com/watch?v=D91q99QK11k', true, 1),
+                                                                                                                                                                                                                                                                                                                                                                                                                      ('Proyecto provisional 02', 'proyecto-02', 'Contenido provisional editable desde el panel.', 'https://www.youtube.com/watch?v=D91q99QK11k', true, 2),
+                                                                                                                                                                                                                                                                                                                                                                                                                        ('Proyecto provisional 03', 'proyecto-03', 'Contenido provisional editable desde el panel.', 'https://www.youtube.com/watch?v=D91q99QK11k', true, 3);
+
+                                                                                                                                                                                                                                                                                                                                                                                                                      INSERT INTO public.footer (description, copyright) VALUES
+                                                                                                                                                                                                                                                                                                                                                                                                                        ('Bodas y videoclips con una mirada propia.', '© 2026 LaesePROD. Todos los derechos reservados.');
+
+                                                                                                                                                                                                                                                                                                                                                                                                                        INSERT INTO public.pages_seo (page_path, title, description) VALUES
+                                                                                                                                                                                                                                                                                                                                                                                                                          ('/', 'LaesePROD | Bodas y videoclips', 'Productora audiovisual especializada en bodas y videoclips.'),
+                                                                                                                                                                                                                                                                                                                                                                                                                            ('/proyectos', 'Proyectos | LaesePROD', 'Portfolio audiovisual de LaesePROD.'),
+                                                                                                                                                                                                                                                                                                                                                                                                                              ('/servicios', 'Bodas y videoclips | LaesePROD', 'Servicios audiovisuales de LaesePROD.'),
+                                                                                                                                                                                                                                                                                                                                                                                                                                ('/contacto', 'Contacto | LaesePROD', 'Cuéntanos tu idea y empezamos a darle forma.'),
+                                                                                                                                                                                                                                                                                                                                                                                                                                  ('/privacidad', 'Privacidad | LaesePROD', 'Política de privacidad de LaesePROD.'),
+                                                                                                                                                                                                                                                                                                                                                                                                                                    ('/aviso-legal', 'Aviso legal | LaesePROD', 'Aviso legal de LaesePROD.'),
+                                                                                                                                                                                                                                                                                                                                                                                                                                      ('/cookies', 'Cookies | LaesePROD', 'Política de cookies de LaesePROD.');
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                      INSERT INTO public.contract_templates (title, content, admin_fields, client_fields) VALUES (
+                                                                                                                                                                                                                                                                                                                                                                                                                                        'Contrato de Producción Audiovisual',
+                                                                                                                                                                                                                                                                                                                                                                                                                                          '<p>Este contrato establece que <strong>LaesePROD</strong> prestará el servicio de <strong>{{SERVICIO}}</strong> a favor de <strong>{{CLIENTE_NOMBRE_FISCAL}}</strong>.</p><p>El precio total acordado es de <strong>{{PRECIO_TOTAL}}€</strong>. El pago inicial es de <strong>{{PAGO_INICIAL}}€</strong>.</p><ul><li>NIF/CIF: {{CLIENTE_CIF}}</li><li>Dirección: {{CLIENTE_DIRECCION}}</li></ul>',
+                                                                                                                                                                                                                                                                                                                                                                                                                                            ARRAY['SERVICIO', 'PRECIO_TOTAL', 'PAGO_INICIAL'],
+                                                                                                                                                                                                                                                                                                                                                                                                                                              ARRAY['CLIENTE_NOMBRE_FISCAL', 'CLIENTE_CIF', 'CLIENTE_DIRECCION']
+                                                                                                                                                                                                                                                                                                                                                                                                                                              );
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                              COMMIT;
+                                                                                                                                                                                                                                                                                                                                                                                                                                              

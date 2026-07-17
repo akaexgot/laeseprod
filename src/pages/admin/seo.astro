@@ -26,12 +26,8 @@ const pageDefinitions: PageDefinition[] = [
     { path: "/", name: "Home", group: "Principal" },
     { path: "/proyectos", name: "Proyectos", group: "Contenido" },
     { path: "/servicios", name: "Servicios", group: "Contenido" },
-    { path: "/sectores", name: "Sectores", group: "Contenido" },
-    { path: "/quienes-somos", name: "Quienes Somos", group: "Empresa" },
     { path: "/contacto", name: "Contacto", group: "Conversion" },
-    { path: "/privacidad", name: "Privacidad", group: "Legal" },
-    { path: "/aviso-legal", name: "Aviso Legal", group: "Legal" },
-    { path: "/cookies", name: "Cookies", group: "Legal" },
+    { path: "/legal", name: "Legal", group: "Legal" },
 ];
 
 const { data: seoRows = [] } = serviceSupabase
@@ -202,7 +198,7 @@ function fieldState(value: string) {
 
                         <label class="seo-field">
                             <span>Titulo SEO</span>
-                            <input name="title" type="text" value={seo?.title || ""} placeholder={`${page.name} | VideoMarketing Sevilla`} />
+                            <input name="title" type="text" value={seo?.title || ""} placeholder={`${page.name} | LaesePROD`} />
                         </label>
 
                         <label class="seo-field">
@@ -218,7 +214,7 @@ function fieldState(value: string) {
 
                             <label class="seo-field">
                                 <span>Canonical</span>
-                                <input name="canonical_url" type="url" value={seo?.canonical_url || ""} placeholder={`https://videomarketingsevilla.com${page.path === "/" ? "" : page.path}`} />
+                                <input name="canonical_url" type="url" value={seo?.canonical_url || ""} placeholder={`https://laeseprod.com${page.path === "/" ? "" : page.path}`} />
                             </label>
                         </div>
 

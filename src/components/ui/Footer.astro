@@ -1,411 +1,312 @@
 ---
-/**
- * Footer — Premium Split-Screen with Elegant Right Grid
- */
-import {
-    getNavigation,
-    getServices,
-    getSettings,
-    getFooterData,
-} from "../../lib/data";
+import { getFooterData, getNavigation, getServices, getSettings } from "../../lib/data";
+const [footer, navigation, services, settings] = await Promise.all([
+    getFooterData(), getNavigation(), getServices(), getSettings(),
+]);
 
-const navigation = await getNavigation();
-const services = await getServices();
-const settings = await getSettings();
-const footerData = await getFooterData();
+const visibleNavigation = navigation.filter((item: any) => item.is_visible !== false);
 ---
 
-<section id="site-footer" class="footer-screen">
-    <div class="f-split">
-        
-        <!-- ═══════════════════════════════════════════════════════
-             LEFT HALF: Pure Brand Experience
-             ═══════════════════════════════════════════════════════ -->
-        <div class="f-left group">
-            <div class="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-            
-            <div class="f-brand-seal relative z-10 transition-transform duration-1000 group-hover:scale-105">
-                <div class="f-spin-ring">
-                    <svg viewBox="0 0 200 200" class="f-spin-svg">
-                        <defs>
-                            <path id="textCircle" d="M 100, 100 m -75, 0 a 75,75 0 1,1 150,0 a 75,75 0 1,1 -150,0" />
-                        </defs>
-                        <text class="f-spin-text" textLength="430" lengthAdjust="spacing">
-                            <textPath href="#textCircle" startOffset="0%">
-                                PRODUCTORA AUDIOVISUAL • 
-                            </textPath>
-                        </text>
-                    </svg>
-                </div>
-                <div class="f-logo-center">
-                    <img src="/logo-oscuro-web.png" alt="VideoMarketing Sevilla" width="162" height="59" class="w-full h-auto object-contain" />
-                </div>
-            </div>
+<footer class="site-footer site-footer--cinema">
+    <div class="site-footer__stage">
+        <p class="site-footer__kicker">LaesePROD</p>
+        <a class="site-footer__wordmark" href="/" aria-label={`${settings.site_name || "LaesePROD"}, inicio`}>
+            <img src="/palabralogotipo-white.png?v=20260717-1" alt={settings.site_name || "LaesePROD"} width="1030" height="173" />
+        </a>
+        <p class="site-footer__claim">{footer.description || settings.site_description}</p>
+        <div class="site-footer__cta">
+            <a href="/contacto">Empezar proyecto</a>
+            <button class="js-open-chat" type="button">Chat en vivo</button>
         </div>
-
-        <!-- DIVIDER -->
-        <div class="hidden lg:block w-px bg-black/8"></div>
-        <div class="block lg:hidden h-px w-full bg-black/8"></div>
-
-        <!-- ═══════════════════════════════════════════════════════
-             RIGHT HALF: Elegant Navigation & Info
-             ═══════════════════════════════════════════════════════ -->
-        <div class="f-right">
-            <div class="f-right-inner">
-                
-                <!-- Top Section: Pages as elegant stacked rows -->
-                <div class="f-nav-section">
-                    <p class="f-section-label">Explora</p>
-                    <nav class="f-nav-stack">
-                        {navigation.map((item: any, i: number) => (
-                            <a href={item.href} class="f-nav-row group" style={`transition-delay: ${i * 50}ms`}>
-                                <span class="f-nav-number">{String(i + 1).padStart(2, '0')}</span>
-                                <span class="f-nav-label">{item.label}</span>
-                                <span class="f-nav-arrow">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        <polyline points="12 5 19 12 12 19"></polyline>
-                                    </svg>
-                                </span>
-                            </a>
-                        ))}
-                    </nav>
-                </div>
-
-                <!-- Bottom Section: Contact + Social in elegant grid -->
-                <div class="f-info-section">
-                    <div class="f-info-grid">
-                        <!-- Contact -->
-                        <div class="f-info-col">
-                            <p class="f-section-label">Contacto</p>
-                            <div class="f-info-items">
-                                <a href={`mailto:${settings.email}`} class="f-info-link">{settings.email}</a>
-                                <a href={`tel:${settings.phone}`} class="f-info-link">{settings.phone}</a>
-                                <span class="f-info-muted">{settings.address}</span>
-                            </div>
-                        </div>
-                        <!-- Social -->
-                        <div class="f-info-col">
-                            <p class="f-section-label">Síguenos</p>
-                            <div class="f-info-items">
-                                <a href={settings.instagram} target="_blank" rel="noopener" class="f-social-link">
-                                    <span class="f-social-dot" style="background:#E1306C"></span>
-                                    Instagram
-                                </a>
-                                <a href={settings.linkedin} target="_blank" rel="noopener" class="f-social-link">
-                                    <span class="f-social-dot" style="background:#0A66C2"></span>
-                                    LinkedIn
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Legal footer pinned to bottom -->
-            <div class="f-legal-bar">
-                <p>© 2026 VideoMarketing Sevilla</p>
-                <div class="f-legal-links">
-                    <a href="/privacidad">Privacidad</a>
-                    <a href="/aviso-legal">Aviso Legal</a>
-                    <a href="/cookies">Cookies</a>
-                </div>
-            </div>
-        </div>
-
     </div>
-</section>
+
+    <div class="site-footer__directory">
+        <nav aria-label="Navegacion del pie">
+            <span>Menu</span>
+            {visibleNavigation.map((item: any) => <a href={item.href}>{item.label}</a>)}
+        </nav>
+
+        <nav aria-label="Servicios del pie">
+            <span>Servicios</span>
+            {services.map((service: any) => <a href={`/servicios/${service.slug}`}>{service.title}</a>)}
+        </nav>
+
+        <div class="site-footer__contact">
+            <span>Contacto</span>
+            {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
+            {settings.phone && <a href={`tel:${String(settings.phone).replace(/\s/g, "")}`}>{settings.phone}</a>}
+            {settings.instagram && <a href={settings.instagram} target="_blank" rel="noreferrer">Instagram</a>}
+        </div>
+    </div>
+
+    <div class="site-footer__legal">
+        <span>{footer.copyright || `© ${new Date().getFullYear()} LaesePROD`}</span>
+        <a href="/legal#privacidad">Privacidad</a>
+        <a href="/legal#aviso-legal">Aviso legal</a>
+        <a href="/legal#cookies">Cookies</a>
+    </div>
+</footer>
 
 <style>
-/* ═══════════════════════════════════════════════════════════
-   FOOTER: Split-Screen Premium Layout
-   ═══════════════════════════════════════════════════════════ */
-
-.footer-screen {
-    width: 100%;
-    background: #FAFAFA;
-    border-top: 1px solid rgba(0,0,0,0.06);
-}
-
-.f-split {
-    display: flex;
-    flex-direction: column;
-    min-height: 90vh;
-}
-@media (min-width: 1024px) {
-    .f-split { flex-direction: row; }
-}
-
-/* ── LEFT HALF ─────────────────────────────────────────── */
-.f-left {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 5rem 3rem;
-    position: relative;
-    overflow: hidden;
-}
-@media (min-width: 1024px) {
-    .f-left {
-        width: 45%;
-        padding: 6rem;
+    footer.site-footer--cinema {
+        position: relative !important;
+        min-height: 100svh !important;
+        display: grid !important;
+        grid-template-rows: minmax(0, 1fr) auto auto !important;
+        gap: clamp(1.5rem, 4vh, 3rem) !important;
+        padding: clamp(5.5rem, 11vh, 8rem) clamp(1.1rem, 5vw, 5rem) clamp(1.1rem, 3vw, 2rem) !important;
+        color: #fff !important;
+        background: #000 !important;
+        overflow: hidden !important;
+        border-top: 1px solid rgba(255, 255, 255, .16) !important;
+        isolation: isolate !important;
     }
-}
 
-/* ── Brand Seal ────────────────────────────────────────── */
-.f-brand-seal {
-    position: relative;
-    width: clamp(280px, 30vw, 420px);
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.f-spin-ring {
-    position: absolute;
-    inset: 0;
-    animation: spin 40s linear infinite;
-    opacity: 0.9;
-}
-
-.f-spin-svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-}
-
-.f-spin-text {
-    font-size: 18.5px;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    fill: #1a1a2e;
-    letter-spacing: 2px;
-}
-
-.f-logo-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 58%;
-    height: 58%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* ── RIGHT HALF ────────────────────────────────────────── */
-.f-right {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    background: #fff;
-    padding: 0;
-}
-@media (min-width: 1024px) {
-    .f-right { width: 55%; }
-}
-
-.f-right-inner {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 6rem 2rem 3rem;
-}
-@media (min-width: 1024px) {
-    .f-right-inner {
-        padding: 7rem 5rem 4rem;
+    footer.site-footer--cinema::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        z-index: -2 !important;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 24%),
+            linear-gradient(110deg, rgba(255, 255, 255, .1), transparent 34%),
+            #000 !important;
     }
-}
 
-/* ── Section Labels ────────────────────────────────────── */
-.f-section-label {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #525252;
-    margin-bottom: 1.5rem;
-}
-
-/* ── Navigation Stack ──────────────────────────────────── */
-.f-nav-section {
-    margin-bottom: 3.5rem;
-}
-
-.f-nav-stack {
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid rgba(0,0,0,0.08);
-}
-
-.f-nav-row {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 1.1rem 0.75rem;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    text-decoration: none;
-    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-    border-radius: 0;
-}
-.f-nav-row:hover {
-    background: rgba(186, 25, 41, 0.03);
-    padding-left: 1.25rem;
-}
-
-.f-nav-number {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #ba1929;
-    opacity: 0.8;
-    min-width: 1.5rem;
-    transition: opacity 0.3s ease;
-}
-.f-nav-row:hover .f-nav-number {
-    opacity: 1;
-}
-
-.f-nav-label {
-    font-family: var(--ff-display, 'Outfit', sans-serif);
-    font-size: clamp(1.4rem, 3vw, 2.2rem);
-    font-weight: 600;
-    color: #111827;
-    letter-spacing: -0.01em;
-    transition: color 0.3s ease;
-    flex: 1;
-}
-.f-nav-row:hover .f-nav-label {
-    color: #ba1929;
-}
-
-.f-nav-arrow {
-    color: #ba1929;
-    opacity: 0;
-    transform: translateX(-12px);
-    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.f-nav-row:hover .f-nav-arrow {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-/* ── Info Section ──────────────────────────────────────── */
-.f-info-section {
-    padding-top: 2rem;
-}
-
-.f-info-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-}
-@media (min-width: 640px) {
-    .f-info-grid { grid-template-columns: 1fr 1fr; }
-}
-
-.f-info-col {
-    display: flex;
-    flex-direction: column;
-}
-
-.f-info-items {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-
-.f-info-link {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #111827;
-    text-decoration: none;
-    transition: color 0.3s ease;
-    width: fit-content;
-}
-.f-info-link:hover {
-    color: #ba1929;
-}
-
-.f-info-muted {
-    font-size: 0.85rem;
-    color: #525252;
-    margin-top: 0.25rem;
-}
-
-/* ── Social Links ──────────────────────────────────────── */
-.f-social-link {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #111827;
-    text-decoration: none;
-    transition: color 0.3s ease;
-    width: fit-content;
-}
-.f-social-link:hover {
-    color: #ba1929;
-}
-
-.f-social-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    flex-shrink: 0;
-}
-
-/* ── Legal Bar ─────────────────────────────────────────── */
-.f-legal-bar {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem 2rem;
-    border-top: 1px solid rgba(0,0,0,0.06);
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: #525252;
-}
-@media (min-width: 768px) {
-    .f-legal-bar {
-        flex-direction: row;
-        padding: 1.5rem 5rem;
+    footer.site-footer--cinema::after {
+        content: "LAESEPROD" !important;
+        position: absolute !important;
+        right: -2vw !important;
+        bottom: 13vh !important;
+        z-index: -1 !important;
+        color: rgba(255, 255, 255, .035) !important;
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif !important;
+        font-size: clamp(8rem, 24vw, 23rem) !important;
+        line-height: .75 !important;
+        text-transform: uppercase !important;
+        white-space: nowrap !important;
+        pointer-events: none !important;
     }
-}
 
-.f-legal-bar p { margin: 0; }
+    footer.site-footer--cinema .site-footer__stage {
+        align-self: center !important;
+        display: grid !important;
+        justify-items: center !important;
+        gap: clamp(.9rem, 2vh, 1.4rem) !important;
+        text-align: center !important;
+    }
 
-.f-legal-links {
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-}
-.f-legal-links a {
-    color: #525252;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-.f-legal-links a:hover {
-    color: #111827;
-}
+    footer.site-footer--cinema .site-footer__kicker {
+        margin: 0 !important;
+        color: rgba(255, 255, 255, .52) !important;
+        font-size: .76rem !important;
+        font-weight: 800 !important;
+        line-height: 1 !important;
+        text-transform: uppercase !important;
+    }
+
+    footer.site-footer--cinema .site-footer__wordmark {
+        display: block !important;
+        width: min(960px, 84vw) !important;
+        color: #fff !important;
+        text-decoration: none !important;
+        transition: transform 280ms cubic-bezier(.16, 1, .3, 1) !important;
+    }
+
+    footer.site-footer--cinema .site-footer__wordmark img {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
+
+    footer.site-footer--cinema .site-footer__wordmark:hover,
+    footer.site-footer--cinema .site-footer__wordmark:focus-visible {
+        transform: translateY(-4px) !important;
+    }
+
+    footer.site-footer--cinema .site-footer__claim {
+        max-width: 680px !important;
+        margin: 0 !important;
+        color: rgba(255, 255, 255, .76) !important;
+        font-size: clamp(1.05rem, 1.9vw, 1.5rem) !important;
+        font-weight: 500 !important;
+        line-height: 1.35 !important;
+    }
+
+    footer.site-footer--cinema .site-footer__cta {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: .7rem !important;
+        margin-top: .35rem !important;
+    }
+
+    footer.site-footer--cinema .site-footer__cta a,
+    footer.site-footer--cinema .site-footer__cta button {
+        min-height: 46px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 1.15rem !important;
+        color: #000 !important;
+        background: #fff !important;
+        border: 1px solid #fff !important;
+        border-radius: 999px !important;
+        font: inherit !important;
+        font-size: .76rem !important;
+        font-weight: 800 !important;
+        line-height: 1 !important;
+        text-decoration: none !important;
+        text-transform: uppercase !important;
+        cursor: pointer !important;
+        transition: transform 180ms ease, color 180ms ease, background 180ms ease !important;
+    }
+
+    footer.site-footer--cinema .site-footer__cta button {
+        color: #fff !important;
+        background: rgba(255, 255, 255, .08) !important;
+        border-color: rgba(255, 255, 255, .42) !important;
+    }
+
+    footer.site-footer--cinema .site-footer__cta a:hover,
+    footer.site-footer--cinema .site-footer__cta a:focus-visible,
+    footer.site-footer--cinema .site-footer__cta button:hover,
+    footer.site-footer--cinema .site-footer__cta button:focus-visible {
+        transform: translateY(-2px) !important;
+    }
+
+    footer.site-footer--cinema .site-footer__directory {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: clamp(1rem, 4vw, 4rem) !important;
+        padding-top: clamp(1.1rem, 3vh, 1.8rem) !important;
+        border-top: 1px solid rgba(255, 255, 255, .18) !important;
+    }
+
+    footer.site-footer--cinema nav,
+    footer.site-footer--cinema .site-footer__contact {
+        display: grid !important;
+        align-content: start !important;
+        gap: .55rem !important;
+    }
+
+    footer.site-footer--cinema nav span,
+    footer.site-footer--cinema .site-footer__contact span {
+        margin: 0 0 .2rem !important;
+        color: rgba(255, 255, 255, .46) !important;
+        font-size: .68rem !important;
+        font-weight: 800 !important;
+        line-height: 1 !important;
+        text-transform: uppercase !important;
+    }
+
+    footer.site-footer--cinema .site-footer__directory a {
+        width: fit-content !important;
+        color: #fff !important;
+        background: transparent !important;
+        border: 0 !important;
+        padding: 0 !important;
+        font: inherit !important;
+        font-size: clamp(.94rem, 1.25vw, 1.14rem) !important;
+        font-weight: 800 !important;
+        line-height: 1.1 !important;
+        text-align: left !important;
+        text-decoration: none !important;
+        text-transform: uppercase !important;
+        transition: color 160ms ease, transform 160ms ease !important;
+    }
+
+    footer.site-footer--cinema .site-footer__directory a:hover,
+    footer.site-footer--cinema .site-footer__directory a:focus-visible {
+        color: rgba(255, 255, 255, .58) !important;
+        transform: translateX(4px) !important;
+    }
+
+    footer.site-footer--cinema .site-footer__legal {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: .75rem 1.25rem !important;
+        padding-top: 1rem !important;
+        color: rgba(255, 255, 255, .5) !important;
+        border-top: 1px solid rgba(255, 255, 255, .12) !important;
+        font-size: .72rem !important;
+        line-height: 1.2 !important;
+    }
+
+    footer.site-footer--cinema .site-footer__legal span {
+        margin-right: auto !important;
+    }
+
+    footer.site-footer--cinema .site-footer__legal a {
+        color: rgba(255, 255, 255, .56) !important;
+        background: transparent !important;
+        border: 0 !important;
+        padding: 0 !important;
+        font: inherit !important;
+        font-size: .72rem !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+        text-transform: uppercase !important;
+    }
+
+    @media (max-width: 760px) {
+        footer.site-footer--cinema {
+            grid-template-rows: minmax(0, 1fr) auto auto !important;
+            gap: 1.4rem !important;
+            padding: 6.5rem 1rem 6.5rem !important;
+        }
+
+        footer.site-footer--cinema::after {
+            right: auto !important;
+            left: 0 !important;
+            bottom: 28vh !important;
+            font-size: 32vw !important;
+        }
+
+        footer.site-footer--cinema .site-footer__stage {
+            align-self: end !important;
+        }
+
+        footer.site-footer--cinema .site-footer__wordmark {
+            width: 100% !important;
+        }
+
+        footer.site-footer--cinema .site-footer__cta {
+            width: 100% !important;
+        }
+
+        footer.site-footer--cinema .site-footer__cta a,
+        footer.site-footer--cinema .site-footer__cta button {
+            flex: 1 1 150px !important;
+        }
+
+        footer.site-footer--cinema .site-footer__directory {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+
+        footer.site-footer--cinema nav,
+        footer.site-footer--cinema .site-footer__contact {
+            gap: .42rem !important;
+        }
+
+        footer.site-footer--cinema .site-footer__directory a {
+            font-size: 1rem !important;
+        }
+
+        footer.site-footer--cinema .site-footer__legal span {
+            flex-basis: 100% !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        footer.site-footer--cinema .site-footer__wordmark,
+        footer.site-footer--cinema .site-footer__cta a,
+        footer.site-footer--cinema .site-footer__cta button,
+        footer.site-footer--cinema .site-footer__directory a {
+            transition: none !important;
+        }
+    }
 </style>

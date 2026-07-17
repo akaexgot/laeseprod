@@ -8,7 +8,7 @@ export interface BreadcrumbItem {
 }
 
 export function getSiteUrl() {
-    return (import.meta.env.PUBLIC_SITE_URL || 'https://videomarketingsevilla.com').replace(/\/+$/, '');
+    return (import.meta.env.PUBLIC_SITE_URL || 'https://laeseprod.com').replace(/\/+$/, '');
 }
 
 export function cleanPath(path: string | null | undefined) {
@@ -95,29 +95,6 @@ export function buildServiceSchema(service: any, path: string): JsonLd {
         ],
         url: absoluteUrl(path),
         image: absoluteUrl(service.thumbnail) || getVideoThumbnail(service.video),
-    };
-}
-
-export function buildSectorSchema(sector: any, path: string): JsonLd {
-    return {
-        '@context': 'https://schema.org',
-        '@type': 'Service',
-        '@id': `${absoluteUrl(path)}#sector-service`,
-        name: `Video marketing para ${sector.title}`,
-        description: sector.description,
-        serviceType: `Video marketing para ${sector.title}`,
-        provider: { '@id': `${getSiteUrl()}/#business` },
-        audience: {
-            '@type': 'BusinessAudience',
-            name: sector.title,
-        },
-        areaServed: [
-            { '@type': 'City', name: 'Sevilla' },
-            { '@type': 'AdministrativeArea', name: 'Andalucia' },
-            { '@type': 'Country', name: 'ES' },
-        ],
-        url: absoluteUrl(path),
-        image: absoluteUrl(sector.thumbnail) || getVideoThumbnail(sector.video),
     };
 }
 

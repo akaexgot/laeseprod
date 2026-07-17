@@ -1,537 +1,61 @@
 ---
-/**
- * Projects Listing Page — Fullpage Scroll Mosaic
- * Shows projects with a playable video or a usable thumbnail. Shows all projects regardless of group size.
- */
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import "../../styles/proyectos.css";
-import ContactFormBlock from '../../components/ui/ContactFormBlock.astro';
-import { getProjects } from '../../lib/data';
-import { getVideoId } from '../../lib/display';
-import { optimizeCloudinaryVideo } from '../../lib/cloudinary';
-import { buildBreadcrumbSchema, buildItemListSchema } from '../../lib/seo';
-
-const allProjects = await getProjects();
-
-type ProjectListItem = {
-    id: string;
-    title?: string;
-    subtitle?: string | null;
-    slug?: string;
-    description?: string | null;
-    video_project?: string | null;
-    video_explanation_desktop?: string | null;
-    video_explanation_mobile?: string | null;
-    thumbnail?: string | null;
-    client_name?: string | null;
-    featured_home?: boolean | null;
-};
-
-function isNativeVideo(value: string | null | undefined): boolean {
-    return !!value && (value.includes('cloudinary.com') || /\.(mp4|webm)(\?.*)?$/i.test(value));
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import VideoBackground from "../../components/ui/VideoBackground.astro";
+import FeaturedProjects from "../../components/home/FeaturedProjects.astro";
+import { getFeaturedProjects, getProjects } from "../../lib/data";
+import { buildItemListSchema } from "../../lib/seo";
+const [projects, featuredProjects] = await Promise.all([getProjects(), getFeaturedProjects()]);
+const featuredIds = new Set(featuredProjects.map((project: any) => project.id));
+const remainingProjects = projects.filter((project: any) => !featuredIds.has(project.id));
+const projectScreens = [];
+for (let index = 0; index < remainingProjects.length; index += 4) {
+    projectScreens.push(remainingProjects.slice(index, index + 4));
 }
-
-/** Generate a poster/thumbnail from a video URL without loading the video */
-function getVideoThumbnail(videoUrl: string | null | undefined): string | null {
-    if (!videoUrl) return null;
-    // Cloudinary: swap extension to .jpg for first-frame thumbnail
-    if (videoUrl.includes('cloudinary.com') && /\.(mp4|webm)(\?.*)?$/i.test(videoUrl)) {
-        return videoUrl.replace(/\.(mp4|webm)(\?.*)?$/i, '.jpg');
-    }
-    // YouTube: use thumbnail API
-    const ytId = getVideoId(videoUrl);
-    if (ytId) return `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
-    return null;
-}
-
-function getYouTubeThumbnailFallbacks(videoUrl: string | null | undefined): string[] {
-    const ytId = getVideoId(videoUrl);
-    if (!ytId) return [];
-    return [
-        `https://img.youtube.com/vi/${ytId}/sddefault.jpg`,
-        `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
-    ];
-}
-
-function hasRenderableProjectMedia(project: ProjectListItem): boolean {
-    return Boolean(project.thumbnail || isNativeVideo(project.video_project) || getVideoId(project.video_project));
-}
-
-function getProjectModalAttrs(
-    project: ProjectListItem,
-    mainVideo: string | null | undefined,
-    makingOf: string | null | undefined,
-) {
-    if (!mainVideo && !makingOf) return {};
-
-    return {
-        'data-pm-title': project.title || '',
-        'data-pm-subtitle': project.subtitle || '',
-        'data-pm-description': project.description || '',
-        'data-pm-video': mainVideo || '',
-        'data-pm-makingof': makingOf || '',
-        'data-pm-slug': project.slug || '',
-        'data-pm-client': project.client_name || '',
-    };
-}
-
-const projects = (allProjects as ProjectListItem[]).filter((project) => project.slug && hasRenderableProjectMedia(project));
-
-// Build screens according to business rules:
-// - First screen: up to 3 featured projects (`featured_home`)
-// - Following screens: chunks of up to 6 projects. Partial chunks are included.
-function buildProjectScreens(all: ProjectListItem[]) {
-    const FEATURED_LIMIT = 3;
-    const CHUNK_SIZE = 6;
-
-    // 1. extract featured (preserve order)
-    const featured = all.filter(p => p.featured_home).slice(0, FEATURED_LIMIT);
-
-    // 2. remaining projects (preserve original order, exclude featured)
-    const remaining = all.filter(p => !featured.some((f) => f.id === p.id));
-
-    // 3. chunk remaining into groups of CHUNK_SIZE (include partial chunks)
-    const chunks: ProjectListItem[][] = [];
-    for (let i = 0; i < remaining.length; i += CHUNK_SIZE) {
-        const chunk = remaining.slice(i, i + CHUNK_SIZE);
-        if (chunk.length > 0) chunks.push(chunk);
-    }
-
-    const screens: ProjectListItem[][] = [];
-    if (featured.length > 0) screens.push(featured);
-    screens.push(...chunks);
-    return screens;
-}
-
-const screens = buildProjectScreens(projects);
-const structuredData = [
-    buildBreadcrumbSchema([
-        { name: 'Inicio', path: '/' },
-        { name: 'Proyectos', path: '/proyectos' },
-    ]),
-    buildItemListSchema('Proyectos de video marketing', projects, '/proyectos'),
-];
 ---
 
-<BaseLayout
-  title="Proyectos"
-  structuredData={structuredData}
-  description="Descubre nuestros proyectos de video marketing. Producción audiovisual para empresas en Sevilla, Cádiz y toda España."
->
+<BaseLayout title="Proyectos" description="Proyectos audiovisuales de LaesePROD" structuredData={buildItemListSchema("Proyectos de LaesePROD", projects, "/proyectos")}>
+    <section class="projects-page">
+        <FeaturedProjects projects={featuredProjects} showAllLink={false} />
 
-    {projects.length === 0 ? (
-        <section class="pj-screen pj-screen--empty">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-            </svg>
-            <p>Próximamente nuevos proyectos</p>
-        </section>
-    ) : (
-        screens.map((group, screenIdx) => {
-            const isFirst = screenIdx === 0 && group.some((p) => p.featured_home);
-            const count = group.length;
-            // First screen with featured: split layout. All others: 2 columns x 3 rows.
-            const layoutClass = isFirst && count >= 3 ? 'pj-screen--split' : 'pj-screen--grid';
+        {projectScreens.map((screen: any[], screenIndex: number) => (
+            <section class="projects-screen" aria-label={`Pantalla de proyectos ${screenIndex + 1}`}>
+                {screen.map((project: any) => (
+                    <a class="project-card" href={`/proyectos/${project.slug}`} aria-label={project.title}>
+                        <VideoBackground desktop={project.video_project} mobile={project.video_project} title={project.title} overlay="dark" />
+                    </a>
+                ))}
+            </section>
+        ))}
 
-            return (
-                <section class={`pj-screen ${layoutClass} ${isFirst ? 'pj-screen--first' : ''}`}>
-                    {isFirst && count >= 3 ? (
-                        <Fragment>
-                            {/* Large cell */}
-                            {(() => {
-                                const videoUrl = group[0].video_project;
-                                const isNative = isNativeVideo(videoUrl);
-                                const nativeVideoUrl = isNative ? optimizeCloudinaryVideo(videoUrl, { width: 1920, quality: 'auto:best', bitRate: '6m' }) : null;
-                                const vid = !isNative ? getVideoId(videoUrl) : null;
-                                const mainVideo = isNative ? videoUrl : vid;
-                                const hasCustomThumbnail = !!group[0].thumbnail;
-                                const posterUrl = group[0].thumbnail || getVideoThumbnail(videoUrl);
-                                const fallbackPosters = !hasCustomThumbnail ? getYouTubeThumbnailFallbacks(videoUrl) : [];
-                                
-                                const makingOfUrl = group[0].video_explanation_mobile || group[0].video_explanation_desktop;
-                                const isMakingOfNative = isNativeVideo(makingOfUrl);
-                                const isMakingOfInstagram = !!makingOfUrl && /instagram\.com\/(reel|reels|p)\//.test(makingOfUrl);
-                                const makingOfId = (!isMakingOfNative && !isMakingOfInstagram) ? (getVideoId(group[0].video_explanation_mobile) || getVideoId(group[0].video_explanation_desktop)) : null;
-                                const makingOf = (isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId;
-
-                                if (!posterUrl && !mainVideo) return null;
-                                return (
-                                    <a href={`/proyectos/${group[0].slug}`} class="pj-cell pj-cell--large group"
-                                       {...getProjectModalAttrs(group[0], mainVideo, makingOf)}>
-                                        <div class="pj-cell__video">
-                                            {isNative ? (
-                                                <video aria-hidden="true" data-src={nativeVideoUrl} class="pj-cell__iframe pj-cell__native-video" loop muted playsinline preload="none" poster={posterUrl || undefined} style="object-fit: cover;"></video>
-                                            ) : vid ? (
-                                                <iframe
-                                                    class="pj-cell__iframe"
-                                                    data-src={`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${vid}&loop=1`}
-                                                    src=""
-                                                    frameborder="0" allow="autoplay; encrypted-media"
-                                                    style="pointer-events: none; transform: translate(-50%, -50%) scale(1.5); top: 50%; left: 50%; position: absolute; width: 100%; height: 100%;"
-                                                    loading="lazy"
-                                                ></iframe>
-                                                <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
-                                            ) : posterUrl ? (
-                                                <img
-                                                    src={posterUrl}
-                                                    alt={group[0].title}
-                                                    class={`pj-cell__thumb pj-cell__thumb--visible ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
-                                                    data-fallback-srcs={fallbackPosters.join('|')}
-                                                    loading="lazy"
-                                                />
-                                            ) : (
-                                                <div class="pj-cell__placeholder"></div>
-                                            )}
-                                            {mainVideo && posterUrl && (
-                                                <img
-                                                    src={posterUrl}
-                                                    alt={group[0].title}
-                                                    class={`pj-cell__thumb pj-cell__thumb--video-poster ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
-                                                    data-fallback-srcs={fallbackPosters.join('|')}
-                                                    loading="lazy"
-                                                />
-                                            )}
-                                        </div>
-                                        <div class="pj-cell__overlay"></div>
-                                        <div class="pj-cell__info">
-                                            <span class="pj-cell__client">{group[0].client_name}</span>
-                                            <h3 class="pj-cell__title pj-cell__title--lg">{group[0].title}</h3>
-                                            {group[0].subtitle && <p class="pj-cell__subtitle">{group[0].subtitle}</p>}
-                                            <div class="pj-cell__cta">
-                                                <span>Ver proyecto</span>
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                                            </div>
-                                        </div>
-                                    </a>
-                                );
-                            })()}
-
-                            {/* Stacked cells */}
-                            {group.length > 1 && (
-                            <div class="pj-stack">
-                                {group.slice(1).map((item) => {
-                                    const videoUrl = item.video_project;
-                                    const isNative = isNativeVideo(videoUrl);
-                                    const nativeVideoUrl = isNative ? optimizeCloudinaryVideo(videoUrl, { width: 1280, quality: 'auto:best', bitRate: '5m' }) : null;
-                                    const vid = !isNative ? getVideoId(videoUrl) : null;
-                                    const mainVideo = isNative ? videoUrl : vid;
-                                    const hasCustomThumbnail = !!item.thumbnail;
-                                    const posterUrl = item.thumbnail || getVideoThumbnail(videoUrl);
-                                    const fallbackPosters = !hasCustomThumbnail ? getYouTubeThumbnailFallbacks(videoUrl) : [];
-                                    
-                                    const makingOfUrl = item.video_explanation_mobile || item.video_explanation_desktop;
-                                    const isMakingOfNative = isNativeVideo(makingOfUrl);
-                                    const isMakingOfInstagram = !!makingOfUrl && /instagram\.com\/(reel|reels|p)\//.test(makingOfUrl);
-                                    const makingOfId = (!isMakingOfNative && !isMakingOfInstagram) ? (getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop)) : null;
-                                    const makingOf = (isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId;
-
-                                    if (!posterUrl && !mainVideo) return null;
-                                    return (
-                                        <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--stacked group"
-                                           {...getProjectModalAttrs(item, mainVideo, makingOf)}>
-                                            <div class="pj-cell__video">
-                                                {isNative ? (
-                                                    <video aria-hidden="true" data-src={nativeVideoUrl} class="pj-cell__iframe pj-cell__native-video" loop muted playsinline preload="none" poster={posterUrl || undefined} style="object-fit: cover;"></video>
-                                                ) : vid ? (
-                                                    <iframe
-                                                        class="pj-cell__iframe"
-                                                        data-src={`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3&playlist=${vid}&loop=1`}
-                                                        src=""
-                                                        frameborder="0" allow="autoplay; encrypted-media"
-                                                        style="pointer-events: none; transform: translate(-50%, -50%) scale(1.5); top: 50%; left: 50%; position: absolute; width: 100%; height: 100%;"
-                                                        loading="lazy"
-                                                    ></iframe>
-                                                    <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
-                                                ) : posterUrl ? (
-                                                    <img
-                                                        src={posterUrl}
-                                                        alt={item.title}
-                                                        class={`pj-cell__thumb pj-cell__thumb--visible ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
-                                                        data-fallback-srcs={fallbackPosters.join('|')}
-                                                        loading="lazy"
-                                                    />
-                                                ) : (
-                                                    <div class="pj-cell__placeholder"></div>
-                                                )}
-                                                {mainVideo && posterUrl && (
-                                                    <img
-                                                        src={posterUrl}
-                                                        alt={item.title}
-                                                        class={`pj-cell__thumb pj-cell__thumb--video-poster ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
-                                                        data-fallback-srcs={fallbackPosters.join('|')}
-                                                        loading="lazy"
-                                                    />
-                                                )}
-                                            </div>
-                                            <div class="pj-cell__overlay"></div>
-                                            <div class="pj-cell__info">
-                                                <span class="pj-cell__client">{item.client_name}</span>
-                                                <h3 class="pj-cell__title">{item.title}</h3>
-                                                {item.subtitle && <p class="pj-cell__subtitle">{item.subtitle}</p>}
-
-                                                <div class="pj-cell__cta">
-                                                    <span>Ver proyecto</span>
-                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    );
-                                })}
-                            </div>
-                            )}
-                        </Fragment>
-                    ) : (
-                        /* Non-featured: show thumbnail only, no autoplay video */
-                        group.map((item) => {
-                            const videoUrl = item.video_project;
-                            const isNative = isNativeVideo(videoUrl);
-                            const vid = !isNative ? getVideoId(videoUrl) : null;
-                            const mainVideo = isNative ? videoUrl : vid;
-                            
-                            const makingOfUrl = item.video_explanation_mobile || item.video_explanation_desktop;
-                            const isMakingOfNative = isNativeVideo(makingOfUrl);
-                            const isMakingOfInstagram = !!makingOfUrl && /instagram\.com\/(reel|reels|p)\//.test(makingOfUrl);
-                            const makingOfId = (!isMakingOfNative && !isMakingOfInstagram) ? (getVideoId(item.video_explanation_mobile) || getVideoId(item.video_explanation_desktop)) : null;
-                            const makingOf = (isMakingOfNative || isMakingOfInstagram) ? makingOfUrl : makingOfId;
-
-                            const hasCustomThumbnail = !!item.thumbnail;
-                            const posterUrl = item.thumbnail || getVideoThumbnail(videoUrl);
-                            const fallbackPosters = !hasCustomThumbnail ? getYouTubeThumbnailFallbacks(videoUrl) : [];
-                            if (!posterUrl && !mainVideo) return null;
-                            return (
-                                <a href={`/proyectos/${item.slug}`} class="pj-cell pj-cell--quarter group"
-                                   {...getProjectModalAttrs(item, mainVideo, makingOf)}>
-                                    <div class="pj-cell__video">
-                                        {posterUrl ? (
-                                            <img
-                                                src={posterUrl}
-                                                alt={item.title}
-                                                class={`pj-cell__thumb pj-cell__thumb--visible ${hasCustomThumbnail ? '' : 'pj-cell__thumb--generated'}`}
-                                                data-fallback-srcs={fallbackPosters.join('|')}
-                                                loading="lazy"
-                                            />
-                                        ) : (
-                                            <div class="pj-cell__placeholder"></div>
-                                        )}
-                                    </div>
-                                    <div class="pj-cell__overlay"></div>
-                                    <div class="pj-cell__info">
-                                        <span class="pj-cell__client">{item.client_name}</span>
-                                        <h3 class="pj-cell__title">{item.title}</h3>
-                                        {item.subtitle && <p class="pj-cell__subtitle">{item.subtitle}</p>}
-
-                                        <div class="pj-cell__cta">
-                                            <span>Ver proyecto</span>
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                                        </div>
-                                    </div>
-                                </a>
-                            );
-                        })
-                    )}
-
-                    {/* Screen indicator */}
-                    <div class="pj-screen__indicator">
-                        <span>{String(screenIdx + 1).padStart(2, '0')}</span>
-                        <span class="pj-screen__indicator-sep">/</span>
-                        <span>{String(screens.length).padStart(2, '0')}</span>
-                    </div>
-                </section>
-            );
-        })
-    )}
-
-    <!-- CONTACT FORM (Replaces Empty CTA) -->
-    <ContactFormBlock />
-
+        {projects.length === 0 && (
+            <section class="projects-empty">
+                <p>Pronto nuevos proyectos.</p>
+            </section>
+        )}
+    </section>
 </BaseLayout>
 
-<script>
-    /* ── YouTube thumbnail fallback quality ── */
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll<HTMLImageElement>('.pj-cell__thumb--generated[data-fallback-srcs]').forEach((img) => {
-            const useNextFallback = () => {
-                const fallbacks = (img.dataset.fallbackSrcs || '').split('|').filter(Boolean);
-                const next = fallbacks.shift();
-                if (!next) return;
+<style>
+    .projects-page { color: #fff; background: #000; }
+    .projects-screen { min-height: 100svh; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); background: #000; }
+    .project-card { position: relative; min-height: 50svh; overflow: hidden; color: #fff; text-decoration: none; border: 1px solid rgba(255, 255, 255, .12); background: #050505; }
+    .project-card::after { content: ""; position: absolute; inset: 0; z-index: 2; background: rgba(0, 0, 0, .1); transition: opacity 260ms ease; pointer-events: none; }
+    .project-card :global(.video-background) { filter: grayscale(1) contrast(1.04); transition: transform 700ms cubic-bezier(.16, 1, .3, 1), filter 700ms cubic-bezier(.16, 1, .3, 1); }
+    .project-card:hover::after, .project-card:focus-visible::after { opacity: 0; }
+    .project-card:hover :global(.video-background), .project-card:focus-visible :global(.video-background) { transform: scale(1.055); filter: grayscale(0) contrast(1.04); }
+    .projects-empty { min-height: 100svh; display: grid; place-items: center; padding: 7rem 1rem; background: #000; }
+    .projects-empty p { margin: 0; color: rgba(255, 255, 255, .72); font-size: clamp(1.4rem, 6vw, 4rem); font-weight: 800; text-transform: uppercase; }
 
-                img.dataset.fallbackSrcs = fallbacks.join('|');
-                img.src = next;
-            };
+    @media (max-width: 760px) {
+        .projects-screen { min-height: auto; grid-template-columns: 1fr; grid-template-rows: none; }
+        .project-card { min-height: 52svh; }
+    }
 
-            img.addEventListener('error', useNextFallback);
-            img.addEventListener('load', () => {
-                // YouTube returns a tiny gray placeholder for missing maxres thumbnails instead of a 404.
-                if (img.naturalWidth <= 320 || img.naturalHeight <= 180) {
-                    useNextFallback();
-                }
-            });
-        });
-    });
-
-    /* ── Keep native video posters visible until a real frame is ready ── */
-    document.addEventListener('DOMContentLoaded', () => {
-        const canAutoplayProjectVideos = window.matchMedia('(min-width: 1024px)').matches;
-
-        document.querySelectorAll<HTMLVideoElement>('video.pj-cell__native-video').forEach((video) => {
-            const poster = video.closest('.pj-cell__video')?.querySelector<HTMLElement>('.pj-cell__thumb--video-poster');
-
-            if (!canAutoplayProjectVideos) {
-                video.pause();
-                video.removeAttribute('src');
-                video.load();
-                return;
-            }
-
-            if (!video.src && video.dataset.src) {
-                video.src = video.dataset.src;
-            }
-
-            video.autoplay = true;
-            video.muted = true;
-            video.playsInline = true;
-            video.play().catch(() => {});
-
-            if (!poster) return;
-
-            const hidePoster = () => {
-                poster.classList.add('is-hidden');
-            };
-
-            video.addEventListener('loadeddata', hidePoster, { once: true });
-            video.addEventListener('canplay', hidePoster, { once: true });
-            video.addEventListener('playing', hidePoster, { once: true });
-
-            if (video.readyState >= 2) hidePoster();
-        });
-    });
-
-    /* ── Lazy-load YouTube iframes ── */
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!window.matchMedia('(min-width: 1024px)').matches) return;
-
-        const lazyIframes = document.querySelectorAll('.pj-cell__iframe[data-src]');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const iframe = entry.target as HTMLElement;
-                    if (iframe.tagName === 'IFRAME') {
-                        const ifr = iframe as HTMLIFrameElement;
-                        if (!ifr.src || ifr.src === '' || ifr.src === window.location.href) {
-                            ifr.src = ifr.dataset.src || '';
-                            // Delay showing the iframe to avoid YouTube UI flash (like the pause icon)
-                            setTimeout(() => {
-                                ifr.style.opacity = '1';
-                            }, 800);
-                        }
-                    }
-                    const thumb = iframe.closest('.pj-cell__video')?.querySelector('.pj-cell__thumb') as HTMLElement;
-                    if (thumb) setTimeout(() => { thumb.style.opacity = '0'; }, 2000);
-                    observer.unobserve(iframe);
-                }
-            });
-        }, { threshold: 0.05, rootMargin: '300px 0px 300px 0px' });
-        lazyIframes.forEach(el => observer.observe(el));
-    });
-
-    /* ── Fullpage Scroll ── */
-    document.addEventListener('DOMContentLoaded', () => {
-        const sections = Array.from(document.querySelectorAll('.pj-screen, .contact-body, #site-footer'));
-        if (sections.length === 0) return;
-
-        // Solo activar scroll snap en escritorio (>1024px)
-        if (window.innerWidth <= 1024) return;
-
-        let isScrolling = false;
-        let scrollTimeout: ReturnType<typeof setTimeout>;
-
-        function getVisibleSectionIndex() {
-            let maxIdx = 0, maxArea = 0;
-            const viewportHeight = window.innerHeight;
-            
-            sections.forEach((sec, idx) => {
-                const r = sec.getBoundingClientRect();
-                const visibleHeight = Math.max(0, Math.min(r.bottom, viewportHeight) - Math.max(r.top, 0));
-                
-                // Special case for footer: if it's visible at all at the bottom of the page, give it weight
-                let weight = visibleHeight;
-                if (idx === sections.length - 1 && r.top < viewportHeight - 50) {
-                    weight += 10000; // Force footer as current if it's coming into view
-                }
-
-                if (weight > maxArea) {
-                    maxArea = weight;
-                    maxIdx = idx;
-                }
-            });
-            return maxIdx;
+    @media (prefers-reduced-motion: reduce) {
+        .project-card,
+        .project-card :global(.video-background) {
+            animation: none;
+            transition: none;
         }
-
-        function scrollToSection(index: number) {
-            if (index < 0 || index >= sections.length || isScrolling) return;
-
-            isScrolling = true;
-            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                isScrolling = false;
-            }, 1200); // Slightly longer to ensure smooth finish
-        }
-
-        window.addEventListener('wheel', (e) => {
-            // Only prevent if we are actually going to scroll to a section
-            const currentIndex = getVisibleSectionIndex();
-            const goingDown = e.deltaY > 0;
-            const goingUp = e.deltaY < 0;
-
-            if (isScrolling) {
-                e.preventDefault();
-                return;
-            }
-
-            if ((goingDown && currentIndex < sections.length - 1) || (goingUp && currentIndex > 0)) {
-                e.preventDefault();
-                scrollToSection(goingDown ? currentIndex + 1 : currentIndex - 1);
-            }
-        }, { passive: false });
-
-        let touchStartY = 0;
-        window.addEventListener('touchstart', (e) => {
-            touchStartY = e.changedTouches[0].screenY;
-        }, { passive: true });
-
-        window.addEventListener('touchend', (e) => {
-            if (isScrolling) return;
-
-            const touchEndY = e.changedTouches[0].screenY;
-            const deltaY = touchStartY - touchEndY;
-            const currentIndex = getVisibleSectionIndex();
-
-            if (Math.abs(deltaY) > 50) {
-                const goingDown = deltaY > 0;
-                if ((goingDown && currentIndex < sections.length - 1) || (!goingDown && currentIndex > 0)) {
-                    scrollToSection(goingDown ? currentIndex + 1 : currentIndex - 1);
-                }
-            }
-        }, { passive: true });
-
-        window.addEventListener('keydown', (e) => {
-            const target = e.target as HTMLElement;
-            if (['INPUT', 'TEXTAREA'].includes(target.tagName)) return;
-
-            const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' '];
-            if (keys.includes(e.key)) {
-                if (isScrolling) { e.preventDefault(); return; }
-                
-                const currentIndex = getVisibleSectionIndex();
-                const goingDown = ['ArrowDown', 'PageDown', ' '].includes(e.key);
-                
-                if ((goingDown && currentIndex < sections.length - 1) || (!goingDown && currentIndex > 0)) {
-                    e.preventDefault();
-                    scrollToSection(goingDown ? currentIndex + 1 : currentIndex - 1);
-                }
-            }
-        }, { passive: false });
-    });
-</script>
+    }
+</style>

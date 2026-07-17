@@ -5,6 +5,7 @@
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
 import { invalidateCache } from '../../../lib/data';
+import { hashPassword } from '../../../lib/passwords';
 
 const PORTAL_CLIENT_COLUMNS = [
     'client_name',
@@ -45,8 +46,10 @@ export const POST: APIRoute = async ({ request }) => {
 
         const filteredBody = pickPortalClientColumns(body);
 
-        // password_hash is required
-        if (!filteredBody.password_hash) filteredBody.password_hash = '';
+        if (typeof filteredBody.password_hash !== 'string' || !filteredBody.password_hash) {
+            return new Response(JSON.stringify({ error: 'password required' }), { status: 400 });
+        }
+        filteredBody.password_hash = await hashPassword(filteredBody.password_hash);
         if (!Object.prototype.hasOwnProperty.call(filteredBody, 'order')) {
             filteredBody.order = await getNextPortalClientOrder(sb);
         }
@@ -54,7 +57,8 @@ export const POST: APIRoute = async ({ request }) => {
         const { data, error } = await sb.from('portal_clients').insert(filteredBody).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
         invalidateCache("portal-clients");
-        return new Response(JSON.stringify(data), { status: 201 });
+        const { password_hash: _passwordHash, ...safeData } = data;
+        return new Response(JSON.stringify(safeData), { status: 201 });
     } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });
     }
@@ -70,11 +74,17 @@ export const PUT: APIRoute = async ({ request }) => {
         if (!id) return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
 
         const updates = pickPortalClientColumns(body);
+        if (typeof updates.password_hash === 'string' && updates.password_hash) {
+            updates.password_hash = await hashPassword(updates.password_hash);
+        } else {
+            delete updates.password_hash;
+        }
 
         const { data, error } = await sb.from('portal_clients').update(updates).eq('id', id).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
         invalidateCache("portal-clients");
-        return new Response(JSON.stringify(data), { status: 200 });
+        const { password_hash: _passwordHash, ...safeData } = data;
+        return new Response(JSON.stringify(safeData), { status: 200 });
     } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });
     }

@@ -1,8 +1,8 @@
 {
-  "name": "videomarketing-sevilla",
+  "name": "laeseprod",
   "type": "module",
   "version": "1.0.0",
-  "description": "VideoMarketing Sevilla - Productora audiovisual y video marketing en Sevilla",
+  "description": "LaesePROD - Productora audiovisual de bodas y videoclips",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -13,6 +13,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.7",
     "@astrojs/node": "^9.5.4",
+    "@lucide/astro": "^1.25.0",
     "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^5.17.1",
@@ -24,6 +25,8 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "dotenv": "^17.4.2",
+    "playwright-core": "^1.61.1",
     "vitest": "^1.0.0"
   }
 }

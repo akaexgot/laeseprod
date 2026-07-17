@@ -1,255 +1,128 @@
 ---
-/**
- * Service Detail Page — Fullscreen Video Hero + Fullpage Scroll
- * Screen 1: Video hero with title
- * Screen 2: White content with description, CTA, related services
- */
 import BaseLayout from "../../layouts/BaseLayout.astro";
-
-import "../../styles/detail.css";
-import { getServiceBySlug, getServices } from "../../lib/data";
-import { getVideoId } from "../../lib/display";
-import { buildBreadcrumbSchema, buildServiceSchema, getVideoThumbnail } from "../../lib/seo";
-
+import VideoBackground from "../../components/ui/VideoBackground.astro";
+import FaqsSection from "../../components/home/FaqsSection.astro";
+import { getServiceBySlug, getSettings } from "../../lib/data";
+import { buildBreadcrumbSchema, buildServiceSchema } from "../../lib/seo";
 
 const { slug } = Astro.params;
-const service = await getServiceBySlug(slug || "");
+const [service, settings] = await Promise.all([getServiceBySlug(slug || ""), getSettings()]);
+if (!service) return Astro.redirect("/servicios");
 
-if (!service) {
-    return Astro.redirect("/servicios");
-}
+const path = `/servicios/${service.slug}`;
+const serviceCopy: Record<string, any> = {
+    bodas: {
+        back: "Servicios / Bodas",
+        kicker: "Historias para volver a vivirlas",
+        title: ["Bodas", "con pulso real"],
+        briefLabel: "Empezamos por tu fecha",
+        briefTitle: "Cu\u00e9ntanos d\u00f3nde, cu\u00e1ndo y qu\u00e9 quer\u00e9is recordar.",
+        notes: ["01 Preparativos", "02 Ceremonia", "03 Celebraci\u00f3n"],
+        afterLabel: "Bodas",
+        afterTitle: "Lo importante no se posa. Se acompa\u00f1a.",
+    },
+    videoclips: {
+        back: "Servicios / Videoclips",
+        kicker: "Imagen para canciones con identidad",
+        title: ["Videoclips", "con car\u00e1cter"],
+        briefLabel: "Empezamos por tu canci\u00f3n",
+        briefTitle: "Cu\u00e9ntanos el tema, la idea y el universo visual.",
+        notes: ["01 Concepto", "02 Rodaje", "03 Edici\u00f3n"],
+        afterLabel: "Videoclips",
+        afterTitle: "Una canci\u00f3n tambi\u00e9n se mira.",
+    },
+};
 
-const allServices = await getServices();
-const otherServices = allServices.filter((s: any) => s.slug !== slug).slice(0, 3);
-
-const isNative = (url: string | null | undefined) => !!url && (url.includes('cloudinary.com') || url.endsWith('.mp4') || url.endsWith('.webm'));
-
-const videoUrl = service.video;
-const videoIsNative = isNative(videoUrl);
-const videoId = !videoIsNative ? getVideoId(videoUrl) : null;
-
-const videoVerticalUrl = service.video_vertical;
-const videoVerticalIsNative = isNative(videoVerticalUrl);
-const videoVerticalId = !videoVerticalIsNative ? getVideoId(videoVerticalUrl) : null;
-const pagePath = `/servicios/${service.slug}`;
-const structuredData = [
-    buildBreadcrumbSchema([
-        { name: 'Inicio', path: '/' },
-        { name: 'Servicios', path: '/servicios' },
-        { name: service.title, path: pagePath },
-    ]),
-    buildServiceSchema(service, pagePath),
-];
+const copy = serviceCopy[service.slug] || {
+    back: "Servicios",
+    kicker: service.title,
+    title: [service.title],
+    briefLabel: "Empezamos por tu idea",
+    briefTitle: "Cu\u00e9ntanos qu\u00e9 tienes en mente.",
+    notes: ["01 Concepto", "02 Rodaje", "03 Entrega"],
+    afterLabel: service.title,
+    afterTitle: "Cada proyecto pide una mirada propia.",
+};
 ---
 
-<BaseLayout
-    title={`${service.title} en Sevilla`}
-    image={service.thumbnail || getVideoThumbnail(service.video)}
-    structuredData={structuredData}
-    description={`${service.description} Servicio de ${service.title.toLowerCase()} en Sevilla, Cádiz y toda España.`}
->
+<BaseLayout title={service.title} description={service.description} structuredData={[buildBreadcrumbSchema([{ name: "Inicio", path: "/" }, { name: "Servicios", path: "/servicios" }, { name: service.title, path }]), buildServiceSchema(service, path)]}>
+    <section class={`service-detail service-detail--cinematic service-detail--${service.slug}`}>
+        <VideoBackground desktop={service.video || settings.hero_video_desktop} mobile={service.video_vertical || service.video || settings.hero_video_mobile} title={service.title} overlay="none" />
+        <div class="service-detail__shade" aria-hidden="true"></div>
 
-    <!-- ═══ SCREEN 1: VIDEO HERO ═══ -->
-    <section class="detail-hero" id="detail-hero">
-        <div class="detail-hero__bg">
-            {videoIsNative ? (
-                <video aria-hidden="true" src={videoUrl} 
-                    class="detail-hero__iframe" 
-                    autoplay loop muted playsinline 
-                    style="object-fit: cover;"
-                ></video>
-            ) : videoId ? (
-                <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
-                    class="detail-hero__iframe"
-                    frameborder="0"
-                    allow="autoplay; encrypted-media"
-                    title={`Vídeo de ${service.title}`}
-                ></iframe>
-            ) : (
-                <div class="detail-hero__fallback">
-                    <span class="detail-hero__fallback-icon">{service.icon}</span>
+        <div class="service-detail__stage">
+            <article class="service-detail__hero" aria-labelledby="service-title">
+                <a class="service-detail__back" href="/servicios">{copy.back}</a>
+                <p class="service-detail__kicker">{copy.kicker}</p>
+                <h1 id="service-title">
+                    {copy.title.map((line: string) => <span>{line}</span>)}
+                </h1>
+                {service.description && <p class="service-detail__description">{service.description}</p>}
+            </article>
+
+            <aside class="service-detail__brief" aria-label={`Contacto para ${service.title}`}>
+                <p class="service-detail__brief-label">{copy.briefLabel}</p>
+                <h2>{copy.briefTitle}</h2>
+                <div class="service-detail__actions">
+                    <a href="/contacto">Contactar</a>
+                    <button class="js-open-chat" type="button">Chat en vivo</button>
                 </div>
-            )}
-        </div>
-        <div class="detail-hero__overlay"></div>
-
-        <!-- Back link -->
-        <a href="/servicios" class="detail-hero__back">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-            Volver a servicios
-        </a>
-
-        <!-- Content -->
-        <div class="detail-hero__content">
-            <div class="detail-hero__badge">
-                <span class="detail-hero__dot"></span>
-                <span>Servicio</span>
-            </div>
-            <h1 class="detail-hero__title">{service.title}</h1>
-            <p class="detail-hero__subtitle">{service.description}</p>
+            </aside>
         </div>
 
-        <!-- Scroll indicator -->
-        <div class="detail-hero__scroll">
-            <span>Descubre más</span>
-            <div class="detail-hero__scroll-arrow">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </div>
+        <div class="service-detail__notes" aria-label="Proceso">
+            {copy.notes.map((note: string) => <span>{note}</span>)}
         </div>
     </section>
 
-    <!-- ═══ SCREEN 2: CONTENT ═══ -->
-    <section class="detail-content" id="detail-content">
-        <div class="detail-content__inner">
-
-            <!-- Description with optional vertical video -->
-            <div class="detail-desc reveal">
-                <div class={`detail-desc__layout ${(videoVerticalUrl || videoVerticalId) ? 'detail-desc__layout--with-video' : ''}`}>
-                    {videoVerticalUrl || videoVerticalId ? (
-                        <div class="detail-vertical-video">
-                            <div class="detail-vertical-video__frame">
-                                {videoVerticalIsNative ? (
-                                    <video aria-hidden="true" src={videoVerticalUrl} 
-                                        class="detail-vertical-video__iframe vm-exclusive-video" 
-                                        autoplay loop muted playsinline 
-                                        style="object-fit: cover;"
-                                    ></video>
-                                ) : (
-                                    <iframe
-                                        src={`https://www.youtube-nocookie.com/embed/${videoVerticalId}?autoplay=0&mute=1&controls=1&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
-                                        class="detail-vertical-video__iframe vm-exclusive-video"
-                                        frameborder="0"
-                                        allow="autoplay; encrypted-media"
-                                        title={`Vídeo vertical de ${service.title}`}
-                                    ></iframe>
-                                )}
-                            </div>
-                        </div>
-                    ) : null}
-                    <div class="detail-desc__text">
-                        <h2 class="detail-desc__heading">
-                            ¿Qué incluye nuestro servicio de
-                            <span class="detail-desc__heading-accent">{service.title.toLowerCase()}</span>?
-                        </h2>
-                        <div class="detail-desc__body">
-                            <p>{service.description}</p>
-                            <p>
-                                En VideoMarketing Sevilla, nuestro servicio de {service.title.toLowerCase()} está diseñado para ayudar a tu empresa a comunicar su mensaje de forma efectiva y memorable. Cada proyecto es único y se adapta a las necesidades específicas de tu marca.
-                            </p>
-                        </div>
-                        <!-- CTA -->
-                        <div class="detail-cta reveal" style="margin-top: 2rem;">
-                            <h3 class="detail-cta__title">¿Necesitas {service.title.toLowerCase()}?</h3>
-                            <p class="detail-cta__text">Solicita tu presupuesto personalizado sin compromiso</p>
-                            <a href="/contacto" class="detail-cta__btn">
-                                Solicitar presupuesto
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Related Services -->
-            <div class="detail-related reveal">
-                <h2 class="detail-related__title">Otros servicios</h2>
-                <div class="detail-related__grid">
-                    {otherServices.map((s: any) => (
-                        <a href={`/servicios/${s.slug}`} class="detail-related__card">
-                            <div class="detail-related__icon">{s.icon}</div>
-                            <div>
-                                <div class="detail-related__name">{s.title}</div>
-                                <div class="detail-related__sub">{s.description}</div>
-                            </div>
-                            <svg class="detail-related__arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                            </svg>
-                        </a>
-                    ))}
-                </div>
-            </div>
-
+    <section class="service-detail__after">
+        <div class="service-detail__after-heading">
+            <p>{copy.afterLabel}</p>
+            <h2>{copy.afterTitle}</h2>
         </div>
+        <FaqsSection serviceSlug={service.slug} />
     </section>
-
-    <!-- ═══ FAQ SECTION ═══ -->
-
-
 </BaseLayout>
 
-<script>
-    /* ── Fullpage Scroll ── */
-    document.addEventListener('DOMContentLoaded', () => {
-        const sections = Array.from(document.querySelectorAll('section'));
-        if (sections.length === 0) return;
+<style>
+    .service-detail { position: relative; background: #000; overflow: hidden; }
+    .service-detail--cinematic { min-height: 100svh; display: grid; padding: clamp(5.8rem, 9.6vh, 7rem) clamp(1rem, 4vw, 4rem) clamp(.7rem, 1.4vh, 1rem); color: #fff; isolation: isolate; }
+    .service-detail__shade { position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(0, 0, 0, .9) 0%, rgba(0, 0, 0, .5) 48%, rgba(0, 0, 0, .82) 100%), linear-gradient(180deg, rgba(0, 0, 0, .06) 0%, rgba(0, 0, 0, .8) 100%); }
+    .service-detail--videoclips .service-detail__shade { background: linear-gradient(90deg, rgba(0, 0, 0, .86) 0%, rgba(0, 0, 0, .42) 48%, rgba(0, 0, 0, .88) 100%), linear-gradient(180deg, rgba(0, 0, 0, .1) 0%, rgba(0, 0, 0, .82) 100%); }
+    .service-detail__stage { position: relative; z-index: 2; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .55fr); gap: clamp(1rem, 3vw, 3rem); align-items: center; padding-bottom: clamp(4.5rem, 11vh, 7rem); }
+    .service-detail__hero { display: grid; align-content: end; gap: clamp(.55rem, 1.2vh, .9rem); max-width: 980px; }
+    .service-detail__back { width: max-content; color: inherit; text-decoration: none; font-size: .68rem; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; opacity: .78; }
+    .service-detail__back:hover, .service-detail__back:focus-visible { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+    .service-detail__kicker { margin: 0; color: rgba(255, 255, 255, .74); font-size: clamp(.72rem, 1vw, .9rem); font-weight: 850; text-transform: uppercase; }
+    .service-detail--cinematic h1 { margin: 0; font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; font-size: clamp(4.8rem, 10vw, min(11rem, 21vh)); font-weight: 400; line-height: .82; text-transform: uppercase; }
+    .service-detail--cinematic h1 span { display: block; }
+    .service-detail__description { max-width: 720px; margin: 0; color: rgba(255, 255, 255, .84); font-size: clamp(.98rem, 1.35vw, 1.25rem); line-height: 1.35; }
+    .service-detail__brief { display: grid; gap: .85rem; padding: clamp(1rem, 2vw, 1.35rem) 0 clamp(1rem, 2vw, 1.35rem) clamp(1rem, 2vw, 1.6rem); border-left: 1px solid rgba(255, 255, 255, .28); }
+    .service-detail__brief-label { margin: 0; color: rgba(255, 255, 255, .55); font-size: .65rem; font-weight: 850; text-transform: uppercase; }
+    .service-detail__brief h2 { max-width: 420px; margin: 0; font-size: clamp(1.45rem, 2.4vw, 2.5rem); font-weight: 900; line-height: .98; text-transform: uppercase; }
+    .service-detail__actions { display: flex; flex-wrap: wrap; gap: .55rem; }
+    .service-detail__actions a, .service-detail__actions button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0 1rem; color: #000; background: #fff; border: 1px solid #fff; border-radius: 999px; text-decoration: none; font: inherit; font-size: .75rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .service-detail__actions a:hover, .service-detail__actions button:hover, .service-detail__actions a:focus-visible, .service-detail__actions button:focus-visible { color: #fff; background: #000; transform: translateY(-2px); }
+    .service-detail__notes { position: absolute; right: clamp(1rem, 4vw, 4rem); bottom: clamp(.7rem, 1.4vh, 1rem); left: clamp(1rem, 4vw, 4rem); z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; border: 1px solid rgba(255, 255, 255, .24); background: rgba(255, 255, 255, .2); }
+    .service-detail__notes span { min-height: 58px; display: grid; place-items: center; padding: .65rem; color: rgba(255, 255, 255, .82); background: rgba(0, 0, 0, .55); font-size: .7rem; font-weight: 850; text-align: center; text-transform: uppercase; backdrop-filter: blur(14px); }
+    .service-detail__after { display: grid; grid-template-columns: minmax(280px, .55fr) minmax(0, 1fr); gap: clamp(1rem, 4vw, 4rem); align-items: start; padding: clamp(5.8rem, 9vh, 6.8rem) clamp(1rem, 4vw, 4rem) clamp(3rem, 6vh, 4.8rem); color: #000; background: #fff; }
+    .service-detail__after-heading { position: sticky; top: 7rem; display: grid; gap: .8rem; }
+    .service-detail__after-heading p { margin: 0; color: rgba(0, 0, 0, .48); font-size: .7rem; font-weight: 850; text-transform: uppercase; }
+    .service-detail__after-heading h2 { max-width: 520px; margin: 0; font-size: clamp(2.2rem, 4.6vw, 4.8rem); font-weight: 900; line-height: .92; text-transform: uppercase; }
+    .service-detail__after :global(.service-faqs) { margin: 0; }
+    .service-detail__after :global(.service-faqs h2) { margin-bottom: 1rem; font-family: inherit; font-size: .82rem; font-weight: 850; text-transform: uppercase; }
 
-        // Solo activar scroll snap en escritorio (>1024px)
-        if (window.innerWidth <= 1024) return;
+    @media (max-width: 940px) {
+        .service-detail--cinematic { height: auto; min-height: 100svh; overflow: visible; }
+        .service-detail__stage, .service-detail__after { grid-template-columns: 1fr; }
+        .service-detail__brief { padding: 1rem 0 0; border-top: 1px solid rgba(255, 255, 255, .28); border-left: 0; }
+        .service-detail__after-heading { position: static; }
+    }
 
-        let isScrolling = false;
-        let scrollTimeout: ReturnType<typeof setTimeout>;
-        
-
-        function getVisibleSectionIndex() {
-            let maxIdx = 0, maxArea = 0;
-            sections.forEach((sec, idx) => {
-                const r = sec.getBoundingClientRect();
-                const visible = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0));
-                if (visible > maxArea) { maxArea = visible; maxIdx = idx; }
-            });
-            return maxIdx;
-        }
-
-        function scrollToSection(index: number) {
-            if (index < 0 || index >= sections.length || isScrolling) return;
-            isScrolling = true;
-            sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                isScrolling = false;
-            }, 1300);
-        }
-
-        window.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (isScrolling) return;
-
-            const currentIndex = getVisibleSectionIndex();
-            if (e.deltaY > 0) {
-                scrollToSection(currentIndex + 1);
-            } else if (e.deltaY < 0) {
-                scrollToSection(currentIndex - 1);
-            }
-        }, { passive: false });
-
-        let touchStartY = 0;
-        window.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].screenY; }, { passive: false });
-        window.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
-        window.addEventListener('touchend', (e) => {
-            if (isScrolling) return;
-            const delta = touchStartY - e.changedTouches[0].screenY;
-            const cur = getVisibleSectionIndex();
-            if (delta > 50) scrollToSection(cur + 1);
-            else if (delta < -50) scrollToSection(cur - 1);
-        }, { passive: false });
-
-        window.addEventListener('keydown', (e) => {
-            const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' '];
-            if (keys.includes(e.key)) {
-                e.preventDefault();
-                if (isScrolling) return;
-                const cur = getVisibleSectionIndex();
-                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') scrollToSection(cur + 1);
-                else scrollToSection(cur - 1);
-            }
-        }, { passive: false });
-    });
-</script>
+    @media (max-width: 700px) {
+        .service-detail--cinematic { padding: 6rem 1rem 5.8rem; }
+        .service-detail--cinematic h1 { font-size: clamp(3.5rem, 17vw, 5.6rem); }
+        .service-detail__stage { padding-bottom: 11rem; }
+        .service-detail__notes { grid-template-columns: 1fr; }
+    }
+</style>

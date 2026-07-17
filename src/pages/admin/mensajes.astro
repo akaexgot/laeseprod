@@ -75,17 +75,13 @@ if (serviceSupabase) {
                                         <div class="text-xs text-zinc-400">
                                             <a href={`mailto:${msg.email}`} class="hover:text-rose-400 transition-colors" onclick="event.stopPropagation()">{msg.email}</a>
                                         </div>
-                                        {msg.company && (
-                                            <span class="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-zinc-700 mt-1">
-                                                {msg.company}
-                                            </span>
-                                        )}
+                                        {msg.phone && <span class="text-xs text-zinc-500 mt-1">{msg.phone}</span>}
                                     </div>
                                     <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0 mt-1"></i>
                                 </div>
                             </td>
                             <td class="hidden sm:table-cell align-top" style="padding: 1.25rem 1.5rem;">
-                                <p class="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed line-clamp-2">{msg.message}</p>
+                                <p class="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed line-clamp-2">{msg.idea || 'Sin idea descrita'}</p>
                             </td>
                             <td class="hidden md:table-cell align-top" style="padding: 1.25rem 1.5rem;">
                                 <span class="text-xs text-zinc-500">
@@ -149,7 +145,7 @@ if (serviceSupabase) {
                 <p id="view-name" class="text-zinc-200 font-medium"></p>
                 <div class="flex items-center gap-3 mt-1 opacity-80">
                     <a id="view-email" href="#" class="text-rose-400 text-sm hover:underline"></a>
-                    <span id="view-company" class="text-zinc-500 text-sm"></span>
+                    <span id="view-phone" class="text-zinc-500 text-sm"></span>
                 </div>
             </div>
             <div>
@@ -222,8 +218,8 @@ if (serviceSupabase) {
                 const elEmail = document.getElementById('view-email') as HTMLAnchorElement;
                 elEmail.textContent = msg.email;
                 elEmail.href = `mailto:${msg.email}`;
-                document.getElementById('view-company')!.textContent = msg.company ? `| ${msg.company}` : '';
-                document.getElementById('view-message')!.textContent = msg.message;
+                document.getElementById('view-phone')!.textContent = msg.phone ? `| ${msg.phone}` : '';
+                document.getElementById('view-message')!.textContent = msg.idea || 'Sin idea descrita';
                 
                 const d = new Date(msg.created_at);
                 document.getElementById('view-date')!.textContent = d.toLocaleDateString('es-ES', { 

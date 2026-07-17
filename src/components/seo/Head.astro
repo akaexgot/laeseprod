@@ -21,8 +21,8 @@ const settings = await getSettings();
 const pageSeo = await getPageSeo(cleanPath(Astro.url.pathname));
 
 const siteUrl = getSiteUrl();
-const siteName = settings.site_name || 'VideoMarketing Sevilla';
-const defaultDescription = settings.site_description || 'Productora audiovisual especializada en video marketing para empresas en Sevilla, Cadiz y toda Espana.';
+const siteName = settings.site_name || 'LaesePROD';
+const defaultDescription = settings.site_description || 'Productora audiovisual especializada en bodas y videoclips.';
 
 const {
   title,
@@ -38,14 +38,15 @@ const {
 const rawTitle = pageSeo?.title || title;
 const fullTitle = rawTitle
   ? (rawTitle.includes(siteName) || rawTitle.includes('|') ? rawTitle : `${rawTitle} | ${siteName}`)
-  : `${siteName} | Productora Audiovisual en Sevilla`;
+  : `${siteName} | Bodas y videoclips`;
 
 const metaDescription = pageSeo?.description || description || defaultDescription;
 const canonicalUrl = pageSeo?.canonical_url || canonicalFromUrl(url);
-const resolvedImage = absoluteUrl(pageSeo?.og_image || image || settings.logo_url || '/logo2.png') || `${siteUrl}/logo2.png`;
+const resolvedImage = absoluteUrl(pageSeo?.og_image || image || settings.logo_url);
+const faviconUrl = absoluteUrl(settings.logo_url);
 const resolvedImageAlt = imageAlt || `${siteName} - productora audiovisual en Sevilla`;
 const shouldNoindex = noindex || pageSeo?.no_index === true;
-const themeColor = settings.primary_color || '#9B1B30';
+const themeColor = '#000000';
 
 const youtubeId = settings.hero_video_desktop?.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/)?.[1] || 'D91q99QK11k';
 
@@ -56,10 +57,10 @@ const localBusinessSchema = {
   name: siteName,
   description: defaultDescription,
   url: siteUrl,
-  logo: absoluteUrl(settings.logo_url || '/logo2.png'),
+  logo: absoluteUrl(settings.logo_url),
   image: resolvedImage,
   telephone: settings.phone || '+34600000000',
-  email: settings.email || 'info@videomarketingsevilla.es',
+  email: settings.email || 'laeseprod@gmail.com',
   address: {
     '@type': 'PostalAddress',
     streetAddress: settings.address || 'Sevilla',
@@ -82,7 +83,7 @@ const localBusinessSchema = {
   contactPoint: {
     '@type': 'ContactPoint',
     telephone: settings.phone || '+34600000000',
-    email: settings.email || 'info@videomarketingsevilla.es',
+    email: settings.email || 'laeseprod@gmail.com',
     contactType: 'sales',
     areaServed: 'ES',
     availableLanguage: ['es'],
@@ -130,41 +131,36 @@ const schemaItems = [
 <meta property="og:url" content={canonicalUrl} />
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={metaDescription} />
-<meta property="og:image" content={resolvedImage} />
-<meta property="og:image:alt" content={resolvedImageAlt} />
+{resolvedImage && <meta property="og:image" content={resolvedImage} />}
+{resolvedImage && <meta property="og:image:alt" content={resolvedImageAlt} />}
 <meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content="es_ES" />
 
 <!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:card" content={resolvedImage ? "summary_large_image" : "summary"} />
 <meta name="twitter:url" content={canonicalUrl} />
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={metaDescription} />
-<meta name="twitter:image" content={resolvedImage} />
-<meta name="twitter:image:alt" content={resolvedImageAlt} />
+{resolvedImage && <meta name="twitter:image" content={resolvedImage} />}
+{resolvedImage && <meta name="twitter:image:alt" content={resolvedImageAlt} />}
 
 <!-- Schema.org -->
 {schemaItems.map((schema) => (
-  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
 ))}
 
-<!-- Preload Critical Assets -->
+<!-- Preload critical video poster -->
 <link rel="preload" href={`https://i.ytimg.com/vi_webp/${youtubeId}/hqdefault.webp`} as="image" fetchpriority="high" />
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" as="style" />
 
 <!-- Security Meta Tags -->
 <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
 
-<!-- Preconnect Google Fonts & DNS-Prefetch Media -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Media connections -->
 <link rel="preconnect" href="https://i.ytimg.com" crossorigin />
 <link rel="dns-prefetch" href="https://www.youtube-nocookie.com" />
 <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-<!-- Favicon -->
-<link rel="icon" type="image/png" href="/favicon.png" />
-<link rel="apple-touch-icon" href="/favicon.png" />
+<!-- Uses the logo configured from the admin panel when available. -->
+{faviconUrl && <link rel="icon" href={faviconUrl} />}
+{faviconUrl && <link rel="apple-touch-icon" href={faviconUrl} />}

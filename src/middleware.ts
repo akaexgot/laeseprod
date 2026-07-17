@@ -4,7 +4,7 @@ import { getServiceSupabase } from "./lib/supabase";
 
 const PROTECTED = ["/admin", "/api/admin"];
 const PUBLIC = ["/admin/login"];
-const CANONICAL_HOST = "videomarketingsevilla.com";
+const CANONICAL_HOST = new URL(import.meta.env.PUBLIC_SITE_URL || "https://laeseprod.com").hostname;
 const LEGACY_REDIRECTS: Record<string, string> = {
   "/ultimos-proyectos": "/proyectos",
 };
@@ -122,8 +122,7 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
   const SECTION_MAP: Record<string, string> = {
     "/admin/proyectos": "proyectos",
     "/admin/servicios": "servicios",
-    "/admin/sectores": "sectores",
-    "/admin/empresas": "empresas",
+    "/admin/faqs": "faqs",
     "/admin/portal": "portal",
     "/admin/contratos": "contratos",
     "/admin/mensajes": "mensajes",
@@ -137,9 +136,6 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     "/api/admin/proyectos": "proyectos",
     "/api/admin/services": "servicios",
     "/api/admin/servicios": "servicios",
-    "/api/admin/sectors": "sectores",
-    "/api/admin/sectores": "sectores",
-    "/api/admin/companies": "empresas",
     "/api/admin/faqs": "faqs",
     "/api/admin/portal": "portal",
     "/api/admin/contracts": "contratos",
@@ -148,7 +144,6 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     "/api/admin/templates": "ajustes",
     "/api/admin/upload": "upload",
     "/api/admin/cloudinary-sign": "upload",
-    "/api/admin/awards": "ajustes",
     "/api/admin/seo": "seo",
     "/api/admin/users": "usuarios",
     "/api/chat": "chat",

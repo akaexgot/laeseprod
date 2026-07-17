@@ -7,4 +7,4 @@ Disallow: /portal-clientes
 Disallow: /contrato/
 Disallow: /carta/
 
-Sitemap: https://videomarketingsevilla.com/sitemap.xml
+Sitemap: https://laeseprod.com/sitemap.xml

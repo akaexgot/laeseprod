@@ -343,7 +343,7 @@ export async function generateContractPDF(title: string, htmlContent: string, si
         const { width } = pages[i].getSize();
         
         // Left side: Company info
-        pages[i].drawText(`VideoMarketing Sevilla | www.videomarketingsevilla.com`, {
+        pages[i].drawText(`LaesePROD | ${(import.meta.env.PUBLIC_SITE_URL || 'https://laeseprod.com').replace(/^https?:\/\//, '')}`, {
             x: margin,
             y: 20,
             size: 8,
@@ -390,7 +390,7 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
     const fontMain = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const margin = 50;
-    const carmin = rgb(0.61, 0.11, 0.19);
+    const carmin = rgb(0, 0, 0);
     const dark = rgb(0.08, 0.08, 0.1);
     const muted = rgb(0.42, 0.42, 0.46);
     const lightLine = rgb(0.88, 0.88, 0.9);

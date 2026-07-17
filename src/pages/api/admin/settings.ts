@@ -4,6 +4,7 @@
  */
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
+import { invalidateCache } from '../../../lib/data';
 
 export const POST: APIRoute = async ({ request }) => {
     const sb = getServiceSupabase();
@@ -15,9 +16,9 @@ export const POST: APIRoute = async ({ request }) => {
         const allowedKeys = [
             'site_name', 'site_description', 'logo_url', 'primary_color', 'secondary_color',
             'font_heading', 'font_body', 'whatsapp_number', 'phone', 'email', 'address',
-            'instagram', 'linkedin', 'google_maps_embed', 'hero_title', 'hero_subtitle',
-            'hero_video_desktop', 'hero_video_mobile',
-            'about_corporate_video', 'faq_section_enabled'
+            'instagram', 'linkedin', 'google_maps_embed',
+            'hero_video_desktop', 'hero_video_mobile', 'contact_hero_video',
+            'about_summary', 'contract_terms_text', 'faq_section_enabled'
         ];
 
         const updates: Record<string, any> = {};
@@ -47,6 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
             .single();
 
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+        invalidateCache('settings');
         return new Response(JSON.stringify(data), { status: 200 });
     } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });

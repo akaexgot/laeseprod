@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getProjects, getServices, getSectors } from '../lib/data';
+import { getProjects, getServices } from '../lib/data';
 
 type SitemapPage = {
     url: string;
@@ -18,16 +18,12 @@ const staticPages: SitemapPage[] = [
     { url: '/', priority: '1.0', changefreq: 'weekly' },
     { url: '/proyectos', priority: '0.9', changefreq: 'weekly' },
     { url: '/servicios', priority: '0.9', changefreq: 'monthly' },
-    { url: '/sectores', priority: '0.9', changefreq: 'monthly' },
-    { url: '/quienes-somos', priority: '0.8', changefreq: 'monthly' },
     { url: '/contacto', priority: '0.8', changefreq: 'monthly' },
-    { url: '/privacidad', priority: '0.3', changefreq: 'yearly' },
-    { url: '/aviso-legal', priority: '0.3', changefreq: 'yearly' },
-    { url: '/cookies', priority: '0.3', changefreq: 'yearly' },
+    { url: '/legal', priority: '0.3', changefreq: 'yearly' },
 ];
 
 function getSiteUrl() {
-    return (import.meta.env.PUBLIC_SITE_URL || 'https://videomarketingsevilla.com').replace(/\/+$/, '');
+    return (import.meta.env.PUBLIC_SITE_URL || 'https://laeseprod.com').replace(/\/+$/, '');
 }
 
 function escapeXml(value: string) {
@@ -63,17 +59,15 @@ export const GET: APIRoute = async () => {
     const site = getSiteUrl();
     const today = new Date().toISOString().split('T')[0];
 
-    const [projects, services, sectors] = await Promise.all([
+    const [projects, services] = await Promise.all([
         getProjects(),
         getServices(),
-        getSectors(),
     ]);
 
     const allPages: SitemapPage[] = [
         ...staticPages,
         ...dynamicPages(projects, '/proyectos', '0.7'),
         ...dynamicPages(services, '/servicios', '0.8'),
-        ...dynamicPages(sectors, '/sectores', '0.8'),
     ];
 
     const body = `<?xml version="1.0" encoding="UTF-8"?>

@@ -30,9 +30,6 @@ const allMenuGroups = [
         items: [
             { label: "Proyectos", href: "/admin/proyectos", icon: "video", id: "proyectos" },
             { label: "Servicios", href: "/admin/servicios", icon: "layers", id: "servicios" },
-            { label: "Sectores", href: "/admin/sectores", icon: "building-2", id: "sectores" },
-            { label: "Empresas", href: "/admin/empresas", icon: "briefcase", id: "empresas" },
-            { label: "Premios", href: "/admin/premios", icon: "award", id: "premios" },
             { label: "FAQs", href: "/admin/faqs", icon: "help-circle", id: "faqs" }
         ]
     },
@@ -75,7 +72,6 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="robots" content="noindex, nofollow" />
         <title>{title} | Admin Panel</title>
-        <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -151,7 +147,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
                 <!-- Logo -->
                 <div class="border-b border-zinc-800" style="height: 64px; display: flex; align-items: center; padding: 0 1.5rem;">
                     <a href="/admin" class="flex items-center group w-full">
-                        <img src="/logo-blanco-web.png" alt="VideoMarketing Sevilla Logo" class="h-8 lg:h-9 w-auto object-contain transition-transform duration-500 group-hover:scale-105" />
+                        <span class="text-white text-xl" style="font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">LaesePROD</span>
                     </a>
                 </div>
 

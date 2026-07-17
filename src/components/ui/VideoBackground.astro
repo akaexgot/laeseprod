@@ -1,0 +1,140 @@
+---
+import { getVideoId } from "../../lib/display";
+import { optimizeCloudinaryVideo } from "../../lib/cloudinary";
+
+interface Props {
+    desktop?: string | null;
+    mobile?: string | null;
+    title?: string;
+    overlay?: "light" | "dark" | "none";
+}
+
+const {
+    desktop = "",
+    mobile = desktop,
+    title = "Video de fondo",
+    overlay = "dark",
+} = Astro.props;
+
+function source(value: string | null | undefined, width: number) {
+    const url = String(value || "").trim();
+    const native = /cloudinary\.com|\.(mp4|webm)(\?.*)?$/i.test(url);
+    const youtubeId = native ? "" : getVideoId(url) || "";
+    return {
+        url: native ? optimizeCloudinaryVideo(url, { width, quality: "auto:best" }) : "",
+        youtubeId,
+        poster: youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : "",
+    };
+}
+
+const sources = {
+    desktop: source(desktop || mobile, 1920),
+    mobile: source(mobile || desktop, 1080),
+};
+const poster = sources.desktop.poster || sources.mobile.poster;
+---
+
+<div
+    class="video-background"
+    data-video-background
+    data-sources={JSON.stringify(sources)}
+    style={poster ? `background-image:url(${poster})` : undefined}
+    aria-hidden="true"
+>
+    <video class="video-background__native" muted loop playsinline preload="none"></video>
+    <iframe
+        class="video-background__youtube"
+        title={title}
+        tabindex="-1"
+        style="border: 0"
+        allow="autoplay; encrypted-media"
+    ></iframe>
+    {overlay !== "none" && <span class={`video-background__overlay video-background__overlay--${overlay}`}></span>}
+</div>
+
+<script>
+    function initVideoBackgrounds() {
+        document.querySelectorAll<HTMLElement>('[data-video-background]:not([data-ready])').forEach((root) => {
+            root.dataset.ready = 'true';
+            const sources = JSON.parse(root.dataset.sources || '{}');
+            const selected = window.matchMedia('(max-width: 767px)').matches ? sources.mobile : sources.desktop;
+            const video = root.querySelector<HTMLVideoElement>('.video-background__native');
+            const iframe = root.querySelector<HTMLIFrameElement>('.video-background__youtube');
+            if (!selected || (!selected.url && !selected.youtubeId)) return;
+
+            const load = () => {
+                if (selected.poster) root.style.backgroundImage = `url(${selected.poster})`;
+                if (selected.url && video) {
+                    video.src = selected.url;
+                    video.autoplay = true;
+                    video.addEventListener('playing', () => video.classList.add('is-visible'), { once: true });
+                    video.play().catch(() => {});
+                } else if (selected.youtubeId && iframe) {
+                    iframe.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${selected.youtubeId}`;
+                    iframe.addEventListener('load', () => iframe.classList.add('is-visible'), { once: true });
+                }
+            };
+
+            if (!('IntersectionObserver' in window)) return load();
+            const observer = new IntersectionObserver((entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    load();
+                    observer.disconnect();
+                }
+            }, { rootMargin: '240px' });
+            observer.observe(root);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initVideoBackgrounds);
+</script>
+
+<style is:global>
+    .video-background {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: #050505 center / cover no-repeat;
+        pointer-events: none;
+    }
+
+    .video-background__native,
+    .video-background__youtube {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        min-width: 177.78vh;
+        min-height: 56.25vw;
+        transform: translate(-50%, -50%) scale(1.02);
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 500ms ease;
+    }
+
+    .video-background__native.is-visible,
+    .video-background__youtube.is-visible {
+        opacity: 1;
+    }
+
+    .video-background__overlay {
+        position: absolute;
+        inset: 0;
+    }
+
+    .video-background__overlay--dark {
+        background: rgba(0, 0, 0, 0.28);
+    }
+
+    .video-background__overlay--light {
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .video-background__native,
+        .video-background__youtube {
+            display: none;
+        }
+    }
+</style>

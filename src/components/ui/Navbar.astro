@@ -1,320 +1,369 @@
 ---
-/**
- * Navbar — Estado único, sin conflictos
- */
+import { ChevronDown, FolderLock, Menu, MessageCircle, X } from "@lucide/astro";
 import { getNavigation, getSettings } from "../../lib/data";
-const allNavigation = await getNavigation();
-const navigation = allNavigation.filter((item: any) => !['Servicios', 'Sectores'].includes(item.label));
-const settings = await getSettings();
+
+const [navigation, settings] = await Promise.all([getNavigation(), getSettings()]);
+const links = navigation.filter((item: any) => item.is_visible !== false);
+const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const isActive = (href: string) => href === "/" ? currentPath === "/" : currentPath === href || currentPath.startsWith(`${href}/`);
+const siteName = settings.site_name || "LaesePROD";
 ---
 
-<nav id="navbar" class="fixed top-0 inset-x-0 z-50 transition-all duration-300">
-    <div id="nav-bg" class="absolute inset-0 -z-10 transition-all duration-300"></div>
+<header class="site-header" data-site-header>
+    <nav class="site-nav" aria-label="Navegacion principal">
+        <a class="site-nav__brand" href="/" aria-label={`${siteName}, inicio`}>
+            <img src="/logotipo-nav.png" alt={siteName} width="386" height="353" />
+        </a>
 
-    <div class="section-container relative lg:pt-[env(safe-area-inset-top)]">
-        <div id="nav-inner" class="flex items-center justify-between h-14 lg:h-24 transition-all duration-300">
-            <!-- Izquierda: Logo (dual images for scroll swap) -->
-            <a href="/" id="nav-logo-link" class="flex lg:flex-1 items-center justify-start group relative select-none">
-                <div class="relative h-12 lg:h-14 lg:min-w-[120px]">
-                    <img id="nav-logo-white" src="/logo-blanco-web.png" alt="VideoMarketing Sevilla Logo" width="200" height="56" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:1" />
-                    <img id="nav-logo-dark" src="/logo-oscuro-web.png" alt="VideoMarketing Sevilla Logo" width="200" height="56" class="h-12 lg:h-14 w-auto object-contain transition-all duration-500 group-hover:scale-105 absolute inset-0" style="opacity:0" />
+        <div class="site-nav__desktop">
+            {links.map((item: any) => item.href === "/servicios" ? (
+                <div class="site-nav__group">
+                    <a class:list={["site-nav__link", { "is-active": isActive(item.href) }]} href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
+                        <span class="nav-reveal"><span>{item.label}</span></span><ChevronDown size={16} stroke-width={2.2} aria-hidden="true" />
+                    </a>
+                    <div class="site-nav__submenu">
+                        <p>Servicios</p>
+                        <a href="/servicios/bodas"><span>Bodas</span><small>Historias para volver a vivirlas</small></a>
+                        <a href="/servicios/videoclips"><span>Videoclips</span><small>Imagen con identidad propia</small></a>
+                    </div>
                 </div>
-            </a>
+            ) : (
+                <a class:list={["site-nav__link", { "is-active": isActive(item.href) }]} href={item.href} aria-current={isActive(item.href) ? "page" : undefined}><span class="nav-reveal"><span>{item.label}</span></span></a>
+            ))}
+        </div>
 
-            <!-- Centro: Links (Absolutamente centrados) -->
-            <div class="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6">
-                {navigation.map((item: any) => (
-                    <a
-                        href={item.href}
-                        class="nav-link relative px-3 py-2 text-base lg:text-lg font-medium transition-colors duration-300 hover:opacity-100 line-animated tracking-wide"
-                        data-href={item.href}
-                    >
-                        {item.label}
+        <div class="site-nav__actions">
+            <button class="site-nav__portal" type="button" aria-label="Portal de clientes" title="Portal de clientes" data-portal-open>
+                <FolderLock size={19} stroke-width={2} aria-hidden="true" />
+            </button>
+            <button id="floating-chat-btn" class="site-nav__chat" type="button" aria-label="Abrir chat en vivo" title="Chat en vivo">
+                <MessageCircle size={21} stroke-width={2} aria-hidden="true" />
+                <span class="site-nav__chat-status"></span>
+            </button>
+            <button class="site-nav__toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-navigation" data-nav-toggle>
+                <Menu class="site-nav__menu-icon" size={23} stroke-width={2} aria-hidden="true" />
+                <X class="site-nav__close-icon" size={23} stroke-width={2} aria-hidden="true" />
+            </button>
+        </div>
+    </nav>
+
+    <div id="mobile-navigation" class="mobile-navigation" aria-hidden="true" data-mobile-nav>
+        <div class="mobile-navigation__inner">
+            <div class="mobile-navigation__primary">
+                {links.map((item: any, index: number) => (
+                    <a class:list={[{ "is-active": isActive(item.href) }]} href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
+                        <small>{String(index + 1).padStart(2, "0")}</small><span class="nav-reveal"><span>{item.label}</span></span>
                     </a>
                 ))}
             </div>
 
-            <!-- Derecha: CTA (desktop only) -->
-            <div class="hidden lg:flex lg:flex-1 items-center justify-end gap-3">
-                <a
-                    href="/portal-clientes"
-                    id="nav-cta"
-                    class="flex items-center justify-center w-11 h-11 rounded-full border transition-all duration-300 hover:bg-carmin hover:border-carmin hover:text-white"
-                    title="Portal de Clientes"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                </a>
+            <div class="mobile-navigation__services">
+                <p>Ir directamente a</p>
+                <a href="/servicios/bodas"><span class="nav-reveal"><span>Bodas</span></span></a>
+                <a href="/servicios/videoclips"><span class="nav-reveal"><span>Videoclips</span></span></a>
+            </div>
+
+            <div class="mobile-navigation__actions">
+                <button type="button" data-portal-open><FolderLock size={18} aria-hidden="true" />Portal de clientes</button>
+                <button class="js-open-chat" type="button"><MessageCircle size={18} aria-hidden="true" />Chat en vivo</button>
             </div>
         </div>
     </div>
-</nav>
+</header>
 
-<!-- Mobile menu (hidden, handled by bottom bar) -->
-<div id="mobile-menu" class="hidden"></div>
-
-<button type="button" id="floating-chat-btn"
-   class="fixed bottom-[6.5rem] lg:bottom-10 right-6 z-50 w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-[#c42847] to-[#9b1b30] rounded-full flex items-center justify-center shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-500 group" aria-label="Chat en vivo">
-    <svg viewBox="0 0 24 24" class="w-7 h-7 lg:w-8 lg:h-8 text-white transform group-hover:scale-110 transition-transform duration-500" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-        <path d="M8 12h.01M12 12h.01M16 12h.01"></path>
-    </svg>
-    <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></span>
-</button>
+<div class="portal-access-modal" data-portal-modal aria-hidden="true">
+    <button class="portal-access-modal__backdrop" type="button" aria-label="Cerrar acceso cliente" data-portal-close></button>
+    <div class="portal-access-modal__panel" role="dialog" aria-modal="true" aria-labelledby="portal-access-title">
+        <button class="portal-access-modal__close" type="button" aria-label="Cerrar" data-portal-close>
+            <X size={19} stroke-width={2} aria-hidden="true" />
+        </button>
+        <div class="portal-access-modal__icon" aria-hidden="true">
+            <FolderLock size={24} stroke-width={1.9} />
+        </div>
+        <h2 id="portal-access-title">Acceso cliente</h2>
+        <p data-portal-copy>Introduce tu codigo privado para abrir tu carpeta de Dropbox.</p>
+        <form class="portal-access-modal__form" data-portal-form>
+            <input data-portal-code type="password" inputmode="text" autocomplete="one-time-code" placeholder="Codigo de acceso" />
+            <p class="portal-access-modal__error" data-portal-error hidden></p>
+            <button type="submit" data-portal-submit>Introducir codigo</button>
+        </form>
+        <a class="portal-access-modal__dropbox" href="#" target="_blank" rel="noopener noreferrer" data-portal-dropbox hidden>Abrir Dropbox</a>
+    </div>
+</div>
 
 <script>
-(function () {
-    const navbar   = document.getElementById('navbar')!;
-    const navBg    = document.getElementById('nav-bg')!;
-    const navBrand = document.getElementById('nav-brand');
-    const navCta   = document.getElementById('nav-cta')!;
-    const navInner = document.getElementById('nav-inner')!;
-    const links    = navbar.querySelectorAll<HTMLElement>('.nav-link');
-    const lines    = navbar.querySelectorAll<HTMLElement>('.hamburger-line');
+    const header = document.querySelector<HTMLElement>('[data-site-header]');
+    const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+    const mobileNav = document.querySelector<HTMLElement>('[data-mobile-nav]');
+    const portalModal = document.querySelector<HTMLElement>('[data-portal-modal]');
+    const portalForm = document.querySelector<HTMLFormElement>('[data-portal-form]');
+    const portalCode = document.querySelector<HTMLInputElement>('[data-portal-code]');
+    const portalError = document.querySelector<HTMLElement>('[data-portal-error]');
+    const portalSubmit = document.querySelector<HTMLButtonElement>('[data-portal-submit]');
+    const portalDropbox = document.querySelector<HTMLAnchorElement>('[data-portal-dropbox]');
+    const portalCopy = document.querySelector<HTMLElement>('[data-portal-copy]');
+    const navBrand = document.querySelector<HTMLElement>('.site-nav__brand');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const path        = window.location.pathname;
-    const lightPages  = ['/portal-clientes'];
-    const isLightPage = lightPages.some(p => path === p || path.startsWith(p + '/'));
-    const isProjectPage = path.startsWith('/proyectos/') && path !== '/proyectos';
-
-    // ── Estilos por tema ──────────────────────────────────────────────
-    // DARK TRANSPARENT: encima de video/dark section sin scroll
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
-    const STYLE_DARK_TRANSPARENT = {
-        bg: isMobile 
-            ? 'transparent'
-            : 'linear-gradient(to bottom, rgba(5,5,8,0.55) 0%, rgba(5,5,8,0.12) 65%, transparent 100%)',
-        bgFilter:   'none',
-        border:     'none',
-        linkColor:  'rgba(255,255,255,0.80)',
-        linkHover:  '#ffffff',
-        brand:      '#ffffff',
-        cta:        { color: '#ffffff', border: 'rgba(255,255,255,0.15)', bg: 'rgba(255,255,255,0.05)' },
-        lines:      '#ffffff',
-        height:     true,   // h-24
+    const triggerScreenShake = () => {
+        if (prefersReducedMotion) return;
+        document.body.classList.remove('screen-shake');
+        void document.body.offsetWidth;
+        document.body.classList.add('screen-shake');
+        window.setTimeout(() => document.body.classList.remove('screen-shake'), 460);
     };
 
-    // DARK SOLID: scroll hacia abajo
-    // Fondo blanco con letras rojas solicitado por el usuario
-    const STYLE_DARK_SOLID = {
-        bg:         '#ffffff', 
-        bgFilter:   'none',
-        border:     '0 1px 0 0 rgba(0,0,0,0.1)',
-        linkColor:  '#ba1929', 
-        linkHover:  '#9b1422',
-        brand:      '#ba1929',
-        cta:        { color: '#ba1929', border: 'rgba(186,25,41,0.2)', bg: 'rgba(186,25,41,0.05)' },
-        lines:      '#ba1929',
-        height:     false,  // h-18
+    navBrand?.addEventListener('pointerenter', triggerScreenShake);
+    navBrand?.addEventListener('focus', triggerScreenShake);
+
+    const setMenuOpen = (open: boolean) => {
+        if (!header || !toggle || !mobileNav) return;
+        header.classList.toggle('menu-is-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Cerrar menu' : 'Abrir menu');
+        mobileNav.setAttribute('aria-hidden', String(!open));
+        document.body.classList.toggle('mobile-menu-open', open);
     };
 
-    // LIGHT_TOP: páginas blancas sin scroll
-    const STYLE_LIGHT_TOP = {
-        bg:         'transparent',
-        bgFilter:   'none',
-        border:     'none',
-        linkColor:  '#525252',
-        linkHover:  '#111111',
-        brand:      '#111111',
-        cta:        { color: '#111111', border: 'rgba(0,0,0,0.12)', bg: 'rgba(0,0,0,0.04)' },
-        lines:      '#111111',
-        height:     false,
+    const setPortalError = (message = '') => {
+        if (!portalError) return;
+        portalError.textContent = message;
+        portalError.hidden = !message;
     };
 
+    const resetPortalModal = () => {
+        if (portalCode) portalCode.value = '';
+        if (portalForm) portalForm.hidden = false;
+        if (portalSubmit) {
+            portalSubmit.disabled = false;
+            portalSubmit.textContent = 'Introducir codigo';
+        }
+        if (portalDropbox) {
+            portalDropbox.hidden = true;
+            portalDropbox.href = '#';
+            portalDropbox.textContent = 'Abrir Dropbox';
+        }
+        if (portalCopy) portalCopy.textContent = 'Introduce tu codigo privado para abrir tu carpeta de Dropbox.';
+        setPortalError();
+    };
 
+    const setPortalModalOpen = (open: boolean) => {
+        if (!portalModal) return;
+        portalModal.classList.toggle('is-open', open);
+        portalModal.setAttribute('aria-hidden', String(!open));
+        document.body.classList.toggle('portal-modal-open', open);
+        if (open) {
+            resetPortalModal();
+            setMenuOpen(false);
+            window.setTimeout(() => portalCode?.focus(), 80);
+        }
+    };
 
-    // Logo elements
-    const logoWhite = document.getElementById('nav-logo-white') as HTMLImageElement | null;
-    const logoDark  = document.getElementById('nav-logo-dark') as HTMLImageElement | null;
-
-    function applyStyle(s: typeof STYLE_DARK_TRANSPARENT) {
-        const mobile = window.innerWidth <= 1024;
-        
-        // Si es móvil y se pide el estilo "solid", usamos una versión oscura en vez de blanca para no desentonar
-        const isDarkSolidMobile = mobile && s === STYLE_DARK_SOLID;
-
-        // Ocultar completamente la barra en móvil al hacer scroll hacia abajo
-        if (isDarkSolidMobile) {
-            navbar.style.transform = 'translateY(-100%)';
-        } else {
-            navbar.style.transform = 'translateY(0)';
+    document.querySelectorAll<HTMLElement>('[data-portal-open]').forEach((button) => {
+        button.addEventListener('click', () => setPortalModalOpen(true));
+    });
+    document.querySelectorAll<HTMLElement>('[data-portal-close]').forEach((button) => {
+        button.addEventListener('click', () => setPortalModalOpen(false));
+    });
+    portalForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const code = portalCode?.value.trim() || '';
+        if (!code) {
+            setPortalError('Introduce tu codigo de acceso.');
+            return;
         }
 
-        // Fondo
-        navBg.style.background       = isDarkSolidMobile ? 'rgba(5,5,8,0.95)' : s.bg;
-        navBg.style.backdropFilter   = isDarkSolidMobile ? 'blur(10px)' : s.bgFilter;
-        (navBg.style as any).webkitBackdropFilter = isDarkSolidMobile ? 'blur(10px)' : s.bgFilter;
-        navBg.style.boxShadow        = isDarkSolidMobile ? '0 1px 0 0 rgba(255,255,255,0.05)' : s.border;
-        navBg.style.opacity          = '1';
+        if (portalSubmit) {
+            portalSubmit.disabled = true;
+            portalSubmit.textContent = 'Verificando...';
+        }
+        setPortalError();
 
-        // Links
-        links.forEach(l => {
-            l.style.color = isDarkSolidMobile ? '#ffffff' : s.linkColor;
-            l.onmouseenter = () => { l.style.color = isDarkSolidMobile ? '#ffffff' : s.linkHover; };
-            l.onmouseleave = () => { l.style.color = isDarkSolidMobile ? '#ffffff' : s.linkColor; };
-        });
+        try {
+            const response = await fetch('/api/portal/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code }),
+            });
+            const result = await response.json();
 
-        // Brand
-        if (navBrand) navBrand.style.color = isDarkSolidMobile ? '#ffffff' : s.brand;
-
-        // Logo swap: white logo for dark-transparent and dark-solid-mobile, dark logo otherwise
-        if (logoWhite && logoDark) {
-            if (s === STYLE_DARK_TRANSPARENT || isDarkSolidMobile || s === STYLE_LIGHT_TOP) {
-                // STYLE_LIGHT_TOP also generally uses dark logo, but wait!
-                // Actually, let's just stick to the specific condition for white logo
-                if (s === STYLE_DARK_TRANSPARENT || isDarkSolidMobile) {
-                    logoWhite.style.opacity = '1';
-                    logoDark.style.opacity  = '0';
-                } else {
-                    logoWhite.style.opacity = '0';
-                    logoDark.style.opacity  = '1';
-                }
-            } else {
-                logoWhite.style.opacity = '0';
-                logoDark.style.opacity  = '1';
+            if (!response.ok || !result.dropbox_link) {
+                setPortalError(result.error || 'No se ha podido verificar el codigo.');
+                return;
             }
-        }
 
-        // CTA: Rojo solo en /portal-clientes, de lo contrario lo que venga del estilo
-        if (path === '/portal-clientes') {
-            navCta.style.color            = '#c42847';
-            navCta.style.borderColor      = 'rgba(196,40,71,0.2)';
-            navCta.style.backgroundColor  = 'rgba(196,40,71,0.05)';
-        } else {
-            navCta.style.color            = isDarkSolidMobile ? '#ffffff' : s.cta.color;
-            navCta.style.borderColor      = isDarkSolidMobile ? 'rgba(255,255,255,0.15)' : s.cta.border;
-            navCta.style.backgroundColor  = isDarkSolidMobile ? 'rgba(255,255,255,0.05)' : s.cta.bg;
-        }
-
-        // Hamburger
-        lines.forEach(l => { l.style.background = isDarkSolidMobile ? '#ffffff' : s.lines; });
-
-        // Altura
-        if (s.height) {
-            navInner.classList.add('lg:h-24');
-            navInner.classList.remove('lg:h-18');
-        } else {
-            navInner.classList.remove('lg:h-24');
-            navInner.classList.add('lg:h-18');
-        }
-    }
-
-    // ── Estado actual ─────────────────────────────────────────────────
-    // 'dark-transparent' | 'dark-solid' | 'light'
-    let currentState = '';
-
-    function getDesiredState(): string {
-        const scrollY = window.scrollY;
-        
-        // 0. Project detail pages: always dark-transparent (white icons/logo)
-        if (isProjectPage) return 'dark-transparent';
-        if (path.startsWith('/carta')) return 'dark-solid';
-
-        const hero    = document.getElementById('hero');
-        const fp      = document.getElementById('featured-projects');
-        const cs      = document.getElementById('companies-section');
-
-        // 1. Pages with light backgrounds (Contact, Portal)
-        if (isLightPage) {
-            return scrollY > 80 ? 'light' : 'light-top';
-        }
-
-        // 2. Homepage / Dark Sections Logic
-        // En desktop, Hero y FeaturedProjects (pantallas 1 y 2) → siempre transparente
-        const isDesktop = window.innerWidth > 1024;
-        const navBottom = scrollY + 96;
-
-        // Hero section: transparente
-        if (hero && scrollY < hero.offsetHeight - 80) {
-            return 'dark-transparent';
-        }
-
-        // FeaturedProjects section (incluye CompaniesCarousel en desktop): transparente
-        if (fp) {
-            const fpTop = fp.offsetTop;
-            const fpBottom = fpTop + fp.offsetHeight;
-            if (navBottom >= fpTop && navBottom <= fpBottom) {
-                // En desktop, toda la sección featured-projects es oscura → transparente
-                // En móvil, el companies-section se renderiza fuera, así que respetar su posición
-                if (isDesktop) {
-                    return 'dark-transparent';
-                }
+            if (portalForm) portalForm.hidden = true;
+            if (portalCopy) portalCopy.textContent = `Acceso verificado${result.client_name ? ` para ${result.client_name}` : ''}.`;
+            if (portalDropbox) {
+                portalDropbox.href = result.dropbox_link;
+                portalDropbox.textContent = 'Abrir carpeta de Dropbox';
+                portalDropbox.hidden = false;
+                portalDropbox.focus();
             }
-        }
-
-        // CompaniesCarousel fuera de FeaturedProjects (móvil) o tras pasar FeaturedProjects
-        if (cs) {
-            const csTop = cs.getBoundingClientRect().top + scrollY;
-            if (scrollY + 80 >= csTop) {
-                return 'dark-solid';
+        } catch {
+            setPortalError('Error de conexion. Intentalo de nuevo.');
+        } finally {
+            if (portalSubmit) {
+                portalSubmit.disabled = false;
+                portalSubmit.textContent = 'Introducir codigo';
             }
-        }
-
-        // Default: scroll normal
-        return scrollY > 80 ? 'dark-solid' : 'dark-transparent';
-    }
-
-    function update() {
-        const desired = getDesiredState();
-        if (desired === currentState) return;
-        currentState = desired;
-
-        if (desired === 'dark-transparent') applyStyle(STYLE_DARK_TRANSPARENT);
-        else if (desired === 'dark-solid')  applyStyle(STYLE_DARK_SOLID);
-        else if (desired === 'light-top')   applyStyle(STYLE_LIGHT_TOP);
-        else                                applyStyle(STYLE_DARK_SOLID); // negro al scroll en light
-    }
-
-    // Ejecutar en scroll y también en resize (por si cambia offsetTop)
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update, { passive: true });
-    // Ejecutar al cargar
-    update();
-
-    // ── Active link ───────────────────────────────────────────────────
-    links.forEach(link => {
-        const href = link.dataset.href;
-        if (href === path || (href !== '/' && path.startsWith(href ?? ''))) {
-            link.style.fontWeight = '600';
         }
     });
 
-    // ── Mobile menu ───────────────────────────────────────────────────
-    const toggle = document.getElementById('mobile-menu-toggle');
-    const menu   = document.getElementById('mobile-menu');
-    const line1  = document.getElementById('line1');
-    const line2  = document.getElementById('line2');
-    let open = false;
+    toggle?.addEventListener('click', () => setMenuOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    mobileNav?.querySelectorAll('a, button').forEach((element) => element.addEventListener('click', () => setMenuOpen(false)));
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            setMenuOpen(false);
+            setPortalModalOpen(false);
+        }
+    });
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1080) setMenuOpen(false);
+    });
+    const updateHeader = () => header?.classList.toggle('is-scrolled', window.scrollY > 20);
+    updateHeader();
+    window.addEventListener('scroll', updateHeader, { passive: true });
+</script>
 
-    if (toggle && menu && line1 && line2) {
-        toggle.addEventListener('click', () => {
-            open = !open;
-            if (open) {
-                menu.classList.remove('opacity-0','pointer-events-none');
-                menu.classList.add('opacity-100','pointer-events-auto');
-                line1.classList.add('rotate-45','translate-y-[4px]');
-                line2.classList.add('-rotate-45','-translate-y-[3px]','w-6');
-                line1.style.background = '#fff';
-                line2.style.background = '#fff';
-                if (logoWhite) logoWhite.style.opacity = '1';
-                if (logoDark) logoDark.style.opacity = '0';
-                document.body.style.overflow = 'hidden';
-            } else {
-                menu.classList.add('opacity-0','pointer-events-none');
-                menu.classList.remove('opacity-100','pointer-events-auto');
-                line1.classList.remove('rotate-45','translate-y-[4px]');
-                line2.classList.remove('-rotate-45','-translate-y-[3px]','w-6');
-                document.body.style.overflow = '';
-                update(); // restaurar colores correctos tras cerrar
-            }
-        });
+<style>
+    .site-header { position: fixed; inset: 0 0 auto; z-index: 60; display: flex; justify-content: center; padding: 12px 18px 0; color: #111; pointer-events: none; }
+    .site-nav { position: relative; z-index: 2; width: clamp(780px, 52vw, 1020px); height: 70px; display: grid; grid-template-columns: minmax(96px, .9fr) auto minmax(92px, auto); align-items: center; padding: 0 10px 0 22px; background: rgba(255, 255, 255, .96); border: 1px solid rgba(0, 0, 0, .08); border-radius: 999px; box-shadow: 0 14px 38px rgba(0, 0, 0, .2); backdrop-filter: blur(18px); pointer-events: auto; animation: nav-drop-in 620ms cubic-bezier(.16, 1, .3, 1) both; transition: box-shadow 180ms ease, background 180ms ease; }
+    .site-header.is-scrolled .site-nav, .site-header.menu-is-open .site-nav { background: #fff; box-shadow: 0 18px 48px rgba(0, 0, 0, .28); }
+    .site-nav__brand { position: relative; z-index: 3; justify-self: start; min-width: 0; display: inline-flex; align-items: center; color: #090909; text-decoration: none; line-height: 1; white-space: nowrap; }
+    .site-nav__brand img { display: block; width: auto; height: 58px; object-fit: contain; object-position: left center; animation: logo-mark-in 720ms cubic-bezier(.16, 1, .3, 1) 160ms both; }
+    .site-nav__desktop { position: absolute; top: 0; bottom: 0; left: 50%; z-index: 2; display: flex; align-items: stretch; justify-content: center; gap: .2rem; transform: translateX(-50%); }
+    .site-nav__link { position: relative; display: inline-flex; align-items: center; gap: .35rem; padding: 0 .8rem; color: #5d5d5d; text-decoration: none; font-family: Arial, Helvetica, sans-serif; font-size: .8rem; font-weight: 650; text-transform: uppercase; transition: color 160ms ease; }
+    .nav-reveal { display: inline-block; overflow: hidden; vertical-align: bottom; white-space: nowrap; }
+    .nav-reveal > span { display: inline-block; animation: text-mask-reveal 720ms cubic-bezier(.16, 1, .3, 1) both; }
+    .site-nav__brand .nav-reveal > span { animation-delay: 180ms; }
+    .site-nav__desktop > :nth-child(1) .nav-reveal > span { animation-delay: 260ms; }
+    .site-nav__desktop > :nth-child(2) .nav-reveal > span { animation-delay: 340ms; }
+    .site-nav__desktop > :nth-child(3) .nav-reveal > span { animation-delay: 420ms; }
+    .site-nav__desktop > :nth-child(4) .nav-reveal > span { animation-delay: 500ms; }
+    .site-nav__desktop > :nth-child(5) .nav-reveal > span { animation-delay: 580ms; }
+    .site-nav__actions > * { animation: action-pop 520ms cubic-bezier(.16, 1, .3, 1) 480ms both; }
+    .site-nav__link::after { content: ""; position: absolute; right: .8rem; bottom: 13px; left: .8rem; height: 3px; background: #000; border-radius: 3px; transform: scaleX(0); transform-origin: right; transition: transform 180ms ease; }
+    .site-nav__link:hover, .site-nav__link:focus-visible, .site-nav__link.is-active { color: #000; }
+    .site-nav__link:hover::after, .site-nav__link:focus-visible::after, .site-nav__link.is-active::after { transform: scaleX(1); transform-origin: left; }
+    .site-nav__group { position: relative; display: flex; }
+    .site-nav__group .site-nav__link svg { transition: transform 160ms ease; }
+    .site-nav__group:hover .site-nav__link svg, .site-nav__group:focus-within .site-nav__link svg { transform: rotate(180deg); }
+    .site-nav__submenu { position: absolute; top: calc(100% + 10px); left: 50%; width: 340px; padding: 1.15rem; color: #000; background: #fff; border: 1px solid rgba(0, 0, 0, .15); border-radius: 18px; box-shadow: 0 22px 50px rgba(0, 0, 0, .25); opacity: 0; visibility: hidden; transform: translate(-50%, 8px); transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease; }
+    .site-nav__group:hover .site-nav__submenu, .site-nav__group:focus-within .site-nav__submenu { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+    .site-nav__submenu p { padding: .25rem .7rem .8rem; border-bottom: 1px solid #d8d8d8; color: #666; font-size: .72rem; font-weight: 650; text-transform: uppercase; }
+    .site-nav__submenu a { display: grid; gap: .15rem; padding: 1rem .7rem; color: #000; text-decoration: none; border-bottom: 1px solid #e6e6e6; }
+    .site-nav__submenu a:last-child { border-bottom: 0; }
+    .site-nav__submenu a:hover, .site-nav__submenu a:focus-visible { background: #f1f1f1; border-radius: 8px; }
+    .site-nav__submenu span { font-family: Arial, Helvetica, sans-serif; font-size: 1rem; font-weight: 650; text-transform: uppercase; }
+    .site-nav__submenu small { color: #5b5b5b; font-size: .8rem; }
+    .site-nav__actions { position: relative; z-index: 3; justify-self: end; display: flex; align-items: center; gap: .4rem; padding-left: .8rem; }
+    .site-nav__actions::before { content: ""; position: absolute; top: 8px; bottom: 8px; left: 0; width: 1px; background: #d6d6d6; }
+    .site-nav__portal, .site-nav__chat, .site-nav__toggle { width: 40px; height: 40px; display: grid; place-items: center; color: #000; background: #f0f0f0; border: 0; border-radius: 50%; text-decoration: none; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .site-nav__chat { position: relative; color: #fff; background: #000; }
+    .site-nav__portal:hover, .site-nav__portal:focus-visible, .site-nav__chat:hover, .site-nav__chat:focus-visible { transform: translateY(-2px); }
+    .site-nav__portal:hover, .site-nav__portal:focus-visible { color: #fff; background: #000; }
+    .site-nav__chat:hover, .site-nav__chat:focus-visible { color: #000; background: #e5e5e5; }
+    .site-nav__chat-status { position: absolute; top: 3px; right: 3px; width: 10px; height: 10px; background: #fff; border: 2px solid #000; border-radius: 50%; }
+    .site-nav__toggle { display: none; color: #fff; background: #000; }
+    .site-nav__close-icon { display: none; }
+    .mobile-navigation { display: none; }
+    :global(body.mobile-menu-open) { overflow: hidden; }
+    :global(body.portal-modal-open) { overflow: hidden; }
+    :global(body.screen-shake) { animation: screen-shake 420ms cubic-bezier(.36, .07, .19, .97) both; transform-origin: center center; }
+    .portal-access-modal { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 1rem; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 180ms ease, visibility 180ms ease; }
+    .portal-access-modal.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+    .portal-access-modal__backdrop { position: absolute; inset: 0; background: radial-gradient(circle at 50% 24%, rgba(255, 255, 255, .12), transparent 34%), rgba(0, 0, 0, .78); border: 0; backdrop-filter: blur(18px); cursor: pointer; }
+    .portal-access-modal__panel { position: relative; width: min(100%, 410px); padding: 2.25rem 2rem 2rem; color: #fff; background: linear-gradient(180deg, rgba(20, 20, 20, .98), rgba(5, 5, 5, .98)); border: 1px solid rgba(255, 255, 255, .16); border-radius: 24px; box-shadow: 0 34px 90px rgba(0, 0, 0, .56), inset 0 1px 0 rgba(255, 255, 255, .08); text-align: center; overflow: hidden; transform: translateY(14px) scale(.97); transition: transform 180ms ease; }
+    .portal-access-modal__panel::before { content: ""; position: absolute; top: 0; right: 2rem; left: 2rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .42), transparent); }
+    .portal-access-modal.is-open .portal-access-modal__panel { transform: translateY(0) scale(1); }
+    .portal-access-modal__close { position: absolute; top: .85rem; right: .85rem; width: 36px; height: 36px; display: grid; place-items: center; color: rgba(255, 255, 255, .62); background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .08); border-radius: 50%; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .portal-access-modal__close:hover, .portal-access-modal__close:focus-visible { color: #fff; background: rgba(255, 255, 255, .14); transform: rotate(90deg); }
+    .portal-access-modal__icon { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 1.05rem; color: #050505; background: linear-gradient(180deg, #fff, #e9e9e9); border-radius: 50%; box-shadow: 0 14px 34px rgba(255, 255, 255, .12); }
+    .portal-access-modal h2 { margin: 0; font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; font-size: 1.9rem; font-weight: 900; line-height: .92; text-transform: uppercase; }
+    .portal-access-modal p { max-width: 300px; margin: .85rem auto 1.4rem; color: rgba(255, 255, 255, .68); font-size: .88rem; line-height: 1.45; }
+    .portal-access-modal__form { display: grid; gap: .85rem; }
+    .portal-access-modal__form input { width: 100%; height: 50px; padding: 0 1rem; color: #fff; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .16); border-radius: 999px; outline: none; text-align: center; font: inherit; font-size: .95rem; font-weight: 800; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
+    .portal-access-modal__form input:focus { border-color: rgba(255, 255, 255, .62); background: rgba(255, 255, 255, .13); box-shadow: 0 0 0 4px rgba(255, 255, 255, .08), inset 0 1px 0 rgba(255, 255, 255, .08); }
+    .portal-access-modal__form input::placeholder { color: rgba(255, 255, 255, .46); font-weight: 800; }
+    .portal-access-modal__error { margin: -.15rem 0 0; color: #ff8f8f; font-size: .78rem; font-weight: 700; }
+    .portal-access-modal__form button, .portal-access-modal__dropbox { min-height: 50px; display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0 1rem; color: #000; background: linear-gradient(180deg, #fff, #f0f0f0); border: 1px solid #fff; border-radius: 999px; text-decoration: none; font: inherit; font-size: .8rem; font-weight: 950; text-transform: uppercase; cursor: pointer; box-shadow: 0 14px 34px rgba(255, 255, 255, .12); transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease; }
+    .portal-access-modal__form button:hover, .portal-access-modal__form button:focus-visible, .portal-access-modal__dropbox:hover, .portal-access-modal__dropbox:focus-visible { transform: translateY(-2px); }
+    .portal-access-modal__form button:disabled { opacity: .56; cursor: wait; transform: none; }
+    .portal-access-modal__dropbox { margin-top: .25rem; background: #0061ff; border-color: #0061ff; color: #fff; }
+
+    @keyframes nav-drop-in {
+        from { opacity: 0; transform: translateY(-26px) scale(.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    // ── Secret Admin Shortcut (Triple Click on Logo) ──
-    const logoLink = document.getElementById('nav-logo-link');
+    @keyframes text-mask-reveal {
+        from { opacity: 0; transform: translateY(115%); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-    // El acceso de administrador ahora se gestiona vía chat (escribiendo "admin") 
-    // para mayor fiabilidad en todos los dispositivos.
-})();
-</script>
+    @keyframes action-pop {
+        from { opacity: 0; transform: translateY(-8px) scale(.88); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes logo-mark-in {
+        from { opacity: 0; transform: translateY(10px) scale(.96); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes screen-shake {
+        0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+        10% { transform: translate3d(-8px, 4px, 0) rotate(-.35deg); }
+        20% { transform: translate3d(7px, -5px, 0) rotate(.32deg); }
+        30% { transform: translate3d(-6px, -3px, 0) rotate(-.24deg); }
+        40% { transform: translate3d(6px, 4px, 0) rotate(.22deg); }
+        55% { transform: translate3d(-4px, 3px, 0) rotate(-.16deg); }
+        70% { transform: translate3d(3px, -2px, 0) rotate(.12deg); }
+        85% { transform: translate3d(-2px, 1px, 0) rotate(-.08deg); }
+    }
+
+    @media (max-width: 1080px) {
+        .site-header { padding: 10px 10px 0; }
+        .site-nav { width: min(540px, calc(100vw - 20px)); height: 66px; grid-template-columns: 1fr auto; padding: 0 10px 0 18px; }
+        .site-nav__brand img { width: auto; height: 54px; }
+        .site-nav__desktop, .site-nav__portal, .site-nav__chat, .site-nav__actions::before { display: none; }
+        .site-nav__actions { display: block; padding: 0; }
+        .site-nav__toggle { display: grid; }
+        .site-header.menu-is-open .site-nav__menu-icon { display: none; }
+        .site-header.menu-is-open .site-nav__close-icon { display: block; }
+        .mobile-navigation { position: fixed; top: 84px; left: 50%; z-index: 1; display: block; width: clamp(320px, 50vw, 440px); max-width: calc(100vw - 24px); max-height: min(72svh, 560px); color: #000; background: rgba(255, 255, 255, .98); border: 1px solid rgba(0, 0, 0, .1); border-radius: 22px; box-shadow: 0 22px 55px rgba(0, 0, 0, .32); visibility: hidden; opacity: 0; transform: translate(-50%, -12px); overflow-y: auto; pointer-events: auto; transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease; }
+        .site-header.menu-is-open .mobile-navigation { visibility: visible; opacity: 1; transform: translate(-50%, 0); }
+        .mobile-navigation__inner { display: flex; flex-direction: column; padding: 1rem 1.1rem max(1rem, env(safe-area-inset-bottom)); }
+        .mobile-navigation__primary { display: grid; }
+        .mobile-navigation__primary a { min-height: 54px; display: grid; grid-template-columns: 2rem 1fr; align-items: center; color: #8a8a8a; border-bottom: 1px solid #d4d4d4; text-decoration: none; }
+        .mobile-navigation .nav-reveal > span { animation: none; }
+        .site-header.menu-is-open .mobile-navigation .nav-reveal > span { animation: text-mask-reveal 560ms cubic-bezier(.16, 1, .3, 1) both; }
+        .site-header.menu-is-open .mobile-navigation__primary a:nth-child(1) .nav-reveal > span { animation-delay: 80ms; }
+        .site-header.menu-is-open .mobile-navigation__primary a:nth-child(2) .nav-reveal > span { animation-delay: 140ms; }
+        .site-header.menu-is-open .mobile-navigation__primary a:nth-child(3) .nav-reveal > span { animation-delay: 200ms; }
+        .site-header.menu-is-open .mobile-navigation__primary a:nth-child(4) .nav-reveal > span { animation-delay: 260ms; }
+        .site-header.menu-is-open .mobile-navigation__services a:nth-of-type(1) .nav-reveal > span { animation-delay: 320ms; }
+        .site-header.menu-is-open .mobile-navigation__services a:nth-of-type(2) .nav-reveal > span { animation-delay: 380ms; }
+        .mobile-navigation__primary a.is-active, .mobile-navigation__primary a:hover { color: #000; }
+        .mobile-navigation__primary small { font-size: .62rem; font-weight: 700; }
+        .mobile-navigation__primary span { font-family: Arial, Helvetica, sans-serif; font-size: clamp(1rem, 4vw, 1.2rem); font-weight: 650; line-height: 1; text-transform: uppercase; }
+        .mobile-navigation__services { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1rem; }
+        .mobile-navigation__services p { grid-column: 1 / -1; color: #747474; font-size: .64rem; font-weight: 650; text-transform: uppercase; }
+        .mobile-navigation__services a { min-height: 42px; display: grid; place-items: center; color: #000; border: 1px solid #000; border-radius: 999px; text-decoration: none; font-size: .8rem; font-weight: 650; text-transform: uppercase; }
+        .mobile-navigation__actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1rem; padding-top: 0; }
+        .mobile-navigation__actions a, .mobile-navigation__actions button { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: .5rem; color: #fff; background: #000; border: 1px solid #000; border-radius: 999px; text-decoration: none; font: inherit; font-size: .74rem; font-weight: 650; cursor: pointer; }
+        .mobile-navigation__actions button.js-open-chat { color: #000; background: #fff; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .site-nav,
+        .site-nav__brand img,
+        .nav-reveal > span,
+        .site-nav__actions > *,
+        :global(body.screen-shake),
+        .site-header.menu-is-open .mobile-navigation .nav-reveal > span {
+            animation: none;
+        }
+    }
+</style>

@@ -92,10 +92,11 @@ function publicQuery<T>(
 /** Fetch site settings */
 export async function getSettings() {
     if (!supabase) return fallback.siteSettings;
+    const sb = supabase;
 
     return publicQuery(
         'settings',
-        () => supabase.from('settings').select('*').single(),
+        () => sb.from('settings').select('*').single(),
         fallback.siteSettings
     );
 }
@@ -103,12 +104,19 @@ export async function getSettings() {
 /** Fetch custom SEO metadata for a public page */
 export async function getPageSeo(pagePath: string) {
     if (!supabase) return null;
+    const sb = supabase;
 
     const normalizedPath = pagePath.length > 1 ? pagePath.replace(/\/+$/, '') : '/';
 
-    return publicQuery(
+    return publicQuery<{
+        title: string | null;
+        description: string | null;
+        canonical_url: string | null;
+        og_image: string | null;
+        no_index: boolean | null;
+    } | null>(
         `page-seo:${normalizedPath}`,
-        () => supabase.from('pages_seo').select('*').eq('page_path', normalizedPath).maybeSingle(),
+        () => sb.from('pages_seo').select('*').eq('page_path', normalizedPath).maybeSingle(),
         null
     );
 }
@@ -116,10 +124,11 @@ export async function getPageSeo(pagePath: string) {
 /** Fetch navigation items */
 export async function getNavigation() {
     if (!supabase) return fallback.navigation;
+    const sb = supabase;
 
     return publicQuery(
         'navigation',
-        () => supabase.from('navigation').select('*').order('order', { ascending: true }),
+        () => sb.from('navigation').select('*').order('order', { ascending: true }),
         fallback.navigation
     );
 }
@@ -127,32 +136,35 @@ export async function getNavigation() {
 /** Fetch all projects */
 export async function getProjects() {
     if (!supabase) return fallback.projects;
+    const sb = supabase;
 
     return publicQuery(
         'projects',
-        () => supabase.from('projects').select('*').order('order', { ascending: true }),
+        () => sb.from('projects').select('*').order('order', { ascending: true }),
         fallback.projects
     );
 }
 
 /** Fetch featured projects for home page */
 export async function getFeaturedProjects() {
-    if (!supabase) return fallback.projects.filter(p => p.featured_home);
+    if (!supabase) return fallback.projects.filter(p => p.featured_home).slice(0, 3);
+    const sb = supabase;
 
     return publicQuery(
         'featured-projects',
-        () => supabase.from('projects').select('*').eq('featured_home', true).order('order', { ascending: true }),
-        fallback.projects.filter(p => p.featured_home)
+        () => sb.from('projects').select('*').eq('featured_home', true).order('order', { ascending: true }).limit(3),
+        fallback.projects.filter(p => p.featured_home).slice(0, 3)
     );
 }
 
 /** Fetch single project by slug */
 export async function getProjectBySlug(slug: string) {
     if (!supabase) return fallback.projects.find(p => p.slug === slug) || null;
+    const sb = supabase;
 
     return publicQuery(
         `project:${slug}`,
-        () => supabase.from('projects').select('*').eq('slug', slug).single(),
+        () => sb.from('projects').select('*').eq('slug', slug).single(),
         null
     );
 }
@@ -160,10 +172,11 @@ export async function getProjectBySlug(slug: string) {
 /** Fetch all services */
 export async function getServices() {
     if (!supabase) return fallback.services;
+    const sb = supabase;
 
     return publicQuery(
         'services',
-        () => supabase.from('services').select('*').order('order', { ascending: true }),
+        () => sb.from('services').select('*').order('order', { ascending: true }),
         fallback.services
     );
 }
@@ -171,76 +184,43 @@ export async function getServices() {
 /** Fetch single service by slug */
 export async function getServiceBySlug(slug: string) {
     if (!supabase) return fallback.services.find(s => s.slug === slug) || null;
+    const sb = supabase;
 
     return publicQuery(
         `service:${slug}`,
-        () => supabase.from('services').select('*').eq('slug', slug).single(),
+        () => sb.from('services').select('*').eq('slug', slug).single(),
         null
-    );
-}
-
-/** Fetch all sectors */
-export async function getSectors() {
-    if (!supabase) return fallback.sectors;
-
-    return publicQuery(
-        'sectors',
-        () => supabase.from('sectors').select('*').order('order', { ascending: true }),
-        fallback.sectors
-    );
-}
-
-/** Fetch single sector by slug */
-export async function getSectorBySlug(slug: string) {
-    if (!supabase) return fallback.sectors.find(s => s.slug === slug) || null;
-
-    return publicQuery(
-        `sector:${slug}`,
-        () => supabase.from('sectors').select('*').eq('slug', slug).single(),
-        null
-    );
-}
-
-/** Fetch companies (logo carousel) */
-export async function getCompanies() {
-    if (!supabase) return fallback.companies;
-
-    return publicQuery(
-        'companies',
-        () => supabase.from('companies').select('*').order('order', { ascending: true }),
-        fallback.companies
-    );
-}
-
-/** Fetch awards (logo carousel) */
-export async function getAwards() {
-    if (!supabase) return [];
-
-    return publicQuery(
-        'awards',
-        () => supabase.from('awards').select('*').order('order', { ascending: true }),
-        []
     );
 }
 
 /** Fetch FAQs */
-export async function getFaqs() {
-    if (!supabase) return fallback.faqs || [];
+export async function getFaqs(serviceId?: string, includeInactive = false) {
+    const fallbackFaqs = (fallback.faqs || []).filter((faq) =>
+        (!serviceId || faq.service_id === serviceId) && (includeInactive || faq.is_active)
+    );
+    if (!supabase) return fallbackFaqs;
+    const sb = supabase;
 
     return publicQuery(
-        'faqs',
-        () => supabase.from('faqs').select('*').eq('is_active', true).order('order', { ascending: true }),
-        fallback.faqs || []
+        `faqs:${serviceId || 'all'}:${includeInactive ? 'admin' : 'public'}`,
+        () => {
+            let query = sb.from('faqs').select('*, services(title, slug)').order('order', { ascending: true });
+            if (serviceId) query = query.eq('service_id', serviceId);
+            if (!includeInactive) query = query.eq('is_active', true);
+            return query;
+        },
+        fallbackFaqs
     );
 }
 
 /** Fetch footer data */
 export async function getFooterData() {
     if (!supabase) return fallback.footerData;
+    const sb = supabase;
 
     return publicQuery(
         'footer',
-        () => supabase.from('footer').select('*').single(),
+        () => sb.from('footer').select('*').single(),
         fallback.footerData
     );
 }
@@ -253,7 +233,7 @@ export async function getPortalClients() {
     return publicQuery(
         'portal-clients',
         () => sb
-            .from('portal_clients')
+            .from('portal_clients_public')
             .select('*')
             .order('order', { ascending: true })
             .order('created_at', { ascending: true })
@@ -296,5 +276,17 @@ export function invalidateCache(tag?: string) {
 
     if (tag === 'portal-clients') {
         publicDataCache.delete('portal-clients');
+    }
+
+    if (tag === 'services') {
+        for (const key of publicDataCache.keys()) {
+            if (key === 'services' || key.startsWith('service:')) publicDataCache.delete(key);
+        }
+    }
+
+    if (tag === 'faqs') {
+        for (const key of publicDataCache.keys()) {
+            if (key.startsWith('faqs:')) publicDataCache.delete(key);
+        }
     }
 }

@@ -77,7 +77,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                                 name="email" 
                                 required 
                                 class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm"
-                                placeholder="trabajador@videomarketingsevilla.es"
+                                placeholder="equipo@laeseprod.com"
                             />
                         </div>
                         <div>
@@ -223,9 +223,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                 sections: [
                     { id: 'proyectos', label: 'Proyectos', icon: 'video' },
                     { id: 'servicios', label: 'Servicios', icon: 'layers' },
+                    { id: 'faqs', label: 'Preguntas frecuentes', icon: 'help-circle' },
                     { id: 'carta', label: 'Carta de Servicios', icon: 'scroll' },
-                    { id: 'sectores', label: 'Sectores', icon: 'building-2' },
-                    { id: 'empresas', label: 'Empresas', icon: 'briefcase' }
                 ]
             },
             {
@@ -247,7 +246,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             }
         ];
 
-        let users = [];
+        type AdminUser = {
+            id: string;
+            email: string;
+            is_admin: boolean;
+            permissions: string[];
+            created_at?: string;
+        };
+
+        let users: AdminUser[] = [];
 
         async function loadUsers() {
             try {
@@ -269,7 +276,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                 return;
             }
 
-            tableBody.innerHTML = users.map(user => {
+            tableBody.innerHTML = users.map((user: AdminUser) => {
                 const initials = user.email.split('@')[0].substring(0, 2).toUpperCase();
                 const createdDate = user.created_at ? new Date(user.created_at).toLocaleDateString('es-ES') : '-';
 
@@ -293,7 +300,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                                         Super-Admin
                                     </span>
                                 ` : ''}
-                                ${(user.permissions || []).map(p => `
+                                ${(user.permissions || []).map((p: string) => `
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 capitalize">
                                         ${p}
                                     </span>
@@ -377,8 +384,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        function openModal(mode = 'create', userData = null) {
-            const modal = document.getElementById('modal-overlay');
+        function openModal(mode: 'create' | 'edit' = 'create', userData: AdminUser | null = null) {
+            const modal = document.getElementById('modal-overlay')!;
             const form = document.getElementById('user-form') as HTMLFormElement;
             form.reset();
             
@@ -389,8 +396,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             modalTitle.textContent = mode === 'create' ? 'Nuevo Trabajador' : 'Editar Trabajador';
             
             (document.getElementById('user-email') as HTMLInputElement).disabled = mode === 'edit';
-            document.getElementById('danger-zone').classList.toggle('hidden', mode === 'create');
-            document.getElementById('modal-save').textContent = mode === 'create' ? 'Crear Cuenta' : 'Guardar Cambios';
+            document.getElementById('danger-zone')!.classList.toggle('hidden', mode === 'create');
+            document.getElementById('modal-save')!.textContent = mode === 'create' ? 'Crear Cuenta' : 'Guardar Cambios';
 
             if (mode === 'edit' && userData) {
                 (document.getElementById('user-id') as HTMLInputElement).value = userData.id;
@@ -413,19 +420,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         }
 
         function closeModal() {
-            const modal = document.getElementById('modal-overlay');
+            const modal = document.getElementById('modal-overlay')!;
             modal.classList.add('opacity-0', 'pointer-events-none');
             const inner = modal.children[1];
             inner.classList.remove('scale-100');
             inner.classList.add('scale-95');
         }
 
-        document.getElementById('btn-new-user').addEventListener('click', () => openModal('create'));
-        document.getElementById('modal-close-icon').addEventListener('click', closeModal);
-        document.getElementById('modal-cancel').addEventListener('click', closeModal);
+        document.getElementById('btn-new-user')!.addEventListener('click', () => openModal('create'));
+        document.getElementById('modal-close-icon')!.addEventListener('click', closeModal);
+        document.getElementById('modal-cancel')!.addEventListener('click', closeModal);
         // document.getElementById('modal-overlay-bg').addEventListener('click', closeModal); // Disabled closing on click outside
 
-        document.getElementById('user-form').addEventListener('submit', async (e) => {
+        document.getElementById('user-form')!.addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target as HTMLFormElement;
             const formData = new FormData(form);
@@ -439,7 +446,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             const email = formData.get('email');
             const password = formData.get('password') as string;
 
-            if (mode === 'create' && (!password || password.length < 6)) {
+            if (mode === 'POST' && (!password || password.length < 6)) {
                 showToast('La contraseña es obligatoria y debe tener al menos 6 caracteres', 'error');
                 return;
             }
@@ -475,7 +482,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             }
         });
 
-        async function performDelete(id) {
+        async function performDelete(id: string) {
             if (!id) return;
 
             const btnYes = document.getElementById('confirm-yes') as HTMLButtonElement;
@@ -516,25 +523,27 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             confirmOverlay.classList.add('hidden');
         }
 
-        document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
-        document.getElementById('confirm-yes').addEventListener('click', () => performDelete(pendingDeleteId));
+        document.getElementById('confirm-cancel')!.addEventListener('click', closeConfirm);
+        document.getElementById('confirm-yes')!.addEventListener('click', () => {
+            if (pendingDeleteId) performDelete(pendingDeleteId);
+        });
         // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
 
-        document.getElementById('btn-delete-user').addEventListener('click', () => {
+        document.getElementById('btn-delete-user')!.addEventListener('click', () => {
             const id = (document.getElementById('user-id') as HTMLInputElement).value;
             openConfirm(id);
         });
 
-        window.deleteUser = function(id) {
+        (window as any).deleteUser = function(id: string) {
             openConfirm(id);
         };
 
-        window.editUser = function(id) {
+        (window as any).editUser = function(id: string) {
             const user = users.find(u => u.id === id);
             if (user) openModal('edit', user);
         };
 
-        function showToast(message, type = 'info') {
+        function showToast(message: string, type = 'info') {
             const container = document.getElementById('toast-container');
             if (!container) return;
             const toast = document.createElement('div');

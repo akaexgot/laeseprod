@@ -12,8 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
             name,
             email,
             phone,
-            company,
-            message,
+            idea,
             captchaToken,
             captchaAnswer,
             website,
@@ -28,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // Validate required fields
-        if (!name || !email || !message) {
+        if (!name || !email || !phone) {
             return new Response(JSON.stringify({ error: 'Faltan campos requeridos' }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
@@ -45,14 +44,14 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // Store in Supabase (if configured)
-        const { supabase } = await import('../../lib/supabase');
+        const { getServiceSupabase } = await import('../../lib/supabase');
+        const supabase = getServiceSupabase();
         if (supabase) {
             await supabase.from('contacts').insert({
                 name,
                 email,
                 phone: phone || null,
-                company: company || null,
-                message,
+                idea: idea || null,
             });
         }
 
@@ -65,13 +64,13 @@ export const POST: APIRoute = async ({ request }) => {
             
             await Promise.allSettled([
                 sendContactNotification({ 
-                    name, email, phone, company, message, 
+                    name, email, phone, idea,
                     adminEmail: settings.email 
                 }),
-                sendContactAutoReply({ name, email, phone, company, message }),
+                sendContactAutoReply({ name, email, phone, idea }),
                 sendOwnerNotification(
                     `Nuevo Lead: ${name}`,
-                    `Mensaje de ${name} (${email}).\nTel: ${phone || 'N/D'}\n${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`
+                    `Mensaje de ${name} (${email}).\nTel: ${phone}\n${String(idea || 'Sin idea descrita').substring(0, 100)}`
                 )
             ]);
         }

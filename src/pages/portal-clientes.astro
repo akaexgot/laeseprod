@@ -12,7 +12,7 @@ const clients = allClients.filter((c: any) => c.is_active);
 
 <BaseLayout
   title="Portal Cliente"
-  description="Portal exclusivo para clientes de VideoMarketing Sevilla. Accede a tus archivos y materiales audiovisuales."
+  description="Portal exclusivo para clientes de LaesePROD. Accede a tus archivos y materiales audiovisuales."
   noindex={true}
 >
 
@@ -48,7 +48,6 @@ const clients = allClients.filter((c: any) => c.is_active);
                       class="pc-card group"
                       data-client-id={client.id}
                       data-client-name={client.client_name}
-                      data-dropbox={client.dropbox_link || ''}
                       style={`animation-delay: ${idx * 0.1}s`}
                   >
                       <!-- Logo area -->
@@ -133,11 +132,11 @@ const clients = allClients.filter((c: any) => c.is_active);
     background-color: #ffffff !important;
 }
 :global(.nav-link) {
-    color: #c42847 !important;
+    color: #000000 !important;
     font-weight: 500;
 }
 :global(.nav-link:hover), :global(.nav-link.active) {
-    color: #9b1b30 !important;
+    color: #000000 !important;
 }
 :global(.navbar) {
     background: rgba(255, 255, 255, 0.9) !important;
@@ -164,12 +163,12 @@ const clients = allClients.filter((c: any) => c.is_active);
     padding: .375rem 1rem; border-radius: 9999px;
     border: 1px solid rgba(155,27,48,.3); background: rgba(155,27,48,.05);
     font-size: .75rem; font-weight: 600; letter-spacing: .08em;
-    text-transform: uppercase; color: #c42847;
+    text-transform: uppercase; color: #000000;
     backdrop-filter: blur(8px);
 }
 .pc-hero__dot {
     display: block; width: 7px; height: 7px; border-radius: 50%;
-    background: #c42847; animation: pc-pulse 2s infinite;
+    background: #000000; animation: pc-pulse 2s infinite;
     box-shadow: 0 0 8px rgba(196,40,71,.7);
 }
 .pc-hero__title {
@@ -276,7 +275,7 @@ const clients = allClients.filter((c: any) => c.is_active);
     transition: border-color .3s;
 }
 .pc-card--pressing .pc-card__ring {
-    border-color: #c42847;
+    border-color: #000000;
     animation: pc-ring-fill 2s linear;
 }
 
@@ -364,7 +363,7 @@ const clients = allClients.filter((c: any) => c.is_active);
     background: rgba(155,27,48,.1);
     display: flex; align-items: center; justify-content: center;
 }
-.pc-modal__icon svg { width: 1.75rem; height: 1.75rem; color: #c42847; }
+.pc-modal__icon svg { width: 1.75rem; height: 1.75rem; color: #000000; }
 .pc-modal__title {
     font-family: 'Outfit', sans-serif;
     font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0;
@@ -389,7 +388,7 @@ const clients = allClients.filter((c: any) => c.is_active);
 }
 .pc-modal__submit {
     width: 100%; padding: .875rem;
-    background: linear-gradient(135deg, #c42847, #9b1b30);
+    background: #000000;
     color: #fff; font-weight: 700; font-size: .9375rem;
     border: none; border-radius: .875rem; cursor: pointer;
     transition: transform .2s, box-shadow .2s;
@@ -411,12 +410,12 @@ const clients = allClients.filter((c: any) => c.is_active);
     to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes pc-ring-fill {
-    0%   { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%); border-color: #c42847; }
+    0%   { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%); border-color: #000000; }
     12.5% { clip-path: polygon(50% 0%, 50% 50%, 100% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%); }
     25%  { clip-path: polygon(50% 0%, 50% 50%, 100% 100%, 100% 0%, 50% 0%, 50% 0%, 50% 0%); }
     37.5% { clip-path: polygon(50% 0%, 50% 50%, 100% 100%, 100% 100%, 50% 0%, 50% 0%, 50% 0%); }
     50%  { clip-path: polygon(50% 0%, 50% 50%, 0% 100%, 100% 100%, 100% 0%, 50% 0%, 50% 0%); }
-    100% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 0% 0%, 0% 100%, 100% 100%, 100% 0%); border-color: #c42847; }
+    100% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 0% 0%, 0% 100%, 100% 100%, 100% 0%); border-color: #000000; }
 }
 @keyframes pc-click-bounce {
     0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(155,27,48,0); }
@@ -428,9 +427,9 @@ const clients = allClients.filter((c: any) => c.is_active);
 }
 @keyframes pc-lock-unlock {
     0%   { transform: rotate(0deg); color: rgba(0,0,0,.6); }
-    30%  { transform: rotate(-15deg); color: #c42847; }
+    30%  { transform: rotate(-15deg); color: #000000; }
     60%  { transform: rotate(5deg); }
-    100% { transform: rotate(0deg); color: #c42847; }
+    100% { transform: rotate(0deg); color: #000000; }
 }
 .pc-card--clicked .pc-card__logo-area {
     animation: pc-click-bounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -521,8 +520,9 @@ const clients = allClients.filter((c: any) => c.is_active);
       });
 
       if (res.ok) {
+        const result = await res.json();
         closePasswordModal();
-        openDropboxModal(currentClientId);
+        openDropboxModal(currentClientId, result.dropbox_link || '');
       } else {
         const err = await res.json();
         passwordError.textContent = err.error || 'Contraseña incorrecta';
@@ -541,9 +541,8 @@ const clients = allClients.filter((c: any) => c.is_active);
   const dropboxModal = document.getElementById('dropbox-modal')!;
   const dropboxLinkBtn = document.getElementById('dropbox-link-btn') as HTMLAnchorElement;
 
-  function openDropboxModal(clientId: string) {
+  function openDropboxModal(clientId: string, dropboxLink: string) {
     const card = document.querySelector(`.pc-card[data-client-id="${clientId}"]`) as HTMLElement;
-    const dropboxLink = card?.dataset.dropbox || '';
     const clientName = card?.dataset.clientName || 'Cliente';
     
     dropboxLinkBtn.href = dropboxLink;

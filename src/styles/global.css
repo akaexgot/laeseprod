@@ -1,41 +1,38 @@
 @import 'tailwindcss';
 
-/* Trigger full Tailwind HMR rebuild */
-
 /* =====================================================
-   VIDEOMARKETING SEVILLA — Premium Design System v2
-   Aesthetic: Cinematic Editorial · Dark Luxury · Motion
+   LaesePROD - Monochrome visual system
    ===================================================== */
 
 /* ── Custom Theme ── */
 @theme {
-  --color-dark: #050508;
-  --color-dark-surface: #0a0a0f;
-  --color-dark-card: #0e0e15;
-  --color-dark-hover: #14141e;
-  --color-dark-border: rgba(255, 255, 255, 0.06);
-  --color-dark-border-hover: rgba(255, 255, 255, 0.12);
+  --color-dark: #ffffff;
+  --color-dark-surface: #f5f5f5;
+  --color-dark-card: #eeeeee;
+  --color-dark-hover: #e5e5e5;
+  --color-dark-border: rgba(0, 0, 0, 0.12);
+  --color-dark-border-hover: rgba(0, 0, 0, 0.24);
   --color-dark-muted: #4B5563;
   --color-dark-subtle: #6B7280;
 
-  --color-carmin: #9B1B30;
-  --color-carmin-light: #E8364F;
-  --color-carmin-100: #FDD0D7;
-  --color-carmin-200: #F99BAA;
-  --color-carmin-300: #F4677E;
-  --color-carmin-400: #E8364F;
-  --color-carmin-500: #9B1B30;
-  --color-carmin-600: #831728;
-  --color-carmin-700: #6B1221;
-  --color-carmin-800: #530E19;
-  --color-carmin-900: #3B0912;
+  --color-carmin: #000000;
+  --color-carmin-light: #111111;
+  --color-carmin-100: #f5f5f5;
+  --color-carmin-200: #dedede;
+  --color-carmin-300: #bdbdbd;
+  --color-carmin-400: #777777;
+  --color-carmin-500: #000000;
+  --color-carmin-600: #000000;
+  --color-carmin-700: #000000;
+  --color-carmin-800: #000000;
+  --color-carmin-900: #000000;
 
-  --color-light: #F0EDE8;
-  --color-light-muted: #9E9A94;
-  --color-light-subtle: #5A5752;
+  --color-light: #080808;
+  --color-light-muted: #4a4a4a;
+  --color-light-subtle: #737373;
 
-  --color-accent-gold: #C9A962;
-  --color-accent-blue: #2D5BFF;
+  --color-accent-gold: #111111;
+  --color-accent-blue: #000000;
 }
 
 /* ── Base Reset ── */
@@ -43,6 +40,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  letter-spacing: 0 !important;
 }
 
 ::selection {
@@ -60,7 +58,7 @@ html {
 body {
   background: var(--color-dark);
   color: var(--color-light);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-weight: 400;
   line-height: 1.6;
   overflow-x: hidden;
@@ -74,11 +72,11 @@ main > * {
 
 /* ── Typography Scale (Editorial) ── */
 .font-display {
-  font-family: 'Outfit', sans-serif;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }
 
 .font-body {
-  font-family: 'Inter', sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .font-mono {
@@ -127,7 +125,7 @@ main > * {
 
 /* ── Gradient Text ── */
 .text-gradient-carmin {
-  background: linear-gradient(135deg, #E8364F 0%, #9B1B30 50%, #E8364F 100%);
+  background: linear-gradient(135deg, #000000 0%, #666666 50%, #000000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -152,7 +150,7 @@ main > * {
 
 /* ── Backgrounds ── */
 .bg-gradient-carmin {
-  background: linear-gradient(135deg, #E8364F, #9B1B30);
+  background: linear-gradient(135deg, #000000, #555555);
 }
 
 .bg-gradient-radial {
@@ -161,7 +159,7 @@ main > * {
 
 .bg-gradient-mesh {
   background:
-    radial-gradient(ellipse at 20% 0%, rgba(155, 27, 48, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 0%, rgba(0, 0, 0, 0.08) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 100%, rgba(45, 91, 255, 0.04) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, rgba(201, 169, 98, 0.03) 0%, transparent 50%);
 }
@@ -458,7 +456,7 @@ main > * {
 }
 
 .btn-primary {
-  background: linear-gradient(90deg, var(--color-carmin-light) 0%, #E8364F 35%, var(--color-carmin) 100%);
+  background: linear-gradient(90deg, #111111 0%, #555555 35%, #000000 100%);
   color: var(--color-light);
   border-color: rgba(255,255,255,0.06);
   box-shadow: 0 22px 50px -18px rgba(155,27,48,0.55), inset 0 -2px 0 rgba(0,0,0,0.12);
@@ -633,13 +631,13 @@ main > * {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(135deg, #E8364F, #9B1B30);
+  background: linear-gradient(135deg, #111111, #555555);
   opacity: 0;
   transition: opacity 0.5s ease;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #E8364F, #9B1B30);
+  background: linear-gradient(135deg, #111111, #555555);
   color: white;
   border: none;
 }
@@ -830,4 +828,165 @@ main > * {
 .cv-auto {
   content-visibility: auto;
   contain-intrinsic-size: auto 100vh;
+}
+
+/* Full-screen public footer. Kept global so stale/footer fallback markup is still styled. */
+.site-footer {
+  position: relative !important;
+  min-height: 100svh !important;
+  display: grid !important;
+  grid-template-rows: 1fr auto auto !important;
+  grid-template-columns: 1fr !important;
+  gap: clamp(2rem, 5vw, 5rem) !important;
+  padding: clamp(6rem, 12vh, 9rem) clamp(1.2rem, 5vw, 5rem) clamp(1.2rem, 4vw, 2.6rem) !important;
+  color: #fff !important;
+  background: #000 !important;
+  border-top: 1px solid rgba(255, 255, 255, .18) !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.site-footer::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .12), transparent 28%), linear-gradient(180deg, transparent 58%, rgba(255, 255, 255, .07)) !important;
+  opacity: .7 !important;
+  pointer-events: none !important;
+}
+
+.site-footer__top,
+.site-footer__brand {
+  align-self: end !important;
+  display: grid !important;
+  gap: clamp(1rem, 2vw, 1.6rem) !important;
+}
+
+.site-footer__logo,
+.site-footer__brand > a {
+  display: block !important;
+  width: min(1040px, 82vw) !important;
+  color: #fff !important;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif !important;
+  font-size: clamp(4rem, 14vw, 13rem) !important;
+  font-weight: 400 !important;
+  line-height: .8 !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+}
+
+.site-footer__logo img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+.site-footer__top p,
+.site-footer__brand p {
+  max-width: 560px !important;
+  margin: 0 !important;
+  color: rgba(255, 255, 255, .72) !important;
+  font-size: clamp(1rem, 1.8vw, 1.45rem) !important;
+  line-height: 1.35 !important;
+}
+
+.site-footer__middle {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: clamp(1.4rem, 5vw, 5rem) !important;
+  padding-top: clamp(1.4rem, 4vh, 2.6rem) !important;
+  border-top: 1px solid rgba(255, 255, 255, .2) !important;
+}
+
+.site-footer nav,
+.site-footer__contact {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: .72rem !important;
+}
+
+.site-footer nav span,
+.site-footer__contact span {
+  margin-bottom: .35rem !important;
+  color: rgba(255, 255, 255, .48) !important;
+  font-size: .72rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+}
+
+.site-footer a,
+.site-footer button {
+  color: #fff !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  font: inherit !important;
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem) !important;
+  font-weight: 800 !important;
+  line-height: 1.05 !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+}
+
+.site-footer__legal {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: .8rem 1.5rem !important;
+  padding-top: 1.2rem !important;
+  color: rgba(255, 255, 255, .52) !important;
+  border-top: 1px solid rgba(255, 255, 255, .14) !important;
+  font-size: .74rem !important;
+}
+
+.site-footer__legal span {
+  margin-right: auto !important;
+}
+
+.site-footer__legal a {
+  color: rgba(255, 255, 255, .56) !important;
+  font-size: .74rem !important;
+  font-weight: 700 !important;
+}
+
+@media (max-width: 760px) {
+  .site-footer {
+    grid-template-rows: auto 1fr auto !important;
+    padding: 7rem 1rem 6.5rem !important;
+  }
+
+  .site-footer__top,
+  .site-footer__brand {
+    align-self: start !important;
+  }
+
+  .site-footer__logo,
+  .site-footer__brand > a {
+    width: 100% !important;
+    font-size: clamp(3.2rem, 18vw, 6rem) !important;
+  }
+
+  .site-footer__middle,
+  .site-footer {
+    grid-template-columns: 1fr !important;
+  }
+
+  .site-footer__middle {
+    align-content: center !important;
+    gap: 1.4rem !important;
+  }
+
+  .site-footer a,
+  .site-footer button {
+    font-size: clamp(1rem, 6vw, 1.55rem) !important;
+  }
+
+  .site-footer__legal span {
+    flex-basis: 100% !important;
+  }
 }

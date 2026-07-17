@@ -109,7 +109,6 @@ const clients = await getPortalClientsAdmin();
                                             data-name={client.client_name}
                                             data-image={client.image || ''}
                                             data-dropbox={client.dropbox_link || ''}
-                                            data-password={client.password_hash || ''}
                                             data-active={client.is_active ? 'true' : 'false'}
                                             data-type={client.image_type || 'logo'}
                                         >
@@ -291,7 +290,7 @@ const clients = await getPortalClientsAdmin();
             $('c-name').value = data?.name || '';
             $('c-image').value = data?.image || '';
             $('c-dropbox').value = data?.dropbox || '';
-            $('c-password').value = data?.password || '';
+            $('c-password').value = '';
             $('c-active').checked = data ? data.active === 'true' : true;
             
             if (data?.type === 'image') {
@@ -303,7 +302,7 @@ const clients = await getPortalClientsAdmin();
             // Update password hint
             const pwHint = document.getElementById('pw-hint')!;
             if (data) {
-                pwHint.textContent = data.password ? 'Déjalo vacío para mantener la actual' : 'Se pedirá al cliente para acceder al Dropbox';
+                pwHint.textContent = 'Déjalo vacío para mantener la actual';
                 modalDeleteBtn.classList.remove('hidden');
             } else {
                 pwHint.textContent = 'Se pedirá al cliente para acceder al Dropbox';
@@ -523,7 +522,6 @@ const clients = await getPortalClientsAdmin();
                     name: el.dataset.name,
                     image: el.dataset.image,
                     dropbox: el.dataset.dropbox,
-                    password: el.dataset.password,
                     active: el.dataset.active,
                     type: el.dataset.type,
                 });

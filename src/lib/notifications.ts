@@ -15,7 +15,7 @@ export async function sendOwnerNotification(title: string, message: string) {
 
     try {
         await resend.emails.send({
-            from: 'VideoMarketing Sevilla <no-reply@videomarketingsevilla.com>',
+            from: `LaesePROD <${import.meta.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'}>`,
             to: PUSHOVER_EMAIL,
             subject: title,
             text: message,

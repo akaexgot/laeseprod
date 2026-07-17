@@ -5,7 +5,7 @@ import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://videomarketingsevilla.com',
+  site: process.env.PUBLIC_SITE_URL || 'https://laeseprod.com',
   output: 'server',
 
   vite: {
