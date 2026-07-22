@@ -28,37 +28,14 @@ Astro.response.headers.set("Cache-Control", "no-store");
             Estamos ajustando la experiencia de LaesePROD. La web volverá a estar disponible en breve.
           </p>
         </div>
-
-        <aside class="maintenance-panel" aria-label="Acceso interno">
-          <div class="panel-top">
-            <span>Acceso autorizado</span>
-            <strong>Admin</strong>
-          </div>
-          <p>
-            Si formas parte del equipo, entra al panel y podrás revisar la web aunque el modo
-            mantenimiento siga activo.
-          </p>
-          <a class="admin-link" href="/admin/login?redirectTo=/admin">
-            Entrar al panel
-            <span aria-hidden="true">-></span>
-          </a>
-        </aside>
-
-        <div class="maintenance-meta" aria-label="Datos de contacto">
-          <div>
-            <span>Contacto</span>
-            <strong>laeseprod@gmail.com</strong>
-          </div>
-          <div>
-            <span>Base</span>
-            <strong>Andalucía, España</strong>
-          </div>
-          <div>
-            <span>Estado</span>
-            <strong>Volvemos pronto</strong>
-          </div>
-        </div>
       </section>
+      <a class="admin-link" href="/admin/login?redirectTo=/admin" aria-label="Acceso admin" title="Acceso admin">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 10V8a5 5 0 0 1 10 0v2" />
+          <rect x="5" y="10" width="14" height="10" rx="2" />
+          <path d="M12 14v2" />
+        </svg>
+      </a>
     </main>
   </body>
 </html>
@@ -83,9 +60,11 @@ Astro.response.headers.set("Cache-Control", "no-store");
     box-sizing: border-box;
   }
 
+  html,
   body {
     margin: 0;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
     background: var(--bg);
     color: var(--fg);
     font-family: Arial, Helvetica, sans-serif;
@@ -93,7 +72,7 @@ Astro.response.headers.set("Cache-Control", "no-store");
 
   .maintenance-shell {
     position: relative;
-    min-height: 100svh;
+    height: 100dvh;
     overflow: hidden;
     background:
       radial-gradient(circle at 72% 25%, rgba(255, 255, 255, 0.16), transparent 18rem),
@@ -128,22 +107,19 @@ Astro.response.headers.set("Cache-Control", "no-store");
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: minmax(0, 1.06fr) minmax(320px, 0.66fr);
-    grid-template-rows: 1fr auto;
-    gap: clamp(1.5rem, 4vw, 5rem);
-    min-height: 100svh;
-    padding: clamp(1.25rem, 4vw, 5rem);
+    height: 100%;
+    max-width: 1120px;
+    padding: clamp(1rem, 4.2vh, 3rem) clamp(1.25rem, 4vw, 5rem);
     align-items: center;
   }
 
   .maintenance-logo {
-    width: clamp(96px, 11vw, 170px);
+    width: clamp(96px, 9vw, 150px);
     height: auto;
-    margin-bottom: clamp(2rem, 5vw, 5rem);
+    margin-bottom: clamp(1.4rem, 7vh, 4.2rem);
   }
 
   .eyebrow,
-  .panel-top span,
   .maintenance-meta span {
     margin: 0;
     color: rgba(255, 255, 255, 0.58);
@@ -154,122 +130,68 @@ Astro.response.headers.set("Cache-Control", "no-store");
   }
 
   h1 {
-    max-width: 980px;
+    max-width: 920px;
     margin: 0.35rem 0 0;
-    font-family: LaeseHeading, Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
-    font-size: clamp(5rem, 13.5vw, 13rem);
-    line-height: 0.82;
+    font-family: "Arial Black", LaeseHeading, Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+    font-size: clamp(4.4rem, min(12vw, 14.5vh), 11.4rem);
+    line-height: 0.9;
     letter-spacing: 0;
+    word-spacing: 0.04em;
     text-transform: uppercase;
+    transform: scaleX(1.025);
+    transform-origin: left center;
   }
 
   .intro {
     max-width: 680px;
-    margin: clamp(1.5rem, 3vw, 2.5rem) 0 0;
+    margin: clamp(1.1rem, 3vh, 2rem) 0 0;
     color: var(--muted);
-    font-size: clamp(1rem, 1.5vw, 1.4rem);
+    font-size: clamp(1rem, 1.35vw, 1.32rem);
     line-height: 1.45;
   }
 
-  .maintenance-panel {
-    align-self: center;
-    border: 1px solid var(--line);
-    background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035)),
-      rgba(0, 0, 0, 0.38);
-    padding: clamp(1.35rem, 3vw, 2.2rem);
-    backdrop-filter: blur(18px);
-  }
-
-  .panel-top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .panel-top strong {
-    font-size: clamp(2rem, 5vw, 4.2rem);
-    line-height: 0.85;
-    text-transform: uppercase;
-  }
-
-  .maintenance-panel p {
-    margin: 1.4rem 0 1.8rem;
-    color: var(--muted);
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-
   .admin-link {
-    display: flex;
-    min-height: 58px;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    border: 1px solid #fff;
+    position: fixed;
+    right: clamp(1rem, 2.5vw, 2rem);
+    bottom: clamp(1rem, 2.5vw, 2rem);
+    z-index: 2;
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.24);
     border-radius: 999px;
-    background: #fff;
-    color: #000;
-    font-weight: 900;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
-    text-transform: uppercase;
-    transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+    backdrop-filter: blur(12px);
+    transition: transform 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease;
+  }
+
+  .admin-link svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .admin-link:hover {
     transform: translateY(-2px);
-    background: transparent;
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.16);
     color: #fff;
-  }
-
-  .maintenance-meta {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    border: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.045);
-  }
-
-  .maintenance-meta div {
-    min-height: 72px;
-    padding: 1rem;
-    border-right: 1px solid var(--line);
-  }
-
-  .maintenance-meta div:last-child {
-    border-right: 0;
-  }
-
-  .maintenance-meta strong {
-    display: block;
-    margin-top: 0.35rem;
-    font-size: 1rem;
   }
 
   @media (max-width: 900px) {
     .maintenance-stage {
-      grid-template-columns: 1fr;
       align-content: center;
     }
 
     .maintenance-logo {
       margin-bottom: 2.2rem;
-    }
-
-    .maintenance-meta {
-      grid-template-columns: 1fr;
-    }
-
-    .maintenance-meta div {
-      border-right: 0;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .maintenance-meta div:last-child {
-      border-bottom: 0;
     }
   }
 
@@ -279,7 +201,14 @@ Astro.response.headers.set("Cache-Control", "no-store");
     }
 
     h1 {
-      font-size: clamp(4.1rem, 20vw, 6.5rem);
+      font-size: clamp(3.65rem, 18vw, 6.1rem);
+      line-height: 0.94;
+      transform: scaleX(1.015);
+    }
+
+    .intro {
+      max-width: 25rem;
+      font-size: 0.98rem;
     }
   }
 </style>

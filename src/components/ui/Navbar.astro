@@ -9,7 +9,7 @@ const isActive = (href: string) => href === "/" ? currentPath === "/" : currentP
 const siteName = settings.site_name || "LaesePROD";
 ---
 
-<header class="site-header" data-site-header>
+<header class="site-header nav-theme-light" data-site-header>
     <nav class="site-nav" aria-label="Navegacion principal">
         <a class="site-nav__brand" href="/" aria-label={`${siteName}, inicio`}>
             <img class="site-nav__brand-logo site-nav__brand-logo--negative" src="/logonegativo.png" alt={siteName} width="386" height="353" />
@@ -121,7 +121,7 @@ const siteName = settings.site_name || "LaesePROD";
     const savedTheme = (() => {
         try { return window.localStorage.getItem('laeseprod-menu-theme'); } catch { return null; }
     })();
-    applyMenuTheme(savedTheme === 'light' ? 'light' : 'dark');
+    applyMenuTheme(savedTheme === 'dark' ? 'dark' : 'light');
     const setMenuOpen = (open: boolean) => {
         if (!header || !toggle || !mobileNav) return;
         header.classList.toggle('menu-is-open', open);
