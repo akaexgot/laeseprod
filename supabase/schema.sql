@@ -37,6 +37,7 @@ BEGIN
                                           about_summary text,
                                             contract_terms_text text NOT NULL DEFAULT 'Al continuar, aceptas la política de privacidad y los términos de servicio de LaesePROD.',
                                               faq_section_enabled boolean NOT NULL DEFAULT true,
+                                                maintenance_mode boolean NOT NULL DEFAULT false,
                                                 created_at timestamptz NOT NULL DEFAULT now(),
                                                   updated_at timestamptz NOT NULL DEFAULT now()
                                                   );

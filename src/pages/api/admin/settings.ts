@@ -18,13 +18,17 @@ export const POST: APIRoute = async ({ request }) => {
             'font_heading', 'font_body', 'whatsapp_number', 'phone', 'email', 'address',
             'instagram', 'linkedin', 'google_maps_embed',
             'hero_video_desktop', 'hero_video_mobile', 'contact_hero_video',
-            'about_summary', 'contract_terms_text', 'faq_section_enabled'
+            'about_summary', 'contract_terms_text', 'faq_section_enabled', 'maintenance_mode'
         ];
+        const booleanKeys = ['faq_section_enabled', 'maintenance_mode'];
 
         const updates: Record<string, any> = {};
         Object.keys(body).forEach(key => {
             if (allowedKeys.includes(key)) {
                 let value = body[key];
+                if (booleanKeys.includes(key)) {
+                    value = value === true || value === 'true' || value === 'on';
+                }
                 // Auto-extract src from iframe if user pastes the whole html tag
                 if (key === 'google_maps_embed' && typeof value === 'string' && value.includes('<iframe')) {
                     const match = value.match(/src="([^"]+)"/);

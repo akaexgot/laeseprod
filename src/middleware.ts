@@ -5,6 +5,9 @@ import { getServiceSupabase } from "./lib/supabase";
 const PROTECTED = ["/admin", "/api/admin"];
 const PUBLIC = ["/admin/login"];
 const CANONICAL_HOST = new URL(import.meta.env.PUBLIC_SITE_URL || "https://laeseprod.com").hostname;
+const MAINTENANCE_CACHE_MS = 5000;
+let maintenanceCache: { value: boolean; expiresAt: number } | null = null;
+
 const LEGACY_REDIRECTS: Record<string, string> = {
   "/ultimos-proyectos": "/proyectos",
 };
@@ -53,9 +56,96 @@ function getCanonicalRedirectUrl(request: Request) {
   return shouldRedirect ? targetUrl : null;
 }
 
-export const onRequest = defineMiddleware(async ({ request, cookies, redirect, locals }, next) => {
+function isStaticAssetPath(pathname: string) {
+  return pathname.startsWith("/_astro/")
+    || pathname.startsWith("/favicon")
+    || pathname.startsWith("/apple-touch-icon")
+    || pathname.startsWith("/android-chrome")
+    || pathname === "/site.webmanifest"
+    || pathname === "/robots.txt"
+    || pathname === "/sitemap.xml"
+    || pathname.includes(".");
+}
+
+function isMaintenanceBypassPath(pathname: string) {
+  return pathname === "/mantenimiento"
+    || pathname.startsWith("/admin")
+    || pathname.startsWith("/api/admin")
+    || pathname.startsWith("/api/auth")
+    || pathname === "/api/stripe/webhook"
+    || pathname === "/api/health"
+    || isStaticAssetPath(pathname);
+}
+
+async function getMaintenanceMode(supabaseAdmin: ReturnType<typeof getServiceSupabase>) {
+  if (!supabaseAdmin) return false;
+
+  const now = Date.now();
+  if (maintenanceCache && maintenanceCache.expiresAt > now) return maintenanceCache.value;
+
+  const { data, error } = await supabaseAdmin
+    .from("settings")
+    .select("maintenance_mode")
+    .limit(1)
+    .maybeSingle();
+
+  const value = !error && data?.maintenance_mode === true;
+  maintenanceCache = { value, expiresAt: now + MAINTENANCE_CACHE_MS };
+  return value;
+}
+
+export const onRequest = defineMiddleware(async ({ request, cookies, redirect, rewrite, locals }, next) => {
   const { pathname, searchParams, host } = new URL(request.url);
   const canonicalRedirectUrl = getCanonicalRedirectUrl(request);
+  const supabaseAdmin = getServiceSupabase();
+  const isApiRequest = pathname.startsWith("/api/");
+  const accessToken = cookies.get("sb-access-token")?.value;
+  const refreshToken = cookies.get("sb-refresh-token")?.value;
+  let authChecked = false;
+  let authProfile: any = null;
+  let authError: unknown = null;
+
+  const getAuthenticatedProfile = async () => {
+    if (authChecked) return { profile: authProfile, error: authError };
+    authChecked = true;
+
+    if (!accessToken || !refreshToken) {
+      authError = "missing-session";
+      return { profile: null, error: authError };
+    }
+
+    const supabase = createClient(
+      import.meta.env.PUBLIC_SUPABASE_URL,
+      import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+    );
+
+    const { data, error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    if (error || !data.user) {
+      authError = error || "missing-user";
+      cookies.delete("sb-access-token", { path: "/" });
+      cookies.delete("sb-refresh-token", { path: "/" });
+      return { profile: null, error: authError };
+    }
+
+    const { data: profile, error: profileError } = await (supabaseAdmin || supabase)
+      .from("profiles")
+      .select("is_admin, permissions")
+      .eq("id", (data.user as any).id)
+      .maybeSingle();
+
+    if (profileError || !profile) {
+      authError = profileError || "missing-profile";
+      return { profile: null, error: authError };
+    }
+
+    authProfile = profile;
+    locals.userProfile = profile;
+    return { profile: authProfile, error: null };
+  };
 
   if (canonicalRedirectUrl) {
     return Response.redirect(canonicalRedirectUrl, 301);
@@ -76,18 +166,29 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     });
   }
 
-  // Sensitive chat actions that need admin protection
-  const isAdminChatAction = pathname === "/api/chat" && searchParams.get('list') === '1';
+  const maintenanceMode = !isMaintenanceBypassPath(pathname) && await getMaintenanceMode(supabaseAdmin);
+  if (maintenanceMode) {
+    const { profile } = await getAuthenticatedProfile();
+    if (!profile?.is_admin) {
+      if (isApiRequest) {
+        return new Response(JSON.stringify({ error: "Site under maintenance" }), {
+          status: 503,
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": "no-store",
+          },
+        });
+      }
 
-  const isProtected = (PROTECTED.some(r => pathname.startsWith(r)) || isAdminChatAction)
+      return rewrite("/mantenimiento");
+    }
+  }
+
+  const isAdminChatAction = pathname === "/api/chat" && searchParams.get("list") === "1";
+  const isProtected = (PROTECTED.some((r) => pathname.startsWith(r)) || isAdminChatAction)
     && !PUBLIC.includes(pathname);
 
   if (!isProtected) return next();
-
-  const isApiRequest = pathname.startsWith("/api/");
-
-  const accessToken = cookies.get("sb-access-token")?.value;
-  const refreshToken = cookies.get("sb-refresh-token")?.value;
 
   if (!accessToken || !refreshToken) {
     if (isApiRequest) {
@@ -96,29 +197,15 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     return redirect(`/admin/login?redirectTo=${encodeURIComponent(pathname)}`);
   }
 
-  // Use service role for permission check to avoid RLS issues
-  const supabaseAdmin = getServiceSupabase();
-  const supabase = createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-  );
-
-  const { data, error } = await supabase.auth.setSession({
-    access_token: accessToken,
-    refresh_token: refreshToken,
-  });
-
-  if (error || !data.user) {
-    console.error("Middleware Auth Error:", error?.message || "No user found");
-    cookies.delete("sb-access-token", { path: "/" });
-    cookies.delete("sb-refresh-token", { path: "/" });
+  const { profile, error } = await getAuthenticatedProfile();
+  if (error || !profile) {
+    console.error("Middleware Auth Error:", error instanceof Error ? error.message : error || "No user found");
     if (isApiRequest) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
     return redirect("/admin/login");
   }
 
-  // Mapping of paths to section IDs (matching those in AdminLayout menu)
   const SECTION_MAP: Record<string, string> = {
     "/admin/proyectos": "proyectos",
     "/admin/servicios": "servicios",
@@ -130,8 +217,7 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     "/admin/ajustes": "ajustes",
     "/admin/seo": "seo",
     "/admin/usuarios": "usuarios",
-    "/admin": "dashboard", 
-    // API mappings
+    "/admin": "dashboard",
     "/api/admin/projects": "proyectos",
     "/api/admin/proyectos": "proyectos",
     "/api/admin/services": "servicios",
@@ -149,36 +235,15 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     "/api/chat": "chat",
   };
 
-  // Identify the target section
   const targetPath = Object.keys(SECTION_MAP)
     .sort((a, b) => b.length - a.length)
-    .find(path => pathname.startsWith(path));
-  
+    .find((path) => pathname.startsWith(path));
   const targetSection = targetPath ? SECTION_MAP[targetPath] : null;
 
-  // 3. Permission Check: Verify profile and permissions
-  const { data: profile, error: profileError } = await (supabaseAdmin || supabase)
-    .from('profiles')
-    .select('is_admin, permissions')
-    .eq('id', (data.user as any).id)
-    .maybeSingle();
-
-  if (profileError || !profile) {
-    if (isApiRequest) {
-      return new Response(JSON.stringify({ error: "Forbidden: No profile found" }), { status: 403 });
-    }
-    return redirect("/admin/login?error=" + encodeURIComponent("No se encontró un perfil de administrador para tu cuenta."));
-  }
-
-  // Store profile in locals for layouts/pages
-  locals.userProfile = profile;
-
-  // Super-admin has access to everything
   if (profile.is_admin) {
     return next();
   }
 
-  // Grant access if the section is in the user's permissions
   const userPermissions = profile.permissions || [];
   if (targetSection === "upload" && userPermissions.length > 0) {
     return next();
@@ -187,9 +252,8 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, l
     return next();
   }
 
-  // Deny access if no permission found
   if (isApiRequest) {
     return new Response(JSON.stringify({ error: "Forbidden: Missing permissions" }), { status: 403 });
   }
-  return redirect("/admin/login?error=" + encodeURIComponent("No tienes permisos para acceder a esta sección."));
+  return redirect("/admin/login?error=" + encodeURIComponent("No tienes permisos para acceder a esta seccion."));
 });

@@ -10,11 +10,11 @@ import {
 import { sendContractCompletedOwnerEmail, sendContractFinalizedEmail } from '../../../lib/resend';
 import { sendOwnerNotification } from '../../../lib/notifications';
 
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '', {
+const stripe = new Stripe((import.meta.env.STRIPE_SECRET_KEY || '').trim(), {
     apiVersion: '2025-02-24-preview' as any
 });
 
-const endpointSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
+const endpointSecret = (import.meta.env.STRIPE_WEBHOOK_SECRET || '').trim();
 
 type SupabaseService = NonNullable<ReturnType<typeof getServiceSupabase>>;
 

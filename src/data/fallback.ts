@@ -23,6 +23,7 @@ export const siteSettings = {
     about_summary: "Somos una productora audiovisual centrada en bodas y videoclips. Trabajamos cada proyecto de forma cercana, ágil y con una mirada cinematográfica.",
     contract_terms_text: "Al continuar, aceptas la política de privacidad y los términos de servicio de LaesePROD.",
     faq_section_enabled: true,
+    maintenance_mode: false,
 };
 
 export const navigation = [

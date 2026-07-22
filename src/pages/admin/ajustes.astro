@@ -4,6 +4,7 @@ import { getSettings } from "../../lib/data";
 
 const settings = await getSettings();
 const value = (key: string) => String((settings as Record<string, unknown>)[key] ?? "");
+const boolValue = (key: string) => (settings as Record<string, unknown>)[key] === true;
 ---
 
 <AdminLayout title="Ajustes" activeSection="ajustes">
@@ -169,6 +170,24 @@ const value = (key: string) => String((settings as Record<string, unknown>)[key]
                 <textarea name="contract_terms_text" rows="3">{value("contract_terms_text")}</textarea>
             </label>
         </section>
+
+        <section class="settings-panel settings-panel--maintenance">
+            <div class="settings-panel__intro">
+                <span class="settings-panel__icon"><i data-lucide="construction" class="w-5 h-5"></i></span>
+                <div>
+                    <p>05 / Mantenimiento</p>
+                    <h2>Cierre temporal</h2>
+                    <span>Bloquea la web pública y muestra una pantalla de mantenimiento. Los super admin autenticados podrán seguir viendo el sitio.</span>
+                </div>
+            </div>
+            <input type="hidden" name="maintenance_mode" value="false" />
+            <label class="settings-check">
+                <input type="checkbox" name="maintenance_mode" value="true" checked={boolValue("maintenance_mode")} />
+                <span aria-hidden="true"></span>
+                <strong>Activar modo mantenimiento</strong>
+                <small>La web pública quedará inaccesible hasta desactivarlo.</small>
+            </label>
+        </section>
     </form>
 
     <input id="settings-upload" type="file" class="hidden" />
@@ -187,6 +206,7 @@ const value = (key: string) => String((settings as Record<string, unknown>)[key]
     .settings-shell { display: grid; gap: 1.15rem; }
     .settings-panel { display: grid; gap: 1.1rem; padding: clamp(1rem, 2.2vw, 1.45rem); color: #fff; background: linear-gradient(135deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, .01)); border: 1px solid #27272a; border-radius: 16px; box-shadow: 0 18px 46px rgba(0, 0, 0, .22); }
     .settings-panel--brand { background: radial-gradient(circle at 92% 0%, rgba(244, 63, 94, .14), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012)); }
+    .settings-panel--maintenance { border-color: rgba(245, 158, 11, .28); background: radial-gradient(circle at 94% 0%, rgba(245, 158, 11, .16), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012)); }
     .settings-panel__intro { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: .9rem; align-items: start; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, .08); }
     .settings-panel__icon { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; background: #050505; border: 1px solid #313138; border-radius: 50%; }
     .settings-panel__icon i, .settings-panel__icon svg { width: 20px !important; height: 20px !important; display: block !important; margin: auto !important; }
@@ -206,6 +226,14 @@ const value = (key: string) => String((settings as Record<string, unknown>)[key]
     .settings-field textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
     .settings-field input:focus, .settings-field textarea:focus { border-color: #fff; background: #050505; box-shadow: 0 0 0 3px rgba(255, 255, 255, .08); }
     .settings-input-action { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .6rem; align-items: stretch; }
+    .settings-check { position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: .85rem; align-items: center; padding: 1rem; background: #09090b; border: 1px solid #34343a; border-radius: 14px; cursor: pointer; }
+    .settings-check input { position: absolute; opacity: 0; pointer-events: none; }
+    .settings-check > span { position: relative; width: 48px; height: 28px; border-radius: 999px; background: #27272a; border: 1px solid #3f3f46; transition: background 160ms ease, border-color 160ms ease; }
+    .settings-check > span::after { content: ""; position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 50%; background: #a1a1aa; transition: transform 160ms ease, background 160ms ease; }
+    .settings-check input:checked + span { background: #f59e0b; border-color: #fbbf24; }
+    .settings-check input:checked + span::after { transform: translateX(20px); background: #111113; }
+    .settings-check strong { display: block; color: #fff; font-size: .92rem; line-height: 1.1; }
+    .settings-check small { display: block; grid-column: 2; margin-top: -.55rem; color: #a1a1aa; font-size: .78rem; line-height: 1.35; }
     .upload-button { padding: 0 .95rem; color: #e4e4e7; background: #141417; border: 1px solid #3f3f46; white-space: nowrap; }
     .upload-button:hover, .upload-button:focus-visible { color: #000; background: #fff; border-color: #fff; transform: translateY(-1px); }
     .settings-status { position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 90; max-width: min(390px, calc(100vw - 2rem)); margin: 0; padding: .85rem 1rem; color: #000; background: #fff; border-radius: 999px; box-shadow: 0 22px 60px rgba(0, 0, 0, .4); font-size: .84rem; font-weight: 850; }
