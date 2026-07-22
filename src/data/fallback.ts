@@ -10,8 +10,8 @@ export const siteSettings = {
     secondary_color: "#FFFFFF",
     font_heading: "Impact",
     font_body: "Arial",
-    whatsapp_number: "34600000000",
-    phone: "+34 600 000 000",
+    whatsapp_number: "34662908416",
+    phone: "+34 662 90 84 16",
     email: "laeseprod@gmail.com",
     address: "Sevilla, España",
     instagram: "",
@@ -35,7 +35,6 @@ export const navigation = [
 export const projects = [
     { id: "p1", title: "Proyecto provisional 01", subtitle: "", slug: "proyecto-01", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 1, created_at: "2026-01-01" },
     { id: "p2", title: "Proyecto provisional 02", subtitle: "", slug: "proyecto-02", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 2, created_at: "2026-01-02" },
-    { id: "p3", title: "Proyecto provisional 03", subtitle: "", slug: "proyecto-03", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 3, created_at: "2026-01-03" },
 ];
 
 export const services = [

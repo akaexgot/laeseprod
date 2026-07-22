@@ -21,30 +21,32 @@ import "../../styles/global.css";
         />
         <style>
             :root {
-                --color-carmin: #000000;
-                --color-carmin-light: #333333;
                 --bg-dark: #050508;
             }
             body {
                 background-color: var(--bg-dark);
                 font-family: 'Inter', sans-serif;
                 overflow: hidden;
+                color: #fff;
             }
             .login-bg {
                 position: fixed;
                 inset: 0;
                 z-index: -1;
                 background: 
-                    radial-gradient(circle at 20% 30%, rgba(155, 27, 48, 0.08) 0%, transparent 40%),
-                    radial-gradient(circle at 80% 70%, rgba(155, 27, 48, 0.04) 0%, transparent 40%),
+                    radial-gradient(circle at 18% 28%, rgba(255, 255, 255, 0.08) 0%, transparent 32%),
+                    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.05) 0%, transparent 36%),
+                    linear-gradient(135deg, rgba(255, 255, 255, 0.035), transparent 42%),
                     #050508;
             }
             .login-grid {
                 position: absolute;
                 inset: 0;
-                background-image: radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
-                background-size: 40px 40px;
-                opacity: 0.5;
+                background-image:
+                    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+                background-size: 48px 48px;
+                opacity: 0.38;
             }
             .login-container {
                 min-height: 100vh;
@@ -56,17 +58,19 @@ import "../../styles/global.css";
             }
             .login-card {
                 width: 100%;
-                max-width: 440px;
-                background: rgba(15, 15, 20, 0.4);
+                max-width: 470px;
+                color: #000;
+                background: rgba(255, 255, 255, 0.96);
                 backdrop-filter: blur(24px);
                 -webkit-backdrop-filter: blur(24px);
-                border: 1px solid rgba(255, 255, 255, 0.06);
-                border-radius: 2.5rem;
-                padding: 3.5rem 2.5rem;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                border-radius: 2rem;
+                padding: 3rem 2.4rem 2.4rem;
                 box-shadow: 
-                    0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                    0 0 60px rgba(155, 27, 48, 0.05);
+                    0 28px 70px rgba(0, 0, 0, 0.38),
+                    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
                 animation: cardEntry 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+                transition: background 220ms ease, color 220ms ease, border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
             }
             @keyframes cardEntry {
                 from { opacity: 0; transform: translateY(30px) rotateX(-5deg); }
@@ -74,23 +78,22 @@ import "../../styles/global.css";
             }
             .login-logo-wrapper {
                 position: relative;
-                width: 200px;
-                height: 50px;
-                margin-bottom: 2.5rem;
-                cursor: pointer;
+                width: min(250px, 72vw);
+                height: 78px;
+                margin: 0 auto 2.35rem;
+                display: block;
+                outline: none;
             }
             .login-logo {
                 position: absolute;
                 inset: 0;
                 width: 100%;
                 height: 100%;
-                object-contain: contain;
-                filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
-                transition: opacity 0.5s ease, transform 0.5s ease;
+                object-fit: contain;
+                transition: opacity 180ms ease, transform 420ms cubic-bezier(.16, 1, .3, 1), filter 220ms ease;
             }
-            .login-logo--dark { opacity: 0; }
-            .login-logo-wrapper:hover .login-logo--white { opacity: 0; transform: scale(0.98); }
-            .login-logo-wrapper:hover .login-logo--dark { opacity: 1; transform: scale(1.02); }
+            .login-logo--dark { opacity: 1; filter: drop-shadow(0 10px 22px rgba(0,0,0,0.08)); }
+            .login-logo--white { opacity: 0; }
             
             .input-group { margin-bottom: 1.75rem; }
             .input-label {
@@ -98,45 +101,53 @@ import "../../styles/global.css";
                 font-family: 'Space Grotesk', sans-serif;
                 font-size: 0.75rem;
                 font-weight: 500;
-                color: rgba(255,255,255,0.4);
+                color: rgba(0,0,0,0.58);
                 text-transform: uppercase;
-                letter-spacing: 0.15em;
+                letter-spacing: 0.08em;
                 margin-bottom: 0.75rem;
+                transition: color 180ms ease;
             }
             .input-wrapper {
                 position: relative;
                 transition: transform 0.3s ease;
             }
+            .input-wrapper:focus-within {
+                transform: translateY(-2px);
+            }
             .input-field {
                 width: 100%;
-                background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                border-radius: 1.125rem;
+                background: rgba(0, 0, 0, 0.045);
+                border: 1px solid rgba(0, 0, 0, 0.12);
+                border-radius: 999px;
                 padding: 1.125rem 1.5rem;
-                color: #fff;
+                color: #000;
                 font-size: 0.9375rem;
                 outline: none;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: color 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
                 box-sizing: border-box;
             }
             .input-field:focus {
-                background: rgba(255, 255, 255, 0.05);
-                border-color: var(--color-carmin);
-                box-shadow: 0 0 0 4px rgba(155, 27, 48, 0.08);
+                background: #fff;
+                border-color: #000;
+                color: #000;
+                box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+            }
+            .input-field::placeholder {
+                color: rgba(0, 0, 0, 0.38);
             }
             .login-btn {
                 width: 100%;
-                background: #000000;
+                background: #000;
                 color: #fff;
-                border: none;
-                border-radius: 1.125rem;
+                border: 1px solid #000;
+                border-radius: 999px;
                 padding: 1.125rem;
                 font-family: 'Outfit', sans-serif;
                 font-size: 1rem;
                 font-weight: 700;
                 cursor: pointer;
-                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-                box-shadow: 0 10px 25px -5px rgba(155, 27, 48, 0.3);
+                transition: color 180ms ease, background 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+                box-shadow: 0 18px 38px rgba(0, 0, 0, 0.18);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -144,8 +155,7 @@ import "../../styles/global.css";
             }
             .login-btn:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 20px 40px -10px rgba(155, 27, 48, 0.45);
-                filter: brightness(1.1);
+                box-shadow: 0 24px 46px rgba(0, 0, 0, 0.28);
             }
             .login-btn:active { transform: translateY(0); }
             .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
@@ -169,14 +179,19 @@ import "../../styles/global.css";
             .back-link {
                 display: inline-block;
                 margin-top: 2rem;
-                color: rgba(255,255,255,0.3);
+                color: rgba(0,0,0,0.42);
                 font-size: 0.8125rem;
                 text-decoration: none;
                 transition: color 0.3s;
                 font-family: 'Space Grotesk', sans-serif;
                 letter-spacing: 0.05em;
             }
-            .back-link:hover { color: var(--color-carmin-light); }
+            .back-link:hover { color: currentColor; opacity: .72; }
+            @media (max-width: 560px) {
+                body { overflow: auto; }
+                .login-card { padding: 2.4rem 1.25rem 1.8rem; border-radius: 1.5rem; }
+                .login-logo-wrapper { width: min(220px, 76vw); height: 68px; }
+            }
         </style>
     </head>
     <body>
@@ -186,9 +201,10 @@ import "../../styles/global.css";
         <main class="login-container">
             <div class="login-card">
                 <div class="flex flex-col items-center text-center">
-                    <div class="login-logo-wrapper">
-                        <span class="login-wordmark">LaesePROD</span>
-                    </div>
+                    <a class="login-logo-wrapper" href="/" aria-label="Volver a LaesePROD">
+                        <img class="login-logo login-logo--white" src="/logopositivo.png" alt="LaesePROD" width="386" height="353" />
+                        <img class="login-logo login-logo--dark" src="/logonegativo.png" alt="" width="386" height="353" aria-hidden="true" />
+                    </a>
                     
                     <div id="login-error" class="error-box"></div>
 
@@ -234,7 +250,7 @@ import "../../styles/global.css";
                     </form>
 
                     <a href="/" class="back-link">
-                        RETORNAR A LA WEB PRINCIPAL
+                        VOLVER
                     </a>
                 </div>
             </div>

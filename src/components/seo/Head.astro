@@ -43,7 +43,6 @@ const fullTitle = rawTitle
 const metaDescription = pageSeo?.description || description || defaultDescription;
 const canonicalUrl = pageSeo?.canonical_url || canonicalFromUrl(url);
 const resolvedImage = absoluteUrl(pageSeo?.og_image || image || settings.logo_url);
-const faviconUrl = absoluteUrl(settings.logo_url);
 const resolvedImageAlt = imageAlt || `${siteName} - productora audiovisual en Sevilla`;
 const shouldNoindex = noindex || pageSeo?.no_index === true;
 const themeColor = '#000000';
@@ -59,7 +58,7 @@ const localBusinessSchema = {
   url: siteUrl,
   logo: absoluteUrl(settings.logo_url),
   image: resolvedImage,
-  telephone: settings.phone || '+34600000000',
+  telephone: settings.phone || '+34662908416',
   email: settings.email || 'laeseprod@gmail.com',
   address: {
     '@type': 'PostalAddress',
@@ -82,7 +81,7 @@ const localBusinessSchema = {
   priceRange: 'EUR',
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: settings.phone || '+34600000000',
+    telephone: settings.phone || '+34662908416',
     email: settings.email || 'laeseprod@gmail.com',
     contactType: 'sales',
     areaServed: 'ES',
@@ -161,6 +160,14 @@ const schemaItems = [
 <link rel="dns-prefetch" href="https://www.youtube-nocookie.com" />
 <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-<!-- Uses the logo configured from the admin panel when available. -->
-{faviconUrl && <link rel="icon" href={faviconUrl} />}
-{faviconUrl && <link rel="apple-touch-icon" href={faviconUrl} />}
+<!-- Favicons / app icons -->
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png" />
+<link rel="shortcut icon" href="/favicon.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="apple-mobile-web-app-title" content={siteName} />
+<meta name="application-name" content={siteName} />
+<meta name="msapplication-TileColor" content={themeColor} />
+<meta name="msapplication-TileImage" content="/android-chrome-192x192.png" />

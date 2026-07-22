@@ -5,6 +5,14 @@ const [footer, navigation, services, settings] = await Promise.all([
 ]);
 
 const visibleNavigation = navigation.filter((item: any) => item.is_visible !== false);
+const normalizeInstagramUrl = (value?: string | null) => {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    const user = raw.replace(/^@/, "").replace(/^instagram\.com\//i, "").replace(/^www\.instagram\.com\//i, "").replace(/^\/+/, "");
+    return `https://www.instagram.com/${user}`;
+};
+const instagramUrl = normalizeInstagramUrl(settings.instagram);
 ---
 
 <footer class="site-footer site-footer--cinema">
@@ -35,7 +43,7 @@ const visibleNavigation = navigation.filter((item: any) => item.is_visible !== f
             <span>Contacto</span>
             {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
             {settings.phone && <a href={`tel:${String(settings.phone).replace(/\s/g, "")}`}>{settings.phone}</a>}
-            {settings.instagram && <a href={settings.instagram} target="_blank" rel="noreferrer">Instagram</a>}
+            {instagramUrl && <a href={instagramUrl} target="_blank" rel="noreferrer">Instagram</a>}
         </div>
     </div>
 

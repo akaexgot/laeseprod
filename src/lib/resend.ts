@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { formatInvoiceNumber } from './contracts';
 
 export const resend = new Resend(import.meta.env.RESEND_API_KEY);
-const defaultFromEmail = import.meta.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+const defaultFromEmail = import.meta.env.RESEND_FROM_EMAIL || 'no-reply@laeseprod.com';
 const ownerEmail = 'laeseprod@gmail.com';
 const publicSiteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://laeseprod.com').replace(/\/+$/, '');
 

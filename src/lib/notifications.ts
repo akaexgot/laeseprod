@@ -1,6 +1,7 @@
 import { resend } from './resend';
 
 const PUSHOVER_EMAIL = import.meta.env.PUSHOVER_EMAIL;
+const publicSiteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://laeseprod.com').replace(/\/+$/, '');
 
 /**
  * Sends a notification to the owner via Pushover (using the email-to-notification bridge).
@@ -14,11 +15,13 @@ export async function sendOwnerNotification(title: string, message: string) {
     }
 
     try {
+        const formattedMessage = `${message}\n\nPanel: ${publicSiteUrl}/admin`;
+
         await resend.emails.send({
-            from: `LaesePROD <${import.meta.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'}>`,
+            from: `LaesePROD <${import.meta.env.RESEND_FROM_EMAIL || 'no-reply@laeseprod.com'}>`,
             to: PUSHOVER_EMAIL,
-            subject: title,
-            text: message,
+            subject: `[LaesePROD] ${title}`,
+            text: formattedMessage,
         });
     } catch (error) {
         console.error('Error sending Pushover notification:', error);

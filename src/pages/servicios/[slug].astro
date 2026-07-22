@@ -80,7 +80,7 @@ const copy = serviceCopy[service.slug] || {
             <p>{copy.afterLabel}</p>
             <h2>{copy.afterTitle}</h2>
         </div>
-        <FaqsSection serviceSlug={service.slug} />
+        <FaqsSection serviceSlug={service.slug} serviceId={service.id} />
     </section>
 </BaseLayout>
 

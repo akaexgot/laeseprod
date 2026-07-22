@@ -12,7 +12,7 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
 ---
 
 {projects.length > 0 && (
-    <section id="featured-projects" class="featured-projects">
+    <section id="featured-projects" class:list={["featured-projects", `featured-projects--count-${projects.length}`]}>
         <h2>Proyectos</h2>
         {showAllLink && <a class="featured-projects__all" href="/proyectos">Ver todos</a>}
         <div class="featured-projects__cuts" aria-label="Proyectos destacados">
@@ -37,6 +37,9 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
     .project-cut--1 { z-index: 3; clip-path: polygon(0 0, 43% 0, 25% 100%, 0 100%); }
     .project-cut--2 { z-index: 2; clip-path: polygon(34% 0, 78% 0, 60% 100%, 16% 100%); }
     .project-cut--3 { z-index: 1; clip-path: polygon(69% 0, 100% 0, 100% 100%, 51% 100%); }
+    .featured-projects--count-1 .project-cut--1 { clip-path: none; }
+    .featured-projects--count-2 .project-cut--1 { clip-path: polygon(0 0, 60% 0, 42% 100%, 0 100%); }
+    .featured-projects--count-2 .project-cut--2 { clip-path: polygon(48% 0, 100% 0, 100% 100%, 30% 100%); }
     .project-cut :global(.video-background) { filter: grayscale(1) contrast(1.04); transition: transform 700ms cubic-bezier(.16, 1, .3, 1), filter 700ms cubic-bezier(.16, 1, .3, 1); }
     .project-cut:hover::before, .project-cut:focus-visible::before { opacity: .58; }
     .project-cut:hover :global(.video-background), .project-cut:focus-visible :global(.video-background) { transform: scale(1.055); filter: grayscale(0) contrast(1.04); }
@@ -47,6 +50,9 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
         .project-cut--1 { clip-path: polygon(0 0, 100% 0, 100% 38%, 0 52%); }
         .project-cut--2 { clip-path: polygon(0 34%, 100% 20%, 100% 72%, 0 86%); }
         .project-cut--3 { clip-path: polygon(0 70%, 100% 56%, 100% 100%, 0 100%); }
+        .featured-projects--count-1 .project-cut--1 { clip-path: none; }
+        .featured-projects--count-2 .project-cut--1 { clip-path: polygon(0 0, 100% 0, 100% 54%, 0 66%); }
+        .featured-projects--count-2 .project-cut--2 { clip-path: polygon(0 48%, 100% 36%, 100% 100%, 0 100%); }
     }
 
     @media (prefers-reduced-motion: reduce) {

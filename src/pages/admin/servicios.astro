@@ -1,68 +1,185 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getServices } from "../../lib/data";
+
 const services = await getServices();
 ---
 
 <AdminLayout title="Servicios" activeSection="servicios">
-    <header class="mb-10"><h1 class="text-2xl font-bold text-white">Bodas y Videoclips</h1><p class="text-zinc-400 text-sm mt-2">Los dos servicios son fijos; puedes editar sus textos y vídeos.</p></header>
-    <div class="grid xl:grid-cols-2 gap-6">
-        {services.map((service: any) => (
-            <form class="service-editor bg-zinc-900 border border-zinc-800 rounded-lg p-6 space-y-5" data-service-id={service.id}>
-                <div class="flex items-center justify-between"><div><h2 class="text-xl font-semibold text-white">{service.title}</h2><p class="text-xs text-zinc-500 mt-1">/{service.slug}</p></div><i data-lucide={service.slug === "bodas" ? "heart" : "music-2"} class="w-6 h-6 text-zinc-400"></i></div>
-                <label class="service-field">Título<input name="title" value={service.title} required /></label>
-                <label class="service-field">Descripción<textarea name="description" rows="5">{service.description}</textarea></label>
-                <label class="service-field">Vídeo horizontal
-                    <div class="flex gap-2"><input id={`video-${service.id}`} name="video" value={service.video || ""} /><button class="service-upload" type="button" data-target={`video-${service.id}`}><i data-lucide="upload" class="w-4 h-4"></i></button></div>
+    <header class="services-admin-header">
+        <div>
+            <p class="services-admin-kicker">Servicios fijos</p>
+            <h1>Bodas y Videoclips</h1>
+            <p>Edita los textos y videos que alimentan las paginas publicas de cada servicio.</p>
+        </div>
+        <div class="services-admin-count">
+            <strong>{services.length}</strong>
+            <span>servicios</span>
+        </div>
+    </header>
+
+    <div class="services-grid">
+        {services.map((service: any, index: number) => (
+            <form class="service-editor" data-service-id={service.id}>
+                <div class="service-card-head">
+                    <div class="service-card-title">
+                        <span class="service-card-index">{String(index + 1).padStart(2, "0")}</span>
+                        <div>
+                            <h2>{service.title}</h2>
+                            <p>/{service.slug}</p>
+                        </div>
+                    </div>
+                    <span class="service-card-icon">
+                        <i data-lucide={service.slug === "bodas" ? "heart" : "music-2"} class="w-5 h-5"></i>
+                    </span>
+                </div>
+
+                <label class="service-field">
+                    <span>Titulo</span>
+                    <input name="title" value={service.title} required />
                 </label>
-                <label class="service-field">Vídeo vertical
-                    <div class="flex gap-2"><input id={`vertical-${service.id}`} name="video_vertical" value={service.video_vertical || ""} /><button class="service-upload" type="button" data-target={`vertical-${service.id}`}><i data-lucide="upload" class="w-4 h-4"></i></button></div>
+
+                <label class="service-field">
+                    <span>Descripcion</span>
+                    <textarea name="description" rows="5">{service.description}</textarea>
                 </label>
-                <button class="save-service w-full py-2.5 bg-white text-black rounded-md font-semibold text-sm" type="submit">Guardar {service.title}</button>
-                <p class="service-status min-h-5 text-xs text-zinc-400" aria-live="polite"></p>
+
+                <div class="service-video-fields">
+                    <label class="service-field">
+                        <span>Video horizontal</span>
+                        <div class="service-input-action">
+                            <input id={`video-${service.id}`} name="video" value={service.video || ""} placeholder="URL de YouTube, Vimeo o archivo" />
+                            <button class="service-upload" type="button" data-target={`video-${service.id}`} title="Subir video horizontal" aria-label="Subir video horizontal">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </label>
+
+                    <label class="service-field">
+                        <span>Video vertical</span>
+                        <div class="service-input-action">
+                            <input id={`vertical-${service.id}`} name="video_vertical" value={service.video_vertical || ""} placeholder="URL vertical para movil" />
+                            <button class="service-upload" type="button" data-target={`vertical-${service.id}`} title="Subir video vertical" aria-label="Subir video vertical">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="service-card-foot">
+                    <p class="service-status" aria-live="polite"></p>
+                    <button class="save-service" type="submit">
+                        <span>Guardar {service.title}</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
             </form>
         ))}
     </div>
+
     <input id="service-file" type="file" accept="video/mp4,video/webm" class="hidden" />
 </AdminLayout>
 
 <style>
-    .service-field { display: grid; gap: .4rem; color: #d4d4d8; font-size: .8rem; font-weight: 600; }
-    .service-field input, .service-field textarea { width: 100%; padding: .65rem .75rem; color: #fff; background: #09090b; border: 1px solid #3f3f46; border-radius: 4px; }
-    .service-field input:focus, .service-field textarea:focus { outline: none; border-color: #fff; }
-    .service-upload { display: grid; place-items: center; flex: 0 0 42px; color: #fff; background: #27272a; border: 1px solid #52525b; border-radius: 4px; }
+    .services-admin-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.35rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .services-admin-kicker { margin: 0 0 .45rem; color: #8b8b92; font-size: .68rem; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
+    .services-admin-header h1 { margin: 0; color: #fff; font-size: clamp(1.8rem, 3vw, 2.65rem); line-height: .95; letter-spacing: 0; }
+    .services-admin-header p:not(.services-admin-kicker) { max-width: 58ch; margin: .65rem 0 0; color: #a1a1aa; font-size: .92rem; line-height: 1.45; }
+    .services-admin-count { min-width: 108px; min-height: 70px; display: grid; place-items: center; padding: .8rem 1rem; color: #000; background: #fff; border-radius: 14px; text-transform: uppercase; }
+    .services-admin-count strong { font-size: 1.35rem; line-height: 1; }
+    .services-admin-count span { color: rgba(0,0,0,.56); font-size: .66rem; font-weight: 900; letter-spacing: .08em; }
+    .services-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; align-items: start; }
+    .service-editor { position: relative; display: grid; gap: 1rem; min-width: 0; padding: 1.05rem; color: #fff; background: linear-gradient(180deg, #18181b 0%, #101012 100%); border: 1px solid #303036; border-radius: 16px; box-shadow: 0 18px 44px rgba(0,0,0,.22); overflow: hidden; }
+    .service-editor::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: linear-gradient(90deg, #fff, rgba(255,255,255,.08)); opacity: .72; }
+    .service-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .service-card-title { display: flex; align-items: center; gap: .85rem; min-width: 0; }
+    .service-card-index { width: 42px; height: 42px; display: grid; place-items: center; flex: 0 0 auto; color: #000; background: #fff; border-radius: 12px; font-size: .78rem; font-weight: 950; }
+    .service-card-title h2 { margin: 0; color: #fff; font-size: 1.22rem; line-height: 1; }
+    .service-card-title p { margin: .28rem 0 0; color: #888891; font-size: .78rem; font-weight: 750; }
+    .service-card-icon { width: 42px; height: 42px; display: grid; place-items: center; flex: 0 0 auto; color: #e4e4e7; background: #0b0b0d; border: 1px solid #303036; border-radius: 50%; }
+    .service-field { display: grid; gap: .42rem; min-width: 0; color: #d4d4d8; font-size: .72rem; font-weight: 850; text-transform: uppercase; letter-spacing: .03em; }
+    .service-field span { color: #a1a1aa; }
+    .service-field input, .service-field textarea { width: 100%; min-width: 0; padding: .82rem .9rem; color: #fff; background: #09090b; border: 1px solid #3f3f46; border-radius: 10px; outline: none; font: inherit; font-size: .9rem; font-weight: 650; text-transform: none; letter-spacing: 0; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+    .service-field textarea { min-height: 132px; resize: vertical; line-height: 1.45; }
+    .service-field input:focus, .service-field textarea:focus { border-color: #fff; background: #050505; box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+    .service-video-fields { display: grid; gap: .85rem; }
+    .service-input-action { display: grid; grid-template-columns: minmax(0, 1fr) 46px; gap: .55rem; }
+    .service-upload { min-height: 46px; display: grid; place-items: center; color: #e4e4e7; background: #111113; border: 1px solid #3f3f46; border-radius: 10px; cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+    .service-upload:hover, .service-upload:focus-visible { color: #000; background: #fff; border-color: #fff; transform: translateY(-1px); }
+    .service-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: .25rem; }
+    .service-status { min-height: 1.1rem; margin: 0; color: #a1a1aa; font-size: .78rem; font-weight: 750; }
+    .save-service { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: .55rem; padding: 0 1.05rem; color: #000; background: #fff; border: 1px solid #fff; border-radius: 999px; font: inherit; font-size: .78rem; font-weight: 950; text-transform: uppercase; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease, opacity 160ms ease; }
+    .save-service:hover, .save-service:focus-visible { color: #fff; background: #000; transform: translateY(-1px); }
+    .save-service:disabled { opacity: .55; cursor: wait; transform: none; }
+    @media (max-width: 1180px) {
+        .services-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+        .services-admin-header { align-items: stretch; flex-direction: column; }
+        .services-admin-count { width: fit-content; }
+        .service-card-foot { align-items: stretch; flex-direction: column; }
+        .save-service { width: 100%; }
+    }
 </style>
 
 <script>
     const fileInput = document.getElementById('service-file') as HTMLInputElement;
     let targetId = '';
-    document.querySelectorAll<HTMLButtonElement>('.service-upload').forEach((button) => button.addEventListener('click', () => {
-        targetId = button.dataset.target || '';
-        fileInput.click();
-    }));
+
+    document.querySelectorAll<HTMLButtonElement>('.service-upload').forEach((button) => {
+        button.addEventListener('click', () => {
+            targetId = button.dataset.target || '';
+            fileInput.click();
+        });
+    });
+
     fileInput.addEventListener('change', async () => {
         const file = fileInput.files?.[0];
         const target = document.getElementById(targetId) as HTMLInputElement | null;
         if (!file || !target) return;
+
         const form = target.closest<HTMLFormElement>('.service-editor')!;
         const status = form.querySelector<HTMLElement>('.service-status')!;
-        status.textContent = 'Subiendo vídeo...';
-        const body = new FormData(); body.append('file', file); body.append('folder', 'service_videos');
+        status.textContent = 'Subiendo video...';
+
+        const body = new FormData();
+        body.append('file', file);
+        body.append('folder', 'service_videos');
+
         const response = await fetch('/api/admin/upload', { method: 'POST', body });
-        const result = await response.json();
-        if (response.ok) { target.value = result.url; status.textContent = 'Vídeo subido. Guarda el servicio.'; }
-        else status.textContent = result.error || 'No se pudo subir.';
+        const result = await response.json().catch(() => ({}));
+        if (response.ok) {
+            target.value = result.url;
+            status.textContent = 'Video subido. Guarda el servicio.';
+        } else {
+            status.textContent = result.error || 'No se pudo subir.';
+        }
         fileInput.value = '';
     });
-    document.querySelectorAll<HTMLFormElement>('.service-editor').forEach((form) => form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const status = form.querySelector<HTMLElement>('.service-status')!;
-        const button = form.querySelector<HTMLButtonElement>('.save-service')!;
-        button.disabled = true; status.textContent = 'Guardando...';
-        const body = { id: form.dataset.serviceId, ...Object.fromEntries(new FormData(form)) };
-        const response = await fetch('/api/admin/services', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const result = await response.json().catch(() => ({}));
-        status.textContent = response.ok ? 'Servicio guardado.' : (result.error || 'No se pudo guardar.');
-        button.disabled = false;
-    }));
+
+    document.querySelectorAll<HTMLFormElement>('.service-editor').forEach((form) => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const status = form.querySelector<HTMLElement>('.service-status')!;
+            const button = form.querySelector<HTMLButtonElement>('.save-service')!;
+            const buttonLabel = button.querySelector('span')!;
+            const originalLabel = buttonLabel.textContent || 'Guardar';
+
+            button.disabled = true;
+            buttonLabel.textContent = 'Guardando...';
+            status.textContent = '';
+
+            const body = { id: form.dataset.serviceId, ...Object.fromEntries(new FormData(form)) };
+            const response = await fetch('/api/admin/services', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            status.textContent = response.ok ? 'Servicio guardado.' : (result.error || 'No se pudo guardar.');
+            button.disabled = false;
+            buttonLabel.textContent = originalLabel;
+        });
+    });
 </script>

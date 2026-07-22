@@ -1,37 +1,50 @@
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
 
+function json(data: unknown, status = 200) {
+    return new Response(JSON.stringify(data), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+    });
+}
+
 export const DELETE: APIRoute = async ({ request }) => {
     const supabase = getServiceSupabase();
-    if (!supabase) return new Response(JSON.stringify({ error: 'Supabase no configurado' }), { status: 500 });
+    if (!supabase) return json({ error: 'Supabase no configurado' }, 500);
     
     try {
         const { id } = await request.json();
-        if (!id) return new Response(JSON.stringify({ error: 'Falta el ID' }), { status: 400 });
+        if (!id) return json({ error: 'Falta el ID' }, 400);
 
         const { error } = await supabase.from('contacts').delete().eq('id', id);
         if (error) throw error;
         
-        return new Response(JSON.stringify({ success: true }), { status: 200 });
+        return json({ success: true });
     } catch (e: any) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+        return json({ error: e.message }, 500);
     }
 };
 
 // PUT to mark as 'leido'
 export const PUT: APIRoute = async ({ request }) => {
     const supabase = getServiceSupabase();
-    if (!supabase) return new Response(JSON.stringify({ error: 'Supabase no configurado' }), { status: 500 });
+    if (!supabase) return json({ error: 'Supabase no configurado' }, 500);
     
     try {
         const { id, status } = await request.json();
-        if (!id) return new Response(JSON.stringify({ error: 'Falta el ID' }), { status: 400 });
+        if (!id) return json({ error: 'Falta el ID' }, 400);
+        if (!['nuevo', 'leido'].includes(status)) {
+            return json({ error: 'Estado no válido' }, 400);
+        }
 
-        const { error } = await supabase.from('contacts').update({ status }).eq('id', id);
+        const { error } = await supabase
+            .from('contacts')
+            .update({ status })
+            .eq('id', id);
         if (error) throw error;
         
-        return new Response(JSON.stringify({ success: true }), { status: 200 });
+        return json({ success: true, message: { id, status } });
     } catch (e: any) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+        return json({ error: e.message }, 500);
     }
 };

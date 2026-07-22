@@ -115,7 +115,7 @@ const clients = allClients.filter((c: any) => c.is_active);
               </svg>
           </div>
           
-          <h3 id="dropbox-title" class="pc-modal__title" style="margin-bottom: 0.5rem;">Acceso verificado</h3>
+          <h3 id="dropbox-title" class="pc-modal__title" style="margin-bottom: 0.5rem;">Bienvenido</h3>
           <p class="pc-modal__subtitle">Tu conexión es segura. Haz clic en el botón para acceder a la carpeta compartida con tus archivos.</p>
           
           <a id="dropbox-link-btn" href="#" target="_blank" class="pc-modal__submit" style="display: inline-block; text-decoration: none; box-sizing: border-box; background: linear-gradient(135deg, #0061FE, #004ecc);">
@@ -540,11 +540,13 @@ const clients = allClients.filter((c: any) => c.is_active);
   // Dropbox Modal
   const dropboxModal = document.getElementById('dropbox-modal')!;
   const dropboxLinkBtn = document.getElementById('dropbox-link-btn') as HTMLAnchorElement;
+  const dropboxTitle = document.getElementById('dropbox-title')!;
 
   function openDropboxModal(clientId: string, dropboxLink: string) {
     const card = document.querySelector(`.pc-card[data-client-id="${clientId}"]`) as HTMLElement;
     const clientName = card?.dataset.clientName || 'Cliente';
     
+    dropboxTitle.textContent = `Bienvenido ${clientName}`;
     dropboxLinkBtn.href = dropboxLink;
     dropboxLinkBtn.textContent = `Abrir archivos de ${clientName}`;
 

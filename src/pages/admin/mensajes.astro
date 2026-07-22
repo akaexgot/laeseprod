@@ -30,20 +30,19 @@ if (serviceSupabase) {
 ---
 
 <AdminLayout title="Mensajes" activeSection="mensajes">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="margin-bottom: 3.5rem !important;">
+    <div class="admin-page-head">
         <div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">Mensajes</h1>
-            <p class="text-zinc-400 text-sm" style="margin-top: 0.75rem !important;">Bandeja de entrada de las consultas de clientes. Total: <span class="text-zinc-100 font-medium">{messages.length}</span></p>
+            <p class="admin-page-kicker">Comunicacion</p>
+            <h1 class="admin-page-title">Mensajes</h1>
+            <p class="admin-page-copy">Bandeja de entrada de las consultas de clientes. Total: <strong>{messages.length}</strong></p>
         </div>
         <div class="flex items-center" style="gap: 0.5rem;">
-            <span class="inline-flex items-center rounded-md text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-300" style="padding: 0.375rem 0.75rem; gap: 0.375rem;">
-                <span class="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>
+            <span class="admin-pill" id="new-messages-pill">
+                <span class="message-dot"></span>
                 {messages.filter(m => m.status === 'nuevo').length} Nuevos
             </span>
         </div>
     </div>
-
-    <div style="margin-bottom: 4rem !important;"></div>
 
     {error && (
         <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-md text-red-400 text-sm">
@@ -51,7 +50,7 @@ if (serviceSupabase) {
         </div>
     )}
 
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+    <div class="admin-surface messages-surface">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left">
                 <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
@@ -64,13 +63,13 @@ if (serviceSupabase) {
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
                     {messages.map((msg) => (
-                        <tr class={`transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default ${msg.status === 'nuevo' ? 'bg-zinc-800/20' : ''}`} data-id={msg.id} onclick="const btn = this.querySelector('.btn-view'); if(btn && !event.target.closest('button')) btn.click();">
+                        <tr class={`message-row transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default ${msg.status === 'nuevo' ? 'is-new' : ''}`} data-id={msg.id} onclick="const btn = this.querySelector('.btn-view'); if(btn && !event.target.closest('button')) btn.click();">
                             <td class="align-top" style="padding: 1.25rem 1.5rem;">
                                 <div class="flex items-start justify-between">
                                     <div>
                                         <div class="font-medium text-zinc-100 flex items-center" style="gap: 0.5rem; margin-bottom: 0.125rem;">
                                             {msg.name}
-                                            {msg.status === 'nuevo' && <span class="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>}
+                                            {msg.status === 'nuevo' && <span class="message-dot message-dot--inline"></span>}
                                         </div>
                                         <div class="text-xs text-zinc-400">
                                             <a href={`mailto:${msg.email}`} class="hover:text-rose-400 transition-colors" onclick="event.stopPropagation()">{msg.email}</a>
@@ -96,17 +95,19 @@ if (serviceSupabase) {
                                     <button class="btn-view hidden" data-msg={JSON.stringify(msg)}></button>
                                     {msg.status === 'nuevo' && (
                                         <button 
-                                            class="btn-mark-read p-2 text-zinc-500 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all" 
+                                            class="btn-mark-read admin-icon-button admin-icon-button--success" 
                                             data-id={msg.id}
-                                            title="Marcar como leído"
+                                            title="Marcar como leido"
+                                            aria-label="Marcar como leido"
                                         >
                                             <i data-lucide="check-check" class="w-4.5 h-4.5"></i>
                                         </button>
                                     )}
                                     <button 
-                                        class="btn-delete p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" 
+                                        class="btn-delete admin-icon-button admin-icon-button--danger" 
                                         data-id={msg.id}
                                         title="Eliminar"
+                                        aria-label="Eliminar"
                                     >
                                         <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                     </button>
@@ -120,7 +121,7 @@ if (serviceSupabase) {
     </div>
 
     {messages.length === 0 && !error && (
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col items-center justify-center text-center" style="padding: 3rem; margin-top: 1.5rem;">
+        <div class="admin-surface flex flex-col items-center justify-center text-center" style="padding: 3rem; margin-top: 1.5rem;">
             <div class="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center border border-zinc-800" style="margin-bottom: 1rem;">
                 <i data-lucide="mail-check" class="w-6 h-6 text-zinc-500"></i>
             </div>
@@ -128,8 +129,6 @@ if (serviceSupabase) {
             <p class="text-zinc-400 text-sm max-w-sm">Aún no has recibido ningún mensaje de contacto.</p>
         </div>
     )}
-</AdminLayout>
-
 <div id="modal-view" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
         <div class="flex flex-shrink-0 items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
@@ -179,10 +178,21 @@ if (serviceSupabase) {
         </div>
     </div>
 </div>
-</div>
 
 <!-- Toast Container -->
 <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+
+<style>
+    .messages-surface table { border-collapse: collapse; }
+    .message-row.is-new { background: rgba(255, 255, 255, .035); }
+    .message-row.is-read { background: transparent !important; }
+    .message-dot { width: 8px; height: 8px; display: inline-block; flex: 0 0 auto; background: #f43f5e; border-radius: 50%; box-shadow: 0 0 10px rgba(244, 63, 94, .68); }
+    .message-dot--inline { margin-left: .1rem; }
+    .messages-surface .btn-mark-read:disabled { opacity: .55; cursor: wait; transform: none; }
+    @media (max-width: 640px) {
+        .admin-page-head { align-items: stretch; flex-direction: column; }
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -248,32 +258,65 @@ if (serviceSupabase) {
             }
         });
 
-        // Marcar como leído
+        // Marcar como leido
+        const setActionIcon = (button: HTMLButtonElement, iconName: string, spinning = false) => {
+            button.innerHTML = `<i data-lucide="${iconName}" class="w-4.5 h-4.5${spinning ? ' animate-spin' : ''}"></i>`;
+            // @ts-ignore
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
         document.querySelectorAll('.btn-mark-read').forEach(btn => {
-            btn.addEventListener('click', async () => {
+            btn.addEventListener('click', async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 const id = (btn as HTMLElement).dataset.id;
-                
-                const icon = btn.querySelector('i')!;
-                icon.setAttribute('data-lucide', 'loader-2');
-                icon.classList.add('animate-spin');
-                // @ts-ignore
-                if (typeof lucide !== 'undefined') lucide.createIcons();
+                if (!id) return showToast('No se encontro el ID del mensaje', 'error');
+
+                const button = btn as HTMLButtonElement;
+                button.disabled = true;
+                setActionIcon(button, 'loader-2', true);
+                const row = button.closest<HTMLTableRowElement>('.message-row');
+                const dot = row?.querySelector<HTMLElement>('.message-dot--inline') || null;
+                const pill = document.getElementById('new-messages-pill');
+                const currentCount = Number((pill?.textContent || '').match(/\d+/)?.[0] || '0');
+                row?.classList.remove('is-new');
+                row?.classList.add('is-read');
+                if (dot) dot.hidden = true;
+                button.style.display = 'none';
+                if (pill) pill.innerHTML = `<span class="message-dot"></span>${Math.max(0, currentCount - 1)} Nuevos`;
 
                 try {
                     const res = await fetch('/api/admin/messages', {
                         method: 'PUT',
+                        credentials: 'same-origin',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id, status: 'leido' })
                     });
-                    
+
                     if (res.ok) {
-                        location.reload();
+                        dot?.remove();
+                        button.remove();
+                        showToast('Mensaje marcado como leido', 'success');
                     } else {
-                        showToast('Error al actualizar el mensaje', 'error');
-                        location.reload();
+                        const result = await res.json().catch(() => ({}));
+                        showToast(result.error || 'Error al actualizar el mensaje', 'error');
+                        button.disabled = false;
+                        button.style.display = '';
+                        row?.classList.add('is-new');
+                        row?.classList.remove('is-read');
+                        if (dot) dot.hidden = false;
+                        if (pill) pill.innerHTML = `<span class="message-dot"></span>${currentCount} Nuevos`;
+                        setActionIcon(button, 'check-check');
                     }
                 } catch (e) {
-                    showToast('Error de conexión', 'error');
+                    showToast('Error de conexion', 'error');
+                    button.disabled = false;
+                    button.style.display = '';
+                    row?.classList.add('is-new');
+                    row?.classList.remove('is-read');
+                    if (dot) dot.hidden = false;
+                    if (pill) pill.innerHTML = `<span class="message-dot"></span>${currentCount} Nuevos`;
+                    setActionIcon(button, 'check-check');
                 }
             });
         });
@@ -321,9 +364,12 @@ if (serviceSupabase) {
         });
 
         document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 openConfirm((btn as HTMLElement).dataset.id!);
             });
         });
     });
 </script>
+</AdminLayout>

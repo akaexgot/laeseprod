@@ -1,324 +1,429 @@
 ---
-/**
- * Admin - Portal Clients Management
- * Full CRUD with Cloudinary drag-and-drop image upload
- */
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { getServiceSupabase } from "../../lib/supabase";
-import { getUserFromCookie } from "../../lib/auth";
 import { getPortalClientsAdmin } from "../../lib/data";
-
-// SSR auth is handled by middleware
-const serviceSupabase = getServiceSupabase()!;
 
 const clients = await getPortalClientsAdmin();
 ---
 
 <AdminLayout title="Portal Clientes" activeSection="portal">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="margin-bottom: 3.5rem !important;">
+    <header class="portal-admin-header">
         <div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">Portal Clientes</h1>
-            <p class="text-zinc-400 text-sm" style="margin-top: 0.75rem !important;">Gestiona el portal. Total: <span class="text-zinc-100 font-medium">{clients.length}</span></p>
+            <p class="portal-admin-kicker">Accesos privados</p>
+            <h1>Portal Clientes</h1>
+            <p>Crea codigos que desbloquean una carpeta de Dropbox para cada cliente.</p>
         </div>
-        <button id="btn-add-client"
-            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
-            style="padding: 0.5rem 1rem; gap: 0.5rem;"
-        >
+        <button id="btn-add-client" class="portal-primary-button" type="button">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Nuevo cliente
         </button>
-    </div>
+    </header>
 
-    <!-- Divider / Search -->
-    <div style="margin-bottom: 4rem !important;"></div>
+    <section class="portal-table-shell">
+        <div class="portal-table-meta">
+            <span>{clients.length} {clients.length === 1 ? "cliente" : "clientes"}</span>
+            <span>Arrastra para ordenar</span>
+        </div>
 
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left" id="clients-table">
-                <thead class="text-xs text-zinc-500 uppercase tracking-wider font-semibold bg-zinc-900/50">
-                    <tr class="border-b border-zinc-800/50">
-                        <th class="hidden sm:table-cell w-10" style="padding: 1.25rem 0.5rem 1.25rem 1.5rem;"></th>
-                        <th style="padding: 1.25rem 1.5rem;">Cliente</th>
-                        <th class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">Dropbox</th>
-                        <th class="hidden md:table-cell" style="padding: 1.25rem 1.5rem;">Estado</th>
-                        <th class="text-right hidden sm:table-cell w-24" style="padding: 1.25rem 1.5rem;">Acciones</th>
+        <div class="portal-table-wrap">
+            <table id="clients-table" class="portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Cliente</th>
+                        <th>Dropbox</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800">
-                {
-                    clients.length === 0 ? (
+                <tbody>
+                    {clients.length === 0 ? (
                         <tr>
-                            <td colspan="5" class="text-center text-zinc-500 py-12">
-                                No hay clientes aún. Pulsa "Nuevo cliente" para empezar.
-                            </td>
+                            <td colspan="5" class="portal-empty">No hay clientes aun. Pulsa "Nuevo cliente" para empezar.</td>
                         </tr>
                     ) : (
                         clients.map((client: any) => (
-                            <tr class="transition-colors group hover:bg-zinc-800/30 mobile-row-click sm:cursor-default drag-row" data-id={client.id} draggable="true" onclick="const btn = this.querySelector('.btn-edit'); if(btn && !event.target.closest('button') && !event.target.closest('a') && !event.target.closest('.drag-handle')) btn.click();">
-                                <td class="hidden sm:table-cell" style="padding: 1.25rem 0.5rem 1.25rem 1.5rem;">
-                                    <div class="drag-handle cursor-grab active:cursor-grabbing text-zinc-600 hover:text-zinc-300 transition-colors" style="display: flex; align-items: center; justify-content: center;" title="Arrastrar para ordenar">
+                            <tr class="drag-row" data-id={client.id} draggable="true">
+                                <td>
+                                    <button class="drag-handle" type="button" title="Arrastrar para ordenar" aria-label="Arrastrar para ordenar">
                                         <i data-lucide="grip-vertical" class="w-4 h-4"></i>
-                                    </div>
+                                    </button>
                                 </td>
-                                <td style="padding: 1.25rem 1.5rem;">
-                                    <div class="flex items-center justify-between">
-                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                            <div class="w-10 h-10 bg-zinc-950 rounded-xl border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                                                {client.image ? (
-                                                    <img src={client.image} alt={client.client_name} class="w-full h-full object-cover rounded-xl" />
-                                                ) : (
-                                                    <span class="text-rose-400 font-bold text-lg">
-                                                        {client.client_name.charAt(0)}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <span class="font-medium text-zinc-100">{client.client_name}</span>
-                                        </div>
-                                        <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0"></i>
-                                    </div>
+                                <td>
+                                    <button
+                                        class="portal-client-button btn-edit"
+                                        type="button"
+                                        data-id={client.id}
+                                        data-name={client.client_name}
+                                        data-dropbox={client.dropbox_link || ""}
+                                        data-active={client.is_active ? "true" : "false"}
+                                    >
+                                        <span>{client.client_name.charAt(0)}</span>
+                                        <strong>{client.client_name}</strong>
+                                    </button>
                                 </td>
-                                <td class="hidden sm:table-cell" style="padding: 1.25rem 1.5rem;">
+                                <td>
                                     {client.dropbox_link ? (
-                                        <a href={client.dropbox_link} target="_blank" class="text-sm text-zinc-400 hover:text-rose-400 hover:underline flex items-center gap-1">
-                                            ✓ Configurado
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                        <a class="portal-dropbox-link" href={client.dropbox_link} target="_blank" rel="noopener noreferrer">
+                                            Configurado
+                                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                                         </a>
                                     ) : (
-                                        <span class="text-sm text-amber-400">⚠ Sin enlace</span>
+                                        <span class="portal-warning">Sin enlace</span>
                                     )}
                                 </td>
-                                <td class="hidden md:table-cell" style="padding: 1.25rem 1.5rem;">
-                                    {client.is_active ? (
-                                        <div class="flex items-center gap-2" title="Activo">
-                                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                                            <span class="text-xs text-emerald-400">Activo</span>
-                                        </div>
-                                    ) : (
-                                        <div class="flex items-center gap-2" title="Inactivo">
-                                            <div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
-                                            <span class="text-xs text-rose-400">Inactivo</span>
-                                        </div>
-                                    )}
+                                <td>
+                                    <span class:list={["portal-state", client.is_active ? "is-active" : "is-inactive"]}>
+                                        <span></span>
+                                        {client.is_active ? "Activo" : "Inactivo"}
+                                    </span>
                                 </td>
-                                <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
-                                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button 
-                                            class="btn-edit p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all" 
+                                <td>
+                                    <div class="portal-actions">
+                                        <button
+                                            class="portal-icon-button btn-edit"
+                                            type="button"
                                             title="Editar"
                                             data-id={client.id}
                                             data-name={client.client_name}
-                                            data-image={client.image || ''}
-                                            data-dropbox={client.dropbox_link || ''}
-                                            data-active={client.is_active ? 'true' : 'false'}
-                                            data-type={client.image_type || 'logo'}
+                                            data-dropbox={client.dropbox_link || ""}
+                                            data-active={client.is_active ? "true" : "false"}
                                         >
-                                            <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
                                         </button>
-                                        <button 
-                                            class="btn-delete p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" 
-                                            title="Eliminar"
-                                            data-id={client.id}
-                                        >
-                                            <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
+                                        <button class="portal-icon-button btn-delete" type="button" title="Eliminar" data-id={client.id}>
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                         ))
-                    )
-                }
+                    )}
                 </tbody>
             </table>
         </div>
-    </div>
-<!-- Create/Edit Modal -->
-<div id="modal-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-lg shadow-2xl overflow-hidden">
-        <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
-            <h3 id="modal-title" class="text-lg font-semibold text-white">Nuevo cliente</h3>
-            <button id="modal-close-icon" class="p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
+    </section>
 
-        <input type="hidden" id="client-id" />
-
-        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
-            <div style="margin-bottom: 0.5rem;">
-                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Nombre del Cliente *</label>
-                <input type="text" id="c-name" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="Ej: Hotel Hilton" />
-            </div>
-
-            <div style="margin-bottom: 0.5rem;">
-                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Logo del Cliente</label>
-                
-                <!-- Drag & Drop Zone -->
-                <div id="drop-zone" class="relative group cursor-pointer drop-zone">
-                    <input type="file" id="file-input" class="hidden" accept="image/*" />
-                    <div class="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 bg-zinc-950/50 hover:bg-zinc-800/20 hover:border-rose-500/50 transition-all duration-300 drop-zone-content">
-                        
-                        <div id="upload-idle" class="flex flex-col items-center gap-3 text-center">
-                            <div class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-rose-400 group-hover:scale-110 transition-all duration-300">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-zinc-200">Pulsa o arrastra el logo</p>
-                                <p class="text-xs text-zinc-500 mt-1">PNG, JPG, SVG o WebP (máx. 2MB)</p>
-                            </div>
-                        </div>
-
-                        <div id="upload-loading" class="hidden flex flex-col items-center gap-3 text-center">
-                            <div class="w-10 h-10 border-2 border-rose-500/30 border-t-rose-500 rounded-full animate-spin"></div>
-                            <p class="text-sm font-medium text-rose-400">Subiendo imagen...</p>
-                        </div>
-
-                        <div id="upload-preview" class="hidden relative w-full h-32 flex items-center justify-center rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden group/preview">
-                            <img id="logo-preview-img" src="" alt="Preview" class="max-h-full max-w-full object-contain p-2" />
-                            <div class="absolute inset-0 bg-zinc-950/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
-                                <button type="button" id="btn-remove-logo" class="bg-rose-600 text-white p-2 rounded-full hover:bg-rose-500 transition-all">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <input type="hidden" id="c-image" />
-            </div>
-
-            <div style="margin-bottom: 0.5rem;">
-                <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.75rem;">Ajuste de la imagen</label>
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="cursor-pointer group">
-                        <input type="radio" name="image_type" value="logo" class="hidden peer" id="type-logo" checked />
-                        <div class="flex items-center justify-center gap-2 p-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 peer-checked:text-rose-500 hover:border-zinc-700 transition-all">
-                            <i data-lucide="layout" class="w-4 h-4"></i>
-                            <span class="text-xs font-semibold uppercase tracking-wider">Logo (Contain)</span>
-                        </div>
-                    </label>
-                    <label class="cursor-pointer group">
-                        <input type="radio" name="image_type" value="image" class="hidden peer" id="type-image" />
-                        <div class="flex items-center justify-center gap-2 p-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 peer-checked:text-rose-500 hover:border-zinc-700 transition-all">
-                            <i data-lucide="image" class="w-4 h-4"></i>
-                            <span class="text-xs font-semibold uppercase tracking-wider">Foto (Cover)</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2" style="display: grid; gap: 1rem; margin-bottom: 0.5rem;">
+    <div id="modal-overlay" class="portal-modal hidden" aria-hidden="true">
+        <div class="portal-modal__backdrop"></div>
+        <div class="portal-modal__panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="portal-modal__header">
                 <div>
-                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Contraseña de acceso *</label>
-                    <div class="relative">
-                        <input type="password" id="c-password" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm pr-10" placeholder="Contraseña del cliente" />
-                        <button type="button" id="btn-toggle-pw" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors">
-                            <svg class="w-4 h-4" id="pw-icon-eye" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            <svg class="w-4 h-4 hidden" id="pw-icon-eyeoff" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                    <p id="modal-kicker">Nuevo acceso</p>
+                    <h2 id="modal-title">Nuevo cliente</h2>
+                </div>
+                <button id="modal-close-icon" class="portal-icon-button" type="button" aria-label="Cerrar">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <input type="hidden" id="client-id" />
+
+            <div class="portal-modal__body">
+                <label class="portal-field">
+                    <span>Nombre del cliente</span>
+                    <input type="text" id="c-name" placeholder="Ej: Maria y Jose" autocomplete="off" />
+                </label>
+
+                <label class="portal-field">
+                    <span>Codigo de acceso</span>
+                    <div class="portal-password">
+                        <input type="password" id="c-password" placeholder="Codigo privado" autocomplete="new-password" />
+                        <button type="button" id="btn-toggle-pw" aria-label="Mostrar u ocultar codigo">
+                            <i data-lucide="eye" class="w-4 h-4" data-eye></i>
+                            <i data-lucide="eye-off" class="w-4 h-4 hidden" data-eye-off></i>
                         </button>
                     </div>
-                    <p class="text-xs text-zinc-500 mt-1" id="pw-hint">Se pedirá al cliente para acceder al Dropbox</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Dropbox Link</label>
-                    <input type="url" id="c-dropbox" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="https://dropbox.com/..." />
-                </div>
-            </div>
-
-            <div style="margin-bottom: 0.5rem;">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="c-active" class="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-rose-500 focus:ring-rose-500" checked />
-                    <span class="text-sm font-medium text-zinc-300">Cuenta activa</span>
+                    <small id="pw-hint">Se pedira este codigo para abrir el Dropbox.</small>
                 </label>
-            </div>
-        </div>
 
-        <div class="border-t border-zinc-800 bg-zinc-950 flex justify-end mt-auto relative" style="padding: 1rem 1.5rem; gap: 0.75rem;">
-            <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-4"></p>
-            <button type="button" id="modal-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors hidden mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
-            <button type="button" id="modal-cancel" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.5rem 1rem;">Cancelar</button>
-            <button type="button" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg shadow-glow transition-all" style="padding: 0.5rem 1rem;">Guardar</button>
+                <label class="portal-field">
+                    <span>Enlace de Dropbox</span>
+                    <input type="url" id="c-dropbox" placeholder="https://dropbox.com/..." />
+                </label>
+
+                <label class="portal-check">
+                    <input type="checkbox" id="c-active" checked />
+                    <span>Acceso activo</span>
+                </label>
+
+                <p id="modal-error" class="portal-error hidden"></p>
+            </div>
+
+            <div class="portal-modal__footer">
+                <button type="button" id="modal-delete" class="portal-danger-button hidden">Eliminar</button>
+                <button type="button" id="modal-cancel" class="portal-secondary-button">Cancelar</button>
+                <button type="button" id="modal-save" class="portal-primary-button">Guardar</button>
+            </div>
         </div>
     </div>
-</div>
+
+    <div id="confirm-overlay" class="portal-confirm hidden" aria-hidden="true">
+        <div class="portal-modal__backdrop"></div>
+        <div class="portal-confirm__panel" role="dialog" aria-modal="true">
+            <div class="portal-confirm__icon">
+                <i data-lucide="triangle-alert" class="w-7 h-7"></i>
+            </div>
+            <h2>Eliminar cliente</h2>
+            <p>Esta accion no se puede deshacer. El codigo dejara de funcionar.</p>
+            <div class="portal-confirm__actions">
+                <button id="confirm-cancel" class="portal-secondary-button" type="button">Cancelar</button>
+                <button id="confirm-yes" class="portal-danger-fill-button" type="button">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="portal-toast-container"></div>
+</AdminLayout>
 
 <style>
-    .drag-row.drag-over {
-        background: rgba(225, 29, 72, 0.08) !important;
-        box-shadow: inset 0 -2px 0 0 #e11d48;
-    }
-    .drag-row[draggable="true"] {
-        user-select: none;
-    }
-    .drop-zone.ready .drop-zone-content {
-        border-color: #e11d48;
-        background-color: rgba(225, 29, 72, 0.05);
+    .portal-admin-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.4rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .portal-admin-kicker { margin: 0 0 .45rem; color: #8b8b92; font-size: .68rem; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
+    .portal-admin-header h1 { margin: 0; color: #fff; font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: .95; }
+    .portal-admin-header p:not(.portal-admin-kicker) { margin: .65rem 0 0; max-width: 58ch; color: #a1a1aa; font-size: .92rem; }
+    .portal-primary-button, .portal-secondary-button, .portal-danger-button, .portal-danger-fill-button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: .55rem; padding: 0 1rem; border-radius: 999px; font: inherit; font-size: .78rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+    .portal-primary-button { color: #000; background: #fff; border: 1px solid #fff; }
+    .portal-primary-button:hover, .portal-primary-button:focus-visible { color: #fff; background: #000; transform: translateY(-1px); }
+    .portal-secondary-button { color: #e4e4e7; background: #18181b; border: 1px solid #3f3f46; }
+    .portal-secondary-button:hover, .portal-secondary-button:focus-visible { color: #000; background: #fff; border-color: #fff; }
+    .portal-danger-button { color: #fb7185; background: transparent; border: 1px solid rgba(251,113,133,.3); margin-right: auto; }
+    .portal-danger-button:hover, .portal-danger-button:focus-visible, .portal-danger-fill-button { color: #fff; background: #dc2626; border: 1px solid #dc2626; }
+    .portal-table-shell { background: #101012; border: 1px solid #27272a; border-radius: 16px; overflow: hidden; box-shadow: 0 18px 44px rgba(0,0,0,.22); }
+    .portal-table-meta { min-height: 50px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 1rem; color: #8b8b92; border-bottom: 1px solid #27272a; font-size: .72rem; font-weight: 850; text-transform: uppercase; letter-spacing: .06em; }
+    .portal-table-wrap { overflow-x: auto; }
+    .portal-table { width: 100%; min-width: 760px; border-collapse: collapse; color: #e4e4e7; font-size: .9rem; }
+    .portal-table th { padding: 1rem; color: #71717a; background: rgba(255,255,255,.015); font-size: .68rem; font-weight: 900; text-align: left; text-transform: uppercase; letter-spacing: .08em; }
+    .portal-table th:first-child, .portal-table td:first-child { width: 48px; text-align: center; }
+    .portal-table th:last-child, .portal-table td:last-child { text-align: right; }
+    .portal-table td { padding: 1rem; border-top: 1px solid rgba(255,255,255,.07); vertical-align: middle; }
+    .portal-table tr { transition: background 160ms ease, box-shadow 160ms ease; }
+    .portal-table tbody tr:hover { background: rgba(255,255,255,.035); }
+    .portal-table .drag-row.drag-over { background: rgba(255,255,255,.07); box-shadow: inset 0 -2px 0 #fff; }
+    .drag-handle, .portal-icon-button { width: 36px; height: 36px; display: inline-grid; place-items: center; color: #a1a1aa; background: #111113; border: 1px solid #303036; border-radius: 10px; cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+    .drag-handle { cursor: grab; }
+    .drag-handle:active { cursor: grabbing; }
+    .drag-handle:hover, .portal-icon-button:hover, .portal-icon-button:focus-visible { color: #000; background: #fff; border-color: #fff; transform: translateY(-1px); }
+    .portal-client-button { min-width: 0; display: inline-flex; align-items: center; gap: .8rem; width: 100%; color: #fff; background: transparent; border: 0; padding: 0; text-align: left; cursor: pointer; }
+    .portal-client-button span { width: 42px; height: 42px; display: grid; place-items: center; flex: 0 0 auto; color: #000; background: #fff; border-radius: 12px; font-weight: 950; }
+    .portal-client-button strong { min-width: 0; overflow: hidden; font-size: .96rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .portal-dropbox-link { display: inline-flex; align-items: center; gap: .4rem; color: #d4d4d8; text-decoration: none; font-weight: 750; }
+    .portal-dropbox-link:hover, .portal-dropbox-link:focus-visible { color: #fff; text-decoration: underline; }
+    .portal-warning { color: #fbbf24; font-size: .82rem; font-weight: 750; }
+    .portal-state { display: inline-flex; align-items: center; gap: .45rem; color: #a1a1aa; font-size: .78rem; font-weight: 800; }
+    .portal-state span { width: 9px; height: 9px; border-radius: 999px; background: currentColor; box-shadow: 0 0 12px currentColor; }
+    .portal-state.is-active { color: #34d399; }
+    .portal-state.is-inactive { color: #fb7185; }
+    .portal-actions { display: inline-flex; justify-content: flex-end; gap: .4rem; }
+    .portal-empty { padding: 3rem 1rem !important; color: #71717a; text-align: center !important; }
+    .portal-modal, .portal-confirm { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 1rem; }
+    .portal-modal.hidden, .portal-confirm.hidden { display: none; }
+    .portal-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.78); backdrop-filter: blur(12px); }
+    .portal-modal__panel, .portal-confirm__panel { position: relative; z-index: 1; width: min(100%, 520px); color: #fff; background: #101012; border: 1px solid #303036; border-radius: 18px; overflow: hidden; box-shadow: 0 26px 90px rgba(0,0,0,.45); }
+    .portal-modal__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.3rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .portal-modal__header p { margin: 0 0 .3rem; color: #8b8b92; font-size: .65rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    .portal-modal__header h2 { margin: 0; font-size: 1.25rem; line-height: 1; }
+    .portal-modal__body { display: grid; gap: 1rem; padding: 1.3rem; }
+    .portal-field { display: grid; gap: .45rem; color: #a1a1aa; font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+    .portal-field input { width: 100%; min-height: 46px; padding: .78rem .9rem; color: #fff; background: #09090b; border: 1px solid #3f3f46; border-radius: 10px; outline: none; font: inherit; font-size: .9rem; font-weight: 650; text-transform: none; letter-spacing: 0; transition: border-color 160ms ease, box-shadow 160ms ease; }
+    .portal-field input:focus { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+    .portal-field small { color: #71717a; font-size: .72rem; font-weight: 700; text-transform: none; letter-spacing: 0; }
+    .portal-password { position: relative; }
+    .portal-password input { padding-right: 3rem; }
+    .portal-password button { position: absolute; right: .4rem; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; display: grid; place-items: center; color: #a1a1aa; background: transparent; border: 0; border-radius: 999px; cursor: pointer; }
+    .portal-password button:hover, .portal-password button:focus-visible { color: #fff; background: #18181b; }
+    .portal-check { display: inline-flex; align-items: center; gap: .55rem; color: #e4e4e7; font-size: .86rem; font-weight: 800; cursor: pointer; }
+    .portal-check input { width: 17px; height: 17px; accent-color: #fff; }
+    .portal-error { margin: 0; color: #fb7185; font-size: .82rem; font-weight: 800; }
+    .portal-modal__footer { display: flex; align-items: center; justify-content: flex-end; gap: .75rem; padding: 1rem 1.3rem; background: #09090b; border-top: 1px solid rgba(255,255,255,.08); }
+    .portal-confirm__panel { max-width: 360px; display: grid; justify-items: center; gap: .85rem; padding: 1.5rem; text-align: center; }
+    .portal-confirm__icon { width: 58px; height: 58px; display: grid; place-items: center; color: #fb7185; background: rgba(251,113,133,.1); border: 1px solid rgba(251,113,133,.22); border-radius: 50%; }
+    .portal-confirm__panel h2 { margin: 0; font-size: 1.25rem; }
+    .portal-confirm__panel p { margin: 0; color: #a1a1aa; line-height: 1.45; }
+    .portal-confirm__actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-top: .4rem; }
+    .portal-toast-container { position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 100; display: grid; gap: .55rem; pointer-events: none; }
+    .portal-toast { padding: .85rem 1rem; color: #000; background: #fff; border-radius: 999px; box-shadow: 0 22px 60px rgba(0,0,0,.4); font-size: .84rem; font-weight: 850; }
+    @media (max-width: 760px) {
+        .portal-admin-header { align-items: stretch; flex-direction: column; }
+        .portal-primary-button { width: fit-content; }
+        .portal-table { min-width: 620px; }
+        .portal-table th:nth-child(3), .portal-table td:nth-child(3) { display: none; }
+        .portal-modal__footer { flex-wrap: wrap; }
+        .portal-danger-button { width: 100%; margin-right: 0; }
     }
 </style>
-
-<!-- Delete Confirmation Modal -->
-<div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
-        <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-            </div>
-            <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
-            <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
-        </div>
-        <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
-            <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
-            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
-        </div>
-    </div>
-</div>
-
-<!-- Toast Container -->
-<div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('modal-overlay')!;
+        const confirmOverlay = document.getElementById('confirm-overlay')!;
         const modalTitle = document.getElementById('modal-title')!;
+        const modalKicker = document.getElementById('modal-kicker')!;
         const modalError = document.getElementById('modal-error')!;
         const modalDeleteBtn = document.getElementById('modal-delete')!;
-        
+        const saveBtn = document.getElementById('modal-save')!;
+        const confirmYes = document.getElementById('confirm-yes')!;
         const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
 
+        let pendingDeleteId: string | null = null;
+
+        function showToast(message: string) {
+            const container = document.getElementById('toast-container')!;
+            const toast = document.createElement('div');
+            toast.className = 'portal-toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 2800);
+        }
+
+        function showModalError(message: string) {
+            modalError.textContent = message;
+            modalError.classList.remove('hidden');
+        }
+
+        function clearModalError() {
+            modalError.textContent = '';
+            modalError.classList.add('hidden');
+        }
+
         function openModal(data?: any) {
-            modalTitle.textContent = data ? 'Editar cliente' : 'Nuevo cliente';
+            const isEdit = Boolean(data);
+            modalKicker.textContent = isEdit ? 'Editar acceso' : 'Nuevo acceso';
+            modalTitle.textContent = isEdit ? 'Editar cliente' : 'Nuevo cliente';
             $('client-id').value = data?.id || '';
             $('c-name').value = data?.name || '';
-            $('c-image').value = data?.image || '';
             $('c-dropbox').value = data?.dropbox || '';
             $('c-password').value = '';
-            $('c-active').checked = data ? data.active === 'true' : true;
-            
-            if (data?.type === 'image') {
-                $('type-image').checked = true;
-            } else {
-                $('type-logo').checked = true;
-            }
-
-            // Update password hint
-            const pwHint = document.getElementById('pw-hint')!;
-            if (data) {
-                pwHint.textContent = 'Déjalo vacío para mantener la actual';
-                modalDeleteBtn.classList.remove('hidden');
-            } else {
-                pwHint.textContent = 'Se pedirá al cliente para acceder al Dropbox';
-                modalDeleteBtn.classList.add('hidden');
-            }
-            
-            updateLogoPreview();
-            modalError.classList.add('hidden');
+            $('c-password').type = 'password';
+            $('c-active').checked = isEdit ? data.active === 'true' : true;
+            document.querySelector('[data-eye]')?.classList.remove('hidden');
+            document.querySelector('[data-eye-off]')?.classList.add('hidden');
+            document.getElementById('pw-hint')!.textContent = isEdit
+                ? 'Dejalo vacio para mantener el codigo actual.'
+                : 'Se pedira este codigo para abrir el Dropbox.';
+            modalDeleteBtn.classList.toggle('hidden', !isEdit);
+            clearModalError();
             overlay.classList.remove('hidden');
+            overlay.setAttribute('aria-hidden', 'false');
+            window.setTimeout(() => $('c-name').focus(), 80);
         }
 
         function closeModal() {
             overlay.classList.add('hidden');
+            overlay.setAttribute('aria-hidden', 'true');
         }
 
-        // Manual ordering for portal clients
+        function openConfirm(id: string) {
+            pendingDeleteId = id;
+            confirmYes.textContent = 'Eliminar';
+            (confirmYes as HTMLButtonElement).disabled = false;
+            confirmOverlay.classList.remove('hidden');
+            confirmOverlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeConfirm() {
+            pendingDeleteId = null;
+            confirmOverlay.classList.add('hidden');
+            confirmOverlay.setAttribute('aria-hidden', 'true');
+        }
+
+        document.getElementById('btn-add-client')?.addEventListener('click', () => openModal());
+        document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
+        document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
+        overlay.querySelector('.portal-modal__backdrop')?.addEventListener('click', closeModal);
+
+        document.querySelectorAll<HTMLElement>('.btn-edit').forEach((button) => {
+            button.addEventListener('click', () => {
+                openModal({
+                    id: button.dataset.id,
+                    name: button.dataset.name,
+                    dropbox: button.dataset.dropbox,
+                    active: button.dataset.active,
+                });
+            });
+        });
+
+        document.querySelectorAll<HTMLElement>('.btn-delete').forEach((button) => {
+            button.addEventListener('click', () => openConfirm(button.dataset.id!));
+        });
+
+        modalDeleteBtn.addEventListener('click', () => {
+            const id = $('client-id').value;
+            closeModal();
+            if (id) openConfirm(id);
+        });
+
+        document.getElementById('confirm-cancel')?.addEventListener('click', closeConfirm);
+        confirmOverlay.querySelector('.portal-modal__backdrop')?.addEventListener('click', closeConfirm);
+
+        confirmYes.addEventListener('click', async () => {
+            if (!pendingDeleteId) return;
+            confirmYes.textContent = 'Eliminando...';
+            (confirmYes as HTMLButtonElement).disabled = true;
+            try {
+                const response = await fetch('/api/admin/portal', {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: pendingDeleteId }),
+                });
+                if (!response.ok) throw new Error('delete failed');
+                location.reload();
+            } catch {
+                showToast('No se pudo eliminar.');
+                closeConfirm();
+            }
+        });
+
+        document.getElementById('btn-toggle-pw')?.addEventListener('click', () => {
+            const input = $('c-password');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            document.querySelector('[data-eye]')?.classList.toggle('hidden', isPassword);
+            document.querySelector('[data-eye-off]')?.classList.toggle('hidden', !isPassword);
+        });
+
+        saveBtn.addEventListener('click', async () => {
+            const name = $('c-name').value.trim();
+            const code = $('c-password').value.trim();
+            const dropbox = $('c-dropbox').value.trim();
+            const id = $('client-id').value;
+            const isEdit = Boolean(id);
+
+            if (!name) return showModalError('El nombre del cliente es obligatorio.');
+            if (!isEdit && !code) return showModalError('El codigo de acceso es obligatorio.');
+            if (!dropbox) return showModalError('El enlace de Dropbox es obligatorio.');
+
+            clearModalError();
+            const originalText = saveBtn.textContent || 'Guardar';
+            saveBtn.textContent = 'Guardando...';
+            saveBtn.setAttribute('disabled', 'true');
+
+            const body: any = {
+                client_name: name,
+                dropbox_link: dropbox,
+                is_active: $('c-active').checked,
+                image: null,
+                image_type: 'logo',
+            };
+            if (code) body.password_hash = code;
+            if (isEdit) body.id = id;
+
+            try {
+                const response = await fetch('/api/admin/portal', {
+                    method: isEdit ? 'PUT' : 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.error || 'No se pudo guardar.');
+                location.reload();
+            } catch (error) {
+                showModalError(error instanceof Error ? error.message : 'No se pudo guardar.');
+                saveBtn.textContent = originalText;
+                saveBtn.removeAttribute('disabled');
+            }
+        });
+
         const tbody = document.querySelector('#clients-table tbody') as HTMLTableSectionElement | null;
         if (tbody) {
             let draggedRow: HTMLTableRowElement | null = null;
@@ -328,31 +433,21 @@ const clients = await getPortalClientsAdmin();
                 if (!target) return;
                 draggedRow = target;
                 target.classList.add('opacity-50');
-                if (event.dataTransfer) {
-                    event.dataTransfer.effectAllowed = 'move';
-                    event.dataTransfer.setData('text/plain', target.dataset.id || '');
-                }
+                event.dataTransfer?.setData('text/plain', target.dataset.id || '');
             });
 
             tbody.addEventListener('dragend', () => {
                 draggedRow?.classList.remove('opacity-50');
                 draggedRow = null;
-                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                tbody.querySelectorAll('.drag-over').forEach((element) => element.classList.remove('drag-over'));
             });
 
             tbody.addEventListener('dragover', (event) => {
                 event.preventDefault();
-                if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
                 const target = (event.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement | null;
                 if (!target || target === draggedRow) return;
-
-                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                tbody.querySelectorAll('.drag-over').forEach((element) => element.classList.remove('drag-over'));
                 target.classList.add('drag-over');
-            });
-
-            tbody.addEventListener('dragleave', (event) => {
-                const target = (event.target as HTMLElement).closest('tr.drag-row') as HTMLTableRowElement | null;
-                target?.classList.remove('drag-over');
             });
 
             tbody.addEventListener('drop', async (event) => {
@@ -363,313 +458,25 @@ const clients = await getPortalClientsAdmin();
                 const rows = Array.from(tbody.querySelectorAll('tr.drag-row'));
                 const dragIndex = rows.indexOf(draggedRow);
                 const dropIndex = rows.indexOf(target);
-
-                if (dragIndex < dropIndex) {
-                    target.parentNode?.insertBefore(draggedRow, target.nextSibling);
-                } else {
-                    target.parentNode?.insertBefore(draggedRow, target);
-                }
-
-                tbody.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                target.parentNode?.insertBefore(draggedRow, dragIndex < dropIndex ? target.nextSibling : target);
+                tbody.querySelectorAll('.drag-over').forEach((element) => element.classList.remove('drag-over'));
 
                 const orderedIds = Array.from(tbody.querySelectorAll('tr.drag-row'))
-                    .map(row => (row as HTMLElement).dataset.id)
-                    .filter((id): id is string => Boolean(id));
+                    .map((row) => (row as HTMLElement).dataset.id)
+                    .filter((rowId): rowId is string => Boolean(rowId));
 
                 try {
-                    const res = await fetch('/api/admin/portal', {
+                    const response = await fetch('/api/admin/portal', {
                         method: 'PATCH',
                         credentials: 'same-origin',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderedIds })
+                        body: JSON.stringify({ orderedIds }),
                     });
-
-                    if (res.ok) {
-                        showToast('Orden actualizado', 'success');
-                    } else {
-                        const error = await res.json().catch(() => null);
-                        showToast(error?.error || 'Error al guardar orden', 'error');
-                    }
+                    showToast(response.ok ? 'Orden actualizado.' : 'No se pudo guardar el orden.');
                 } catch {
-                    showToast('Error de conexión al guardar orden', 'error');
+                    showToast('No se pudo guardar el orden.');
                 }
             });
         }
-
-        function updateLogoPreview() {
-            const url = $('c-image').value;
-            const idle = document.getElementById('upload-idle')!;
-            const preview = document.getElementById('upload-preview')!;
-            const loading = document.getElementById('upload-loading')!;
-            const img = document.getElementById('logo-preview-img') as HTMLImageElement;
-            
-            if (url) {
-                img.src = url;
-                preview.classList.remove('hidden');
-                idle.classList.add('hidden');
-            } else {
-                preview.classList.add('hidden');
-                idle.classList.remove('hidden');
-                img.src = '';
-            }
-            loading.classList.add('hidden');
-        }
-
-        // Drag and Drop Logic
-        const dropZone = document.getElementById('drop-zone')!;
-        const fileInput = document.getElementById('file-input') as HTMLInputElement;
-
-        dropZone.addEventListener('click', () => fileInput.click());
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('ready');
-        });
-
-        ['dragleave', 'dragend'].forEach(type => {
-            dropZone.addEventListener(type, () => dropZone.classList.remove('ready'));
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('ready');
-            const file = e.dataTransfer?.files[0];
-            if (file) handleUpload(file);
-        });
-
-        fileInput.addEventListener('change', () => {
-            const file = fileInput.files?.[0];
-            if (file) handleUpload(file);
-        });
-
-        async function handleUpload(file: File) {
-            if (!file.type.startsWith('image/')) {
-                showToast('El archivo debe ser una imagen', 'error');
-                return;
-            }
-
-            const idle = document.getElementById('upload-idle')!;
-            const loading = document.getElementById('upload-loading')!;
-            const preview = document.getElementById('upload-preview')!;
-
-            idle.classList.add('hidden');
-            preview.classList.add('hidden');
-            loading.classList.remove('hidden');
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('folder', 'portal');
-
-            try {
-                const res = await fetch('/api/admin/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    $('c-image').value = data.url;
-                    updateLogoPreview();
-                    showToast('Logo subido correctamente', 'success');
-                } else {
-                    const err = await res.json();
-                    showToast(err.error || 'Error al subir', 'error');
-                    updateLogoPreview();
-                }
-            } catch (error) {
-                showToast('Error de conexión al subir', 'error');
-                updateLogoPreview();
-            }
-        }
-
-        document.getElementById('btn-remove-logo')?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            $('c-image').value = '';
-            updateLogoPreview();
-        });
-
-        // Open modal buttons
-        document.getElementById('btn-add-client')?.addEventListener('click', () => openModal());
-        document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
-        document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
-        
-        // overlay.addEventListener('click', (e) => {
-        //     if (e.target === overlay) closeModal();
-        // });
-
-        // Edit buttons
-        // Toggle password visibility
-        document.getElementById('btn-toggle-pw')?.addEventListener('click', () => {
-            const pwInput = $('c-password');
-            const eyeIcon = document.getElementById('pw-icon-eye')!;
-            const eyeOffIcon = document.getElementById('pw-icon-eyeoff')!;
-            if (pwInput.type === 'password') {
-                pwInput.type = 'text';
-                eyeIcon.classList.add('hidden');
-                eyeOffIcon.classList.remove('hidden');
-            } else {
-                pwInput.type = 'password';
-                eyeIcon.classList.remove('hidden');
-                eyeOffIcon.classList.add('hidden');
-            }
-        });
-
-        document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const el = btn as HTMLElement;
-                openModal({
-                    id: el.dataset.id,
-                    name: el.dataset.name,
-                    image: el.dataset.image,
-                    dropbox: el.dataset.dropbox,
-                    active: el.dataset.active,
-                    type: el.dataset.type,
-                });
-            });
-        });
-
-        modalDeleteBtn.addEventListener('click', () => {
-            closeModal();
-            const id = $('client-id').value;
-            if (id) {
-                const deleteBtn = document.querySelector(`.btn-delete[data-id="${id}"]`) as HTMLButtonElement;
-                if (deleteBtn) deleteBtn.click();
-            }
-        });
-
-        // Confirm delete modal
-        const confirmOverlay = document.getElementById('confirm-overlay')!;
-        const confirmYes = document.getElementById('confirm-yes')!;
-        const confirmCancel = document.getElementById('confirm-cancel')!;
-        let pendingDeleteId: string | null = null;
-
-        function openConfirm(id: string) {
-            pendingDeleteId = id;
-            confirmYes.textContent = 'Eliminar';
-            (confirmYes as HTMLButtonElement).disabled = false;
-            confirmOverlay.classList.remove('hidden');
-        }
-        function closeConfirm() {
-            pendingDeleteId = null;
-            confirmOverlay.classList.add('hidden');
-        }
-        confirmCancel.addEventListener('click', closeConfirm);
-        // confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
-
-        confirmYes.addEventListener('click', async () => {
-            if (!pendingDeleteId) return;
-            confirmYes.textContent = 'Eliminando...';
-            (confirmYes as HTMLButtonElement).disabled = true;
-            const id = pendingDeleteId;
-            
-            try {
-                const res = await fetch('/api/admin/portal', {
-                    method: 'DELETE',
-                    credentials: 'same-origin',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id }),
-                });
-                if (res.ok) {
-                    location.reload();
-                } else {
-                    showToast('Error al eliminar', 'error');
-                    closeConfirm();
-                    confirmYes.textContent = 'Eliminar';
-                    (confirmYes as HTMLButtonElement).disabled = false;
-                }
-            } catch {
-                showToast('Error de conexión', 'error');
-                closeConfirm();
-                confirmYes.textContent = 'Eliminar';
-                (confirmYes as HTMLButtonElement).disabled = false;
-            }
-        });
-
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', () => {
-                openConfirm((btn as HTMLElement).dataset.id!);
-            });
-        });
-
-        // Toast notification
-                                function showToast(message: string, type: 'error' | 'success' = 'error') {
-            const container = document.getElementById('toast-container')!;
-            const toast = document.createElement('div');
-            toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
-                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
-            }`;
-            toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
-            if (type === 'success') {
-                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span>${message}</span>`;
-            } else {
-                toast.innerHTML = `<div class="bg-white/20 p-1.5 rounded-full flex items-center justify-center"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></div><span>${message}</span>`;
-            }
-            container.appendChild(toast);
-            setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
-        }
-
-        // Save
-        document.getElementById('modal-save')?.addEventListener('click', async () => {
-            const name = $('c-name').value.trim();
-            if (!name) {
-                modalError.textContent = 'El nombre es obligatorio';
-                modalError.classList.remove('hidden');
-                return;
-            }
-
-            const saveBtn = document.getElementById('modal-save')!;
-            const oHtml = saveBtn.innerHTML;
-            saveBtn.innerHTML = 'Guardando...';
-            saveBtn.setAttribute('disabled', 'true');
-
-            const password = $('c-password').value;
-            const isEdit = !!$('client-id').value;
-
-            const body: any = {
-                client_name: name,
-                image: $('c-image').value.trim() || null,
-                dropbox_link: $('c-dropbox').value.trim() || null,
-                is_active: $('c-active').checked,
-                image_type: (document.querySelector('input[name="image_type"]:checked') as HTMLInputElement)?.value || 'logo',
-            };
-
-            // Only include password if provided (on edit, empty = keep existing)
-            if (password) {
-                body.password_hash = password;
-            } else if (!isEdit) {
-                modalError.textContent = 'La contraseña es obligatoria';
-                modalError.classList.remove('hidden');
-                saveBtn.innerHTML = oHtml;
-                saveBtn.removeAttribute('disabled');
-                return;
-            }
-
-            if (isEdit) body.id = $('client-id').value;
-
-            try {
-                const res = await fetch('/api/admin/portal', {
-                    method: isEdit ? 'PUT' : 'POST',
-                    credentials: 'same-origin',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body),
-                });
-
-                if (res.ok) {
-                    location.reload();
-                } else {
-                    const err = await res.json();
-                    modalError.textContent = err.error || 'Error al guardar';
-                    modalError.classList.remove('hidden');
-                    saveBtn.innerHTML = oHtml;
-                    saveBtn.removeAttribute('disabled');
-                }
-            } catch (e) {
-                modalError.textContent = 'Error de conexión';
-                modalError.classList.remove('hidden');
-                saveBtn.innerHTML = oHtml;
-                saveBtn.removeAttribute('disabled');
-            }
-        });
     });
 </script>
-</AdminLayout>

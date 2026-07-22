@@ -1,70 +1,513 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getFaqs, getServices, getSettings } from "../../lib/data";
+
 const [services, settings] = await Promise.all([getServices(), getSettings()]);
-const grouped = await Promise.all(services.map(async (service: any) => ({ service, faqs: await getFaqs(service.id, true) })));
+const grouped = await Promise.all(
+    services.map(async (service: any) => ({ service, faqs: await getFaqs(service.id, true) }))
+);
 ---
 
 <AdminLayout title="Preguntas frecuentes" activeSection="faqs">
-    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-        <div><h1 class="text-2xl font-bold text-white">FAQ por servicio</h1><p class="text-sm text-zinc-400 mt-2">Bodas y Videoclips se gestionan de forma independiente.</p></div>
-        <label class="flex items-center gap-3 text-sm text-zinc-300"><input id="faq-enabled" type="checkbox" checked={settings.faq_section_enabled !== false} class="w-4 h-4" />Mostrar FAQ en la web</label>
+    <header class="faq-admin-header">
+        <div>
+            <p class="faq-admin-kicker">Contenido publico</p>
+            <h1>Preguntas frecuentes</h1>
+            <p>Ordena arrastrando y edita las FAQ de Bodas y Videoclips por separado.</p>
+        </div>
+        <div class="faq-admin-actions">
+            <label class="faq-switch">
+                <input id="faq-enabled" type="checkbox" checked={settings.faq_section_enabled !== false} />
+                <span aria-hidden="true"></span>
+                Mostrar en la web
+            </label>
+            <button id="faq-open-create" class="faq-primary-action" type="button">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Nueva FAQ
+            </button>
+        </div>
     </header>
-    <div class="grid xl:grid-cols-2 gap-8">
+
+    <div class="faq-services">
         {grouped.map(({ service, faqs }) => (
-            <section>
-                <div class="flex items-center gap-3 mb-4"><i data-lucide={service.slug === "bodas" ? "heart" : "music-2"} class="w-5 h-5 text-white"></i><h2 class="text-xl font-semibold text-white">{service.title}</h2><span class="text-xs text-zinc-500">{faqs.length}</span></div>
-                <div class="space-y-4">
-                    {faqs.map((faq: any) => (
-                        <form class="faq-editor bg-zinc-900 border border-zinc-800 rounded-lg p-5 space-y-4" data-id={faq.id} data-service-id={service.id}>
-                            <div class="flex items-center justify-between"><strong class="text-sm text-zinc-200">Editar pregunta</strong><button type="button" class="delete-faq text-zinc-500 hover:text-red-400" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
-                            <label class="faq-field">Pregunta<input name="question" value={faq.question} required /></label>
-                            <label class="faq-field">Respuesta<textarea name="answer" rows="4" required>{faq.answer}</textarea></label>
-                            <div class="grid grid-cols-2 gap-4"><label class="faq-field">Orden<input type="number" name="order" min="0" value={faq.order ?? 0} /></label><label class="flex items-center gap-2 pt-6 text-sm text-zinc-300"><input type="checkbox" name="is_active" checked={faq.is_active} />Activa</label></div>
-                            <button type="submit" class="w-full py-2 bg-white text-black rounded font-semibold text-sm">Guardar</button>
-                        </form>
+            <section class="faq-service-panel" data-service-id={service.id}>
+                <div class="faq-service-heading">
+                    <div class="faq-service-title">
+                        <span class="faq-service-icon"><i data-lucide={service.slug === "bodas" ? "heart" : "music-2"} class="w-5 h-5"></i></span>
+                        <div>
+                            <h2>{service.title}</h2>
+                            <p>{faqs.length} {faqs.length === 1 ? "pregunta" : "preguntas"}</p>
+                        </div>
+                    </div>
+                    <span class="faq-service-hint">Arrastra para ordenar</span>
+                </div>
+
+                <div class="faq-list" data-faq-list data-service-id={service.id}>
+                    {faqs.length === 0 && (
+                        <p class="faq-empty">Todavia no hay FAQs para este servicio.</p>
+                    )}
+                    {faqs.map((faq: any, index: number) => (
+                        <article class="faq-editor faq-editor--existing" data-id={faq.id} data-service-id={service.id} draggable="false">
+                            <div class="faq-selector-row">
+                                <button type="button" class="faq-drag" title="Arrastrar FAQ" aria-label="Arrastrar FAQ">
+                                    <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="faq-selector" aria-expanded="false">
+                                    <span class="faq-selector-index">{String(index + 1).padStart(2, "0")}</span>
+                                    <span class="faq-selector-copy">
+                                        <small>{faq.is_active ? "Activa" : "Oculta"}</small>
+                                        <strong>{faq.question}</strong>
+                                    </span>
+                                    <i data-lucide="chevron-down" class="faq-selector-icon w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="delete-faq" title="Eliminar pregunta" aria-label="Eliminar pregunta">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <form class="faq-editor-form" hidden data-id={faq.id} data-service-id={service.id}>
+                                <label class="faq-field faq-field--wide">
+                                    <span>Pregunta</span>
+                                    <input name="question" value={faq.question} required />
+                                </label>
+                                <label class="faq-field faq-field--wide">
+                                    <span>Respuesta</span>
+                                    <textarea name="answer" rows="4" required>{faq.answer}</textarea>
+                                </label>
+                                <div class="faq-editor-footer">
+                                    <label class="faq-check">
+                                        <input type="checkbox" name="is_active" checked={faq.is_active} />
+                                        <span>Activa</span>
+                                    </label>
+                                    <button type="submit" class="faq-save">Guardar</button>
+                                </div>
+                            </form>
+                        </article>
                     ))}
-                    <form class="faq-editor bg-zinc-950 border border-dashed border-zinc-700 rounded-lg p-5 space-y-4" data-service-id={service.id}>
-                        <strong class="text-sm text-zinc-200">Nueva pregunta</strong>
-                        <label class="faq-field">Pregunta<input name="question" required /></label>
-                        <label class="faq-field">Respuesta<textarea name="answer" rows="4" required></textarea></label>
-                        <div class="grid grid-cols-2 gap-4"><label class="faq-field">Orden<input type="number" name="order" min="0" value="0" /></label><label class="flex items-center gap-2 pt-6 text-sm text-zinc-300"><input type="checkbox" name="is_active" checked />Activa</label></div>
-                        <button type="submit" class="w-full py-2 bg-white text-black rounded font-semibold text-sm">Añadir</button>
-                    </form>
                 </div>
             </section>
         ))}
     </div>
-    <p id="faq-status" class="fixed bottom-6 right-6 z-50 px-4 py-3 bg-white text-black rounded shadow-xl text-sm font-semibold hidden" aria-live="polite"></p>
+
+    <p id="faq-status" class="faq-status hidden" aria-live="polite"></p>
+
+    <div id="faq-create-overlay" class="faq-modal hidden" aria-hidden="true">
+        <button class="faq-modal__backdrop" type="button" aria-label="Cerrar modal" data-faq-create-close></button>
+        <div class="faq-modal__panel" role="dialog" aria-modal="true" aria-labelledby="faq-create-title">
+            <div class="faq-modal__header">
+                <div>
+                    <p>Nueva entrada</p>
+                    <h2 id="faq-create-title">Crear FAQ</h2>
+                </div>
+                <button type="button" class="faq-modal__close" aria-label="Cerrar" data-faq-create-close>
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="faq-create-form" class="faq-modal__body">
+                <label class="faq-field">
+                    <span>Servicio</span>
+                    <select name="service_id" required>
+                        {services.map((service: any) => (
+                            <option value={service.id}>{service.title}</option>
+                        ))}
+                    </select>
+                </label>
+                <label class="faq-field">
+                    <span>Pregunta</span>
+                    <input name="question" required />
+                </label>
+                <label class="faq-field">
+                    <span>Respuesta</span>
+                    <textarea name="answer" rows="5" required></textarea>
+                </label>
+                <label class="faq-check">
+                    <input type="checkbox" name="is_active" checked />
+                    <span>Activa</span>
+                </label>
+                <p class="faq-modal__error hidden" data-faq-create-error></p>
+                <div class="faq-modal__footer">
+                    <button type="button" class="faq-secondary-action" data-faq-create-close>Cancelar</button>
+                    <button type="submit" class="faq-primary-action">Crear FAQ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="faq-confirm-overlay" class="faq-modal faq-confirm hidden" aria-hidden="true">
+        <button class="faq-modal__backdrop" type="button" aria-label="Cancelar eliminacion" data-faq-confirm-cancel></button>
+        <div class="faq-confirm__panel" role="dialog" aria-modal="true" aria-labelledby="faq-confirm-title">
+            <div class="faq-confirm__icon">
+                <i data-lucide="triangle-alert" class="w-7 h-7"></i>
+            </div>
+            <h2 id="faq-confirm-title">Eliminar FAQ</h2>
+            <p>Esta pregunta dejara de aparecer en la web y no se podra recuperar.</p>
+            <div class="faq-confirm__actions">
+                <button type="button" class="faq-secondary-action" data-faq-confirm-cancel>Cancelar</button>
+                <button type="button" class="faq-danger-action" data-faq-confirm-delete>Eliminar</button>
+            </div>
+        </div>
+    </div>
 </AdminLayout>
 
 <style>
-    .faq-field { display: grid; gap: .4rem; color: #d4d4d8; font-size: .75rem; font-weight: 600; }
-    .faq-field input, .faq-field textarea { width: 100%; padding: .6rem .7rem; color: #fff; background: #09090b; border: 1px solid #3f3f46; border-radius: 4px; }
+    .faq-admin-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.35rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .faq-admin-kicker { margin: 0 0 .45rem; color: #8b8b92; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+    .faq-admin-header h1 { margin: 0; color: #fff; font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: .95; letter-spacing: 0; }
+    .faq-admin-header p:not(.faq-admin-kicker) { margin: .65rem 0 0; color: #a1a1aa; font-size: .92rem; }
+    .faq-admin-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: .75rem; }
+    .faq-switch { position: relative; display: inline-flex; align-items: center; gap: .75rem; min-height: 42px; padding: .35rem .85rem .35rem .45rem; color: #e4e4e7; background: #18181b; border: 1px solid #27272a; border-radius: 999px; font-size: .82rem; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .faq-switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .faq-switch span { position: relative; width: 38px; height: 24px; background: #3f3f46; border-radius: 999px; transition: background 160ms ease; }
+    .faq-switch span::after { content: ""; position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform 160ms ease; }
+    .faq-switch input:checked + span { background: #fff; }
+    .faq-switch input:checked + span::after { background: #000; transform: translateX(14px); }
+    .faq-switch:focus-within { outline: 2px solid rgba(255,255,255,.45); outline-offset: 3px; }
+    .faq-primary-action, .faq-secondary-action, .faq-danger-action { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: .55rem; padding: 0 1rem; border-radius: 999px; font: inherit; font-size: .78rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease, opacity 160ms ease; }
+    .faq-primary-action { color: #000; background: #fff; border: 1px solid #fff; }
+    .faq-primary-action:hover, .faq-primary-action:focus-visible { color: #fff; background: #000; transform: translateY(-1px); }
+    .faq-secondary-action { color: #e4e4e7; background: #18181b; border: 1px solid #3f3f46; }
+    .faq-secondary-action:hover, .faq-secondary-action:focus-visible { color: #000; background: #fff; border-color: #fff; }
+    .faq-danger-action { color: #fff; background: #dc2626; border: 1px solid #dc2626; }
+    .faq-danger-action:hover, .faq-danger-action:focus-visible { background: #b91c1c; border-color: #b91c1c; transform: translateY(-1px); }
+    .faq-primary-action:disabled, .faq-danger-action:disabled { opacity: .6; cursor: wait; transform: none; }
+    .faq-services { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; align-items: start; }
+    .faq-service-panel { min-width: 0; padding: 1.1rem; background: #101012; border: 1px solid #27272a; border-radius: 14px; box-shadow: 0 18px 44px rgba(0,0,0,.22); }
+    .faq-service-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+    .faq-service-title { display: flex; align-items: center; gap: .85rem; min-width: 0; }
+    .faq-service-icon { width: 42px; height: 42px; display: grid; place-items: center; color: #fff; background: #000; border: 1px solid #2f2f33; border-radius: 50%; flex: 0 0 auto; }
+    .faq-service-title h2 { margin: 0; color: #fff; font-size: 1.22rem; line-height: 1; }
+    .faq-service-title p { margin: .28rem 0 0; color: #888891; font-size: .78rem; font-weight: 700; }
+    .faq-service-hint { color: #71717a; font-size: .66rem; font-weight: 900; text-transform: uppercase; white-space: nowrap; }
+    .faq-list { display: grid; gap: .85rem; min-height: 52px; }
+    .faq-empty { margin: 0; padding: 1.1rem; color: #71717a; background: #0b0b0d; border: 1px dashed #3f3f46; border-radius: 10px; font-size: .84rem; font-weight: 750; text-align: center; }
+    .faq-editor { display: grid; gap: .8rem; padding: .72rem; color: #fff; background: #18181b; border: 1px solid #303036; border-radius: 10px; }
+    .faq-editor--existing { transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
+    .faq-editor--existing.is-open { background: #1d1d20; border-color: #52525b; box-shadow: 0 18px 46px rgba(0,0,0,.2); }
+    .faq-editor--existing.is-dragging { opacity: .45; }
+    .faq-editor--existing.drag-over { border-color: #fff; box-shadow: inset 0 -2px 0 #fff; }
+    .faq-selector-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) 38px; align-items: stretch; gap: .55rem; }
+    .faq-drag, .delete-faq, .faq-modal__close { width: 38px; min-height: 38px; display: grid; place-items: center; flex: 0 0 auto; color: #a1a1aa; background: #111113; border: 1px solid #2f2f33; border-radius: 8px; cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+    .faq-drag { cursor: grab; }
+    .faq-drag:active { cursor: grabbing; }
+    .faq-drag:hover, .faq-drag:focus-visible, .faq-modal__close:hover, .faq-modal__close:focus-visible { color: #000; background: #fff; border-color: #fff; transform: translateY(-1px); }
+    .delete-faq:hover, .delete-faq:focus-visible { color: #fff; background: #dc2626; border-color: #dc2626; transform: translateY(-1px); }
+    .faq-selector { min-width: 0; display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) 22px; align-items: center; gap: .78rem; padding: .72rem .78rem; color: #f4f4f5; background: #0d0d0f; border: 1px solid #28282d; border-radius: 8px; text-align: left; cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease; }
+    .faq-selector:hover, .faq-selector:focus-visible { color: #000; background: #fff; border-color: #fff; outline: none; }
+    .faq-selector-index { color: #8d8d96; font-size: .7rem; font-weight: 900; }
+    .faq-selector:hover .faq-selector-index, .faq-selector:focus-visible .faq-selector-index { color: rgba(0,0,0,.5); }
+    .faq-selector-copy { min-width: 0; display: grid; gap: .18rem; }
+    .faq-selector-copy small { color: #8d8d96; font-size: .62rem; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
+    .faq-selector:hover .faq-selector-copy small, .faq-selector:focus-visible .faq-selector-copy small { color: rgba(0,0,0,.52); }
+    .faq-selector-copy strong { display: block; min-width: 0; overflow: hidden; color: inherit; font-size: .9rem; line-height: 1.18; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+    .faq-selector-icon { justify-self: end; transition: transform 160ms ease; }
+    .faq-editor.is-open .faq-selector-icon { transform: rotate(180deg); }
+    .faq-editor-form { display: grid; gap: .8rem; }
+    .faq-editor-form[hidden] { display: none; }
+    .faq-field { display: grid; gap: .42rem; min-width: 0; color: #d4d4d8; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
+    .faq-field span { color: #a1a1aa; }
+    .faq-field input, .faq-field textarea, .faq-field select { width: 100%; min-width: 0; padding: .78rem .85rem; color: #fff; background: #09090b; border: 1px solid #3f3f46; border-radius: 8px; outline: none; font: inherit; font-size: .86rem; font-weight: 650; text-transform: none; letter-spacing: 0; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+    .faq-field textarea { resize: vertical; min-height: 112px; line-height: 1.45; }
+    .faq-field input:focus, .faq-field textarea:focus, .faq-field select:focus { border-color: #fff; background: #050505; box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+    .faq-editor-footer { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+    .faq-check { min-height: 42px; display: inline-flex; align-items: center; gap: .55rem; color: #e4e4e7; font-size: .82rem; font-weight: 750; cursor: pointer; }
+    .faq-check input { width: 16px; height: 16px; accent-color: #fff; }
+    .faq-save { min-height: 42px; padding: 0 1rem; color: #000; background: #fff; border: 1px solid #fff; border-radius: 999px; font: inherit; font-size: .78rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .faq-save:hover, .faq-save:focus-visible { color: #fff; background: #000; transform: translateY(-1px); }
+    .faq-status { position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 90; max-width: min(360px, calc(100vw - 2rem)); margin: 0; padding: .85rem 1rem; color: #000; background: #fff; border-radius: 999px; box-shadow: 0 22px 60px rgba(0,0,0,.4); font-size: .84rem; font-weight: 850; }
+    .faq-modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 1rem; }
+    .faq-modal.hidden { display: none; }
+    .faq-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.78); border: 0; backdrop-filter: blur(12px); cursor: pointer; }
+    .faq-modal__panel, .faq-confirm__panel { position: relative; z-index: 1; width: min(100%, 520px); color: #fff; background: #101012; border: 1px solid #303036; border-radius: 18px; overflow: hidden; box-shadow: 0 26px 90px rgba(0,0,0,.45); }
+    .faq-modal__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.3rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .faq-modal__header p { margin: 0 0 .3rem; color: #8b8b92; font-size: .65rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    .faq-modal__header h2 { margin: 0; font-size: 1.25rem; line-height: 1; }
+    .faq-modal__body { display: grid; gap: 1rem; padding: 1.3rem; }
+    .faq-modal__footer { display: flex; align-items: center; justify-content: flex-end; gap: .75rem; padding-top: .4rem; }
+    .faq-modal__error { margin: 0; color: #fb7185; font-size: .82rem; font-weight: 800; }
+    .faq-confirm__panel { max-width: 360px; display: grid; justify-items: center; gap: .85rem; padding: 1.5rem; text-align: center; }
+    .faq-confirm__icon { width: 58px; height: 58px; display: grid; place-items: center; color: #fb7185; background: rgba(251,113,133,.1); border: 1px solid rgba(251,113,133,.22); border-radius: 50%; }
+    .faq-confirm__panel h2 { margin: 0; font-size: 1.25rem; line-height: 1; }
+    .faq-confirm__panel p { margin: 0; color: #a1a1aa; font-size: .9rem; line-height: 1.45; }
+    .faq-confirm__actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-top: .4rem; }
+    @media (max-width: 1180px) {
+        .faq-services { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+        .faq-admin-header { align-items: stretch; flex-direction: column; }
+        .faq-admin-actions { align-items: stretch; justify-content: flex-start; flex-direction: column; }
+        .faq-switch, .faq-primary-action { width: fit-content; }
+        .faq-service-panel { padding: .85rem; border-radius: 10px; }
+        .faq-service-heading { align-items: flex-start; flex-direction: column; }
+        .faq-selector-row { grid-template-columns: 36px minmax(0, 1fr) 36px; gap: .45rem; }
+        .faq-selector { grid-template-columns: 1.8rem minmax(0, 1fr) 18px; padding: .68rem; }
+        .faq-editor-footer, .faq-modal__footer { align-items: stretch; flex-direction: column; }
+        .faq-save, .faq-modal__footer button { width: 100%; }
+    }
 </style>
 
 <script>
     const toast = document.getElementById('faq-status')!;
-    function showStatus(message: string) { toast.textContent = message; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 2500); }
-    document.querySelectorAll<HTMLFormElement>('.faq-editor').forEach((form) => {
+    const confirmOverlay = document.getElementById('faq-confirm-overlay')!;
+    const confirmDelete = document.querySelector<HTMLButtonElement>('[data-faq-confirm-delete]')!;
+    const createOverlay = document.getElementById('faq-create-overlay')!;
+    const createForm = document.getElementById('faq-create-form') as HTMLFormElement;
+    const createError = document.querySelector<HTMLElement>('[data-faq-create-error]')!;
+    let pendingDeleteEditor: HTMLElement | null = null;
+    let draggedEditor: HTMLElement | null = null;
+    let dragHandleActive = false;
+
+    function showStatus(message: string) {
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 2500);
+    }
+
+    function setOverlayOpen(overlay: HTMLElement, open: boolean) {
+        overlay.classList.toggle('hidden', !open);
+        overlay.setAttribute('aria-hidden', String(!open));
+    }
+
+    function openDeleteConfirm(editor: HTMLElement) {
+        pendingDeleteEditor = editor;
+        confirmDelete.textContent = 'Eliminar';
+        confirmDelete.disabled = false;
+        setOverlayOpen(confirmOverlay, true);
+        confirmDelete.focus();
+    }
+
+    function closeDeleteConfirm() {
+        pendingDeleteEditor = null;
+        setOverlayOpen(confirmOverlay, false);
+    }
+
+    function openCreateModal() {
+        createForm.reset();
+        const activeInput = createForm.elements.namedItem('is_active') as HTMLInputElement | null;
+        if (activeInput) activeInput.checked = true;
+        createError.textContent = '';
+        createError.classList.add('hidden');
+        setOverlayOpen(createOverlay, true);
+        window.setTimeout(() => (createForm.elements.namedItem('service_id') as HTMLSelectElement | null)?.focus(), 80);
+    }
+
+    function closeCreateModal() {
+        setOverlayOpen(createOverlay, false);
+    }
+
+    function updateListIndexes(list: HTMLElement) {
+        list.querySelectorAll<HTMLElement>('.faq-editor--existing').forEach((editor, index) => {
+            const label = editor.querySelector<HTMLElement>('.faq-selector-index');
+            if (label) label.textContent = String(index + 1).padStart(2, '0');
+        });
+    }
+
+    async function saveFaqOrder(list: HTMLElement) {
+        updateListIndexes(list);
+        const orderedIds = Array.from(list.querySelectorAll<HTMLElement>('.faq-editor--existing'))
+            .map((editor) => editor.dataset.id)
+            .filter((id): id is string => Boolean(id));
+        if (orderedIds.length === 0) return;
+        const response = await fetch('/api/admin/faqs', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderedIds }),
+        });
+        const result = await response.json().catch(() => ({}));
+        showStatus(response.ok ? 'Orden actualizado.' : (result.error || 'No se pudo guardar el orden.'));
+    }
+
+    function getNextOrderForService(serviceId: string) {
+        const list = document.querySelector<HTMLElement>(`[data-faq-list][data-service-id="${serviceId}"]`);
+        return list ? list.querySelectorAll('.faq-editor--existing').length + 1 : 1;
+    }
+
+    document.getElementById('faq-open-create')?.addEventListener('click', openCreateModal);
+    document.querySelectorAll<HTMLButtonElement>('[data-faq-create-close]').forEach((button) => {
+        button.addEventListener('click', closeCreateModal);
+    });
+
+    createForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const submit = createForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+        const values = Object.fromEntries(new FormData(createForm));
+        const serviceId = String(values.service_id || '');
+        const body = {
+            ...values,
+            service_id: serviceId,
+            order: getNextOrderForService(serviceId),
+            is_active: (createForm.elements.namedItem('is_active') as HTMLInputElement).checked,
+        };
+        submit.disabled = true;
+        submit.textContent = 'Creando...';
+        createError.textContent = '';
+        createError.classList.add('hidden');
+
+        const response = await fetch('/api/admin/faqs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            createError.textContent = result.error || 'No se pudo crear.';
+            createError.classList.remove('hidden');
+            submit.disabled = false;
+            submit.textContent = 'Crear FAQ';
+            return;
+        }
+        showStatus('FAQ creada.');
+        window.setTimeout(() => window.location.reload(), 350);
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.faq-selector').forEach((button) => {
+        button.addEventListener('click', () => {
+            const editor = button.closest<HTMLElement>('.faq-editor');
+            const form = editor?.querySelector<HTMLFormElement>('.faq-editor-form');
+            if (!editor || !form) return;
+            const willOpen = form.hidden;
+
+            editor.closest('.faq-list')?.querySelectorAll<HTMLElement>('.faq-editor--existing.is-open').forEach((openEditor) => {
+                if (openEditor === editor) return;
+                openEditor.classList.remove('is-open');
+                openEditor.querySelector<HTMLFormElement>('.faq-editor-form')!.hidden = true;
+                openEditor.querySelector<HTMLButtonElement>('.faq-selector')?.setAttribute('aria-expanded', 'false');
+            });
+
+            form.hidden = !willOpen;
+            editor.classList.toggle('is-open', willOpen);
+            button.setAttribute('aria-expanded', String(willOpen));
+        });
+    });
+
+    document.querySelectorAll<HTMLFormElement>('.faq-editor-form').forEach((form) => {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const values = Object.fromEntries(new FormData(form));
-            const body = { ...values, id: form.dataset.id || undefined, service_id: form.dataset.serviceId, order: Number(values.order || 0), is_active: (form.elements.namedItem('is_active') as HTMLInputElement).checked };
-            const response = await fetch('/api/admin/faqs', { method: form.dataset.id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            const body = {
+                ...values,
+                id: form.dataset.id || undefined,
+                service_id: form.dataset.serviceId,
+                is_active: (form.elements.namedItem('is_active') as HTMLInputElement).checked,
+            };
+            const response = await fetch('/api/admin/faqs', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
             const result = await response.json().catch(() => ({}));
             if (!response.ok) return showStatus(result.error || 'No se pudo guardar.');
-            showStatus('FAQ guardada.'); setTimeout(() => window.location.reload(), 500);
-        });
-        form.querySelector<HTMLButtonElement>('.delete-faq')?.addEventListener('click', async () => {
-            if (!confirm('¿Eliminar esta pregunta?')) return;
-            const response = await fetch('/api/admin/faqs', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: form.dataset.id }) });
-            if (response.ok) form.remove(); else showStatus('No se pudo eliminar.');
+            showStatus('FAQ guardada.');
+            setTimeout(() => window.location.reload(), 500);
         });
     });
+
+    document.querySelectorAll<HTMLButtonElement>('.delete-faq').forEach((button) => {
+        button.addEventListener('click', () => {
+            const editor = button.closest<HTMLElement>('.faq-editor');
+            if (!editor?.dataset.id) return;
+            openDeleteConfirm(editor);
+        });
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('[data-faq-confirm-cancel]').forEach((button) => {
+        button.addEventListener('click', closeDeleteConfirm);
+    });
+
+    confirmDelete.addEventListener('click', async () => {
+        if (!pendingDeleteEditor?.dataset.id) return;
+        const editor = pendingDeleteEditor;
+        const list = editor.closest<HTMLElement>('[data-faq-list]');
+        confirmDelete.disabled = true;
+        confirmDelete.textContent = 'Eliminando...';
+
+        const response = await fetch('/api/admin/faqs', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: editor.dataset.id }),
+        });
+
+        if (response.ok) {
+            editor.remove();
+            if (list) await saveFaqOrder(list);
+            closeDeleteConfirm();
+            showStatus('FAQ eliminada.');
+        } else {
+            closeDeleteConfirm();
+            showStatus('No se pudo eliminar.');
+        }
+    });
+
+    document.addEventListener('pointerup', () => {
+        if (!dragHandleActive) return;
+        dragHandleActive = false;
+        document.querySelectorAll<HTMLElement>('.faq-editor--existing').forEach((editor) => {
+            if (editor !== draggedEditor) editor.draggable = false;
+        });
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-faq-list]').forEach((list) => {
+        list.querySelectorAll<HTMLButtonElement>('.faq-drag').forEach((handle) => {
+            handle.addEventListener('pointerdown', () => {
+                const editor = handle.closest<HTMLElement>('.faq-editor--existing');
+                if (!editor) return;
+                dragHandleActive = true;
+                editor.draggable = true;
+            });
+        });
+
+        list.addEventListener('dragstart', (event) => {
+            const target = (event.target as HTMLElement).closest<HTMLElement>('.faq-editor--existing');
+            if (!target || !dragHandleActive) {
+                event.preventDefault();
+                return;
+            }
+            draggedEditor = target;
+            target.classList.add('is-dragging');
+            event.dataTransfer?.setData('text/plain', target.dataset.id || '');
+            if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+        });
+
+        list.addEventListener('dragend', () => {
+            draggedEditor?.classList.remove('is-dragging');
+            if (draggedEditor) draggedEditor.draggable = false;
+            draggedEditor = null;
+            dragHandleActive = false;
+            list.querySelectorAll('.drag-over').forEach((item) => item.classList.remove('drag-over'));
+        });
+
+        list.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+            const target = (event.target as HTMLElement).closest<HTMLElement>('.faq-editor--existing');
+            if (!target || !draggedEditor || target === draggedEditor || target.closest('[data-faq-list]') !== list) return;
+            list.querySelectorAll('.drag-over').forEach((item) => item.classList.remove('drag-over'));
+            target.classList.add('drag-over');
+            const rect = target.getBoundingClientRect();
+            const after = event.clientY > rect.top + rect.height / 2;
+            list.insertBefore(draggedEditor, after ? target.nextSibling : target);
+        });
+
+        list.addEventListener('drop', async (event) => {
+            event.preventDefault();
+            list.querySelectorAll('.drag-over').forEach((item) => item.classList.remove('drag-over'));
+            if (!draggedEditor) return;
+            await saveFaqOrder(list);
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (!confirmOverlay.classList.contains('hidden')) closeDeleteConfirm();
+        if (!createOverlay.classList.contains('hidden')) closeCreateModal();
+    });
+
     document.getElementById('faq-enabled')?.addEventListener('change', async (event) => {
         const enabled = (event.target as HTMLInputElement).checked;
-        const response = await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ faq_section_enabled: enabled }) });
+        const response = await fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ faq_section_enabled: enabled }),
+        });
         showStatus(response.ok ? 'Visibilidad actualizada.' : 'No se pudo actualizar.');
     });
 </script>

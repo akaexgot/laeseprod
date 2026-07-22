@@ -20,7 +20,9 @@ const caseNumber = String(Math.max(currentIndex + 1, 1)).padStart(2, "0");
 const previousProject = currentIndex > 0 ? orderedProjects[currentIndex - 1] : orderedProjects.at(-1);
 const nextProject = currentIndex >= 0 && currentIndex < orderedProjects.length - 1 ? orderedProjects[currentIndex + 1] : orderedProjects[0];
 const relatedProjects = orderedProjects.filter((item: any) => item.slug !== project.slug).slice(0, 3);
-const makingOf = project.video_explanation_mobile || project.video_explanation_desktop;
+const explanationDesktop = project.video_explanation_desktop;
+const explanationMobile = project.video_explanation_mobile;
+const hasExplanationVideo = Boolean(explanationDesktop || explanationMobile);
 const projectType = project.subtitle || "Producción audiovisual";
 const projectDescription = project.description || "Proyecto audiovisual desarrollado por LaesePROD con una mirada cercana, ritmo visual y una pieza final pensada para verse con intención.";
 ---
@@ -119,15 +121,20 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
             </div>
         </section>
 
-        {(makingOf || project.thumbnail) && (
+        {(hasExplanationVideo || project.thumbnail) && (
             <section class="project-case-process" aria-label="Material adicional">
                 <div class="project-case-process__label">
                     <span>Material adicional</span>
-                    <strong>{makingOf ? "Making of" : "Imagen principal"}</strong>
+                    <strong>{hasExplanationVideo ? "Making of" : "Imagen principal"}</strong>
                 </div>
                 <figure class="project-case-process__media">
-                    {makingOf ? (
-                        <InteractiveProjectVideo url={makingOf} title={`Making of de ${project.title}`} poster={project.thumbnail} />
+                    {hasExplanationVideo ? (
+                        <InteractiveProjectVideo
+                            desktop={explanationDesktop}
+                            mobile={explanationMobile}
+                            title={`Making of de ${project.title}`}
+                            poster={project.thumbnail}
+                        />
                     ) : (
                         <img src={project.thumbnail} alt={`Imagen de ${project.title}`} />
                     )}

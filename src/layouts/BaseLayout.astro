@@ -72,6 +72,10 @@ const settings = await getSettings();
             let pollTimer: ReturnType<typeof setInterval> | null = null;
             let visitorId = localStorage.getItem('laese_visitor_id');
             let visitorName = localStorage.getItem('laese_visitor_name');
+            const isAdminShortcut = (value: string) => value.trim().toLowerCase() === 'admin';
+            const goToAdminLogin = () => {
+                window.location.href = '/admin/login';
+            };
 
             if (!visitorId) {
                 visitorId = `v_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -106,6 +110,10 @@ const settings = await getSettings();
             startButton?.addEventListener('click', () => {
                 const value = nameInput.value.trim();
                 if (!value) return nameInput.focus();
+                if (isAdminShortcut(value)) {
+                    goToAdminLogin();
+                    return;
+                }
                 visitorName = value;
                 localStorage.setItem('laese_visitor_name', value);
                 startChat();
@@ -161,7 +169,12 @@ const settings = await getSettings();
 
             async function sendMessage() {
                 const message = input.value.trim();
-                if (!message || !conversationId) return;
+                if (!message) return;
+                if (isAdminShortcut(message)) {
+                    goToAdminLogin();
+                    return;
+                }
+                if (!conversationId) return;
                 input.value = '';
                 sendButton.disabled = true;
                 await fetch('/api/chat', {

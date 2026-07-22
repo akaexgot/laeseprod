@@ -89,9 +89,400 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
                 padding: 0.5rem 0.75rem !important;
                 border-radius: 0.375rem !important;
             }
+            .admin-layout input,
+            .admin-layout textarea,
+            .admin-layout select,
+            .admin-layout [contenteditable="true"] {
+                -webkit-user-select: text !important;
+                user-select: text !important;
+            }
+            .admin-layout input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]),
+            .admin-layout textarea,
+            .admin-layout [contenteditable="true"] {
+                cursor: text !important;
+            }
+            .admin-layout input::selection,
+            .admin-layout textarea::selection,
+            .admin-layout [contenteditable="true"]::selection {
+                background: rgba(255, 255, 255, 0.28) !important;
+                color: #ffffff !important;
+            }
             .admin-layout input[type="color"] {
                 padding: 0.25rem !important;
                 border-radius: 0.375rem !important;
+            }
+            .admin-layout [data-lucide],
+            .admin-layout svg.lucide {
+                display: block !important;
+                flex-shrink: 0 !important;
+            }
+            .admin-user-dot {
+                width: 32px;
+                height: 32px;
+                display: grid !important;
+                place-items: center !important;
+                color: #d4d4d8;
+                background: #27272a;
+                border: 1px solid #3f3f46;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+            }
+            .admin-user-dot:hover {
+                color: #fff;
+                background: #18181b;
+                border-color: #71717a;
+            }
+            .admin-user-dot [data-lucide],
+            .admin-user-dot svg {
+                width: 16px !important;
+                height: 16px !important;
+                margin: 0 !important;
+            }
+            .admin-sidebar {
+                background:
+                    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.06), transparent 28%),
+                    linear-gradient(180deg, #18181b 0%, #101012 100%) !important;
+            }
+            .admin-brand {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-width: 0 !important;
+                width: 100% !important;
+                text-decoration: none !important;
+            }
+            .admin-brand img {
+                display: block !important;
+                width: auto !important;
+                height: 56px !important;
+                max-width: 72px !important;
+                object-fit: contain !important;
+                object-position: center !important;
+            }
+            .admin-layout main {
+                background:
+                    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+                    #09090b !important;
+                background-size: 32px 32px !important;
+            }
+            .admin-page-head {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                gap: 1.25rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1.2rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            }
+            .admin-page-kicker {
+                margin: 0 0 0.45rem;
+                color: #8b8b92;
+                font-size: 0.68rem;
+                font-weight: 850;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+            .admin-page-title {
+                margin: 0;
+                color: #fff;
+                font-size: clamp(1.8rem, 3vw, 2.65rem);
+                line-height: 0.95;
+            }
+            .admin-page-copy {
+                max-width: 62ch;
+                margin: 0.65rem 0 0;
+                color: #a1a1aa;
+                font-size: 0.92rem;
+                line-height: 1.45;
+            }
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) {
+                align-items: flex-end !important;
+                justify-content: space-between !important;
+                gap: 1.25rem !important;
+                margin-bottom: 1.5rem !important;
+                padding-bottom: 1.2rem !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            }
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) nav,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) [aria-label="Breadcrumb"],
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) p:first-child,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) .portal-admin-kicker,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) .services-admin-kicker,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) .settings-kicker,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) .faq-admin-kicker {
+                margin: 0 0 0.45rem !important;
+                color: #8b8b92 !important;
+                font-size: 0.68rem !important;
+                font-weight: 850 !important;
+                letter-spacing: 0.08em !important;
+                line-height: 1 !important;
+                text-transform: uppercase !important;
+            }
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) nav ol,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) nav li,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) nav span {
+                color: inherit !important;
+                font: inherit !important;
+                letter-spacing: inherit !important;
+                text-transform: inherit !important;
+            }
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) nav i,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) nav svg {
+                display: none !important;
+            }
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) h1 {
+                margin: 0 !important;
+                color: #fff !important;
+                font-size: clamp(1.8rem, 3vw, 2.65rem) !important;
+                font-weight: 500 !important;
+                letter-spacing: 0 !important;
+                line-height: 0.95 !important;
+            }
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) h1 + p,
+            .admin-layout main > div > :first-child:is(.flex.flex-col, header):not(.chat-admin-shell) p:not(:first-child) {
+                max-width: 62ch !important;
+                margin: 0.65rem 0 0 !important;
+                color: #a1a1aa !important;
+                font-size: 0.92rem !important;
+                line-height: 1.45 !important;
+            }
+            .admin-surface {
+                color: #fff;
+                background: linear-gradient(180deg, #18181b 0%, #101012 100%);
+                border: 1px solid #303036;
+                border-radius: 16px;
+                box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+                overflow: hidden;
+            }
+            .admin-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.45rem;
+                min-height: 38px;
+                padding: 0 0.85rem;
+                color: #e4e4e7;
+                background: #141417;
+                border: 1px solid #333339;
+                border-radius: 999px;
+                font-size: 0.76rem;
+                font-weight: 850;
+                text-transform: uppercase;
+            }
+            .admin-icon-button {
+                width: 38px;
+                height: 38px;
+                display: grid !important;
+                place-items: center !important;
+                color: #a1a1aa;
+                background: #111113;
+                border: 1px solid #333339;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease, opacity 160ms ease;
+            }
+            .admin-icon-button:hover,
+            .admin-icon-button:focus-visible {
+                color: #000;
+                background: #fff;
+                border-color: #fff;
+                transform: translateY(-1px);
+            }
+            .admin-icon-button--success:hover,
+            .admin-icon-button--success:focus-visible {
+                color: #022c22;
+                background: #34d399;
+                border-color: #34d399;
+            }
+            .admin-icon-button--danger:hover,
+            .admin-icon-button--danger:focus-visible {
+                color: #fff;
+                background: #e11d48;
+                border-color: #e11d48;
+            }
+            .admin-icon-button svg,
+            .admin-icon-button [data-lucide] {
+                width: 17px !important;
+                height: 17px !important;
+                margin: 0 !important;
+            }
+            .admin-layout .bg-zinc-900.border.border-zinc-800.rounded-xl,
+            .admin-layout .bg-zinc-900.border.border-zinc-800.rounded-2xl,
+            .admin-layout .bg-zinc-900.border.border-zinc-800.rounded-lg {
+                background: linear-gradient(180deg, #18181b 0%, #101012 100%) !important;
+                border-color: #303036 !important;
+                box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22) !important;
+            }
+            .admin-layout .bg-zinc-950,
+            .admin-layout .bg-zinc-950\/80 {
+                background-color: rgba(9, 9, 11, 0.94) !important;
+            }
+            .admin-layout table {
+                border-collapse: collapse !important;
+            }
+            .admin-layout thead {
+                background: rgba(255, 255, 255, 0.025) !important;
+            }
+            .admin-layout th {
+                color: #8b8b92 !important;
+                font-size: 0.68rem !important;
+                font-weight: 850 !important;
+                letter-spacing: 0.08em !important;
+                text-transform: uppercase !important;
+            }
+            .admin-layout td {
+                border-color: rgba(255, 255, 255, 0.06) !important;
+            }
+            .admin-layout input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]),
+            .admin-layout textarea,
+            .admin-layout select {
+                background: #09090b !important;
+                border-color: #36363c !important;
+                color: #f4f4f5 !important;
+                font-weight: 650 !important;
+            }
+            .admin-layout input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]):focus,
+            .admin-layout textarea:focus,
+            .admin-layout select:focus {
+                border-color: #fff !important;
+                box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
+                outline: none !important;
+            }
+            .admin-layout button {
+                font-family: inherit;
+            }
+            .admin-layout button.bg-rose-600,
+            .admin-layout a.bg-rose-600,
+            .admin-layout .portal-primary-button,
+            .admin-layout .settings-save,
+            .admin-layout .save-service,
+            .admin-layout .seo-save,
+            .admin-layout #btn-add,
+            .admin-layout #btn-new-user,
+            .admin-layout #btn-add-contract,
+            .admin-layout #btn-add-template,
+            .admin-layout #btn-save,
+            .admin-layout #btn-save-all,
+            .admin-layout #modal-save,
+            .admin-layout #modal-btn-save {
+                min-height: 42px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.55rem !important;
+                padding: 0 1rem !important;
+                color: #000 !important;
+                background: #fff !important;
+                border: 1px solid #fff !important;
+                border-radius: 999px !important;
+                box-shadow: none !important;
+                font-size: 0.78rem !important;
+                font-weight: 900 !important;
+                letter-spacing: 0 !important;
+                text-transform: uppercase !important;
+                transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease, opacity 160ms ease !important;
+            }
+            .admin-layout button.bg-rose-600:hover,
+            .admin-layout button.bg-rose-600:focus-visible,
+            .admin-layout a.bg-rose-600:hover,
+            .admin-layout a.bg-rose-600:focus-visible,
+            .admin-layout .portal-primary-button:hover,
+            .admin-layout .portal-primary-button:focus-visible,
+            .admin-layout .settings-save:hover,
+            .admin-layout .settings-save:focus-visible,
+            .admin-layout .save-service:hover,
+            .admin-layout .save-service:focus-visible,
+            .admin-layout .seo-save:hover,
+            .admin-layout .seo-save:focus-visible,
+            .admin-layout #btn-add:hover,
+            .admin-layout #btn-add:focus-visible,
+            .admin-layout #btn-new-user:hover,
+            .admin-layout #btn-new-user:focus-visible,
+            .admin-layout #btn-add-contract:hover,
+            .admin-layout #btn-add-contract:focus-visible,
+            .admin-layout #btn-add-template:hover,
+            .admin-layout #btn-add-template:focus-visible,
+            .admin-layout #btn-save:hover,
+            .admin-layout #btn-save:focus-visible,
+            .admin-layout #btn-save-all:hover,
+            .admin-layout #btn-save-all:focus-visible,
+            .admin-layout #modal-save:hover,
+            .admin-layout #modal-save:focus-visible,
+            .admin-layout #modal-btn-save:hover,
+            .admin-layout #modal-btn-save:focus-visible {
+                color: #fff !important;
+                background: #000 !important;
+                border-color: #fff !important;
+                transform: translateY(-1px) !important;
+            }
+            .admin-layout a.bg-zinc-800,
+            .admin-layout button.bg-zinc-800,
+            .admin-layout .portal-secondary-button,
+            .admin-layout #modal-cancel,
+            .admin-layout #modal-btn-cancel,
+            .admin-layout #btn-templates-link,
+            .admin-layout #btn-add-block,
+            .admin-layout #btn-upload-imgs,
+            .admin-layout #btn-upload-pdf {
+                min-height: 42px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.55rem !important;
+                padding: 0 0.95rem !important;
+                color: #e4e4e7 !important;
+                background: #141417 !important;
+                border: 1px solid #3f3f46 !important;
+                border-radius: 999px !important;
+                box-shadow: none !important;
+                font-size: 0.78rem !important;
+                font-weight: 850 !important;
+                text-transform: uppercase !important;
+            }
+            .admin-layout a.bg-zinc-800:hover,
+            .admin-layout a.bg-zinc-800:focus-visible,
+            .admin-layout button.bg-zinc-800:hover,
+            .admin-layout button.bg-zinc-800:focus-visible,
+            .admin-layout .portal-secondary-button:hover,
+            .admin-layout .portal-secondary-button:focus-visible,
+            .admin-layout #modal-cancel:hover,
+            .admin-layout #modal-cancel:focus-visible,
+            .admin-layout #modal-btn-cancel:hover,
+            .admin-layout #modal-btn-cancel:focus-visible,
+            .admin-layout #btn-templates-link:hover,
+            .admin-layout #btn-templates-link:focus-visible,
+            .admin-layout #btn-add-block:hover,
+            .admin-layout #btn-add-block:focus-visible,
+            .admin-layout #btn-upload-imgs:hover,
+            .admin-layout #btn-upload-imgs:focus-visible,
+            .admin-layout #btn-upload-pdf:hover,
+            .admin-layout #btn-upload-pdf:focus-visible {
+                color: #000 !important;
+                background: #fff !important;
+                border-color: #fff !important;
+            }
+            .admin-layout .btn-delete,
+            .admin-layout .btn-del-img,
+            .admin-layout .btn-del-block,
+            .admin-layout .btn-del-s {
+                color: #fb7185 !important;
+                background: #111113 !important;
+                border: 1px solid #333339 !important;
+                border-radius: 50% !important;
+            }
+            .admin-layout .btn-delete:hover,
+            .admin-layout .btn-delete:focus-visible,
+            .admin-layout .btn-del-img:hover,
+            .admin-layout .btn-del-img:focus-visible,
+            .admin-layout .btn-del-block:hover,
+            .admin-layout .btn-del-block:focus-visible,
+            .admin-layout .btn-del-s:hover,
+            .admin-layout .btn-del-s:focus-visible {
+                color: #fff !important;
+                background: #e11d48 !important;
+                border-color: #e11d48 !important;
             }
 
             /* --- MODAL BULLETPROOFING (Bypass Tailwind cache bugs) --- */
@@ -141,13 +532,13 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             <!-- Sidebar (Fixed Width, Flex-shrink 0) -->
             <aside
                 id="admin-sidebar"
-                class="bg-zinc-900 border-r border-zinc-800 z-40 transition-transform duration-300 lg:translate-x-0 -translate-x-full lg:static absolute top-0 left-0 h-full"
+                class="admin-sidebar border-r border-zinc-800 z-40 transition-transform duration-300 lg:translate-x-0 -translate-x-full lg:static absolute top-0 left-0 h-full"
                 style="width: 260px; flex-shrink: 0; display: flex; flex-direction: column;"
             >
                 <!-- Logo -->
-                <div class="border-b border-zinc-800" style="height: 64px; display: flex; align-items: center; padding: 0 1.5rem;">
-                    <a href="/admin" class="flex items-center group w-full">
-                        <span class="text-white text-xl" style="font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">LaesePROD</span>
+                <div class="border-b border-zinc-800" style="height: 72px; display: flex; align-items: center; justify-content: center; padding: 0 1rem;">
+                    <a href="/admin" class="admin-brand" aria-label="LaesePROD admin">
+                        <img src="/logopositivo.png" alt="LaesePROD" width="386" height="353" />
                     </a>
                 </div>
 
@@ -229,8 +620,8 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
                         </h1>
                     </div>
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div class="bg-zinc-800 border-zinc-700 hover:border-zinc-500 transition-colors" style="width: 32px; height: 32px; border-radius: 50%; border-width: 1px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                            <i data-lucide="user" class="w-4 h-4 text-zinc-300"></i>
+                        <div class="admin-user-dot">
+                            <i data-lucide="user" class="w-4 h-4"></i>
                         </div>
                     </div>
                 </header>
@@ -293,6 +684,25 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             overlay?.addEventListener("click", () => {
                 sidebar?.classList.add("-translate-x-full");
                 overlay?.classList.add("hidden");
+            });
+
+            const restoreDraggable = (element: HTMLElement | null) => {
+                if (!element || element.dataset.adminDragDisabled !== "true") return;
+                element.setAttribute("draggable", "true");
+                delete element.dataset.adminDragDisabled;
+            };
+
+            document.addEventListener("pointerdown", (event) => {
+                const field = (event.target as HTMLElement).closest("input, textarea, select, [contenteditable='true']");
+                const draggable = field?.closest<HTMLElement>("[draggable='true']");
+                if (!draggable) return;
+                draggable.dataset.adminDragDisabled = "true";
+                draggable.setAttribute("draggable", "false");
+            });
+
+            document.addEventListener("focusout", (event) => {
+                const field = (event.target as HTMLElement).closest("input, textarea, select, [contenteditable='true']");
+                restoreDraggable(field?.closest<HTMLElement>("[data-admin-drag-disabled='true']") || null);
             });
         </script>
         <style>

@@ -1,70 +1,19 @@
 ---
-import { getSettings } from "../../lib/data";
+import { getFaqs, getServiceBySlug, getSettings } from "../../lib/data";
 import { buildFaqSchema } from "../../lib/seo";
 
 interface Props {
     serviceSlug: string;
+    serviceId?: string;
 }
 
-const { serviceSlug } = Astro.props;
-const settings = await getSettings();
-
-const fixedFaqs: Record<string, Array<{ question: string; answer: string }>> = {
-    bodas: [
-        {
-            question: "\u00bfHac\u00e9is v\u00eddeos de boda en Andaluc\u00eda y otras zonas de Espa\u00f1a?",
-            answer: "S\u00ed. Trabajamos v\u00eddeos de boda en Andaluc\u00eda y podemos desplazarnos a otras ciudades de Espa\u00f1a. Cu\u00e9ntanos la fecha, el lugar de la ceremonia y el tipo de celebraci\u00f3n para confirmar disponibilidad.",
-        },
-        {
-            question: "\u00bfQu\u00e9 incluye un servicio de vide\u00f3grafo de bodas?",
-            answer: "El servicio se adapta a cada pareja, pero normalmente incluye cobertura de preparativos, ceremonia, celebraci\u00f3n y edici\u00f3n final con una mirada cinematogr\u00e1fica, natural y cercana.",
-        },
-        {
-            question: "\u00bfCon cu\u00e1nta antelaci\u00f3n hay que reservar el v\u00eddeo de boda?",
-            answer: "Lo ideal es reservar el vide\u00f3grafo de boda cuanto antes, especialmente en temporada alta. As\u00ed podemos bloquear la fecha y preparar el estilo del v\u00eddeo con calma.",
-        },
-        {
-            question: "\u00bfEl v\u00eddeo de boda tendr\u00e1 un estilo natural o m\u00e1s posado?",
-            answer: "Buscamos un v\u00eddeo de boda natural, emocional y poco invasivo. Acompa\u00f1amos el d\u00eda sin forzar momentos para que el resultado se sienta real.",
-        },
-        {
-            question: "\u00bfEntreg\u00e1is un resumen de boda para redes sociales?",
-            answer: "S\u00ed. Podemos preparar una pieza breve para Instagram, TikTok o WhatsApp adem\u00e1s del v\u00eddeo principal de boda, manteniendo el mismo tono visual.",
-        },
-        {
-            question: "\u00bfPodemos personalizar la m\u00fasica y el ritmo del montaje?",
-            answer: "S\u00ed. Antes de la edici\u00f3n hablamos de referencias, energ\u00eda y gustos musicales para que el montaje final encaje con vuestra forma de vivir la boda.",
-        },
-    ],
-    videoclips: [
-        {
-            question: "\u00bfRealiz\u00e1is videoclips musicales para artistas en Andaluc\u00eda?",
-            answer: "S\u00ed. Producimos videoclips musicales para artistas, grupos y sellos en Andaluc\u00eda, con posibilidad de desplazamiento seg\u00fan el proyecto y el plan de rodaje.",
-        },
-        {
-            question: "\u00bfPod\u00e9is desarrollar la idea creativa del videoclip?",
-            answer: "S\u00ed. Podemos partir de una idea cerrada o crear el concepto visual desde cero, trabajando est\u00e9tica, narrativa, localizaciones y ritmo de montaje.",
-        },
-        {
-            question: "\u00bfQu\u00e9 incluye la producci\u00f3n audiovisual de un videoclip?",
-            answer: "Puede incluir concepto creativo, planificaci\u00f3n, rodaje, direcci\u00f3n, edici\u00f3n, color y entrega final optimizada para YouTube, redes sociales y campa\u00f1as de lanzamiento.",
-        },
-        {
-            question: "\u00bfCu\u00e1nto tarda la edici\u00f3n de un videoclip profesional?",
-            answer: "Depende del tipo de videoclip, n\u00famero de jornadas y complejidad de montaje. Tras conocer la canci\u00f3n y la idea, te damos una estimaci\u00f3n clara de tiempos de producci\u00f3n y entrega.",
-        },
-        {
-            question: "\u00bfGrab\u00e1is videoclips para YouTube, Instagram y TikTok?",
-            answer: "S\u00ed. Podemos entregar el videoclip principal y versiones adaptadas a formatos verticales o cortes promocionales para redes sociales.",
-        },
-        {
-            question: "\u00bfTrabaj\u00e1is con artistas independientes y sellos peque\u00f1os?",
-            answer: "S\u00ed. Ajustamos la producci\u00f3n del videoclip al presupuesto, la canci\u00f3n y el momento del artista, buscando una imagen potente sin inflar el rodaje.",
-        },
-    ],
-};
-
-const faqs = fixedFaqs[serviceSlug] || [];
+const { serviceSlug, serviceId: providedServiceId } = Astro.props;
+const [settings, service] = await Promise.all([
+    getSettings(),
+    providedServiceId ? Promise.resolve(null) : getServiceBySlug(serviceSlug),
+]);
+const serviceId = providedServiceId || service?.id;
+const faqs = serviceId ? await getFaqs(serviceId) : [];
 const schema = buildFaqSchema(faqs);
 ---
 

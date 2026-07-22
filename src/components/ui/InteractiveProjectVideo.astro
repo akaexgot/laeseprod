@@ -4,51 +4,127 @@ import { optimizeCloudinaryVideo } from "../../lib/cloudinary";
 
 interface Props {
     url?: string | null;
+    desktop?: string | null;
+    mobile?: string | null;
     title?: string;
     poster?: string | null;
 }
 
-const { url = "", title = "Video del proyecto", poster = "" } = Astro.props;
-const cleanUrl = String(url || "").trim();
-const isNative = /cloudinary\.com|\.(mp4|webm)(\?.*)?$/i.test(cleanUrl);
-const isInstagram = isInstagramReel(cleanUrl);
-const youtubeId = !isNative && !isInstagram ? getVideoId(cleanUrl) : "";
-const nativeUrl = isNative ? optimizeCloudinaryVideo(cleanUrl, { width: 1920, quality: "auto:best" }) : "";
-const instagramEmbed = isInstagram ? getInstagramEmbedUrl(cleanUrl) : "";
+const { url = "", desktop = "", mobile = "", title = "Video del proyecto", poster = "" } = Astro.props;
+
+function source(value: string | null | undefined, width: number) {
+    const cleanUrl = String(value || "").trim();
+    const isNative = /cloudinary\.com|\.(mp4|webm)(\?.*)?$/i.test(cleanUrl);
+    const isInstagram = isInstagramReel(cleanUrl);
+    const isShort = /youtube(?:-nocookie)?\.com\/shorts\//i.test(cleanUrl);
+    const youtubeId = !isNative && !isInstagram ? getVideoId(cleanUrl) : "";
+
+    return {
+        nativeUrl: isNative ? optimizeCloudinaryVideo(cleanUrl, { width, quality: "auto:best" }) : "",
+        youtubeId,
+        instagramEmbed: isInstagram ? getInstagramEmbedUrl(cleanUrl) : "",
+        isVertical: isShort || isInstagram,
+        hasMedia: Boolean(cleanUrl),
+    };
+}
+
+const desktopUrl = desktop || url || mobile;
+const mobileUrl = mobile || url || desktop;
+const sources = {
+    desktop: source(desktopUrl, 1920),
+    mobile: source(mobileUrl, 1080),
+};
 ---
 
-<div class="interactive-project-video">
-    {nativeUrl ? (
-        <video
-            class="interactive-project-video__media"
-            src={nativeUrl}
-            poster={poster || undefined}
-            controls
-            playsinline
-            preload="metadata"
-        ></video>
-    ) : youtubeId ? (
-        <iframe
-            class="interactive-project-video__media"
-            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1&playsinline=1&controls=1`}
-            title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-        ></iframe>
-    ) : instagramEmbed ? (
-        <iframe
-            class="interactive-project-video__media"
-            src={instagramEmbed}
-            title={title}
-            allowtransparency="true"
-            allowfullscreen
-        ></iframe>
-    ) : poster ? (
-        <img class="interactive-project-video__media" src={poster} alt={title} />
-    ) : (
-        <div class="interactive-project-video__empty">Video no disponible</div>
-    )}
+<div
+    class="interactive-project-video"
+    data-interactive-project-video
+    data-sources={JSON.stringify(sources)}
+    data-title={title}
+    data-poster={poster || ""}
+>
+    <video class="interactive-project-video__media interactive-project-video__native" controls playsinline preload="metadata"></video>
+    <iframe
+        class="interactive-project-video__media interactive-project-video__youtube"
+        title={title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+    ></iframe>
+    <iframe
+        class="interactive-project-video__media interactive-project-video__instagram"
+        title={title}
+        allowtransparency="true"
+        allowfullscreen
+    ></iframe>
+    <img class="interactive-project-video__media interactive-project-video__poster" alt={title} />
+    <div class="interactive-project-video__empty">Video no disponible</div>
 </div>
+
+<script>
+    function initInteractiveProjectVideos() {
+        document.querySelectorAll<HTMLElement>('[data-interactive-project-video]:not([data-ready])').forEach((root) => {
+            root.dataset.ready = 'true';
+            const sources = JSON.parse(root.dataset.sources || '{}');
+            const selected = window.matchMedia('(max-width: 767px)').matches ? sources.mobile : sources.desktop;
+            const poster = root.dataset.poster || '';
+            const title = root.dataset.title || 'Video del proyecto';
+            const nativeVideo = root.querySelector<HTMLVideoElement>('.interactive-project-video__native');
+            const youtubeFrame = root.querySelector<HTMLIFrameElement>('.interactive-project-video__youtube');
+            const instagramFrame = root.querySelector<HTMLIFrameElement>('.interactive-project-video__instagram');
+            const posterImage = root.querySelector<HTMLImageElement>('.interactive-project-video__poster');
+            const empty = root.querySelector<HTMLElement>('.interactive-project-video__empty');
+
+            const hideAll = () => {
+                root.querySelectorAll<HTMLElement>('.interactive-project-video__media, .interactive-project-video__empty').forEach((item) => {
+                    item.classList.remove('is-visible');
+                });
+                if (nativeVideo) {
+                    nativeVideo.pause();
+                    nativeVideo.removeAttribute('src');
+                    nativeVideo.load();
+                }
+                if (youtubeFrame) youtubeFrame.removeAttribute('src');
+                if (instagramFrame) instagramFrame.removeAttribute('src');
+                if (posterImage) posterImage.removeAttribute('src');
+            };
+
+            hideAll();
+            root.classList.toggle('interactive-project-video--vertical', Boolean(selected?.isVertical));
+
+            if (selected?.nativeUrl && nativeVideo) {
+                nativeVideo.src = selected.nativeUrl;
+                if (poster) nativeVideo.poster = poster;
+                nativeVideo.classList.add('is-visible');
+                return;
+            }
+
+            if (selected?.youtubeId && youtubeFrame) {
+                youtubeFrame.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?rel=0&modestbranding=1&playsinline=1&controls=1`;
+                youtubeFrame.title = title;
+                youtubeFrame.classList.add('is-visible');
+                return;
+            }
+
+            if (selected?.instagramEmbed && instagramFrame) {
+                instagramFrame.src = selected.instagramEmbed;
+                instagramFrame.title = title;
+                instagramFrame.classList.add('is-visible');
+                return;
+            }
+
+            if (poster && posterImage) {
+                posterImage.src = poster;
+                posterImage.alt = title;
+                posterImage.classList.add('is-visible');
+                return;
+            }
+
+            empty?.classList.add('is-visible');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initInteractiveProjectVideos);
+</script>
 
 <style>
     .interactive-project-video {
@@ -61,6 +137,7 @@ const instagramEmbed = isInstagram ? getInstagramEmbedUrl(cleanUrl) : "";
     }
 
     .interactive-project-video__media {
+        display: none;
         width: 100%;
         height: 100%;
         border: 0;
@@ -68,11 +145,45 @@ const instagramEmbed = isInstagram ? getInstagramEmbedUrl(cleanUrl) : "";
         background: #050505;
     }
 
+    .interactive-project-video__media.is-visible,
+    .interactive-project-video__empty.is-visible {
+        display: block;
+    }
+
+    .interactive-project-video--vertical {
+        background:
+            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .08), transparent 32%),
+            #050505;
+    }
+
+    .interactive-project-video--vertical .interactive-project-video__media {
+        width: auto;
+        height: 100%;
+        max-width: 100%;
+        aspect-ratio: 9 / 16;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, .16);
+    }
+
     iframe.interactive-project-video__media {
         object-fit: initial;
     }
 
+    .interactive-project-video--vertical iframe.interactive-project-video__media {
+        width: min(100%, calc(100svh * .5625));
+        height: 100%;
+    }
+
+    @media (max-width: 760px) {
+        .interactive-project-video--vertical .interactive-project-video__media,
+        .interactive-project-video--vertical iframe.interactive-project-video__media {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+        }
+    }
+
     .interactive-project-video__empty {
+        display: none;
         color: #fff;
         font-size: .82rem;
         font-weight: 900;

@@ -1,69 +1,229 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { getSettings } from "../../lib/data";
+
 const settings = await getSettings();
 const value = (key: string) => String((settings as Record<string, unknown>)[key] ?? "");
 ---
 
 <AdminLayout title="Ajustes" activeSection="ajustes">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-        <div><h1 class="text-2xl font-bold text-white">Ajustes</h1><p class="text-sm text-zinc-400 mt-2">Marca, vídeos y datos públicos de LaesePROD.</p></div>
-        <button id="save-settings" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-md text-sm font-semibold"><i data-lucide="save" class="w-4 h-4"></i>Guardar</button>
-    </div>
+    <header class="settings-header">
+        <div>
+            <p class="settings-kicker">Configuración pública</p>
+            <h1>Ajustes generales</h1>
+            <p>Marca, vídeos de portada, contacto y textos legales que aparecen en la web.</p>
+        </div>
+        <button id="save-settings" class="settings-save" type="button">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            Guardar ajustes
+        </button>
+    </header>
 
-    <form id="settings-form" class="bg-zinc-900 border border-zinc-800 rounded-lg divide-y divide-zinc-800">
-        <section class="p-6 space-y-5">
-            <h2 class="text-lg font-semibold text-white">Marca</h2>
-            <div class="grid md:grid-cols-2 gap-5">
-                <label class="admin-field">Nombre<input name="site_name" value={value("site_name")} /></label>
-                <label class="admin-field">Descripción corta<input name="site_description" value={value("site_description")} /></label>
+    <form id="settings-form" class="settings-shell">
+        <section class="settings-panel settings-panel--brand">
+            <div class="settings-panel__intro">
+                <span class="settings-panel__icon"><i data-lucide="badge" class="w-5 h-5"></i></span>
+                <div>
+                    <p>01 / Marca</p>
+                    <h2>Identidad visible</h2>
+                    <span>Nombre, descripción y logotipo usados en navegación, SEO y cabecera.</span>
+                </div>
             </div>
-            <label class="admin-field">URL del logotipo
-                <div class="flex gap-2"><input id="logo_url" name="logo_url" value={value("logo_url")} /><button type="button" class="upload-button" data-upload-target="logo_url" data-accept="image/*" data-folder="logos"><i data-lucide="upload" class="w-4 h-4"></i>Subir</button></div>
-            </label>
-        </section>
 
-        <section class="p-6 space-y-5">
-            <h2 class="text-lg font-semibold text-white">Vídeo de inicio</h2>
-            <label class="admin-field">Escritorio
-                <div class="flex gap-2"><input id="hero_video_desktop" name="hero_video_desktop" value={value("hero_video_desktop")} /><button type="button" class="upload-button" data-upload-target="hero_video_desktop" data-accept="video/mp4,video/webm" data-folder="background_videos"><i data-lucide="upload" class="w-4 h-4"></i>Subir</button></div>
-            </label>
-            <label class="admin-field">Móvil / vertical
-                <div class="flex gap-2"><input id="hero_video_mobile" name="hero_video_mobile" value={value("hero_video_mobile")} /><button type="button" class="upload-button" data-upload-target="hero_video_mobile" data-accept="video/mp4,video/webm" data-folder="background_videos"><i data-lucide="upload" class="w-4 h-4"></i>Subir</button></div>
-            </label>
-        </section>
-
-        <section class="p-6 space-y-5">
-            <h2 class="text-lg font-semibold text-white">Contacto y presentación</h2>
-            <label class="admin-field">Resumen de LaesePROD<textarea name="about_summary" rows="4">{value("about_summary")}</textarea></label>
-            <label class="admin-field">Vídeo de fondo de contacto
-                <div class="flex gap-2"><input id="contact_hero_video" name="contact_hero_video" value={value("contact_hero_video")} /><button type="button" class="upload-button" data-upload-target="contact_hero_video" data-accept="video/mp4,video/webm" data-folder="background_videos"><i data-lucide="upload" class="w-4 h-4"></i>Subir</button></div>
-            </label>
-            <div class="grid md:grid-cols-2 gap-5">
-                <label class="admin-field">Email<input type="email" name="email" value={value("email")} /></label>
-                <label class="admin-field">Teléfono<input name="phone" value={value("phone")} /></label>
-                <label class="admin-field">WhatsApp<input name="whatsapp_number" value={value("whatsapp_number")} /></label>
-                <label class="admin-field">Dirección<input name="address" value={value("address")} /></label>
-                <label class="admin-field">Instagram<input type="url" name="instagram" value={value("instagram")} /></label>
-                <label class="admin-field">LinkedIn<input type="url" name="linkedin" value={value("linkedin")} /></label>
+            <div class="settings-grid">
+                <label class="settings-field">
+                    <span>Nombre</span>
+                    <input name="site_name" value={value("site_name")} />
+                </label>
+                <label class="settings-field">
+                    <span>Descripción corta</span>
+                    <input name="site_description" value={value("site_description")} />
+                </label>
             </div>
-            <label class="admin-field">Google Maps<input name="google_maps_embed" value={value("google_maps_embed")} /></label>
+
+            <div class="settings-media-row">
+                <div class="settings-logo-preview" aria-label="Vista previa del logotipo">
+                    {value("logo_url") ? (
+                        <img src={value("logo_url")} alt="" />
+                    ) : (
+                        <span>LP</span>
+                    )}
+                </div>
+                <label class="settings-field settings-field--with-action">
+                    <span>URL del logotipo</span>
+                    <div class="settings-input-action">
+                        <input id="logo_url" name="logo_url" value={value("logo_url")} />
+                        <button type="button" class="upload-button" data-upload-target="logo_url" data-accept="image/*" data-folder="logos">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            Subir
+                        </button>
+                    </div>
+                </label>
+            </div>
         </section>
 
-        <section class="p-6 space-y-5">
-            <h2 class="text-lg font-semibold text-white">Contratos</h2>
-            <label class="admin-field">Texto de aceptación<textarea name="contract_terms_text" rows="3">{value("contract_terms_text")}</textarea></label>
+        <section class="settings-panel">
+            <div class="settings-panel__intro">
+                <span class="settings-panel__icon"><i data-lucide="clapperboard" class="w-5 h-5"></i></span>
+                <div>
+                    <p>02 / Vídeo de inicio</p>
+                    <h2>Primera impresión</h2>
+                    <span>Vídeos usados como fondo de la home en escritorio y móvil.</span>
+                </div>
+            </div>
+
+            <div class="settings-stack">
+                <label class="settings-field settings-field--with-action">
+                    <span>Escritorio</span>
+                    <div class="settings-input-action">
+                        <input id="hero_video_desktop" name="hero_video_desktop" value={value("hero_video_desktop")} />
+                        <button type="button" class="upload-button" data-upload-target="hero_video_desktop" data-accept="video/mp4,video/webm" data-folder="background_videos">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            Subir
+                        </button>
+                    </div>
+                </label>
+                <label class="settings-field settings-field--with-action">
+                    <span>Móvil / vertical</span>
+                    <div class="settings-input-action">
+                        <input id="hero_video_mobile" name="hero_video_mobile" value={value("hero_video_mobile")} />
+                        <button type="button" class="upload-button" data-upload-target="hero_video_mobile" data-accept="video/mp4,video/webm" data-folder="background_videos">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            Subir
+                        </button>
+                    </div>
+                </label>
+            </div>
+        </section>
+
+        <section class="settings-panel">
+            <div class="settings-panel__intro">
+                <span class="settings-panel__icon"><i data-lucide="phone-call" class="w-5 h-5"></i></span>
+                <div>
+                    <p>03 / Contacto</p>
+                    <h2>Datos públicos</h2>
+                    <span>Información de contacto y presentación usada en contacto, footer y enlaces.</span>
+                </div>
+            </div>
+
+            <label class="settings-field">
+                <span>Resumen de LaesePROD</span>
+                <textarea name="about_summary" rows="4">{value("about_summary")}</textarea>
+            </label>
+
+            <label class="settings-field settings-field--with-action">
+                <span>Vídeo de fondo de contacto</span>
+                <div class="settings-input-action">
+                    <input id="contact_hero_video" name="contact_hero_video" value={value("contact_hero_video")} />
+                    <button type="button" class="upload-button" data-upload-target="contact_hero_video" data-accept="video/mp4,video/webm" data-folder="background_videos">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        Subir
+                    </button>
+                </div>
+            </label>
+
+            <div class="settings-grid">
+                <label class="settings-field">
+                    <span>Email</span>
+                    <input type="email" name="email" value={value("email")} />
+                </label>
+                <label class="settings-field">
+                    <span>Teléfono</span>
+                    <input name="phone" value={value("phone")} />
+                </label>
+                <label class="settings-field">
+                    <span>WhatsApp</span>
+                    <input name="whatsapp_number" value={value("whatsapp_number")} />
+                </label>
+                <label class="settings-field">
+                    <span>Dirección</span>
+                    <input name="address" value={value("address")} />
+                </label>
+                <label class="settings-field">
+                    <span>Instagram</span>
+                    <input type="url" name="instagram" value={value("instagram")} />
+                </label>
+                <label class="settings-field">
+                    <span>LinkedIn</span>
+                    <input type="url" name="linkedin" value={value("linkedin")} />
+                </label>
+            </div>
+
+            <label class="settings-field">
+                <span>Google Maps</span>
+                <input name="google_maps_embed" value={value("google_maps_embed")} placeholder="Pega aquí el enlace o el iframe" />
+            </label>
+        </section>
+
+        <section class="settings-panel">
+            <div class="settings-panel__intro">
+                <span class="settings-panel__icon"><i data-lucide="file-check-2" class="w-5 h-5"></i></span>
+                <div>
+                    <p>04 / Contratos</p>
+                    <h2>Texto de aceptación</h2>
+                    <span>Mensaje que aparece antes de continuar con contratos y pagos.</span>
+                </div>
+            </div>
+            <label class="settings-field">
+                <span>Texto legal</span>
+                <textarea name="contract_terms_text" rows="3">{value("contract_terms_text")}</textarea>
+            </label>
         </section>
     </form>
+
     <input id="settings-upload" type="file" class="hidden" />
-    <p id="settings-status" class="mt-4 text-sm text-zinc-400" aria-live="polite"></p>
+    <p id="settings-status" class="settings-status hidden" aria-live="polite"></p>
 </AdminLayout>
 
 <style>
-    .admin-field { display: grid; gap: .45rem; color: #d4d4d8; font-size: .8rem; font-weight: 600; }
-    .admin-field input, .admin-field textarea { width: 100%; padding: .65rem .75rem; color: #f4f4f5; background: #09090b; border: 1px solid #3f3f46; border-radius: 4px; outline: none; }
-    .admin-field input:focus, .admin-field textarea:focus { border-color: #fff; }
-    .upload-button { display: inline-flex; align-items: center; gap: .4rem; flex: 0 0 auto; padding: 0 .9rem; color: #fff; background: #27272a; border: 1px solid #52525b; border-radius: 4px; }
+    .settings-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.35rem; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+    .settings-kicker { margin: 0 0 .45rem; color: #8b8b92; font-size: .68rem; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
+    .settings-header h1 { margin: 0; color: #fff; font-size: clamp(1.9rem, 3vw, 2.7rem); line-height: .95; letter-spacing: 0; }
+    .settings-header p:not(.settings-kicker) { max-width: 660px; margin: .7rem 0 0; color: #a1a1aa; font-size: .92rem; line-height: 1.45; }
+    .settings-save, .upload-button { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 42px; border-radius: 999px; font: inherit; font-size: .78rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease, opacity 160ms ease; }
+    .settings-save { flex: 0 0 auto; padding: 0 1rem; color: #000; background: #fff; border: 1px solid #fff; box-shadow: 0 20px 44px rgba(0, 0, 0, .25); }
+    .settings-save:hover, .settings-save:focus-visible { color: #fff; background: #000; transform: translateY(-1px); }
+    .settings-save:disabled { opacity: .6; cursor: wait; transform: none; }
+    .settings-shell { display: grid; gap: 1.15rem; }
+    .settings-panel { display: grid; gap: 1.1rem; padding: clamp(1rem, 2.2vw, 1.45rem); color: #fff; background: linear-gradient(135deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, .01)); border: 1px solid #27272a; border-radius: 16px; box-shadow: 0 18px 46px rgba(0, 0, 0, .22); }
+    .settings-panel--brand { background: radial-gradient(circle at 92% 0%, rgba(244, 63, 94, .14), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012)); }
+    .settings-panel__intro { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: .9rem; align-items: start; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+    .settings-panel__icon { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; background: #050505; border: 1px solid #313138; border-radius: 50%; }
+    .settings-panel__icon i, .settings-panel__icon svg { width: 20px !important; height: 20px !important; display: block !important; margin: auto !important; }
+    .settings-save i, .settings-save svg, .upload-button i, .upload-button svg { width: 16px !important; height: 16px !important; display: block !important; flex: 0 0 auto !important; }
+    .settings-panel__intro p { margin: 0 0 .35rem; color: #8b8b92; font-size: .66rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    .settings-panel__intro h2 { margin: 0; color: #fff; font-size: clamp(1.18rem, 2vw, 1.6rem); line-height: 1; }
+    .settings-panel__intro span { display: block; margin-top: .45rem; color: #9ca3af; font-size: .84rem; line-height: 1.4; }
+    .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .settings-stack { display: grid; gap: 1rem; }
+    .settings-media-row { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 1rem; align-items: stretch; }
+    .settings-logo-preview { min-height: 104px; display: grid; place-items: center; overflow: hidden; color: #71717a; background: #08080a; border: 1px solid #2f2f33; border-radius: 12px; }
+    .settings-logo-preview img { width: 100%; height: 100%; object-fit: contain; padding: .9rem; }
+    .settings-logo-preview span { width: 54px; height: 54px; display: grid; place-items: center; color: #000; background: #fff; border-radius: 50%; font-weight: 950; }
+    .settings-field { display: grid; gap: .5rem; min-width: 0; color: #d4d4d8; font-size: .74rem; font-weight: 850; text-transform: uppercase; letter-spacing: .02em; }
+    .settings-field > span { color: #b7b7be; }
+    .settings-field input, .settings-field textarea { width: 100%; min-width: 0; padding: .82rem .9rem !important; color: #f4f4f5; background: #09090b; border: 1px solid #36363c; border-radius: 10px !important; outline: none; font: inherit; font-size: .88rem; font-weight: 650; text-transform: none; letter-spacing: 0; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+    .settings-field textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
+    .settings-field input:focus, .settings-field textarea:focus { border-color: #fff; background: #050505; box-shadow: 0 0 0 3px rgba(255, 255, 255, .08); }
+    .settings-input-action { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .6rem; align-items: stretch; }
+    .upload-button { padding: 0 .95rem; color: #e4e4e7; background: #141417; border: 1px solid #3f3f46; white-space: nowrap; }
+    .upload-button:hover, .upload-button:focus-visible { color: #000; background: #fff; border-color: #fff; transform: translateY(-1px); }
+    .settings-status { position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 90; max-width: min(390px, calc(100vw - 2rem)); margin: 0; padding: .85rem 1rem; color: #000; background: #fff; border-radius: 999px; box-shadow: 0 22px 60px rgba(0, 0, 0, .4); font-size: .84rem; font-weight: 850; }
+    .settings-status.is-error { color: #fff; background: #e11d48; }
+    .settings-status.hidden { display: none; }
+
+    @media (max-width: 840px) {
+        .settings-header { align-items: stretch; flex-direction: column; }
+        .settings-save { width: fit-content; }
+        .settings-grid, .settings-media-row { grid-template-columns: 1fr; }
+        .settings-logo-preview { min-height: 96px; }
+    }
+
+    @media (max-width: 560px) {
+        .settings-input-action { grid-template-columns: 1fr; }
+        .upload-button { width: fit-content; }
+        .settings-panel__intro { grid-template-columns: 1fr; }
+    }
 </style>
 
 <script>
@@ -73,6 +233,15 @@ const value = (key: string) => String((settings as Record<string, unknown>)[key]
     const fileInput = document.getElementById('settings-upload') as HTMLInputElement;
     let uploadTarget = '';
     let uploadFolder = '';
+    let statusTimer: ReturnType<typeof setTimeout> | undefined;
+
+    function showStatus(message: string, type: 'success' | 'error' = 'success') {
+        status.textContent = message;
+        status.classList.toggle('is-error', type === 'error');
+        status.classList.remove('hidden');
+        if (statusTimer) window.clearTimeout(statusTimer);
+        statusTimer = window.setTimeout(() => status.classList.add('hidden'), 3200);
+    }
 
     document.querySelectorAll<HTMLButtonElement>('.upload-button').forEach((button) => {
         button.addEventListener('click', () => {
@@ -87,24 +256,37 @@ const value = (key: string) => String((settings as Record<string, unknown>)[key]
         const file = fileInput.files?.[0];
         const target = document.getElementById(uploadTarget) as HTMLInputElement | null;
         if (!file || !target) return;
-        status.textContent = 'Subiendo archivo...';
+        showStatus('Subiendo archivo...');
         const body = new FormData();
         body.append('file', file);
         body.append('folder', uploadFolder);
         const response = await fetch('/api/admin/upload', { method: 'POST', body });
-        const result = await response.json();
-        if (response.ok) { target.value = result.url; status.textContent = 'Archivo subido. Guarda los cambios.'; }
-        else status.textContent = result.error || 'No se pudo subir el archivo.';
+        const result = await response.json().catch(() => ({}));
+        if (response.ok) {
+            target.value = result.url;
+            showStatus('Archivo subido. Guarda los cambios.');
+        } else {
+            showStatus(result.error || 'No se pudo subir el archivo.', 'error');
+        }
         fileInput.value = '';
     });
 
     saveButton.addEventListener('click', async () => {
         saveButton.disabled = true;
-        status.textContent = 'Guardando...';
+        const originalText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Guardando';
+        if (typeof (window as any).lucide !== 'undefined') (window as any).lucide.createIcons();
+        showStatus('Guardando ajustes...');
         const data = Object.fromEntries(new FormData(form));
-        const response = await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        const response = await fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
         const result = await response.json().catch(() => ({}));
-        status.textContent = response.ok ? 'Ajustes guardados.' : (result.error || 'No se pudieron guardar los ajustes.');
+        showStatus(response.ok ? 'Ajustes guardados.' : (result.error || 'No se pudieron guardar los ajustes.'), response.ok ? 'success' : 'error');
         saveButton.disabled = false;
+        saveButton.innerHTML = originalText;
+        if (typeof (window as any).lucide !== 'undefined') (window as any).lucide.createIcons();
     });
 </script>

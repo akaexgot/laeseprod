@@ -1,5 +1,5 @@
 ---
-import { ChevronDown, FolderLock, Menu, MessageCircle, X } from "@lucide/astro";
+import { ChevronDown, FolderLock, Menu, MessageCircle, Moon, Sun, X } from "@lucide/astro";
 import { getNavigation, getSettings } from "../../lib/data";
 
 const [navigation, settings] = await Promise.all([getNavigation(), getSettings()]);
@@ -12,7 +12,8 @@ const siteName = settings.site_name || "LaesePROD";
 <header class="site-header" data-site-header>
     <nav class="site-nav" aria-label="Navegacion principal">
         <a class="site-nav__brand" href="/" aria-label={`${siteName}, inicio`}>
-            <img src="/logotipo-nav.png" alt={siteName} width="386" height="353" />
+            <img class="site-nav__brand-logo site-nav__brand-logo--negative" src="/logonegativo.png" alt={siteName} width="386" height="353" />
+            <img class="site-nav__brand-logo site-nav__brand-logo--positive" src="/logopositivo.png" alt="" width="386" height="353" aria-hidden="true" />
         </a>
 
         <div class="site-nav__desktop">
@@ -43,6 +44,10 @@ const siteName = settings.site_name || "LaesePROD";
             <button class="site-nav__toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-navigation" data-nav-toggle>
                 <Menu class="site-nav__menu-icon" size={23} stroke-width={2} aria-hidden="true" />
                 <X class="site-nav__close-icon" size={23} stroke-width={2} aria-hidden="true" />
+            </button>
+            <button class="site-nav__theme" type="button" aria-label="Cambiar tema del menu" title="Cambiar tema del menu" data-nav-theme-toggle>
+                <Sun class="site-nav__theme-sun" size={18} stroke-width={2} aria-hidden="true" />
+                <Moon class="site-nav__theme-moon" size={18} stroke-width={2} aria-hidden="true" />
             </button>
         </div>
     </nav>
@@ -80,7 +85,7 @@ const siteName = settings.site_name || "LaesePROD";
         <div class="portal-access-modal__icon" aria-hidden="true">
             <FolderLock size={24} stroke-width={1.9} />
         </div>
-        <h2 id="portal-access-title">Acceso cliente</h2>
+        <h2 id="portal-access-title" data-portal-title>Acceso cliente</h2>
         <p data-portal-copy>Introduce tu codigo privado para abrir tu carpeta de Dropbox.</p>
         <form class="portal-access-modal__form" data-portal-form>
             <input data-portal-code type="password" inputmode="text" autocomplete="one-time-code" placeholder="Codigo de acceso" />
@@ -102,20 +107,21 @@ const siteName = settings.site_name || "LaesePROD";
     const portalSubmit = document.querySelector<HTMLButtonElement>('[data-portal-submit]');
     const portalDropbox = document.querySelector<HTMLAnchorElement>('[data-portal-dropbox]');
     const portalCopy = document.querySelector<HTMLElement>('[data-portal-copy]');
-    const navBrand = document.querySelector<HTMLElement>('.site-nav__brand');
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const triggerScreenShake = () => {
-        if (prefersReducedMotion) return;
-        document.body.classList.remove('screen-shake');
-        void document.body.offsetWidth;
-        document.body.classList.add('screen-shake');
-        window.setTimeout(() => document.body.classList.remove('screen-shake'), 460);
+    const portalTitle = document.querySelector<HTMLElement>('[data-portal-title]');
+    const themeToggle = document.querySelector<HTMLButtonElement>('[data-nav-theme-toggle]');
+    const applyMenuTheme = (theme: 'dark' | 'light') => {
+        if (!header || !themeToggle) return;
+        header.dataset.menuTheme = theme;
+        header.classList.toggle('nav-theme-light', theme === 'light');
+        header.classList.toggle('nav-theme-dark', theme === 'dark');
+        themeToggle.setAttribute('aria-label', theme === 'light' ? 'Cambiar menu a oscuro' : 'Cambiar menu a claro');
+        themeToggle.setAttribute('title', theme === 'light' ? 'Menu oscuro' : 'Menu claro');
+        try { window.localStorage.setItem('laeseprod-menu-theme', theme); } catch {}
     };
-
-    navBrand?.addEventListener('pointerenter', triggerScreenShake);
-    navBrand?.addEventListener('focus', triggerScreenShake);
-
+    const savedTheme = (() => {
+        try { return window.localStorage.getItem('laeseprod-menu-theme'); } catch { return null; }
+    })();
+    applyMenuTheme(savedTheme === 'light' ? 'light' : 'dark');
     const setMenuOpen = (open: boolean) => {
         if (!header || !toggle || !mobileNav) return;
         header.classList.toggle('menu-is-open', open);
@@ -143,6 +149,7 @@ const siteName = settings.site_name || "LaesePROD";
             portalDropbox.href = '#';
             portalDropbox.textContent = 'Abrir Dropbox';
         }
+        if (portalTitle) portalTitle.textContent = 'Acceso cliente';
         if (portalCopy) portalCopy.textContent = 'Introduce tu codigo privado para abrir tu carpeta de Dropbox.';
         setPortalError();
     };
@@ -193,7 +200,8 @@ const siteName = settings.site_name || "LaesePROD";
             }
 
             if (portalForm) portalForm.hidden = true;
-            if (portalCopy) portalCopy.textContent = `Acceso verificado${result.client_name ? ` para ${result.client_name}` : ''}.`;
+            if (portalTitle) portalTitle.textContent = `Bienvenido ${result.client_name || 'cliente'}`;
+            if (portalCopy) portalCopy.textContent = 'Tu carpeta de Dropbox esta lista.';
             if (portalDropbox) {
                 portalDropbox.href = result.dropbox_link;
                 portalDropbox.textContent = 'Abrir carpeta de Dropbox';
@@ -211,6 +219,10 @@ const siteName = settings.site_name || "LaesePROD";
     });
 
     toggle?.addEventListener('click', () => setMenuOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    themeToggle?.addEventListener('click', () => {
+        const nextTheme = header?.classList.contains('nav-theme-light') ? 'dark' : 'light';
+        applyMenuTheme(nextTheme);
+    });
     mobileNav?.querySelectorAll('a, button').forEach((element) => element.addEventListener('click', () => setMenuOpen(false)));
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
@@ -227,13 +239,31 @@ const siteName = settings.site_name || "LaesePROD";
 </script>
 
 <style>
-    .site-header { position: fixed; inset: 0 0 auto; z-index: 60; display: flex; justify-content: center; padding: 12px 18px 0; color: #111; pointer-events: none; }
-    .site-nav { position: relative; z-index: 2; width: clamp(780px, 52vw, 1020px); height: 70px; display: grid; grid-template-columns: minmax(96px, .9fr) auto minmax(92px, auto); align-items: center; padding: 0 10px 0 22px; background: rgba(255, 255, 255, .96); border: 1px solid rgba(0, 0, 0, .08); border-radius: 999px; box-shadow: 0 14px 38px rgba(0, 0, 0, .2); backdrop-filter: blur(18px); pointer-events: auto; animation: nav-drop-in 620ms cubic-bezier(.16, 1, .3, 1) both; transition: box-shadow 180ms ease, background 180ms ease; }
-    .site-header.is-scrolled .site-nav, .site-header.menu-is-open .site-nav { background: #fff; box-shadow: 0 18px 48px rgba(0, 0, 0, .28); }
-    .site-nav__brand { position: relative; z-index: 3; justify-self: start; min-width: 0; display: inline-flex; align-items: center; color: #090909; text-decoration: none; line-height: 1; white-space: nowrap; }
-    .site-nav__brand img { display: block; width: auto; height: 58px; object-fit: contain; object-position: left center; animation: logo-mark-in 720ms cubic-bezier(.16, 1, .3, 1) 160ms both; }
+    .site-header { position: fixed; inset: 0 0 auto; z-index: 60; display: flex; justify-content: center; padding: 12px 18px 0; color: #fff; pointer-events: none; }
+    .site-nav { position: relative; z-index: 2; width: clamp(780px, 52vw, 1020px); height: 70px; display: grid; grid-template-columns: minmax(96px, .9fr) auto minmax(92px, auto); align-items: center; padding: 0 10px 0 22px; background: rgba(0, 0, 0, .96); border: 1px solid rgba(255, 255, 255, .18); border-radius: 999px; box-shadow: 0 14px 38px rgba(0, 0, 0, .34); backdrop-filter: blur(18px); pointer-events: auto; animation: nav-drop-in 620ms cubic-bezier(.16, 1, .3, 1) both; transition: box-shadow 180ms ease, background 220ms ease, border-color 220ms ease; }
+    .site-header.is-scrolled .site-nav, .site-header.menu-is-open .site-nav { background: rgba(0, 0, 0, .96); box-shadow: 0 18px 48px rgba(0, 0, 0, .34); }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover),
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible),
+    .site-nav:has(.site-nav__group:hover),
+    .site-nav:has(.site-nav__group:focus-within) { background: rgba(255, 255, 255, .96); border-color: rgba(0, 0, 0, .08); box-shadow: 0 18px 48px rgba(0, 0, 0, .26); }
+    .site-nav__brand { position: relative; z-index: 3; justify-self: start; min-width: 0; display: inline-grid; align-items: center; color: #fff; text-decoration: none; line-height: 1; white-space: nowrap; }
+    .site-nav__brand-logo { grid-area: 1 / 1; display: block; width: auto; height: 44px; object-fit: contain; object-position: left center; transition: opacity 180ms ease, transform 420ms cubic-bezier(.16, 1, .3, 1), filter 220ms ease; transform-origin: center; }
+    .site-nav__brand-logo--negative { opacity: 0; }
+    .site-nav__brand-logo--positive { opacity: 1; animation: none; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__brand-logo,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__brand-logo,
+    .site-nav:has(.site-nav__group:hover) .site-nav__brand-logo,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__brand-logo { transform: translateY(-1px) scale(1.025); }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__brand-logo--negative,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__brand-logo--negative,
+    .site-nav:has(.site-nav__group:hover) .site-nav__brand-logo--negative,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__brand-logo--negative { opacity: 1; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .08)); }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__brand-logo--positive,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__brand-logo--positive,
+    .site-nav:has(.site-nav__group:hover) .site-nav__brand-logo--positive,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__brand-logo--positive { opacity: 0; }
     .site-nav__desktop { position: absolute; top: 0; bottom: 0; left: 50%; z-index: 2; display: flex; align-items: stretch; justify-content: center; gap: .2rem; transform: translateX(-50%); }
-    .site-nav__link { position: relative; display: inline-flex; align-items: center; gap: .35rem; padding: 0 .8rem; color: #5d5d5d; text-decoration: none; font-family: Arial, Helvetica, sans-serif; font-size: .8rem; font-weight: 650; text-transform: uppercase; transition: color 160ms ease; }
+    .site-nav__link { position: relative; display: inline-flex; align-items: center; gap: .35rem; padding: 0 .8rem; color: rgba(255, 255, 255, .72); text-decoration: none; font-family: Arial, Helvetica, sans-serif; font-size: .8rem; font-weight: 500; text-transform: uppercase; transition: color 160ms ease; }
     .nav-reveal { display: inline-block; overflow: hidden; vertical-align: bottom; white-space: nowrap; }
     .nav-reveal > span { display: inline-block; animation: text-mask-reveal 720ms cubic-bezier(.16, 1, .3, 1) both; }
     .site-nav__brand .nav-reveal > span { animation-delay: 180ms; }
@@ -243,34 +273,151 @@ const siteName = settings.site_name || "LaesePROD";
     .site-nav__desktop > :nth-child(4) .nav-reveal > span { animation-delay: 500ms; }
     .site-nav__desktop > :nth-child(5) .nav-reveal > span { animation-delay: 580ms; }
     .site-nav__actions > * { animation: action-pop 520ms cubic-bezier(.16, 1, .3, 1) 480ms both; }
-    .site-nav__link::after { content: ""; position: absolute; right: .8rem; bottom: 13px; left: .8rem; height: 3px; background: #000; border-radius: 3px; transform: scaleX(0); transform-origin: right; transition: transform 180ms ease; }
-    .site-nav__link:hover, .site-nav__link:focus-visible, .site-nav__link.is-active { color: #000; }
+    .site-nav__link::after { content: ""; position: absolute; right: .8rem; bottom: 13px; left: .8rem; height: 3px; background: #fff; border-radius: 3px; transform: scaleX(0); transform-origin: right; transition: transform 180ms ease; }
+    .site-nav__link:hover, .site-nav__link:focus-visible, .site-nav__link.is-active { color: #fff; }
     .site-nav__link:hover::after, .site-nav__link:focus-visible::after, .site-nav__link.is-active::after { transform: scaleX(1); transform-origin: left; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__link,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__link,
+    .site-nav:has(.site-nav__group:hover) .site-nav__link,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__link { color: #5d5d5d; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__link:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__link:focus-visible,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__link.is-active,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__link.is-active,
+    .site-nav:has(.site-nav__group:hover) .site-nav__link.is-active,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__link.is-active { color: #000; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__link::after,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__link::after,
+    .site-nav:has(.site-nav__group:hover) .site-nav__link::after,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__link::after { background: #000; }
     .site-nav__group { position: relative; display: flex; }
     .site-nav__group .site-nav__link svg { transition: transform 160ms ease; }
     .site-nav__group:hover .site-nav__link svg, .site-nav__group:focus-within .site-nav__link svg { transform: rotate(180deg); }
     .site-nav__submenu { position: absolute; top: calc(100% + 10px); left: 50%; width: 340px; padding: 1.15rem; color: #000; background: #fff; border: 1px solid rgba(0, 0, 0, .15); border-radius: 18px; box-shadow: 0 22px 50px rgba(0, 0, 0, .25); opacity: 0; visibility: hidden; transform: translate(-50%, 8px); transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease; }
     .site-nav__group:hover .site-nav__submenu, .site-nav__group:focus-within .site-nav__submenu { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
-    .site-nav__submenu p { padding: .25rem .7rem .8rem; border-bottom: 1px solid #d8d8d8; color: #666; font-size: .72rem; font-weight: 650; text-transform: uppercase; }
+    .site-nav__submenu p { padding: .25rem .7rem .8rem; border-bottom: 1px solid #d8d8d8; color: #666; font-size: .72rem; font-weight: 500; text-transform: uppercase; }
     .site-nav__submenu a { display: grid; gap: .15rem; padding: 1rem .7rem; color: #000; text-decoration: none; border-bottom: 1px solid #e6e6e6; }
     .site-nav__submenu a:last-child { border-bottom: 0; }
     .site-nav__submenu a:hover, .site-nav__submenu a:focus-visible { background: #f1f1f1; border-radius: 8px; }
-    .site-nav__submenu span { font-family: Arial, Helvetica, sans-serif; font-size: 1rem; font-weight: 650; text-transform: uppercase; }
+    .site-nav__submenu span { font-family: Arial, Helvetica, sans-serif; font-size: 1rem; font-weight: 500; text-transform: uppercase; }
     .site-nav__submenu small { color: #5b5b5b; font-size: .8rem; }
     .site-nav__actions { position: relative; z-index: 3; justify-self: end; display: flex; align-items: center; gap: .4rem; padding-left: .8rem; }
-    .site-nav__actions::before { content: ""; position: absolute; top: 8px; bottom: 8px; left: 0; width: 1px; background: #d6d6d6; }
-    .site-nav__portal, .site-nav__chat, .site-nav__toggle { width: 40px; height: 40px; display: grid; place-items: center; color: #000; background: #f0f0f0; border: 0; border-radius: 50%; text-decoration: none; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
-    .site-nav__chat { position: relative; color: #fff; background: #000; }
-    .site-nav__portal:hover, .site-nav__portal:focus-visible, .site-nav__chat:hover, .site-nav__chat:focus-visible { transform: translateY(-2px); }
-    .site-nav__portal:hover, .site-nav__portal:focus-visible { color: #fff; background: #000; }
-    .site-nav__chat:hover, .site-nav__chat:focus-visible { color: #000; background: #e5e5e5; }
+    .site-nav__actions::before { content: ""; position: absolute; top: 8px; bottom: 8px; left: 0; width: 1px; background: rgba(255, 255, 255, .24); }
+    .site-nav__theme, .site-nav__portal, .site-nav__chat, .site-nav__toggle { width: 40px; height: 40px; display: grid; place-items: center; color: #fff; background: rgba(255, 255, 255, .1); border: 0; border-radius: 50%; text-decoration: none; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .site-nav__theme { position: relative; overflow: hidden; }
+    .site-nav__theme svg { grid-area: 1 / 1; transition: opacity 160ms ease, transform 180ms ease; }
+    .site-nav__theme-moon { opacity: 0; transform: scale(.72) rotate(-45deg); }
+    .site-nav__chat { position: relative; color: #fff; background: rgba(255, 255, 255, .1); }
+    .site-nav__theme:hover, .site-nav__theme:focus-visible, .site-nav__portal:hover, .site-nav__portal:focus-visible, .site-nav__chat:hover, .site-nav__chat:focus-visible { transform: translateY(-2px); }
+    .site-nav__theme:hover, .site-nav__theme:focus-visible, .site-nav__portal:hover, .site-nav__portal:focus-visible, .site-nav__chat:hover, .site-nav__chat:focus-visible { color: #000; background: #fff; }
     .site-nav__chat-status { position: absolute; top: 3px; right: 3px; width: 10px; height: 10px; background: #fff; border: 2px solid #000; border-radius: 50%; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__actions::before,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__actions::before,
+    .site-nav:has(.site-nav__group:hover) .site-nav__actions::before,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__actions::before { background: #d6d6d6; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__theme,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__theme,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__portal,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__portal,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__toggle,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__toggle,
+    .site-nav:has(.site-nav__group:hover) .site-nav__theme,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__theme,
+    .site-nav:has(.site-nav__group:hover) .site-nav__portal,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__portal,
+    .site-nav:has(.site-nav__group:hover) .site-nav__toggle,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__toggle { color: #000; background: #f0f0f0; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__chat,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__chat,
+    .site-nav:has(.site-nav__group:hover) .site-nav__chat,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__chat { color: #fff; background: #000; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__theme:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__theme:focus-visible,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__portal:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__portal:focus-visible,
+    .site-nav:has(.site-nav__group:hover) .site-nav__theme:hover,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__theme:focus-visible,
+    .site-nav:has(.site-nav__group:hover) .site-nav__portal:hover,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__portal:focus-visible { color: #fff; background: #000; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__chat:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__chat:focus-visible,
+    .site-nav:has(.site-nav__group:hover) .site-nav__chat:hover,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__chat:focus-visible { color: #000; background: #e5e5e5; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__chat-status,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__chat-status,
+    .site-nav:has(.site-nav__group:hover) .site-nav__chat-status,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__chat-status { background: #fff; border-color: #000; }
     .site-nav__toggle { display: none; color: #fff; background: #000; }
     .site-nav__close-icon { display: none; }
     .mobile-navigation { display: none; }
+
+    .site-header.nav-theme-dark .site-nav,
+    .site-header.nav-theme-dark.is-scrolled .site-nav,
+    .site-header.nav-theme-dark.menu-is-open .site-nav {
+        background: rgba(0, 0, 0, .96) !important;
+        border-color: rgba(255, 255, 255, .18) !important;
+        box-shadow: 0 14px 38px rgba(0, 0, 0, .34) !important;
+    }
+    .site-header.nav-theme-dark .site-nav__brand-logo--negative {
+        opacity: 0 !important;
+        filter: none !important;
+    }
+    .site-header.nav-theme-dark .site-nav__brand-logo--positive {
+        opacity: 1 !important;
+    }
+    .site-header.nav-theme-dark .site-nav__brand-logo {
+        transform: none !important;
+    }
+    .site-header.nav-theme-dark .site-nav__link {
+        color: rgba(255, 255, 255, .72) !important;
+    }
+    .site-header.nav-theme-dark .site-nav__link:hover,
+    .site-header.nav-theme-dark .site-nav__link:focus-visible,
+    .site-header.nav-theme-dark .site-nav__link.is-active {
+        color: #fff !important;
+    }
+    .site-header.nav-theme-dark .site-nav__link::after {
+        background: #fff !important;
+    }
+    .site-header.nav-theme-dark .site-nav__actions::before {
+        background: rgba(255, 255, 255, .24) !important;
+    }
+    .site-header.nav-theme-dark .site-nav__theme,
+    .site-header.nav-theme-dark .site-nav__portal,
+    .site-header.nav-theme-dark .site-nav__toggle {
+        color: #fff !important;
+        background: rgba(255, 255, 255, .1) !important;
+    }
+    .site-header.nav-theme-dark .site-nav__chat {
+        color: #fff !important;
+        background: rgba(255, 255, 255, .1) !important;
+    }
+    .site-header.nav-theme-dark .site-nav__chat-status {
+        background: #fff !important;
+        border-color: #000 !important;
+    }
+
+    .site-header.nav-theme-light .site-nav { background: rgba(255, 255, 255, .96); border-color: rgba(0, 0, 0, .08); box-shadow: 0 18px 48px rgba(0, 0, 0, .26); }
+    .site-header.nav-theme-light .site-nav__brand-logo--negative { opacity: 1; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .08)); }
+    .site-header.nav-theme-light .site-nav__brand-logo--positive { opacity: 0; }
+    .site-header.nav-theme-light .site-nav__link { color: #5d5d5d; }
+    .site-header.nav-theme-light .site-nav__link:hover,
+    .site-header.nav-theme-light .site-nav__link:focus-visible,
+    .site-header.nav-theme-light .site-nav__link.is-active { color: #000; }
+    .site-header.nav-theme-light .site-nav__link::after { background: #000; }
+    .site-header.nav-theme-light .site-nav__actions::before { background: #d6d6d6; }
+    .site-header.nav-theme-light .site-nav__theme,
+    .site-header.nav-theme-light .site-nav__portal,
+    .site-header.nav-theme-light .site-nav__toggle { color: #000; background: #f0f0f0; }
+    .site-header.nav-theme-light .site-nav__chat { color: #fff; background: #000; }
+    .site-header.nav-theme-light .site-nav__theme-sun { opacity: 0; transform: scale(.72) rotate(45deg); }
+    .site-header.nav-theme-light .site-nav__theme-moon { opacity: 1; transform: scale(1) rotate(0); }
+    .site-header.nav-theme-light .site-nav__chat-status { background: #fff; border-color: #000; }
+
+    .site-header.nav-theme-dark .site-nav__theme-sun { opacity: 1; transform: scale(1) rotate(0); }
+    .site-header.nav-theme-dark .site-nav__theme-moon { opacity: 0; transform: scale(.72) rotate(-45deg); }
     :global(body.mobile-menu-open) { overflow: hidden; }
     :global(body.portal-modal-open) { overflow: hidden; }
-    :global(body.screen-shake) { animation: screen-shake 420ms cubic-bezier(.36, .07, .19, .97) both; transform-origin: center center; }
     .portal-access-modal { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 1rem; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 180ms ease, visibility 180ms ease; }
     .portal-access-modal.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
     .portal-access-modal__backdrop { position: absolute; inset: 0; background: radial-gradient(circle at 50% 24%, rgba(255, 255, 255, .12), transparent 34%), rgba(0, 0, 0, .78); border: 0; backdrop-filter: blur(18px); cursor: pointer; }
@@ -312,23 +459,12 @@ const siteName = settings.site_name || "LaesePROD";
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    @keyframes screen-shake {
-        0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-        10% { transform: translate3d(-8px, 4px, 0) rotate(-.35deg); }
-        20% { transform: translate3d(7px, -5px, 0) rotate(.32deg); }
-        30% { transform: translate3d(-6px, -3px, 0) rotate(-.24deg); }
-        40% { transform: translate3d(6px, 4px, 0) rotate(.22deg); }
-        55% { transform: translate3d(-4px, 3px, 0) rotate(-.16deg); }
-        70% { transform: translate3d(3px, -2px, 0) rotate(.12deg); }
-        85% { transform: translate3d(-2px, 1px, 0) rotate(-.08deg); }
-    }
-
     @media (max-width: 1080px) {
         .site-header { padding: 10px 10px 0; }
         .site-nav { width: min(540px, calc(100vw - 20px)); height: 66px; grid-template-columns: 1fr auto; padding: 0 10px 0 18px; }
-        .site-nav__brand img { width: auto; height: 54px; }
+        .site-nav__brand-logo { width: auto; height: 42px; }
         .site-nav__desktop, .site-nav__portal, .site-nav__chat, .site-nav__actions::before { display: none; }
-        .site-nav__actions { display: block; padding: 0; }
+        .site-nav__actions { display: flex; padding: 0; }
         .site-nav__toggle { display: grid; }
         .site-header.menu-is-open .site-nav__menu-icon { display: none; }
         .site-header.menu-is-open .site-nav__close-icon { display: block; }
@@ -346,13 +482,13 @@ const siteName = settings.site_name || "LaesePROD";
         .site-header.menu-is-open .mobile-navigation__services a:nth-of-type(1) .nav-reveal > span { animation-delay: 320ms; }
         .site-header.menu-is-open .mobile-navigation__services a:nth-of-type(2) .nav-reveal > span { animation-delay: 380ms; }
         .mobile-navigation__primary a.is-active, .mobile-navigation__primary a:hover { color: #000; }
-        .mobile-navigation__primary small { font-size: .62rem; font-weight: 700; }
-        .mobile-navigation__primary span { font-family: Arial, Helvetica, sans-serif; font-size: clamp(1rem, 4vw, 1.2rem); font-weight: 650; line-height: 1; text-transform: uppercase; }
+        .mobile-navigation__primary small { font-size: .62rem; font-weight: 500; }
+        .mobile-navigation__primary span { font-family: Arial, Helvetica, sans-serif; font-size: clamp(1rem, 4vw, 1.2rem); font-weight: 500; line-height: 1; text-transform: uppercase; }
         .mobile-navigation__services { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1rem; }
-        .mobile-navigation__services p { grid-column: 1 / -1; color: #747474; font-size: .64rem; font-weight: 650; text-transform: uppercase; }
-        .mobile-navigation__services a { min-height: 42px; display: grid; place-items: center; color: #000; border: 1px solid #000; border-radius: 999px; text-decoration: none; font-size: .8rem; font-weight: 650; text-transform: uppercase; }
+        .mobile-navigation__services p { grid-column: 1 / -1; color: #747474; font-size: .64rem; font-weight: 500; text-transform: uppercase; }
+        .mobile-navigation__services a { min-height: 42px; display: grid; place-items: center; color: #000; border: 1px solid #000; border-radius: 999px; text-decoration: none; font-size: .8rem; font-weight: 500; text-transform: uppercase; }
         .mobile-navigation__actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1rem; padding-top: 0; }
-        .mobile-navigation__actions a, .mobile-navigation__actions button { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: .5rem; color: #fff; background: #000; border: 1px solid #000; border-radius: 999px; text-decoration: none; font: inherit; font-size: .74rem; font-weight: 650; cursor: pointer; }
+        .mobile-navigation__actions a, .mobile-navigation__actions button { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: .5rem; color: #fff; background: #000; border: 1px solid #000; border-radius: 999px; text-decoration: none; font: inherit; font-size: .74rem; font-weight: 500; cursor: pointer; }
         .mobile-navigation__actions button.js-open-chat { color: #000; background: #fff; }
     }
 
@@ -361,7 +497,6 @@ const siteName = settings.site_name || "LaesePROD";
         .site-nav__brand img,
         .nav-reveal > span,
         .site-nav__actions > *,
-        :global(body.screen-shake),
         .site-header.menu-is-open .mobile-navigation .nav-reveal > span {
             animation: none;
         }
