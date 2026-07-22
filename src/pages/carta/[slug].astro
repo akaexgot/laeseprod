@@ -3,6 +3,7 @@
  * Página pública de Carta de Servicios
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { toYouTubeEmbed } from "../../lib/display";
 import { getServiceSupabase } from "../../lib/supabase";
 
 const sb = getServiceSupabase()!;
@@ -25,25 +26,13 @@ if (carta.tipo === 'imagenes' || carta.tipo === 'pdf') {
     }));
 }
 
-const hasVideo = !!carta.video_url;
-const isVertical = hasVideo && carta.video_url.includes('/shorts/');
-let videoEmbedUrl = '';
-
-if (hasVideo) {
-    if (carta.video_url.includes('youtube.com/watch?v=')) {
-        videoEmbedUrl = carta.video_url.replace('watch?v=', 'embed/');
-    } else if (carta.video_url.includes('youtu.be/')) {
-        videoEmbedUrl = carta.video_url.replace('youtu.be/', 'youtube-nocookie.com/embed/');
-    } else if (carta.video_url.includes('/shorts/')) {
-        videoEmbedUrl = carta.video_url.replace('/shorts/', '/embed/');
-    } else {
-        videoEmbedUrl = carta.video_url; // fallback
-    }
-    
-    // Preparar URL con parámetros - evitar doble "?"
-    const separator = videoEmbedUrl.includes('?') ? '&' : '?';
-    videoEmbedUrl = `${videoEmbedUrl}${separator}autoplay=0&loop=1&playsinline=1&rel=0`;
-}
+const videoUrl = typeof carta.video_url === 'string' ? carta.video_url.trim() : '';
+const hasVideo = !!videoUrl;
+const isVertical = hasVideo && /youtube(?:-nocookie)?\.com\/shorts\//i.test(videoUrl);
+const youtubeEmbedUrl = toYouTubeEmbed(videoUrl);
+const videoEmbedUrl = youtubeEmbedUrl
+    ? `${youtubeEmbedUrl}&playsinline=1&modestbranding=1`
+    : videoUrl;
 
 const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.tipo === 'manual';
 ---
@@ -83,9 +72,10 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
                             <iframe title="Reproductor multimedia" 
                                 src={videoEmbedUrl}
                                 style="width: 100% !important; height: 100% !important; border: 0;"
-                                allow="autoplay; fullscreen; picture-in-picture"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                                 allowfullscreen
                                 loading="lazy"
+                                referrerpolicy="strict-origin-when-cross-origin"
                             ></iframe>
                         </div>
                     </div>

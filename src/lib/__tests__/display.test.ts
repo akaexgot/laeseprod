@@ -51,6 +51,14 @@ describe('getVideoId / toYouTubeEmbed', () => {
     expect(toYouTubeEmbed(url)).toBe('https://www.youtube-nocookie.com/embed/ZYXWVUTSRQP?rel=0');
   });
 
+  it('extracts mobile youtube ids with shared params', () => {
+    expect(getVideoId('https://m.youtube.com/watch?si=sharecode123&v=AbCdEfGhIj1')).toBe('AbCdEfGhIj1');
+  });
+
+  it('extracts live youtube urls', () => {
+    expect(getVideoId('https://www.youtube.com/live/AbCdEfGhIj1?si=sharecode123')).toBe('AbCdEfGhIj1');
+  });
+
   it('returns null for invalid urls', () => {
     expect(getVideoId('not a url')).toBe(null);
     expect(toYouTubeEmbed('')).toBe(null);
