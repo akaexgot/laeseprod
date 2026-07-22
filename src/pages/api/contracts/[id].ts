@@ -4,6 +4,28 @@ import { generateContractPDF, getInvoiceClientFieldKeys, replacePlaceholders } f
 import { sendContractCompletedOwnerEmail, sendContractFinalizedEmail } from '../../../lib/resend';
 import { sendOwnerNotification } from '../../../lib/notifications';
 
+export const GET: APIRoute = async ({ params }) => {
+    const { id } = params;
+    const supabase = getServiceSupabase();
+    if (!supabase) return new Response(JSON.stringify({ error: 'Supabase no configurado' }), { status: 500 });
+    if (!id) return new Response(JSON.stringify({ error: 'ID de contrato requerido' }), { status: 400 });
+
+    const { data, error } = await supabase
+        .from('contracts')
+        .select('id, status, payment_status, pdf_url, invoice_url, invoice_number, paid_at, updated_at')
+        .eq('id', id)
+        .single();
+
+    if (error || !data) {
+        return new Response(JSON.stringify({ error: 'Contrato no encontrado' }), { status: 404 });
+    }
+
+    return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+    });
+};
+
 /**
  * PUT - Update contract with client data and signature
  */

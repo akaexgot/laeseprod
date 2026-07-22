@@ -215,8 +215,8 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
 
                                         <div id="payment-success-msg" style="display:none;" class="w-full">
                                             <div class="final-success">
-                                                <h2 class="success-title">Pago pendiente de confirmacion</h2>
-                                                <p class="final-desc">Stripe ha registrado la operacion. Si has pagado con transferencia, el contrato y la factura se enviaran cuando Stripe confirme que el dinero se ha recibido.</p>
+                                                <h2 class="success-title" id="payment-status-title">Confirmando pago</h2>
+                                                <p class="final-desc" id="payment-status-copy">Stripe ha registrado la operacion. Si has pagado con tarjeta, la confirmacion suele tardar unos segundos; si has pagado por transferencia, se completara cuando Stripe confirme el ingreso.</p>
                                                 
                                                 <div class="success-icon">
                                                     <svg class="w-20 h-20 text-amber-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>
@@ -224,7 +224,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
 
                                                 <div class="success-actions">
                                                     <a href="/" class="btn-primary success-home-link">Volver al sitio web</a>
-                                                    <div class="success-downloads">
+                                                    <div class="success-downloads" id="payment-downloads">
                                                         {contract.pdf_url && (
                                                             <a href={contract.pdf_url} target="_blank" class="btn-secondary download-button">
                                                                 Descargar Contrato (PDF)
@@ -637,6 +637,50 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
             }
         });
 
+        const renderPaidState = (data = contract) => {
+            const title = $('payment-status-title');
+            const copy = $('payment-status-copy');
+            const icon = document.querySelector('#payment-success-msg .success-icon svg');
+            const downloads = $('payment-downloads');
+
+            if (title) title.textContent = 'Pago confirmado';
+            if (copy) copy.textContent = 'Gracias. El pago se ha confirmado correctamente. Hemos generado el contrato y la factura, y se enviaran por email.';
+            if (icon) {
+                icon.classList.remove('text-amber-500');
+                icon.classList.add('text-emerald-500');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>';
+            }
+
+            if (downloads && !downloads.dataset.hydrated) {
+                const links = [];
+                if (data?.pdf_url) links.push(`<a href="${data.pdf_url}" target="_blank" class="btn-secondary download-button">Descargar Contrato (PDF)</a>`);
+                if (data?.invoice_url) links.push(`<a href="${data.invoice_url}" target="_blank" class="btn-secondary download-button">Descargar Factura</a>`);
+                if (links.length) {
+                    downloads.innerHTML = links.join('');
+                    downloads.dataset.hydrated = 'true';
+                }
+            }
+        };
+
+        const pollPaymentStatus = async () => {
+            const maxAttempts = 18;
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                try {
+                    const response = await fetch(`/api/contracts/${id}`, { headers: { 'Accept': 'application/json' } });
+                    if (response.ok) {
+                        const latest = await response.json();
+                        if (latest.status === 'completed' || latest.status === 'paid' || latest.payment_status === 'paid') {
+                            renderPaidState(latest);
+                            showToast('Pago confirmado. Documentos generados.', 'success');
+                            return;
+                        }
+                    }
+                } catch {}
+
+                await new Promise((resolve) => setTimeout(resolve, attempt < 4 ? 2500 : 5000));
+            }
+        };
+
         // Initialize state
         if (urlParams.get('status') === 'processing' || (contract.is_billable && urlParams.get('status') === 'success')) {
             setStep(3, { scroll: false });
@@ -644,7 +688,12 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
             const successMsg = $('payment-success-msg');
             if (checkoutBox) checkoutBox.style.display = 'none';
             if (successMsg) successMsg.style.display = 'block';
-            showToast('Pago registrado. Esperando confirmacion de Stripe.', 'success');
+            if (contract.status === 'completed' || contract.status === 'paid' || contract.payment_status === 'paid') {
+                renderPaidState(contract);
+            } else {
+                pollPaymentStatus();
+            }
+            showToast('Pago registrado. Confirmando con Stripe.', 'success');
         } else if (urlParams.get('status') === 'success') {
             setStep(3, { scroll: false });
             showToast('Contrato firmado correctamente.', 'success');
