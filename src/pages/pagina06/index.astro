@@ -1,0 +1,217 @@
+---
+import ConceptLayout from "../../layouts/ConceptLayout.astro";
+import Navbar from "../../components/ui/Navbar.astro";
+---
+
+<ConceptLayout
+    concept={6}
+    title="Concepto 06 — Brand Cut"
+    description="Propuesta cinematográfica centrada en la identidad visual de LaesePROD."
+>
+    <Navbar />
+
+    <section class="brand-hero" aria-labelledby="brand-title">
+        <div class="brand-hero__frame" aria-hidden="true">
+            <span class="corner corner--tl"></span>
+            <span class="corner corner--tr"></span>
+            <span class="corner corner--bl"></span>
+            <span class="corner corner--br"></span>
+        </div>
+
+        <div class="brand-hero__meta brand-hero__meta--left" aria-hidden="true">
+            <span class="rec-dot"></span>
+            <span>REC 00:00:01:24</span>
+        </div>
+        <div class="brand-hero__meta brand-hero__meta--right" aria-hidden="true">
+            <span>4K RAW</span>
+            <span>25 FPS</span>
+        </div>
+
+        <div class="brand-hero__content">
+            <h1 id="brand-title">
+                <img src="/logopositivo.png" alt="LaesePROD — Vídeo y visual art" width="1992" height="669" />
+            </h1>
+        </div>
+    </section>
+</ConceptLayout>
+
+<style>
+    .brand-hero {
+        position: relative;
+        min-height: 100svh;
+        overflow: hidden;
+        color: #fff;
+        background: #000;
+        font-family: Arial, Helvetica, sans-serif;
+        isolation: isolate;
+    }
+
+    .brand-hero__frame {
+        position: absolute;
+        z-index: 2;
+        inset: 102px clamp(22px, 3vw, 46px) clamp(22px, 3vw, 46px);
+        pointer-events: none;
+    }
+
+    .corner {
+        position: absolute;
+        width: 34px;
+        height: 34px;
+        border-color: rgba(255, 255, 255, .52);
+        border-style: solid;
+    }
+
+    .corner--tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
+    .corner--tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+    .corner--bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+    .corner--br { right: 0; bottom: 0; border-width: 0 1px 1px 0; }
+
+    .brand-hero__meta {
+        position: absolute;
+        z-index: 4;
+        top: 126px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: rgba(255, 255, 255, .68);
+        font-family: "Courier New", monospace;
+        font-size: 9px;
+        letter-spacing: .13em;
+    }
+
+    .brand-hero__meta--left { left: clamp(34px, 4vw, 68px); }
+    .brand-hero__meta--right { right: clamp(34px, 4vw, 68px); }
+
+    .rec-dot {
+        width: 7px;
+        height: 7px;
+        background: #ff3b1f;
+        border-radius: 50%;
+        box-shadow: 0 0 14px #ff3b1f;
+        animation: rec-pulse 1.5s ease infinite;
+    }
+
+    .brand-hero__content {
+        position: relative;
+        z-index: 3;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 120px clamp(28px, 6vw, 100px) 80px;
+        text-align: center;
+        perspective: 1400px;
+    }
+
+    .brand-hero h1 {
+        width: min(72vw, 1040px);
+        margin: 0;
+        filter: drop-shadow(0 24px 46px rgba(0, 0, 0, .28));
+        transform-style: preserve-3d;
+        animation: brand-logo-in 1200ms cubic-bezier(.16, 1, .3, 1) 120ms both;
+        transition: transform 500ms cubic-bezier(.16, 1, .3, 1), filter 300ms ease;
+    }
+
+    .brand-hero h1:hover {
+        filter: drop-shadow(0 34px 60px rgba(0, 0, 0, .42));
+        transform: rotateX(3deg) rotateY(-4deg) translateZ(24px) scale(1.015);
+    }
+
+    .brand-hero h1 img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+
+    @keyframes brand-logo-in {
+        from {
+            opacity: 0;
+            filter: blur(10px);
+            transform: translate3d(0, 60px, -160px) rotateX(18deg) scale(.88);
+        }
+        to {
+            opacity: 1;
+            filter: blur(0);
+            transform: translate3d(0, 0, 0) rotateX(0) scale(1);
+        }
+    }
+
+    @keyframes rec-pulse {
+        50% { opacity: .35; }
+    }
+
+    @media (max-width: 680px) {
+        .brand-hero__frame {
+            inset: 82px 12px 64px;
+        }
+
+        .brand-hero__meta {
+            top: 98px;
+        }
+
+        .brand-hero__meta--left {
+            left: 26px;
+        }
+
+        .brand-hero__meta--right {
+            display: none;
+        }
+
+        .brand-hero__content {
+            padding: 120px 20px 82px;
+        }
+
+        .brand-hero h1 {
+            width: min(92vw, 520px);
+        }
+    }
+</style>
+
+<style is:global>
+    .concept-page--06 .site-nav__brand {
+        display: none !important;
+    }
+
+    @media (min-width: 1081px) {
+        .concept-page--06 .site-nav {
+            width: 620px;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            padding: 0 10px 0 18px;
+        }
+
+        .concept-page--06 .site-nav__desktop {
+            position: static;
+            top: auto;
+            bottom: auto;
+            left: auto;
+            flex: 0 0 auto;
+            transform: none;
+        }
+
+        .concept-page--06 .site-nav__actions {
+            flex: 0 0 auto;
+            justify-self: auto;
+        }
+    }
+
+    @media (max-width: 1080px) {
+        .concept-page--06 .site-header {
+            justify-content: flex-end;
+        }
+
+        .concept-page--06 .site-nav {
+            width: 126px;
+            grid-template-columns: 1fr;
+            padding: 0 10px;
+        }
+
+        .concept-page--06 .site-nav__actions {
+            grid-column: 1;
+            justify-self: end;
+        }
+    }
+</style>

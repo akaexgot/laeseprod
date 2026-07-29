@@ -1,0 +1,149 @@
+---
+interface Props {
+    current: number;
+    tone?: "dark" | "light";
+}
+
+const { current, tone = "dark" } = Astro.props;
+const concepts = [1, 3, 6, 7, 8, 9];
+---
+
+<aside class:list={["concept-switcher", `concept-switcher--${tone}`]} aria-label="Cambiar de propuesta visual">
+    <a class="concept-switcher__home" href="/" aria-label="Volver al Home">Home</a>
+    <span class="concept-switcher__label">Conceptos</span>
+    <nav aria-label="Propuestas de hero">
+        {concepts.map((number) => (
+            <a
+                class:list={{ "is-active": number === current }}
+                href={`/pagina${String(number).padStart(2, "0")}`}
+                aria-current={number === current ? "page" : undefined}
+                aria-label={`Ver propuesta ${number}`}
+            >
+                {String(number).padStart(2, "0")}
+            </a>
+        ))}
+    </nav>
+</aside>
+
+<style>
+    .concept-switcher {
+        --switcher-bg: rgba(10, 10, 10, .78);
+        --switcher-fg: #fff;
+        --switcher-line: rgba(255, 255, 255, .19);
+        --switcher-muted: rgba(255, 255, 255, .58);
+        position: fixed;
+        z-index: 100;
+        right: max(18px, env(safe-area-inset-right));
+        bottom: max(18px, env(safe-area-inset-bottom));
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 48px;
+        padding: 6px;
+        color: var(--switcher-fg);
+        background: var(--switcher-bg);
+        border: 1px solid var(--switcher-line);
+        border-radius: 999px;
+        box-shadow: 0 16px 42px rgba(0, 0, 0, .2);
+        backdrop-filter: blur(20px) saturate(1.2);
+        -webkit-backdrop-filter: blur(20px) saturate(1.2);
+        font-family: Arial, Helvetica, sans-serif;
+        animation: switcher-in 700ms cubic-bezier(.16, 1, .3, 1) 900ms both;
+    }
+
+    .concept-switcher--light {
+        --switcher-bg: rgba(249, 246, 238, .82);
+        --switcher-fg: #171713;
+        --switcher-line: rgba(20, 20, 16, .16);
+        --switcher-muted: rgba(20, 20, 16, .55);
+    }
+
+    .concept-switcher__home,
+    .concept-switcher nav a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 36px;
+        color: inherit;
+        border-radius: 999px;
+        text-decoration: none;
+        transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+    }
+
+    .concept-switcher__home {
+        padding: 0 12px;
+        border-right: 1px solid var(--switcher-line);
+        border-radius: 999px 0 0 999px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+    }
+
+    .concept-switcher__label {
+        color: var(--switcher-muted);
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .14em;
+    }
+
+    .concept-switcher nav {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .concept-switcher nav a {
+        width: 36px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .06em;
+    }
+
+    .concept-switcher nav a:hover,
+    .concept-switcher nav a:focus-visible {
+        background: var(--switcher-line);
+        transform: translateY(-1px);
+    }
+
+    .concept-switcher nav a.is-active {
+        color: var(--switcher-bg);
+        background: var(--switcher-fg);
+    }
+
+    @keyframes switcher-in {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 680px) {
+        .concept-switcher {
+            right: 50%;
+            bottom: max(10px, env(safe-area-inset-bottom));
+            max-width: calc(100vw - 20px);
+            min-height: 44px;
+            transform: translateX(50%);
+            animation-name: switcher-in-mobile;
+        }
+
+        .concept-switcher__label {
+            display: none;
+        }
+
+        .concept-switcher__home {
+            height: 32px;
+            padding: 0 9px;
+        }
+
+        .concept-switcher nav a {
+            width: 32px;
+            height: 32px;
+        }
+
+        @keyframes switcher-in-mobile {
+            from { opacity: 0; transform: translate(50%, 18px); }
+            to { opacity: 1; transform: translate(50%, 0); }
+        }
+    }
+</style>

@@ -1,0 +1,1186 @@
+---
+import ConceptLayout from "../../layouts/ConceptLayout.astro";
+import Navbar from "../../components/ui/Navbar.astro";
+import VideoBackground from "../../components/ui/VideoBackground.astro";
+import { getSettings } from "../../lib/data";
+
+const settings = await getSettings();
+const fallbackVideo = "https://www.youtube.com/watch?v=D91q99QK11k";
+const desktopVideo = settings.hero_video_desktop || fallbackVideo;
+const mobileVideo = settings.hero_video_mobile || desktopVideo;
+---
+
+<ConceptLayout
+    concept={7}
+    title="Concepto 07 — Assembly"
+    description="Una introducción cinematográfica en la que la cámara se construye antes de revelar el hero de LaesePROD."
+>
+    <Navbar />
+
+    <section class="assembly-hero" aria-labelledby="assembly-title">
+        <VideoBackground
+            desktop={desktopVideo}
+            mobile={mobileVideo}
+            title="Showreel de LaesePROD"
+            overlay="none"
+        />
+        <div class="assembly-hero__grade" aria-hidden="true"></div>
+        <div class="assembly-hero__grain" aria-hidden="true"></div>
+
+        <a class="assembly-brand" href="/" aria-label="LaesePROD, inicio">
+            <img
+                src="/logopositivo.png"
+                alt="LaesePROD — Vídeo y visual art"
+                width="1992"
+                height="669"
+            />
+        </a>
+
+        <div class="assembly-hero__index" aria-hidden="true">
+            <span>VII</span>
+            <i></i>
+            <span>SEVILLA · ESP</span>
+        </div>
+
+        <div class="assembly-hero__content">
+            <p class="assembly-hero__eyebrow">Productora audiovisual · Films & visual art</p>
+            <h1 id="assembly-title">
+                Construimos imágenes<br />
+                <em>que permanecen.</em>
+            </h1>
+            <div class="assembly-hero__footer">
+                <p>Cine, música y emociones reales contadas con una mirada propia.</p>
+                <a href="/proyectos">
+                    <span>Explorar proyectos</span>
+                    <span aria-hidden="true">↗</span>
+                </a>
+            </div>
+        </div>
+
+        <p class="assembly-hero__scroll" aria-hidden="true">
+            <span></span>
+            Scroll to discover
+        </p>
+    </section>
+
+    <div
+        class="camera-intro"
+        data-camera-intro
+    >
+        <button class="camera-intro__skip" type="button" data-skip-intro>
+            Saltar intro
+            <span aria-hidden="true">↗</span>
+        </button>
+
+        <div class="camera-intro__guides" aria-hidden="true">
+            <span class="camera-intro__guide camera-intro__guide--h"></span>
+            <span class="camera-intro__guide camera-intro__guide--v"></span>
+        </div>
+
+        <div class="camera-intro__stage" aria-hidden="true">
+            <div class="camera">
+                <span class="camera__shadow"></span>
+
+                <div class="camera__body camera__piece">
+                    <span class="camera__body-line"></span>
+                    <span class="camera__body-mark">LAESE</span>
+                    <span class="camera__sensor-mark">FULL FRAME · 4K</span>
+                </div>
+
+                <div class="camera__grip camera__piece">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+
+                <div class="camera__top camera__piece"></div>
+                <div class="camera__viewfinder camera__piece">
+                    <span></span>
+                </div>
+                <div class="camera__hot-shoe camera__piece">
+                    <i></i><i></i><i></i>
+                </div>
+
+                <div class="camera__dial camera__dial--left camera__piece">
+                    <span></span>
+                </div>
+                <div class="camera__dial camera__dial--right camera__piece">
+                    <span></span>
+                </div>
+                <div class="camera__shutter-button camera__piece"></div>
+                <div class="camera__indicator camera__piece"></div>
+
+                <div class="camera__lens-mount camera__piece"></div>
+                <div class="camera__lens-system">
+                    <div class="camera__lens-barrel camera__piece">
+                        <span class="camera__lens-copy camera__lens-copy--top">LAESE · CINE OPTICS</span>
+                        <span class="camera__lens-copy camera__lens-copy--bottom">35 MM · T1.8</span>
+                    </div>
+                    <div class="camera__lens-ring camera__piece"></div>
+                    <div class="camera__lens-glass camera__piece">
+                        <span class="camera__lens-reflection"></span>
+                        <div class="camera__iris">
+                            <i></i><i></i><i></i><i></i><i></i><i></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="camera-intro__meta" aria-hidden="true">
+            <div>
+                <span>LAESE PRODUCTION SYSTEM</span>
+                <span>ASSEMBLY SEQUENCE · 07</span>
+            </div>
+            <div class="camera-intro__progress"><span></span></div>
+        </div>
+
+        <div class="camera-intro__shutter" aria-hidden="true"></div>
+    </div>
+</ConceptLayout>
+
+<script>
+    const intro = document.querySelector<HTMLElement>("[data-camera-intro]");
+    const skipButton = document.querySelector<HTMLButtonElement>("[data-skip-intro]");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const timers: number[] = [];
+
+    const revealHero = (skip = false) => {
+        document.body.classList.add("concept-seven-ready");
+        intro?.classList.toggle("is-skipped", skip);
+    };
+
+    const completeIntro = () => {
+        intro?.classList.add("is-complete");
+    };
+
+    const cancelSequence = () => {
+        timers.forEach((timer) => window.clearTimeout(timer));
+        revealHero(true);
+        completeIntro();
+    };
+
+    if (reducedMotion.matches) {
+        cancelSequence();
+    } else {
+        timers.push(window.setTimeout(() => revealHero(), 3260));
+        timers.push(window.setTimeout(completeIntro, 4150));
+    }
+
+    skipButton?.addEventListener("click", cancelSequence);
+    reducedMotion.addEventListener("change", (event) => {
+        if (event.matches) cancelSequence();
+    });
+</script>
+
+<style>
+    .assembly-hero {
+        position: relative;
+        min-height: 100svh;
+        overflow: hidden;
+        color: #fff;
+        background: #020202;
+        font-family: Arial, Helvetica, sans-serif;
+        isolation: isolate;
+    }
+
+    .assembly-hero :global(.video-background) {
+        z-index: -3;
+        filter: grayscale(1) contrast(1.08) brightness(.76);
+        transform: scale(1.02);
+        transform-origin: center;
+        animation: backdrop-drift 18s ease-out both;
+    }
+
+    .assembly-hero :global(.video-background__youtube) {
+        display: none;
+    }
+
+    .assembly-hero__grade {
+        position: absolute;
+        z-index: -2;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba(0, 0, 0, .92) 0%, rgba(0, 0, 0, .54) 48%, rgba(0, 0, 0, .18) 78%),
+            linear-gradient(180deg, rgba(0, 0, 0, .34), transparent 42%, rgba(0, 0, 0, .56));
+    }
+
+    .assembly-hero__grain {
+        position: absolute;
+        z-index: -1;
+        inset: -30%;
+        opacity: .055;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+        animation: grain-shift .18s steps(2) infinite;
+        pointer-events: none;
+    }
+
+    .assembly-brand {
+        position: absolute;
+        z-index: 5;
+        top: 31px;
+        left: clamp(24px, 3.5vw, 64px);
+        width: clamp(150px, 14vw, 225px);
+        opacity: 0;
+        transform: translateY(-12px);
+        transition: opacity 800ms ease, transform 900ms cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .assembly-brand img {
+        width: 100%;
+        height: auto;
+    }
+
+    .assembly-hero__index {
+        position: absolute;
+        z-index: 3;
+        top: 50%;
+        right: clamp(24px, 3.6vw, 64px);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        color: rgba(255, 255, 255, .54);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+        letter-spacing: .16em;
+        opacity: 0;
+        transform: rotate(90deg) translateX(20px);
+        transform-origin: right center;
+        transition: opacity 900ms 220ms ease, transform 1000ms 220ms cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .assembly-hero__index i {
+        width: 46px;
+        height: 1px;
+        background: rgba(255, 255, 255, .4);
+    }
+
+    .assembly-hero__content {
+        position: relative;
+        z-index: 3;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 160px clamp(28px, 7vw, 128px) clamp(86px, 10vh, 122px);
+        opacity: 0;
+        transform: translateY(38px);
+        transition: opacity 1000ms 100ms ease, transform 1200ms 100ms cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .assembly-hero__eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 20px;
+        color: rgba(255, 255, 255, .7);
+        font-size: clamp(9px, .68vw, 12px);
+        font-weight: 700;
+        letter-spacing: .17em;
+        line-height: 1.4;
+        text-transform: uppercase;
+    }
+
+    .assembly-hero__eyebrow::before {
+        content: "";
+        width: 34px;
+        height: 1px;
+        background: currentColor;
+    }
+
+    .assembly-hero h1 {
+        max-width: 1120px;
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: clamp(3.3rem, 7.6vw, 9rem);
+        font-weight: 850;
+        letter-spacing: -.072em;
+        line-height: .79;
+        text-wrap: balance;
+    }
+
+    .assembly-hero h1 em {
+        display: inline-block;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(255, 255, 255, .78);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+        letter-spacing: -.055em;
+    }
+
+    .assembly-hero__footer {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 28px;
+        width: min(100%, 830px);
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, .24);
+    }
+
+    .assembly-hero__footer p {
+        max-width: 390px;
+        margin: 0;
+        color: rgba(255, 255, 255, .66);
+        font-size: clamp(12px, .9vw, 15px);
+        line-height: 1.55;
+    }
+
+    .assembly-hero__footer a {
+        display: inline-flex;
+        align-items: center;
+        gap: 20px;
+        padding-bottom: 4px;
+        color: #fff;
+        border-bottom: 1px solid rgba(255, 255, 255, .56);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .13em;
+        text-decoration: none;
+        text-transform: uppercase;
+        transition: gap 220ms ease, border-color 220ms ease;
+    }
+
+    .assembly-hero__footer a:hover,
+    .assembly-hero__footer a:focus-visible {
+        gap: 27px;
+        border-color: #fff;
+    }
+
+    .assembly-hero__scroll {
+        position: absolute;
+        z-index: 3;
+        right: clamp(24px, 3.6vw, 64px);
+        bottom: clamp(84px, 8vh, 110px);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        color: rgba(255, 255, 255, .48);
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: .15em;
+        text-transform: uppercase;
+        opacity: 0;
+        transition: opacity 700ms 500ms ease;
+    }
+
+    .assembly-hero__scroll span {
+        position: relative;
+        width: 44px;
+        height: 1px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, .2);
+    }
+
+    .assembly-hero__scroll span::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: #fff;
+        animation: scroll-line 2s ease-in-out infinite;
+    }
+
+    .camera-intro {
+        position: fixed;
+        z-index: 120;
+        inset: 0;
+        overflow: hidden;
+        color: #fff;
+        background:
+            radial-gradient(circle at 50% 48%, rgba(255, 255, 255, .045), transparent 35%),
+            #030303;
+        font-family: Arial, Helvetica, sans-serif;
+        isolation: isolate;
+        transition: opacity 250ms ease, visibility 250ms ease;
+        animation: intro-clear 1ms linear 3290ms forwards;
+    }
+
+    .camera-intro.is-complete,
+    .camera-intro.is-skipped {
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .camera-intro__skip {
+        position: absolute;
+        z-index: 8;
+        top: max(26px, env(safe-area-inset-top));
+        right: max(30px, env(safe-area-inset-right));
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        padding: 8px 0;
+        color: rgba(255, 255, 255, .58);
+        background: none;
+        border: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, .24);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: color 180ms ease, border-color 180ms ease;
+    }
+
+    .camera-intro__skip:hover,
+    .camera-intro__skip:focus-visible {
+        color: #fff;
+        border-color: #fff;
+    }
+
+    .camera-intro__guides {
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        opacity: .16;
+    }
+
+    .camera-intro__guide {
+        position: absolute;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .52), transparent);
+        transform: scaleX(0);
+        animation: guide-in 900ms cubic-bezier(.16, 1, .3, 1) 100ms forwards;
+    }
+
+    .camera-intro__guide--h {
+        top: 50%;
+        left: 8%;
+        width: 84%;
+        height: 1px;
+    }
+
+    .camera-intro__guide--v {
+        top: 8%;
+        left: 50%;
+        width: 1px;
+        height: 84%;
+        background: linear-gradient(180deg, transparent, rgba(255, 255, 255, .52), transparent);
+        transform: scaleY(0);
+        animation-name: guide-in-v;
+    }
+
+    .camera-intro__stage {
+        position: absolute;
+        z-index: 2;
+        top: 50%;
+        left: 50%;
+        width: min(650px, 72vw);
+        aspect-ratio: 1.52;
+        transform: translate(-50%, -50%);
+        perspective: 1200px;
+        animation: stage-focus 1000ms cubic-bezier(.76, 0, .24, 1) 2280ms both;
+    }
+
+    .camera {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+    }
+
+    .camera__piece {
+        position: absolute;
+        opacity: 0;
+        will-change: transform, opacity;
+    }
+
+    .camera__shadow {
+        position: absolute;
+        right: 13%;
+        bottom: 7%;
+        left: 11%;
+        height: 15%;
+        background: rgba(0, 0, 0, .9);
+        border-radius: 50%;
+        filter: blur(24px);
+        opacity: 0;
+        animation: shadow-in 800ms ease 1500ms forwards;
+    }
+
+    .camera__body {
+        top: 29%;
+        left: 9%;
+        width: 78%;
+        height: 51%;
+        overflow: hidden;
+        background:
+            linear-gradient(155deg, rgba(255, 255, 255, .16), transparent 18%),
+            linear-gradient(180deg, #202020, #090909 66%, #121212);
+        border: 1px solid rgba(255, 255, 255, .18);
+        border-radius: 13% 9% 10% 10% / 18% 14% 18% 17%;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .14),
+            inset 0 -18px 30px rgba(0, 0, 0, .42),
+            0 24px 50px rgba(0, 0, 0, .42);
+        animation: piece-from-left 720ms cubic-bezier(.16, 1, .3, 1) 180ms forwards;
+    }
+
+    .camera__body::after {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        border: 1px solid rgba(255, 255, 255, .055);
+        border-radius: inherit;
+    }
+
+    .camera__body-line {
+        position: absolute;
+        right: 0;
+        bottom: 18%;
+        left: 0;
+        height: 1px;
+        background: rgba(255, 255, 255, .08);
+    }
+
+    .camera__body-mark,
+    .camera__sensor-mark {
+        position: absolute;
+        z-index: 1;
+        color: rgba(255, 255, 255, .8);
+        font-weight: 800;
+        letter-spacing: .18em;
+    }
+
+    .camera__body-mark {
+        top: 17%;
+        left: 11%;
+        font-size: clamp(8px, 1vw, 13px);
+    }
+
+    .camera__sensor-mark {
+        right: 7%;
+        bottom: 9%;
+        color: rgba(255, 255, 255, .35);
+        font-family: "Courier New", monospace;
+        font-size: clamp(4px, .48vw, 7px);
+        font-weight: 400;
+        letter-spacing: .12em;
+    }
+
+    .camera__grip {
+        top: 32%;
+        right: 4%;
+        width: 24%;
+        height: 54%;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 70% 44%, rgba(255, 255, 255, .07) 0 1px, transparent 1.4px) 0 0 / 6px 6px,
+            linear-gradient(145deg, #242424, #080808 62%);
+        border: 1px solid rgba(255, 255, 255, .14);
+        border-radius: 18% 22% 28% 17% / 14% 18% 28% 14%;
+        box-shadow: inset 12px 0 24px rgba(255, 255, 255, .035), 10px 20px 30px rgba(0, 0, 0, .4);
+        animation: piece-from-right 680ms cubic-bezier(.16, 1, .3, 1) 390ms forwards;
+    }
+
+    .camera__grip span {
+        position: absolute;
+        right: 12%;
+        width: 38%;
+        height: 1px;
+        background: rgba(255, 255, 255, .09);
+        transform: rotate(-8deg);
+    }
+
+    .camera__grip span:nth-child(1) { top: 26%; }
+    .camera__grip span:nth-child(2) { top: 36%; }
+    .camera__grip span:nth-child(3) { top: 46%; }
+    .camera__grip span:nth-child(4) { top: 56%; }
+    .camera__grip span:nth-child(5) { top: 66%; }
+
+    .camera__top {
+        top: 21%;
+        left: 14%;
+        width: 64%;
+        height: 17%;
+        background: linear-gradient(180deg, #252525, #0b0b0b);
+        border: 1px solid rgba(255, 255, 255, .17);
+        border-radius: 14px 12px 2px 2px;
+        clip-path: polygon(2% 42%, 8% 7%, 66% 0, 96% 34%, 100% 100%, 0 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14);
+        animation: piece-from-top 620ms cubic-bezier(.16, 1, .3, 1) 580ms forwards;
+    }
+
+    .camera__viewfinder {
+        z-index: 2;
+        top: 10%;
+        left: 39%;
+        width: 25%;
+        height: 24%;
+        background: linear-gradient(150deg, #292929, #090909 72%);
+        border: 1px solid rgba(255, 255, 255, .18);
+        clip-path: polygon(19% 30%, 33% 0, 73% 0, 89% 31%, 100% 100%, 0 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+        animation: piece-from-top 650ms cubic-bezier(.16, 1, .3, 1) 760ms forwards;
+    }
+
+    .camera__viewfinder span {
+        position: absolute;
+        top: 46%;
+        left: 50%;
+        width: 31%;
+        height: 28%;
+        background: #030303;
+        border: 1px solid rgba(255, 255, 255, .18);
+        border-radius: 3px;
+        transform: translateX(-50%);
+        box-shadow: inset 0 0 8px rgba(255, 255, 255, .08);
+    }
+
+    .camera__hot-shoe {
+        z-index: 3;
+        top: 6.5%;
+        left: 45%;
+        width: 13%;
+        height: 5%;
+        display: flex;
+        justify-content: space-evenly;
+        padding: 0 6%;
+        background: linear-gradient(180deg, #777, #191919 60%);
+        border: 1px solid rgba(255, 255, 255, .25);
+        border-radius: 3px 3px 0 0;
+        animation: piece-from-top 520ms cubic-bezier(.16, 1, .3, 1) 940ms forwards;
+    }
+
+    .camera__hot-shoe i {
+        width: 1px;
+        background: rgba(255, 255, 255, .4);
+    }
+
+    .camera__dial {
+        z-index: 4;
+        top: 20%;
+        width: 12%;
+        aspect-ratio: 2.4;
+        overflow: hidden;
+        background: repeating-linear-gradient(90deg, #171717 0 3px, #4b4b4b 3px 4px);
+        border: 1px solid rgba(255, 255, 255, .22);
+        border-radius: 50%;
+    }
+
+    .camera__dial span {
+        position: absolute;
+        inset: 26% 8%;
+        background: #111;
+        border-radius: 50%;
+    }
+
+    .camera__dial--left {
+        left: 18%;
+        animation: dial-from-left 650ms cubic-bezier(.16, 1, .3, 1) 810ms forwards;
+    }
+
+    .camera__dial--right {
+        right: 17%;
+        animation: dial-from-right 650ms cubic-bezier(.16, 1, .3, 1) 690ms forwards;
+    }
+
+    .camera__shutter-button {
+        z-index: 5;
+        top: 22%;
+        right: 8.5%;
+        width: 6%;
+        aspect-ratio: 2.2;
+        background: linear-gradient(180deg, #d8d8d8, #505050 48%, #151515);
+        border: 1px solid rgba(255, 255, 255, .28);
+        border-radius: 50%;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, .5);
+        animation: piece-from-right 520ms cubic-bezier(.16, 1, .3, 1) 1030ms forwards;
+    }
+
+    .camera__indicator {
+        z-index: 5;
+        top: 42%;
+        right: 19%;
+        width: 1.1%;
+        aspect-ratio: 1;
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 9px rgba(255, 255, 255, .72);
+        animation: indicator-in 280ms ease 1670ms forwards;
+    }
+
+    .camera__lens-mount {
+        z-index: 5;
+        top: 33%;
+        left: 27.5%;
+        width: 46%;
+        aspect-ratio: 1;
+        background:
+            conic-gradient(from 20deg, #8d8d8d, #1c1c1c 13%, #707070 24%, #161616 45%, #a8a8a8 61%, #222 78%, #8d8d8d),
+            #222;
+        border: 1px solid rgba(255, 255, 255, .28);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px #0a0a0a, 0 16px 34px rgba(0, 0, 0, .48);
+        animation: mount-from-bottom 700ms cubic-bezier(.16, 1, .3, 1) 910ms forwards;
+    }
+
+    .camera__lens-system {
+        position: absolute;
+        z-index: 7;
+        top: 35.5%;
+        left: 30%;
+        width: 41%;
+        aspect-ratio: 1;
+        animation: lens-focus 800ms cubic-bezier(.65, 0, .35, 1) 2150ms both;
+    }
+
+    .camera__lens-barrel {
+        inset: 0;
+        background:
+            repeating-conic-gradient(from 2deg, rgba(255, 255, 255, .15) 0deg 1deg, transparent 1deg 4deg),
+            radial-gradient(circle, #0a0a0a 58%, #282828 59%, #0b0b0b 77%);
+        border: 1px solid rgba(255, 255, 255, .22);
+        border-radius: 50%;
+        box-shadow:
+            inset 0 0 0 8px #080808,
+            inset 0 0 0 10px rgba(255, 255, 255, .12),
+            0 20px 44px rgba(0, 0, 0, .56);
+        animation: barrel-from-right 720ms cubic-bezier(.16, 1, .3, 1) 1120ms forwards;
+    }
+
+    .camera__lens-copy {
+        position: absolute;
+        left: 50%;
+        color: rgba(255, 255, 255, .56);
+        font-family: "Courier New", monospace;
+        font-size: clamp(4px, .55vw, 8px);
+        letter-spacing: .14em;
+        white-space: nowrap;
+        transform: translateX(-50%);
+    }
+
+    .camera__lens-copy--top { top: 7.5%; }
+    .camera__lens-copy--bottom { bottom: 7.5%; transform: translateX(-50%) rotate(180deg); }
+
+    .camera__lens-ring {
+        z-index: 2;
+        inset: 9%;
+        background: linear-gradient(145deg, #393939, #090909 56%, #252525);
+        border: 1px solid rgba(255, 255, 255, .19);
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 8px #090909;
+        animation: ring-from-left 700ms cubic-bezier(.16, 1, .3, 1) 1310ms forwards;
+    }
+
+    .camera__lens-glass {
+        z-index: 3;
+        inset: 18%;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 38% 34%, rgba(255, 255, 255, .24), transparent 7%),
+            radial-gradient(circle at 54% 58%, #060606 0 24%, #111 25% 42%, #050505 63%, #171717 78%, #020202);
+        border: 1px solid rgba(255, 255, 255, .23);
+        border-radius: 50%;
+        box-shadow:
+            inset 0 0 24px rgba(255, 255, 255, .08),
+            inset 0 0 0 7px rgba(0, 0, 0, .82),
+            0 0 18px rgba(255, 255, 255, .04);
+        animation: glass-from-bottom 680ms cubic-bezier(.16, 1, .3, 1) 1490ms forwards;
+    }
+
+    .camera__lens-reflection {
+        position: absolute;
+        z-index: 4;
+        top: 19%;
+        left: 22%;
+        width: 30%;
+        height: 13%;
+        background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .16), transparent);
+        border-radius: 50%;
+        filter: blur(2px);
+        transform: rotate(-28deg);
+    }
+
+    .camera__iris {
+        position: absolute;
+        inset: 20%;
+        border-radius: 50%;
+        filter: drop-shadow(0 0 3px #000);
+    }
+
+    .camera__iris i {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(145deg, #111, #010101);
+        clip-path: polygon(50% 50%, 50% 0, 100% 22%, 80% 58%);
+        transform-origin: 50% 50%;
+        animation: iris-breathe 650ms cubic-bezier(.65, 0, .35, 1) 2260ms both;
+    }
+
+    .camera__iris i:nth-child(2) { transform: rotate(60deg); }
+    .camera__iris i:nth-child(3) { transform: rotate(120deg); }
+    .camera__iris i:nth-child(4) { transform: rotate(180deg); }
+    .camera__iris i:nth-child(5) { transform: rotate(240deg); }
+    .camera__iris i:nth-child(6) { transform: rotate(300deg); }
+
+    .camera-intro__meta {
+        position: absolute;
+        z-index: 3;
+        right: clamp(28px, 4vw, 70px);
+        bottom: clamp(26px, 4vh, 52px);
+        left: clamp(28px, 4vw, 70px);
+        display: flex;
+        align-items: flex-end;
+        gap: 22px;
+        color: rgba(255, 255, 255, .44);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        opacity: 0;
+        animation: meta-in 500ms ease 100ms forwards;
+    }
+
+    .camera-intro__meta > div:first-child {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        width: 100%;
+    }
+
+    .camera-intro__progress {
+        position: absolute;
+        right: 0;
+        bottom: -10px;
+        left: 0;
+        height: 1px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, .12);
+    }
+
+    .camera-intro__progress span {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, .72);
+        transform: scaleX(0);
+        transform-origin: left center;
+        animation: assembly-progress 2470ms cubic-bezier(.65, 0, .35, 1) 120ms forwards;
+    }
+
+    .camera-intro__shutter {
+        position: absolute;
+        z-index: 6;
+        inset: 0;
+        background:
+            repeating-conic-gradient(from 15deg at 50% 50%, rgba(255, 255, 255, .018) 0deg 28deg, transparent 28deg 60deg),
+            radial-gradient(circle at 50% 50%, #020202 0, #040404 55%, #000 100%);
+        clip-path: circle(0 at 50% 50%);
+        pointer-events: none;
+        animation: shutter-transition 1260ms cubic-bezier(.72, 0, .28, 1) 2640ms both;
+    }
+
+    @keyframes piece-from-left {
+        0% { opacity: 0; transform: translate3d(-62vw, 6vh, -120px) rotate(-7deg); }
+        72% { opacity: 1; transform: translate3d(9px, 0, 0) rotate(.6deg); }
+        100% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
+    }
+
+    @keyframes piece-from-right {
+        0% { opacity: 0; transform: translate3d(58vw, -4vh, -100px) rotate(8deg); }
+        72% { opacity: 1; transform: translate3d(-7px, 0, 0) rotate(-.5deg); }
+        100% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
+    }
+
+    @keyframes piece-from-top {
+        0% { opacity: 0; transform: translate3d(0, -52vh, -100px) rotate(-4deg); }
+        72% { opacity: 1; transform: translate3d(0, 7px, 0); }
+        100% { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+
+    @keyframes dial-from-left {
+        from { opacity: 0; transform: translate3d(-38vw, -16vh, -80px) rotate(-220deg); }
+        to { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
+    }
+
+    @keyframes dial-from-right {
+        from { opacity: 0; transform: translate3d(38vw, -18vh, -80px) rotate(220deg); }
+        to { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
+    }
+
+    @keyframes mount-from-bottom {
+        from { opacity: 0; transform: translate3d(0, 55vh, -180px) rotate(-90deg) scale(.7); }
+        to { opacity: 1; transform: translate3d(0, 0, 0) rotate(0) scale(1); }
+    }
+
+    @keyframes barrel-from-right {
+        from { opacity: 0; transform: translate3d(46vw, 20vh, 100px) rotate(100deg) scale(.72); }
+        to { opacity: 1; transform: translate3d(0, 0, 0) rotate(0) scale(1); }
+    }
+
+    @keyframes ring-from-left {
+        from { opacity: 0; transform: translate3d(-42vw, 25vh, 140px) rotate(-140deg) scale(.65); }
+        to { opacity: 1; transform: translate3d(0, 0, 0) rotate(0) scale(1); }
+    }
+
+    @keyframes glass-from-bottom {
+        from { opacity: 0; transform: translate3d(0, 48vh, 180px) scale(.45); filter: blur(8px); }
+        to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+    }
+
+    @keyframes indicator-in {
+        from { opacity: 0; transform: scale(0); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes shadow-in {
+        from { opacity: 0; transform: scale(.6); }
+        to { opacity: .8; transform: scale(1); }
+    }
+
+    @keyframes guide-in {
+        to { transform: scaleX(1); }
+    }
+
+    @keyframes guide-in-v {
+        to { transform: scaleY(1); }
+    }
+
+    @keyframes meta-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes assembly-progress {
+        0% { transform: scaleX(0); }
+        72% { transform: scaleX(.82); }
+        100% { transform: scaleX(1); }
+    }
+
+    @keyframes stage-focus {
+        0%, 18% { transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+        42% { transform: translate(-50%, -50%) scale(1.035); filter: blur(1.3px); }
+        62% { transform: translate(-50%, -50%) scale(1.075); filter: blur(0); }
+        100% { transform: translate(-50%, -50%) scale(1.22); filter: blur(0); }
+    }
+
+    @keyframes lens-focus {
+        0%, 18% { transform: scale(1); }
+        40% { transform: scale(1.08); }
+        56% { transform: scale(1.025); }
+        72%, 100% { transform: scale(1.12); }
+    }
+
+    @keyframes iris-breathe {
+        0%, 18% { scale: 1; }
+        46% { scale: 1.22; }
+        68%, 100% { scale: .88; }
+    }
+
+    @keyframes shutter-transition {
+        0%, 4% { clip-path: circle(0 at 50% 50%); }
+        35%, 59% { clip-path: circle(150vmax at 50% 50%); }
+        100% { clip-path: circle(0 at 50% 50%); }
+    }
+
+    @keyframes intro-clear {
+        to { background: transparent; }
+    }
+
+    @keyframes grain-shift {
+        0% { transform: translate3d(0, 0, 0); }
+        25% { transform: translate3d(2%, -3%, 0); }
+        50% { transform: translate3d(-3%, 2%, 0); }
+        75% { transform: translate3d(3%, 3%, 0); }
+        100% { transform: translate3d(-2%, -2%, 0); }
+    }
+
+    @keyframes scroll-line {
+        0% { transform: translateX(-100%); }
+        45%, 55% { transform: translateX(0); }
+        100% { transform: translateX(100%); }
+    }
+
+    @keyframes backdrop-drift {
+        from { transform: scale(1.02); }
+        to { transform: scale(1.08); }
+    }
+
+    @media (max-width: 760px) {
+        .assembly-hero__grade {
+            background:
+                linear-gradient(180deg, rgba(0, 0, 0, .32), rgba(0, 0, 0, .12) 35%, rgba(0, 0, 0, .9) 82%),
+                linear-gradient(90deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .1));
+        }
+
+        .assembly-brand {
+            top: 24px;
+            left: 22px;
+            width: 142px;
+        }
+
+        .assembly-hero__content {
+            padding: 130px 22px 116px;
+        }
+
+        .assembly-hero h1 {
+            font-size: clamp(3.2rem, 16.5vw, 5.9rem);
+            line-height: .82;
+        }
+
+        .assembly-hero__footer {
+            display: grid;
+            gap: 20px;
+            margin-top: 28px;
+        }
+
+        .assembly-hero__footer p {
+            max-width: 300px;
+            font-size: 12px;
+        }
+
+        .assembly-hero__footer a {
+            width: max-content;
+        }
+
+        .assembly-hero__index,
+        .assembly-hero__scroll {
+            display: none;
+        }
+
+        .camera-intro__skip {
+            top: max(20px, env(safe-area-inset-top));
+            right: 20px;
+            font-size: 8px;
+        }
+
+        .camera-intro__stage {
+            width: min(590px, 96vw);
+        }
+
+        .camera-intro__meta {
+            right: 20px;
+            bottom: max(24px, env(safe-area-inset-bottom));
+            left: 20px;
+        }
+
+        .camera-intro__meta > div:first-child span:first-child {
+            display: none;
+        }
+
+        .camera-intro__meta > div:first-child {
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 430px) {
+        .camera-intro__stage {
+            top: 47%;
+            width: 108vw;
+        }
+
+        .camera__body-mark {
+            left: 9%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .assembly-hero__grain,
+        .assembly-hero__scroll span::after,
+        .camera-intro,
+        .camera-intro *,
+        .camera-intro *::before,
+        .camera-intro *::after {
+            animation: none !important;
+        }
+
+        .camera-intro {
+            display: none;
+        }
+    }
+</style>
+
+<style is:global>
+    .concept-page--07 .site-nav__brand {
+        display: none !important;
+    }
+
+    .concept-page--07 .site-header,
+    .concept-page--07 .concept-switcher {
+        opacity: 0;
+        transform: translateY(-12px);
+        transition:
+            opacity 800ms 180ms ease,
+            transform 900ms 180ms cubic-bezier(.16, 1, .3, 1);
+        animation: none !important;
+    }
+
+    .concept-page--07 .concept-switcher {
+        transform: translateY(12px);
+    }
+
+    .concept-page--07.concept-seven-ready .site-header,
+    .concept-page--07.concept-seven-ready .concept-switcher,
+    .concept-page--07.concept-seven-ready .assembly-brand,
+    .concept-page--07.concept-seven-ready .assembly-hero__index,
+    .concept-page--07.concept-seven-ready .assembly-hero__content,
+    .concept-page--07.concept-seven-ready .assembly-hero__scroll {
+        opacity: 1;
+        transform: none;
+    }
+
+    @media (min-width: 1081px) {
+        .concept-page--07 .site-nav {
+            width: 620px;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            padding: 0 10px 0 18px;
+        }
+
+        .concept-page--07 .site-nav__desktop {
+            position: static;
+            top: auto;
+            bottom: auto;
+            left: auto;
+            flex: 0 0 auto;
+            transform: none;
+        }
+
+        .concept-page--07 .site-nav__actions {
+            flex: 0 0 auto;
+            justify-self: auto;
+        }
+    }
+
+    @media (max-width: 1080px) {
+        .concept-page--07 .site-header {
+            justify-content: flex-end;
+        }
+
+        .concept-page--07 .site-nav {
+            width: 126px;
+            grid-template-columns: 1fr;
+            padding: 0 10px;
+        }
+
+        .concept-page--07 .site-nav__actions {
+            grid-column: 1;
+            justify-self: end;
+        }
+    }
+
+    @media (max-width: 680px) {
+        .concept-page--07 .concept-switcher {
+            transform: translate(50%, 12px);
+        }
+
+        .concept-page--07.concept-seven-ready .concept-switcher {
+            transform: translateX(50%);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .concept-page--07 .site-header,
+        .concept-page--07 .concept-switcher,
+        .concept-page--07 .assembly-brand,
+        .concept-page--07 .assembly-hero__index,
+        .concept-page--07 .assembly-hero__content,
+        .concept-page--07 .assembly-hero__scroll {
+            opacity: 1;
+            transform: none;
+            transition: none !important;
+        }
+    }
+</style>

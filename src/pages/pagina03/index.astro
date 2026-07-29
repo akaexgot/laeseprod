@@ -1,0 +1,784 @@
+---
+import { ArrowUpRight, Crosshair, Play } from "@lucide/astro";
+import ConceptLayout from "../../layouts/ConceptLayout.astro";
+import Navbar from "../../components/ui/Navbar.astro";
+import VideoBackground from "../../components/ui/VideoBackground.astro";
+import { getSettings } from "../../lib/data";
+
+const settings = await getSettings();
+const fallbackVideo = "https://www.youtube.com/watch?v=D91q99QK11k";
+const desktopVideo = settings.hero_video_desktop || fallbackVideo;
+const mobileVideo = settings.hero_video_mobile || desktopVideo;
+---
+
+<ConceptLayout
+    concept={3}
+    title="Concepto 03 — Futureframe"
+    description="Propuesta tecnológica e inmersiva para el hero de LaesePROD."
+>
+    <Navbar />
+
+    <section class="future-hero" aria-labelledby="future-title" data-future-hero>
+        <a class="future-brand" href="/" aria-label="LaesePROD, inicio">
+            <img src="/logopositivo.png" alt="LaesePROD — Vídeo y visual art" width="1992" height="669" />
+        </a>
+
+        <div class="future-grid" aria-hidden="true"></div>
+        <div class="future-glow" aria-hidden="true"></div>
+
+        <div class="future-hero__ghost" aria-hidden="true">
+            <span>Vision</span>
+            <span>in motion</span>
+        </div>
+
+        <div class="future-lens" data-future-lens>
+            <div class="future-lens__knurl" aria-hidden="true"></div>
+            <div class="future-lens__barrel" aria-hidden="true">
+                <span class="future-lens__brand">LAESE · CINE OPTICS</span>
+                <span class="future-lens__serial">NO. 0326 — SVQ</span>
+                <span class="future-lens__index"></span>
+                <div class="future-lens__aperture">
+                    <span>2.8</span><i></i><span>4</span><i></i><span>5.6</span><i></i><span>8</span><i></i><span>11</span><i></i><span>16</span>
+                </div>
+            </div>
+
+            <div class="future-lens__glass">
+                <VideoBackground desktop={desktopVideo} mobile={mobileVideo} title="Showreel de LaesePROD" overlay="none" />
+                <div class="future-lens__iris" aria-hidden="true"></div>
+                <div class="future-lens__shade" aria-hidden="true"></div>
+                <div class="future-lens__reflection" aria-hidden="true"></div>
+                <div class="future-lens__scan" aria-hidden="true"></div>
+                <div class="future-lens__focus" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                </div>
+                <div class="future-lens__crosshair" aria-hidden="true">
+                    <Crosshair size={38} stroke-width={.55} />
+                </div>
+            </div>
+
+            <a class="future-lens__play" href="/proyectos" aria-label="Ver showreel">
+                <Play size={17} fill="currentColor" stroke-width={1} />
+            </a>
+
+            <div class="future-lens__tag future-lens__tag--one" aria-hidden="true">35 MM / T2.8</div>
+            <div class="future-lens__tag future-lens__tag--two" aria-hidden="true">FOCUS · 0.8 M</div>
+        </div>
+
+        <div class="future-copy">
+            <p class="future-copy__kicker"><span></span> Film studio · Creative direction</p>
+            <h1 id="future-title">Emoción<br />en alta <em>definición.</em></h1>
+            <p class="future-copy__text">Convertimos ideas, canciones y momentos irrepetibles en universos visuales con identidad propia.</p>
+            <div class="future-copy__actions">
+                <a href="/proyectos">Explorar proyectos <ArrowUpRight size={17} stroke-width={2} /></a>
+                <a href="/contacto">Iniciar un proyecto</a>
+            </div>
+        </div>
+
+        <div class="future-data future-data--left" aria-hidden="true">
+            <span>37.3891° N</span><span>5.9845° W</span><strong>SVQ / ES</strong>
+        </div>
+        <div class="future-data future-data--right" aria-hidden="true">
+            <span>RES 4K</span><span>FPS 25</span><strong>EST. 2026</strong>
+        </div>
+
+        <div class="future-ticker" aria-hidden="true">
+            <div>
+                <span>BODAS</span><i></i><span>MUSIC FILMS</span><i></i><span>STORYTELLING</span><i></i><span>VISUAL ART</span><i></i>
+                <span>BODAS</span><i></i><span>MUSIC FILMS</span><i></i><span>STORYTELLING</span><i></i><span>VISUAL ART</span><i></i>
+            </div>
+        </div>
+    </section>
+</ConceptLayout>
+
+<script>
+    const futureHero = document.querySelector<HTMLElement>('[data-future-hero]');
+    const canTrack = window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (futureHero && canTrack) {
+        futureHero.addEventListener('pointermove', (event) => {
+            const x = (event.clientX / window.innerWidth - .5) * 2;
+            const y = (event.clientY / window.innerHeight - .5) * 2;
+            futureHero.style.setProperty('--pointer-x', x.toFixed(3));
+            futureHero.style.setProperty('--pointer-y', y.toFixed(3));
+        });
+    }
+</script>
+
+<style is:global>
+    .future-hero {
+        --white: #fff;
+        --soft-white: #ececec;
+        --pointer-x: 0;
+        --pointer-y: 0;
+        position: relative;
+        min-height: 100svh;
+        overflow: hidden;
+        color: var(--white);
+        background: #050505;
+        font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+        isolation: isolate;
+    }
+
+    .future-grid,
+    .future-glow {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .future-brand {
+        position: absolute;
+        z-index: 9;
+        top: 18px;
+        left: clamp(24px, 3.2vw, 52px);
+        width: clamp(128px, 10vw, 158px);
+        color: #fff;
+        text-decoration: none;
+        animation: future-rise 800ms cubic-bezier(.16, 1, .3, 1) 120ms both;
+        transition: transform 400ms cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .future-brand:hover {
+        transform: translateY(-2px) scale(1.025);
+    }
+
+    .future-brand img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+    .future-grid {
+        z-index: -1;
+        opacity: .48;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, .065) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, .065) 1px, transparent 1px);
+        background-size: clamp(42px, 5vw, 80px) clamp(42px, 5vw, 80px);
+        mask-image: linear-gradient(180deg, #000, transparent 90%);
+    }
+
+    .future-glow {
+        z-index: -1;
+        background:
+            radial-gradient(circle at calc(67% + var(--pointer-x) * 3%) calc(48% + var(--pointer-y) * 3%), rgba(255, 255, 255, .1), transparent 28%),
+            radial-gradient(circle at 17% 34%, rgba(255, 255, 255, .035), transparent 24%);
+    }
+
+    .future-hero__ghost {
+        position: absolute;
+        z-index: 0;
+        inset: 16% -2% auto;
+        display: grid;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(255, 255, 255, .09);
+        font-size: clamp(7rem, 17vw, 20rem);
+        font-weight: 800;
+        line-height: .64;
+        text-transform: uppercase;
+        letter-spacing: -.075em;
+        pointer-events: none;
+        animation: future-ghost 1500ms cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    .future-hero__ghost span:last-child {
+        justify-self: end;
+    }
+
+    .future-lens {
+        position: absolute;
+        z-index: 3;
+        top: 50%;
+        left: 68%;
+        width: clamp(410px, 43vw, 700px);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background:
+            radial-gradient(circle, transparent 0 57%, rgba(255, 255, 255, .08) 57.2% 57.8%, #0b0b0b 58% 67%, #353535 67.2% 67.7%, #080808 68% 75%, #202020 75.2% 76%, #080808 76.2%);
+        box-shadow:
+            0 42px 90px rgba(0, 0, 0, .62),
+            0 0 0 1px rgba(255, 255, 255, .14),
+            inset 0 0 55px rgba(255, 255, 255, .055);
+        transform: translate(-50%, -50%) perspective(1100px) rotateX(calc(var(--pointer-y) * -2.2deg)) rotateY(calc(var(--pointer-x) * 2.2deg));
+        transition: transform 160ms ease-out;
+        animation: future-lens-in 1300ms cubic-bezier(.16, 1, .3, 1) 120ms both;
+    }
+
+    .future-lens__knurl {
+        position: absolute;
+        z-index: -1;
+        inset: -1px;
+        border-radius: 50%;
+        background: repeating-conic-gradient(from 0deg, #444 0deg .45deg, #090909 .55deg 1.3deg);
+        mask-image: radial-gradient(circle, transparent 0 74%, #000 74.3%);
+        animation: lens-knurl 60s linear infinite;
+    }
+
+    .future-lens__barrel {
+        position: absolute;
+        inset: 5.5%;
+        border: 1px solid rgba(255, 255, 255, .22);
+        border-radius: 50%;
+        box-shadow:
+            inset 0 0 0 8px #080808,
+            inset 0 0 0 9px rgba(255, 255, 255, .08);
+        pointer-events: none;
+    }
+
+    .future-lens__brand,
+    .future-lens__serial {
+        position: absolute;
+        left: 50%;
+        width: max-content;
+        color: rgba(255, 255, 255, .67);
+        font-family: "Courier New", monospace;
+        font-size: clamp(6px, .53vw, 8px);
+        font-weight: 700;
+        letter-spacing: .22em;
+        transform: translateX(-50%);
+    }
+
+    .future-lens__brand {
+        top: 2.8%;
+    }
+
+    .future-lens__serial {
+        bottom: 2.8%;
+        color: rgba(255, 255, 255, .38);
+    }
+
+    .future-lens__index {
+        position: absolute;
+        top: 8.5%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-right: 5px solid transparent;
+        border-bottom: 8px solid #fff;
+        border-left: 5px solid transparent;
+        filter: drop-shadow(0 0 6px rgba(255, 255, 255, .5));
+        transform: translateX(-50%);
+    }
+
+    .future-lens__aperture {
+        position: absolute;
+        top: 50%;
+        right: 1.5%;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: rgba(255, 255, 255, .45);
+        font-family: "Courier New", monospace;
+        font-size: 6px;
+        transform: translateY(-50%) rotate(90deg) translateY(-50%);
+        transform-origin: right center;
+    }
+
+    .future-lens__aperture i {
+        width: 1px;
+        height: 5px;
+        background: rgba(255, 255, 255, .4);
+    }
+
+    .future-lens__glass {
+        position: absolute;
+        z-index: 2;
+        inset: 20%;
+        overflow: hidden;
+        background: #090909;
+        border: 1px solid rgba(255, 255, 255, .28);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 9px #050505,
+            0 0 0 10px rgba(255, 255, 255, .15),
+            0 0 0 19px #101010,
+            0 0 0 20px rgba(255, 255, 255, .09),
+            inset 0 0 60px #000;
+    }
+
+    .future-lens__glass .video-background {
+        filter: grayscale(1) contrast(1.12) brightness(.74);
+        transform: scale(1.06);
+    }
+
+    .future-lens__iris,
+    .future-lens__shade,
+    .future-lens__reflection,
+    .future-lens__scan {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .future-lens__iris {
+        z-index: 2;
+        opacity: .22;
+        background: repeating-conic-gradient(from 12deg, rgba(255, 255, 255, .08) 0deg 36deg, rgba(0, 0, 0, .42) 37deg 45deg);
+        mask-image: radial-gradient(circle, transparent 0 30%, #000 54%);
+        mix-blend-mode: overlay;
+        animation: lens-iris 18s ease-in-out infinite alternate;
+    }
+
+    .future-lens__shade {
+        z-index: 3;
+        background:
+            radial-gradient(circle, transparent 40%, rgba(0, 0, 0, .76) 100%),
+            linear-gradient(135deg, rgba(255, 255, 255, .08), transparent 34%);
+    }
+
+    .future-lens__reflection {
+        z-index: 4;
+        width: 45%;
+        height: 22%;
+        top: 12%;
+        left: 18%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, .23), transparent);
+        border-radius: 50%;
+        filter: blur(8px);
+        transform: rotate(-28deg);
+    }
+
+    .future-lens__scan {
+        z-index: 5;
+        opacity: .17;
+        background: repeating-linear-gradient(180deg, transparent 0 3px, rgba(255, 255, 255, .16) 4px);
+        mix-blend-mode: screen;
+    }
+
+    .future-lens__focus {
+        position: absolute;
+        z-index: 6;
+        top: 50%;
+        left: 50%;
+        width: 36%;
+        aspect-ratio: 1.45;
+        transform: translate(-50%, -50%);
+    }
+
+    .future-lens__focus i {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        border-color: rgba(255, 255, 255, .72);
+        border-style: solid;
+    }
+
+    .future-lens__focus i:nth-child(1) { top: 0; left: 0; border-width: 1px 0 0 1px; }
+    .future-lens__focus i:nth-child(2) { top: 0; right: 0; border-width: 1px 1px 0 0; }
+    .future-lens__focus i:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+    .future-lens__focus i:nth-child(4) { right: 0; bottom: 0; border-width: 0 1px 1px 0; }
+
+    .future-lens__crosshair {
+        position: absolute;
+        z-index: 7;
+        top: 50%;
+        left: 50%;
+        color: rgba(255, 255, 255, .7);
+        transform: translate(-50%, -50%);
+    }
+
+    .future-lens__play {
+        position: absolute;
+        z-index: 8;
+        right: 10%;
+        bottom: 14%;
+        width: 64px;
+        height: 64px;
+        display: grid;
+        place-items: center;
+        color: #050505;
+        background: #fff;
+        border: 1px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 8px rgba(0, 0, 0, .7), 0 0 0 9px rgba(255, 255, 255, .2);
+        text-decoration: none;
+        transition: color 220ms ease, background 220ms ease, box-shadow 240ms ease, transform 240ms ease;
+    }
+
+    .future-lens__play:hover {
+        color: #fff;
+        background: #050505;
+        box-shadow: 0 0 0 8px rgba(0, 0, 0, .7), 0 0 0 9px rgba(255, 255, 255, .7);
+        transform: scale(1.08);
+    }
+
+    .future-lens__tag {
+        position: absolute;
+        z-index: 4;
+        color: rgba(255, 255, 255, .42);
+        font-family: "Courier New", monospace;
+        font-size: 7px;
+        letter-spacing: .15em;
+    }
+
+    .future-lens__tag--one {
+        top: 15.5%;
+        right: 10%;
+    }
+
+    .future-lens__tag--two {
+        bottom: 15%;
+        left: 10%;
+    }
+
+    .future-copy {
+        position: relative;
+        z-index: 5;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        width: 57%;
+        padding: 150px 0 120px clamp(28px, 6vw, 100px);
+        pointer-events: none;
+    }
+
+    .future-copy > * {
+        pointer-events: auto;
+    }
+
+    .future-copy__kicker {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 24px;
+        color: rgba(255, 255, 255, .72);
+        font-family: "Courier New", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .15em;
+        animation: future-rise 800ms cubic-bezier(.16, 1, .3, 1) 300ms both;
+    }
+
+    .future-copy__kicker span {
+        width: 7px;
+        height: 7px;
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 11px rgba(255, 255, 255, .5);
+        animation: future-status 1.7s ease infinite;
+    }
+
+    .future-copy h1 {
+        max-width: 750px;
+        margin: 0;
+        font-size: clamp(4.2rem, 7vw, 8.7rem);
+        font-weight: 800;
+        line-height: .82;
+        text-transform: uppercase;
+        letter-spacing: -.065em;
+        animation: future-title 1100ms cubic-bezier(.16, 1, .3, 1) 160ms both;
+    }
+
+    .future-copy h1 em {
+        color: transparent;
+        -webkit-text-stroke: 1px #fff;
+        font-style: normal;
+    }
+
+    .future-copy__text {
+        max-width: 420px;
+        margin: 30px 0 0;
+        color: rgba(255, 255, 255, .57);
+        font-size: 14px;
+        line-height: 1.5;
+        animation: future-rise 800ms cubic-bezier(.16, 1, .3, 1) 500ms both;
+    }
+
+    .future-copy__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+        animation: future-rise 800ms cubic-bezier(.16, 1, .3, 1) 650ms both;
+    }
+
+    .future-copy__actions a {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        gap: 20px;
+        padding: 0 18px;
+        color: #050505;
+        background: #fff;
+        border: 1px solid #fff;
+        font-size: 9px;
+        font-weight: 800;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        transition: color 180ms ease, background 180ms ease;
+    }
+
+    .future-copy__actions a:hover {
+        color: #fff;
+        background: transparent;
+    }
+
+    .future-copy__actions a + a {
+        color: #fff;
+        background: rgba(255, 255, 255, .03);
+        border-color: rgba(255, 255, 255, .3);
+    }
+
+    .future-copy__actions a + a:hover {
+        color: #050505;
+        background: #fff;
+    }
+
+    .future-data {
+        position: absolute;
+        z-index: 5;
+        bottom: 61px;
+        display: flex;
+        gap: 20px;
+        color: rgba(255, 255, 255, .35);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+        letter-spacing: .1em;
+    }
+
+    .future-data strong {
+        color: #fff;
+        font-weight: 400;
+    }
+
+    .future-data--left {
+        left: clamp(20px, 3.5vw, 56px);
+    }
+
+    .future-data--right {
+        right: clamp(20px, 3.5vw, 56px);
+    }
+
+    .future-ticker {
+        position: absolute;
+        z-index: 6;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 35px;
+        overflow: hidden;
+        color: #050505;
+        background: #fff;
+        border-top: 1px solid rgba(255, 255, 255, .35);
+        font-family: "Courier New", monospace;
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .14em;
+    }
+
+    .future-ticker div {
+        width: max-content;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        animation: future-ticker 22s linear infinite;
+    }
+
+    .future-ticker i {
+        width: 4px;
+        height: 4px;
+        background: currentColor;
+        border-radius: 50%;
+    }
+
+    @keyframes lens-knurl {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes lens-iris {
+        to { transform: rotate(12deg); }
+    }
+
+    @keyframes future-status {
+        50% { opacity: .25; }
+    }
+
+    @keyframes future-ticker {
+        to { transform: translateX(-50%); }
+    }
+
+    @keyframes future-ghost {
+        from { opacity: 0; transform: scale(.86); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes future-lens-in {
+        from { opacity: 0; scale: .68; rotate: -12deg; }
+        to { opacity: 1; scale: 1; rotate: 0deg; }
+    }
+
+    @keyframes future-title {
+        from { opacity: 0; transform: translateX(-45px); clip-path: inset(0 100% 0 0); }
+        to { opacity: 1; transform: translateX(0); clip-path: inset(0); }
+    }
+
+    @keyframes future-rise {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1080px) {
+        .future-lens {
+            left: 72%;
+            width: clamp(390px, 56vw, 590px);
+            opacity: .78;
+        }
+
+        .future-copy {
+            width: 68%;
+        }
+    }
+
+    @media (max-width: 680px) {
+        .future-brand {
+            position: fixed;
+            z-index: 61;
+            top: 24px;
+            left: 16px;
+            width: 112px;
+        }
+
+        .future-hero__ghost {
+            inset: 14% -4% auto;
+            font-size: clamp(6.6rem, 31vw, 10rem);
+            line-height: .69;
+        }
+
+        .future-lens {
+            top: 36%;
+            left: 66%;
+            width: 96vw;
+            max-width: 470px;
+            opacity: .8;
+        }
+
+        .future-lens__glass {
+            inset: 21%;
+        }
+
+        .future-lens__play {
+            width: 53px;
+            height: 53px;
+        }
+
+        .future-copy {
+            z-index: 6;
+            width: 100%;
+            justify-content: flex-end;
+            padding: 300px 20px 110px;
+        }
+
+        .future-copy__kicker {
+            margin-bottom: 13px;
+        }
+
+        .future-copy h1 {
+            max-width: 500px;
+            font-size: clamp(3.65rem, 16.7vw, 6rem);
+        }
+
+        .future-copy__text {
+            max-width: 330px;
+            margin-top: 18px;
+            font-size: 12px;
+        }
+
+        .future-copy__actions {
+            margin-top: 20px;
+        }
+
+        .future-copy__actions a {
+            min-height: 43px;
+            padding: 0 14px;
+        }
+
+        .future-copy__actions a + a {
+            display: none;
+        }
+
+        .future-data {
+            bottom: 48px;
+        }
+
+        .future-data--left {
+            left: 20px;
+        }
+
+        .future-data--right {
+            display: none;
+        }
+
+        .future-ticker {
+            height: 29px;
+            font-size: 8px;
+        }
+    }
+
+    @media (max-height: 720px) and (max-width: 680px) {
+        .future-copy {
+            padding-top: 235px;
+        }
+
+        .future-copy__text {
+            display: none;
+        }
+
+        .future-lens {
+            top: 32%;
+            width: 82vw;
+        }
+    }
+</style>
+
+<style is:global>
+    .concept-page--03 .site-nav__brand {
+        display: none !important;
+    }
+
+    @media (min-width: 1081px) {
+        .concept-page--03 .site-nav {
+            width: 620px;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            padding: 0 10px 0 18px;
+        }
+
+        .concept-page--03 .site-nav__desktop {
+            position: static;
+            top: auto;
+            bottom: auto;
+            left: auto;
+            flex: 0 0 auto;
+            transform: none;
+        }
+
+        .concept-page--03 .site-nav__actions {
+            flex: 0 0 auto;
+            justify-self: auto;
+        }
+    }
+
+    @media (max-width: 1080px) {
+        .concept-page--03 .site-header {
+            justify-content: flex-end;
+        }
+
+        .concept-page--03 .site-nav {
+            width: 126px;
+            grid-template-columns: 1fr;
+            padding: 0 10px;
+        }
+
+        .concept-page--03 .site-nav__actions {
+            grid-column: 1;
+            justify-self: end;
+        }
+    }
+</style>
