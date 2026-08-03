@@ -19,10 +19,17 @@ interface Props {
 
 const settings = await getSettings();
 const pageSeo = await getPageSeo(cleanPath(Astro.url.pathname));
+const BRAND_NAME = 'LaeseProd S.L.';
+const normalizeBrandText = (value?: string | null) => String(value || '')
+  .replace(/LaesePROD/g, BRAND_NAME)
+  .replace(/LaeseProd S\.L\.\./g, BRAND_NAME)
+  .replace(/Bodas\s*y\s*videoclips/gi, 'Arte visual')
+  .replace(/Bodas\s*\/\s*Videoclips/gi, 'Arte visual')
+  .trim();
 
 const siteUrl = getSiteUrl();
-const siteName = settings.site_name || 'LaesePROD';
-const defaultDescription = settings.site_description || 'Productora audiovisual especializada en bodas y videoclips.';
+const siteName = normalizeBrandText(settings.site_name) || BRAND_NAME;
+const defaultDescription = normalizeBrandText(settings.site_description) || 'Productora audiovisual especializada en arte visual.';
 
 const {
   title,
@@ -35,12 +42,12 @@ const {
   structuredData,
 } = Astro.props;
 
-const rawTitle = pageSeo?.title || title;
+const rawTitle = normalizeBrandText(pageSeo?.title || title);
 const fullTitle = rawTitle
   ? (rawTitle.includes(siteName) || rawTitle.includes('|') ? rawTitle : `${rawTitle} | ${siteName}`)
-  : `${siteName} | Bodas y videoclips`;
+  : `${siteName} | Arte visual`;
 
-const metaDescription = pageSeo?.description || description || defaultDescription;
+const metaDescription = normalizeBrandText(pageSeo?.description || description || defaultDescription);
 const canonicalUrl = pageSeo?.canonical_url || canonicalFromUrl(url);
 const resolvedImage = absoluteUrl(pageSeo?.og_image || image || settings.logo_url);
 const resolvedImageAlt = imageAlt || `${siteName} - productora audiovisual en Sevilla`;

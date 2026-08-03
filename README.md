@@ -1,6 +1,6 @@
-# LaesePROD
+# LaeseProd S.L.
 
-Web y panel de gestion para LaesePROD, una productora audiovisual centrada en bodas y videoclips.
+Web y panel de gestion para LaeseProd S.L., una productora audiovisual centrada en arte visual.
 
 ## Requisitos
 

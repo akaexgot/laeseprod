@@ -343,7 +343,7 @@ export async function generateContractPDF(title: string, htmlContent: string, si
         const { width } = pages[i].getSize();
         
         // Left side: Company info
-        pages[i].drawText(`LaesePROD | ${(import.meta.env.PUBLIC_SITE_URL || 'https://laeseprod.com').replace(/^https?:\/\//, '')}`, {
+        pages[i].drawText(`LaeseProd S.L. | ${(import.meta.env.PUBLIC_SITE_URL || 'https://laeseprod.com').replace(/^https?:\/\//, '')}`, {
             x: margin,
             y: 20,
             size: 8,

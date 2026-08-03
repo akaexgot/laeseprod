@@ -22,7 +22,7 @@ const projects = await getProjects();
             <p class="admin-page-copy">Gestiona tus proyectos. Total: <strong>{projects.length}</strong></p>
         </div>
         <button id="btn-add"
-            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
+            class="inline-flex items-center justify-center bg-white text-white text-sm font-medium rounded-md hover:bg-zinc-200 transition-colors shadow-sm"
             style="padding: 0.5rem 1rem; gap: 0.5rem;"
         >
             <i data-lucide="plus" class="w-4 h-4"></i>
@@ -39,7 +39,7 @@ const projects = await getProjects();
             type="text" 
             id="project-search" 
             placeholder="Buscar proyectos por título o cliente..." 
-            class="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-3.5 pl-10 pr-4 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all shadow-sm"
+            class="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-3.5 pl-10 pr-4 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white transition-all shadow-sm"
         />
     </div>
 
@@ -102,10 +102,10 @@ const projects = await getProjects();
                             </td>
                             <td class="hidden sm:table-cell text-right" style="padding: 1.25rem 1.5rem;">
                                 <div class="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button class="p-1.5 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all btn-edit" data-project={JSON.stringify(project)} title="Editar">
+                                    <button class="p-1.5 text-zinc-500 hover:text-white hover:bg-zinc-200/10 rounded-lg transition-all btn-edit" data-project={JSON.stringify(project)} title="Editar">
                                         <i data-lucide="edit-3" class="w-4 h-4"></i>
                                     </button>
-                                    <button class="p-1.5 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={project.id} title="Eliminar">
+                                    <button class="p-1.5 text-zinc-500 hover:text-white hover:bg-white/10 rounded-lg transition-all btn-delete" data-id={project.id} title="Eliminar">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </div>
@@ -136,19 +136,19 @@ const projects = await getProjects();
                         <h4 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider" style="margin-bottom: 0.5rem;">INFO PRINCIPAL</h4>
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Título *</label>
-                            <input type="text" id="p-title" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" />
+                            <input type="text" id="p-title" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Subtítulo</label>
-                            <input type="text" id="p-subtitle" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="Ej: Video corporativo / Spots" />
+                            <input type="text" id="p-subtitle" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="Ej: Video corporativo / Spots" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Cliente</label>
-                            <input type="text" id="p-client" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" />
+                            <input type="text" id="p-client" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Descripción</label>
-                            <textarea id="p-description" rows="5" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm resize-none"></textarea>
+                            <textarea id="p-description" rows="5" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm resize-none"></textarea>
                         </div>
                     </div>
                     <!-- Right Column (Media) -->
@@ -156,7 +156,7 @@ const projects = await getProjects();
                         <!-- Drag & Drop Portada -->
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">Imagen de Portada</label>
-                            <div id="drop-zone-thumb" class="relative group cursor-pointer border-2 border-dashed border-zinc-800 hover:border-rose-500/50 bg-zinc-950/50 rounded-xl transition-all overflow-hidden" style="height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <div id="drop-zone-thumb" class="relative group cursor-pointer border-2 border-dashed border-zinc-800 hover:border-white/50 bg-zinc-950/50 rounded-xl transition-all overflow-hidden" style="height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
                                 <input type="file" id="file-thumb" class="hidden" accept="image/*" />
                                 <input type="hidden" id="p-thumbnail" />
                                 <div id="preview-thumb" class="absolute inset-0 bg-cover bg-center hidden opacity-40 group-hover:opacity-60 transition-opacity"></div>
@@ -165,10 +165,10 @@ const projects = await getProjects();
                                     <span class="text-sm font-medium">Arrastrar o click para subir portada</span>
                                 </div>
                                 <div id="loading-thumb" class="absolute inset-0 bg-zinc-950/80 hidden items-center justify-center z-20">
-                                    <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-rose-500"></i>
+                                    <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-white"></i>
                                 </div>
                             </div>
-                            <button type="button" id="btn-remove-thumb" class="hidden mt-2 text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-500/10 border border-rose-500/20 rounded-lg transition-all" style="padding: 0.45rem 0.75rem;">
+                            <button type="button" id="btn-remove-thumb" class="hidden mt-2 text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-200/10 border border-white/20 rounded-lg transition-all" style="padding: 0.45rem 0.75rem;">
                                 Eliminar miniatura
                             </button>
                         </div>
@@ -176,23 +176,23 @@ const projects = await getProjects();
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Fondo (YouTube o Cloudinary MP4)</label>
                             <div class="flex gap-2">
-                                <input type="text" id="p-video" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="URL YouTube o Cloudinary" />
+                                <input type="text" id="p-video" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="URL YouTube o Cloudinary" />
                                 <button type="button" onclick="document.getElementById('file-p-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
                                     <i data-lucide="upload" class="w-4 h-4"></i>
                                 </button>
                                 <input type="file" id="file-p-video" class="hidden" accept="video/mp4,video/webm" />
                             </div>
-                            <div id="loading-p-video" class="hidden items-center gap-2 mt-2 text-xs text-rose-500 font-medium">
+                            <div id="loading-p-video" class="hidden items-center gap-2 mt-2 text-xs text-white font-medium">
                                 <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo...
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of (YouTube Shorts / Instagram Reel)</label>
-                            <input type="url" id="p-makingof" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all text-sm" placeholder="URL de YouTube Short o Instagram Reel" />
+                            <input type="url" id="p-makingof" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="URL de YouTube Short o Instagram Reel" />
                         </div>
                         <div style="padding-top: 0.5rem;">
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="p-featured" class="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-rose-500 focus:ring-rose-500 focus:ring-offset-zinc-900" />
+                                <input type="checkbox" id="p-featured" class="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-white focus:ring-white focus:ring-offset-zinc-900" />
                                 <span class="text-sm font-medium text-zinc-300">Destacar en la página de inicio</span>
                             </label>
                         </div>
@@ -201,10 +201,10 @@ const projects = await getProjects();
             </form>
         </div>
         <div class="border-t border-zinc-800 bg-zinc-950 flex items-center justify-end mt-auto relative" style="padding: 0.75rem 1.25rem; gap: 0.5rem;">
-            <p id="modal-error" class="text-rose-400 text-sm hidden font-medium absolute left-6 top-3"></p>
-            <button type="button" id="modal-delete" class="text-xs font-semibold text-rose-500 hover:text-white hover:bg-rose-500/10 border border-rose-500/20 rounded-lg transition-all hidden mr-auto" style="padding: 0.4rem 0.75rem;">Eliminar</button>
+            <p id="modal-error" class="text-zinc-200 text-sm hidden font-medium absolute left-6 top-3"></p>
+            <button type="button" id="modal-delete" class="text-xs font-semibold text-white hover:text-white hover:bg-zinc-200/10 border border-white/20 rounded-lg transition-all hidden mr-auto" style="padding: 0.4rem 0.75rem;">Eliminar</button>
             <button type="button" id="modal-cancel" class="text-xs font-medium text-zinc-400 hover:text-white transition-colors" style="padding: 0.4rem 0.75rem;">Cancelar</button>
-            <button type="submit" id="modal-save" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg shadow-glow transition-all" style="padding: 0.45rem 1rem;">Guardar Cambios</button>
+            <button type="submit" id="modal-save" class="bg-white hover:bg-zinc-200 text-white text-xs font-bold rounded-lg shadow-glow transition-all" style="padding: 0.45rem 1rem;">Guardar Cambios</button>
         </div>
     </div>
 </div>
@@ -213,15 +213,15 @@ const projects = await getProjects();
 <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
         <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(0, 0, 0,0.1); border: 1px solid rgba(0, 0, 0,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             </div>
             <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
             <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
         </div>
         <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
             <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
-            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #000000; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #000000; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0,0.3);">Eliminar</button>
         </div>
     </div>
 </div>
@@ -230,15 +230,15 @@ const projects = await getProjects();
 <div id="thumb-confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[65] hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[360px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
         <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5"/><path d="M14 11v5"/></svg>
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(0, 0, 0,0.1); border: 1px solid rgba(0, 0, 0,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5"/><path d="M14 11v5"/></svg>
             </div>
             <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">Eliminar miniatura</h3>
             <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Se borrará definitivamente al guardar los cambios del proyecto.</p>
         </div>
         <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
             <button id="thumb-confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
-            <button id="thumb-confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+            <button id="thumb-confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #000000; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #000000; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0,0.3);">Eliminar</button>
         </div>
     </div>
 </div>
@@ -248,8 +248,8 @@ const projects = await getProjects();
 
 <style>
     .drag-row.drag-over {
-        background: rgba(225, 29, 72, 0.08) !important;
-        box-shadow: inset 0 -2px 0 0 #e11d48;
+        background: rgba(0, 0, 0, 0.08) !important;
+        box-shadow: inset 0 -2px 0 0 #000000;
     }
     .drag-row[draggable="true"] {
         user-select: none;
@@ -409,11 +409,11 @@ const projects = await getProjects();
 
         function setupDropZone(dropZone: HTMLElement, fileInput: HTMLInputElement, inputId: string, previewId: string, emptyId: string, loadingId: string) {
             dropZone.addEventListener('click', () => fileInput.click());
-            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-rose-500', 'bg-rose-500/5'); });
-            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-rose-500', 'bg-rose-500/5'); });
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-white', 'bg-white/5'); });
+            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-white', 'bg-white/5'); });
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                dropZone.classList.remove('border-rose-500', 'bg-rose-500/5');
+                dropZone.classList.remove('border-white', 'bg-white/5');
                 const file = e.dataTransfer?.files[0];
                 if (file) handleUpload(file, inputId, previewId, emptyId, loadingId);
             });
@@ -674,7 +674,7 @@ const projects = await getProjects();
             const container = document.getElementById('toast-container')!;
             const toast = document.createElement('div');
             toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
-                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-white text-white shadow-white/30'
             }`;
             toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
             if (type === 'success') {

@@ -6,19 +6,31 @@ const [navigation, settings] = await Promise.all([getNavigation(), getSettings()
 const links = navigation.filter((item: any) => item.is_visible !== false);
 const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
 const isActive = (href: string) => href === "/" ? currentPath === "/" : currentPath === href || currentPath.startsWith(`${href}/`);
-const siteName = settings.site_name || "LaesePROD";
+const isHome = currentPath === "/";
+const isSplitLeft = (href: string) => href === "/" || href === "/proyectos";
+const siteName = String(settings.site_name || "LaeseProd S.L.")
+    .replace(/LaesePROD/g, "LaeseProd S.L.")
+    .replace(/LaeseProd S\.L\.\./g, "LaeseProd S.L.");
 ---
 
-<header class="site-header nav-theme-light" data-site-header>
+<header class:list={["site-header", "nav-theme-light", { "is-home": isHome }]} data-site-header>
     <nav class="site-nav" aria-label="Navegacion principal">
         <a class="site-nav__brand" href="/" aria-label={`${siteName}, inicio`}>
             <img class="site-nav__brand-logo site-nav__brand-logo--negative" src="/logonegativo.png" alt={siteName} width="386" height="353" />
             <img class="site-nav__brand-logo site-nav__brand-logo--positive" src="/logopositivo.png" alt="" width="386" height="353" aria-hidden="true" />
         </a>
 
-        <div class="site-nav__desktop">
+        <div class="site-nav__desktop" data-nav-desktop>
             {links.map((item: any) => item.href === "/servicios" ? (
-                <div class="site-nav__group">
+                <div class:list={[
+                    "site-nav__group",
+                    "site-nav__item",
+                    {
+                        "site-nav__item--split-left": isSplitLeft(item.href),
+                        "site-nav__item--split-right": !isSplitLeft(item.href),
+                        "site-nav__item--split-break": item.href === "/proyectos",
+                    },
+                ]}>
                     <a class:list={["site-nav__link", { "is-active": isActive(item.href) }]} href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
                         <span class="nav-reveal"><span>{item.label}</span></span><ChevronDown size={16} stroke-width={2.2} aria-hidden="true" />
                     </a>
@@ -29,7 +41,16 @@ const siteName = settings.site_name || "LaesePROD";
                     </div>
                 </div>
             ) : (
-                <a class:list={["site-nav__link", { "is-active": isActive(item.href) }]} href={item.href} aria-current={isActive(item.href) ? "page" : undefined}><span class="nav-reveal"><span>{item.label}</span></span></a>
+                <a class:list={[
+                    "site-nav__link",
+                    "site-nav__item",
+                    {
+                        "is-active": isActive(item.href),
+                        "site-nav__item--split-left": isSplitLeft(item.href),
+                        "site-nav__item--split-right": !isSplitLeft(item.href),
+                        "site-nav__item--split-break": item.href === "/proyectos",
+                    },
+                ]} href={item.href} aria-current={isActive(item.href) ? "page" : undefined}><span class="nav-reveal"><span>{item.label}</span></span></a>
             ))}
         </div>
 
@@ -233,7 +254,10 @@ const siteName = settings.site_name || "LaesePROD";
     window.addEventListener('resize', () => {
         if (window.innerWidth > 1080) setMenuOpen(false);
     });
-    const updateHeader = () => header?.classList.toggle('is-scrolled', window.scrollY > 20);
+    const updateHeader = () => {
+        const isScrolled = window.scrollY > 20;
+        header?.classList.toggle('is-scrolled', isScrolled);
+    };
     updateHeader();
     window.addEventListener('scroll', updateHeader, { passive: true });
 </script>
@@ -262,8 +286,9 @@ const siteName = settings.site_name || "LaesePROD";
     .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__brand-logo--positive,
     .site-nav:has(.site-nav__group:hover) .site-nav__brand-logo--positive,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__brand-logo--positive { opacity: 0; }
-    .site-nav__desktop { position: absolute; top: 0; bottom: 0; left: 50%; z-index: 2; display: flex; align-items: stretch; justify-content: center; gap: .2rem; transform: translateX(-50%); }
-    .site-nav__link { position: relative; display: inline-flex; align-items: center; gap: .35rem; padding: 0 .8rem; color: rgba(255, 255, 255, .72); text-decoration: none; font-family: Arial, Helvetica, sans-serif; font-size: .8rem; font-weight: 500; text-transform: uppercase; transition: color 160ms ease; }
+    .site-nav__desktop { position: absolute; top: 0; bottom: 0; left: 50%; z-index: 2; display: flex; align-items: stretch; justify-content: center; gap: .2rem; transform: translateX(-50%); transition: inset 620ms cubic-bezier(.16, 1, .3, 1), gap 620ms cubic-bezier(.16, 1, .3, 1), transform 620ms cubic-bezier(.16, 1, .3, 1), width 620ms cubic-bezier(.16, 1, .3, 1); }
+    .site-nav__link { position: relative; display: inline-flex; align-items: center; gap: .35rem; padding: 0 .8rem; color: rgba(255, 255, 255, .72); text-decoration: none; font-family: Arial, Helvetica, sans-serif; font-size: .8rem; font-weight: 500; text-transform: uppercase; transition: color 160ms ease, min-height 620ms cubic-bezier(.16, 1, .3, 1), padding 620ms cubic-bezier(.16, 1, .3, 1); }
+    .site-nav__item { transition: margin 620ms cubic-bezier(.16, 1, .3, 1), color 160ms ease; }
     .nav-reveal { display: inline-block; overflow: hidden; vertical-align: bottom; white-space: nowrap; }
     .nav-reveal > span { display: inline-block; animation: text-mask-reveal 720ms cubic-bezier(.16, 1, .3, 1) both; }
     .site-nav__brand .nav-reveal > span { animation-delay: 180ms; }
@@ -416,6 +441,156 @@ const siteName = settings.site_name || "LaesePROD";
 
     .site-header.nav-theme-dark .site-nav__theme-sun { opacity: 1; transform: scale(1) rotate(0); }
     .site-header.nav-theme-dark .site-nav__theme-moon { opacity: 0; transform: scale(.72) rotate(-45deg); }
+
+    @media (min-width: 1081px) {
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) {
+            padding: 18px clamp(32px, 4vw, 72px) 0;
+        }
+
+        :global(html.is-rolling-reveal-active) .site-header.is-home:not(.is-scrolled):not(.menu-is-open) {
+            clip-path: inset(0 calc(100% - var(--rolling-nav-reveal, 0%)) 0 0);
+            will-change: clip-path;
+        }
+
+        :global(html.is-rolling-reveal-active) .site-header.is-home.is-scrolled,
+        :global(html.is-rolling-reveal-active) .site-header.is-home.menu-is-open {
+            clip-path: none;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav {
+            width: 100%;
+            height: 64px;
+            grid-template-columns: 1fr;
+            padding: 0;
+            background: transparent !important;
+            border-color: transparent !important;
+            border-radius: 0;
+            box-shadow: none !important;
+            backdrop-filter: none;
+            animation: none;
+        }
+
+        .site-header.is-home .site-nav {
+            transition:
+                width 620ms cubic-bezier(.16, 1, .3, 1),
+                height 620ms cubic-bezier(.16, 1, .3, 1),
+                padding 620ms cubic-bezier(.16, 1, .3, 1),
+                border-radius 620ms cubic-bezier(.16, 1, .3, 1),
+                background 360ms ease,
+                border-color 360ms ease,
+                box-shadow 360ms ease;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__brand {
+            opacity: 0;
+            transform: translateY(-10px) scale(.96);
+            pointer-events: none;
+        }
+
+        .site-nav__brand,
+        .site-nav__actions {
+            transition:
+                opacity 320ms ease,
+                transform 420ms cubic-bezier(.16, 1, .3, 1);
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__desktop {
+            top: 0;
+            right: auto;
+            bottom: 0;
+            left: calc(52% - 178px);
+            width: max-content;
+            display: flex;
+            justify-content: flex-start;
+            gap: 22px;
+            transform: none;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__actions {
+            position: absolute;
+            top: 50%;
+            right: auto;
+            left: calc(52% + 255px);
+            z-index: 4;
+            opacity: 1;
+            padding-left: .85rem;
+            transform: translateY(-50%);
+            pointer-events: auto;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__actions::before {
+            background: rgba(255, 255, 255, .24) !important;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__theme,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__portal,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__chat {
+            color: #fff !important;
+            background: rgba(255, 255, 255, .1) !important;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__theme:hover,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__theme:focus-visible,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__portal:hover,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__portal:focus-visible,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__chat:hover,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__chat:focus-visible {
+            color: #000 !important;
+            background: #fff !important;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__chat-status {
+            background: #fff !important;
+            border-color: #000 !important;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__item--split-break {
+            margin-right: 44px;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__item--split-left {
+            color: #000;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__item--split-left .site-nav__link,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__link.site-nav__item--split-left {
+            color: #000 !important;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__item--split-right .site-nav__link,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__link.site-nav__item--split-right {
+            color: #fff !important;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__link {
+            min-height: 64px;
+            padding: 0;
+            font-size: .82rem;
+            font-weight: 700;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__link::after {
+            right: 0;
+            bottom: 15px;
+            left: 0;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__item--split-left::after,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__item--split-left .site-nav__link::after {
+            background: #000;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__item--split-right::after,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__item--split-right .site-nav__link::after {
+            background: #fff;
+        }
+
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__group:hover .site-nav__submenu,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__group:focus-within .site-nav__submenu {
+            top: calc(100% - 4px);
+        }
+    }
+
     :global(body.mobile-menu-open) { overflow: hidden; }
     :global(body.portal-modal-open) { overflow: hidden; }
     .portal-access-modal { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 1rem; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 180ms ease, visibility 180ms ease; }
@@ -433,7 +608,7 @@ const siteName = settings.site_name || "LaesePROD";
     .portal-access-modal__form input { width: 100%; height: 50px; padding: 0 1rem; color: #fff; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .16); border-radius: 999px; outline: none; text-align: center; font: inherit; font-size: .95rem; font-weight: 800; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
     .portal-access-modal__form input:focus { border-color: rgba(255, 255, 255, .62); background: rgba(255, 255, 255, .13); box-shadow: 0 0 0 4px rgba(255, 255, 255, .08), inset 0 1px 0 rgba(255, 255, 255, .08); }
     .portal-access-modal__form input::placeholder { color: rgba(255, 255, 255, .46); font-weight: 800; }
-    .portal-access-modal__error { margin: -.15rem 0 0; color: #ff8f8f; font-size: .78rem; font-weight: 700; }
+    .portal-access-modal__error { margin: -.15rem 0 0; color: #ffffff; font-size: .78rem; font-weight: 700; }
     .portal-access-modal__form button, .portal-access-modal__dropbox { min-height: 50px; display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0 1rem; color: #000; background: linear-gradient(180deg, #fff, #f0f0f0); border: 1px solid #fff; border-radius: 999px; text-decoration: none; font: inherit; font-size: .8rem; font-weight: 950; text-transform: uppercase; cursor: pointer; box-shadow: 0 14px 34px rgba(255, 255, 255, .12); transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease; }
     .portal-access-modal__form button:hover, .portal-access-modal__form button:focus-visible, .portal-access-modal__dropbox:hover, .portal-access-modal__dropbox:focus-visible { transform: translateY(-2px); }
     .portal-access-modal__form button:disabled { opacity: .56; cursor: wait; transform: none; }

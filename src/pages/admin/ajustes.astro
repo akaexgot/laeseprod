@@ -108,7 +108,7 @@ const boolValue = (key: string) => (settings as Record<string, unknown>)[key] ==
             </div>
 
             <label class="settings-field">
-                <span>Resumen de LaesePROD</span>
+                <span>Resumen de LaeseProd S.L.</span>
                 <textarea name="about_summary" rows="4">{value("about_summary")}</textarea>
             </label>
 
@@ -205,7 +205,7 @@ const boolValue = (key: string) => (settings as Record<string, unknown>)[key] ==
     .settings-save:disabled { opacity: .6; cursor: wait; transform: none; }
     .settings-shell { display: grid; gap: 1.15rem; }
     .settings-panel { display: grid; gap: 1.1rem; padding: clamp(1rem, 2.2vw, 1.45rem); color: #fff; background: linear-gradient(135deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, .01)); border: 1px solid #27272a; border-radius: 16px; box-shadow: 0 18px 46px rgba(0, 0, 0, .22); }
-    .settings-panel--brand { background: radial-gradient(circle at 92% 0%, rgba(244, 63, 94, .14), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012)); }
+    .settings-panel--brand { background: radial-gradient(circle at 92% 0%, rgba(0, 0, 0, .14), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012)); }
     .settings-panel--maintenance { border-color: rgba(245, 158, 11, .28); background: radial-gradient(circle at 94% 0%, rgba(245, 158, 11, .16), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012)); }
     .settings-panel__intro { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: .9rem; align-items: start; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, .08); }
     .settings-panel__icon { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; background: #050505; border: 1px solid #313138; border-radius: 50%; }
@@ -237,7 +237,7 @@ const boolValue = (key: string) => (settings as Record<string, unknown>)[key] ==
     .upload-button { padding: 0 .95rem; color: #e4e4e7; background: #141417; border: 1px solid #3f3f46; white-space: nowrap; }
     .upload-button:hover, .upload-button:focus-visible { color: #000; background: #fff; border-color: #fff; transform: translateY(-1px); }
     .settings-status { position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 90; max-width: min(390px, calc(100vw - 2rem)); margin: 0; padding: .85rem 1rem; color: #000; background: #fff; border-radius: 999px; box-shadow: 0 22px 60px rgba(0, 0, 0, .4); font-size: .84rem; font-weight: 850; }
-    .settings-status.is-error { color: #fff; background: #e11d48; }
+    .settings-status.is-error { color: #fff; background: #000000; }
     .settings-status.hidden { display: none; }
 
     @media (max-width: 840px) {

@@ -2,7 +2,10 @@
 import { getServices, getSettings } from "../../lib/data";
 import VideoBackground from "../ui/VideoBackground.astro";
 const [allServices, settings] = await Promise.all([getServices(), getSettings()]);
-const services = allServices.slice(0, 2);
+const servicePriority: Record<string, number> = { videoclips: 0, bodas: 1 };
+const services = [...allServices]
+    .sort((a: any, b: any) => (servicePriority[a.slug] ?? 99) - (servicePriority[b.slug] ?? 99))
+    .slice(0, 2);
 ---
 
 <section id="services" class="home-services" aria-label="Servicios">

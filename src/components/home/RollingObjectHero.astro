@@ -1,0 +1,740 @@
+<section class="rolling-study" data-rolling-content-reveal aria-labelledby="rolling-title">
+    <div class="rolling-study__content" data-reveal-target>
+        <div
+            class="object-viewer"
+            data-lens-explorer
+            aria-label="Visor interactivo del objetivo cinematografico"
+        >
+            <canvas
+                class="object-viewer__canvas"
+                data-explorer-canvas
+                tabindex="0"
+                aria-label="Objetivo 3D interactivo. Arrastra para girarlo, usa la rueda para acercarlo o las flechas del teclado para rotarlo."
+            ></canvas>
+
+            <div class="object-viewer__rings" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+
+            <p class="object-viewer__index" aria-hidden="true">
+                <span>OBJ / HOME</span>
+                <span>35 MM - INTERACTIVE</span>
+            </p>
+
+            <div class="object-viewer__loading" aria-live="polite">
+                <span data-explorer-status>Cargando objeto</span>
+                <i><b data-explorer-progress></b></i>
+            </div>
+
+            <p class="object-viewer__hint">
+                <span class="object-viewer__drag" aria-hidden="true">
+                    <i></i><i></i><i></i>
+                </span>
+                Arrastra para girar - rueda para acercar
+            </p>
+        </div>
+
+        <div class="object-copy">
+            <p class="object-copy__eyebrow"><span>01</span> LaeseProd S.L.</p>
+            <h1 id="rolling-title">
+                La mirada que<br />
+                <em>lo cambia todo</em>
+            </h1>
+            <p class="object-copy__text">
+                Arte visual con mirada cinematografica para convertir cada instante en una imagen capaz de permanecer.
+            </p>
+            <div class="object-copy__actions">
+                <a href="/proyectos">Ver proyectos</a>
+                <a href="/contacto">Contactar</a>
+            </div>
+            <div class="object-copy__footer" aria-hidden="true">
+                <span>LAESEPROD</span>
+                <span>SEVILLA - ESP</span>
+                <span>2026</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="rolling-study__veil" aria-hidden="true"></div>
+    <div class="rolling-study__frame" aria-hidden="true">
+        <span class="corner corner--tl"></span>
+        <span class="corner corner--tr"></span>
+        <span class="corner corner--bl"></span>
+        <span class="corner corner--br"></span>
+    </div>
+
+    <div class="rolling-study__meta rolling-study__meta--left" aria-hidden="true">
+        <span class="rolling-study__dot"></span>
+        <span>LAESEPROD IN MOTION</span>
+    </div>
+    <div class="rolling-study__meta rolling-study__meta--right" aria-hidden="true">
+        <span>LAESEPROD</span>
+        <span>HOME FRAME</span>
+    </div>
+
+    <div class="rolling-study__shadow" data-reveal-shadow aria-hidden="true"></div>
+    <canvas class="rolling-study__canvas" data-reveal-canvas aria-hidden="true"></canvas>
+
+    <div class="rolling-study__loading" aria-live="polite">
+        <span data-reveal-status>Preparando optica</span>
+        <i><b data-reveal-progress></b></i>
+    </div>
+
+    <p class="rolling-study__counter" aria-hidden="true">
+        <span>HOME</span>
+        <i></i>
+        <span>ROLL / DISCOVER</span>
+    </p>
+</section>
+
+<script>
+    import "../../scripts/lens-explorer";
+    import "../../scripts/rolling-content-reveal";
+</script>
+
+<noscript>
+    <style>
+        .rolling-study__content {
+            clip-path: none !important;
+        }
+
+        .rolling-study__loading {
+            display: none !important;
+        }
+    </style>
+</noscript>
+
+<style>
+    .rolling-study {
+        position: relative;
+        min-height: 100svh;
+        overflow: hidden;
+        background: #050505;
+        font-family: Arial, Helvetica, sans-serif;
+        isolation: isolate;
+    }
+
+    .rolling-study__content {
+        --content-reveal: 0%;
+        position: relative;
+        z-index: 1;
+        min-height: 100svh;
+        display: grid;
+        grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+        clip-path: inset(0 calc(100% - var(--content-reveal)) 0 0);
+        pointer-events: none;
+        will-change: clip-path;
+    }
+
+    .rolling-study.is-content-revealed .rolling-study__content {
+        pointer-events: auto;
+    }
+
+    .rolling-study__veil {
+        position: absolute;
+        z-index: 0;
+        inset: 0;
+        background:
+            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .08), transparent 30%),
+            #050505;
+    }
+
+    .rolling-study__veil::after {
+        content: "LAESEPROD";
+        position: absolute;
+        right: -4vw;
+        bottom: -4vh;
+        color: rgba(255, 255, 255, .035);
+        font-size: clamp(7rem, 18vw, 20rem);
+        font-weight: 950;
+        line-height: .75;
+        white-space: nowrap;
+    }
+
+    .object-viewer {
+        position: relative;
+        min-height: 100svh;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 50% 46%, rgba(255, 255, 255, .96), rgba(237, 237, 233, .9) 43%, rgba(219, 219, 215, .88) 100%),
+            #ecece8;
+        isolation: isolate;
+    }
+
+    .object-viewer::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        opacity: .22;
+        background-image:
+            linear-gradient(rgba(0, 0, 0, .08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 0, 0, .08) 1px, transparent 1px);
+        background-size: 80px 80px;
+        mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+    }
+
+    .object-viewer__canvas {
+        position: absolute;
+        z-index: 2;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        cursor: grab;
+        opacity: 0;
+        outline: none;
+        touch-action: none;
+        transition: opacity 650ms ease;
+    }
+
+    .object-viewer__canvas:active,
+    .object-viewer.is-interacting .object-viewer__canvas {
+        cursor: grabbing;
+    }
+
+    .object-viewer__canvas:focus-visible {
+        outline: 2px solid #0a0a0a;
+        outline-offset: -8px;
+    }
+
+    .object-viewer.is-model-ready .object-viewer__canvas {
+        opacity: 1;
+    }
+
+    .object-viewer__rings {
+        position: absolute;
+        z-index: 0;
+        top: 50%;
+        left: 50%;
+        width: min(72vw, 720px);
+        aspect-ratio: 1;
+        transform: translate(-50%, -50%);
+        opacity: .3;
+        pointer-events: none;
+    }
+
+    .object-viewer__rings span {
+        position: absolute;
+        border: 1px solid rgba(0, 0, 0, .12);
+        border-radius: 50%;
+    }
+
+    .object-viewer__rings span:nth-child(1) { inset: 0; }
+    .object-viewer__rings span:nth-child(2) { inset: 15%; }
+    .object-viewer__rings span:nth-child(3) { inset: 34%; background: rgba(255, 255, 255, .18); }
+
+    .object-viewer__index,
+    .object-viewer__hint {
+        position: absolute;
+        z-index: 4;
+        right: clamp(24px, 3.4vw, 52px);
+        left: clamp(24px, 3.4vw, 52px);
+        display: flex;
+        justify-content: space-between;
+        margin: 0;
+        color: rgba(0, 0, 0, .46);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+        text-transform: uppercase;
+        pointer-events: none;
+    }
+
+    .object-viewer__index { top: 124px; }
+
+    .object-viewer__hint {
+        right: auto;
+        bottom: clamp(38px, 5vh, 62px);
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+    }
+
+    .object-viewer__drag {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        height: 18px;
+    }
+
+    .object-viewer__drag i {
+        width: 1px;
+        height: 8px;
+        background: currentColor;
+        animation: drag-wave 1.2s ease-in-out infinite;
+    }
+
+    .object-viewer__drag i:nth-child(2) {
+        height: 16px;
+        animation-delay: 120ms;
+    }
+
+    .object-viewer__drag i:nth-child(3) {
+        height: 11px;
+        animation-delay: 240ms;
+    }
+
+    .object-viewer.is-user-controlled .object-viewer__drag i {
+        animation: none;
+    }
+
+    .object-viewer__loading {
+        position: absolute;
+        z-index: 4;
+        right: clamp(24px, 3.4vw, 52px);
+        bottom: clamp(38px, 5vh, 62px);
+        width: 190px;
+        display: grid;
+        gap: 9px;
+        color: rgba(0, 0, 0, .5);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+        text-align: right;
+        text-transform: uppercase;
+        transition: opacity 450ms ease, transform 450ms ease;
+    }
+
+    .object-viewer.is-model-ready .object-viewer__loading {
+        opacity: 0;
+        transform: translateY(8px);
+        pointer-events: none;
+    }
+
+    .object-viewer__loading i {
+        position: relative;
+        height: 1px;
+        overflow: hidden;
+        background: rgba(0, 0, 0, .12);
+    }
+
+    .object-viewer__loading b {
+        position: absolute;
+        inset: 0;
+        background: #0a0a0a;
+        transform: scaleX(.08);
+        transform-origin: left;
+        transition: transform 180ms ease;
+    }
+
+    .object-copy {
+        position: relative;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 136px clamp(42px, 6.5vw, 118px) 92px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 76% 30%, rgba(255, 255, 255, .075), transparent 27%),
+            #0a0a0a;
+    }
+
+    .object-copy::before {
+        content: "LAESEPROD";
+        position: absolute;
+        right: -5vw;
+        bottom: -8vh;
+        color: rgba(255, 255, 255, .025);
+        font-size: clamp(8rem, 17vw, 19rem);
+        font-weight: 900;
+        line-height: .72;
+        pointer-events: none;
+    }
+
+    .object-copy__eyebrow {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin: 0 0 28px;
+        color: rgba(255, 255, 255, .52);
+        font-family: "Courier New", monospace;
+        font-size: 9px;
+        text-transform: uppercase;
+    }
+
+    .object-copy__eyebrow span {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        color: #0a0a0a;
+        background: #fff;
+        border-radius: 50%;
+        font-weight: 700;
+    }
+
+    .object-copy h1 {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        font-size: clamp(4rem, 6.3vw, 8rem);
+        font-weight: 850;
+        line-height: .81;
+    }
+
+    .object-copy h1 em {
+        display: inline-block;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(255, 255, 255, .7);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+    }
+
+    .object-copy__text {
+        position: relative;
+        z-index: 1;
+        max-width: 420px;
+        margin: 42px 0 0;
+        padding-top: 20px;
+        color: rgba(255, 255, 255, .58);
+        border-top: 1px solid rgba(255, 255, 255, .2);
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    .object-copy__actions {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+    }
+
+    .object-copy__actions a {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1.15rem;
+        color: #0a0a0a;
+        background: #fff;
+        border: 1px solid #fff;
+        border-radius: 999px;
+        font-size: .76rem;
+        font-weight: 800;
+        text-decoration: none;
+        text-transform: uppercase;
+        transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+    }
+
+    .object-copy__actions a + a {
+        color: #fff;
+        background: transparent;
+        border-color: rgba(255, 255, 255, .45);
+    }
+
+    .object-copy__actions a:hover,
+    .object-copy__actions a:focus-visible {
+        transform: translateY(-2px);
+    }
+
+    .object-copy__footer {
+        position: absolute;
+        z-index: 1;
+        right: clamp(42px, 6.5vw, 118px);
+        bottom: clamp(38px, 5vh, 62px);
+        left: clamp(42px, 6.5vw, 118px);
+        display: flex;
+        justify-content: space-between;
+        color: rgba(255, 255, 255, .35);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+    }
+
+    .rolling-study__frame {
+        position: absolute;
+        z-index: 6;
+        inset: 102px clamp(22px, 3vw, 46px) clamp(22px, 3vw, 46px);
+        pointer-events: none;
+    }
+
+    .corner {
+        position: absolute;
+        width: 34px;
+        height: 34px;
+        border-color: rgba(255, 255, 255, .35);
+        border-style: solid;
+    }
+
+    .corner--tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
+    .corner--tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+    .corner--bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+    .corner--br { right: 0; bottom: 0; border-width: 0 1px 1px 0; }
+
+    .rolling-study__meta {
+        position: absolute;
+        z-index: 7;
+        top: 126px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: rgba(255, 255, 255, .55);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+        pointer-events: none;
+    }
+
+    .rolling-study__meta--left { left: clamp(34px, 4vw, 68px); }
+    .rolling-study__meta--right { right: clamp(34px, 4vw, 68px); }
+
+    .rolling-study__dot {
+        width: 6px;
+        height: 6px;
+        background: #fff;
+        border-radius: 50%;
+        animation: optic-pulse 1.5s ease-in-out infinite;
+    }
+
+    .rolling-study__canvas {
+        position: absolute;
+        z-index: 8;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 650ms ease, filter 650ms ease;
+    }
+
+    .rolling-study.is-reveal-model-ready .rolling-study__canvas {
+        opacity: 1;
+    }
+
+    .rolling-study__shadow {
+        position: absolute;
+        z-index: 7;
+        top: 0;
+        left: 0;
+        background: radial-gradient(ellipse, rgba(0, 0, 0, .22), rgba(0, 0, 0, .08) 45%, transparent 72%);
+        border-radius: 50%;
+        filter: blur(7px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 500ms ease;
+    }
+
+    .rolling-study.is-reveal-model-ready .rolling-study__shadow {
+        opacity: 1;
+    }
+
+    .rolling-study.is-reveal-finished .rolling-study__canvas {
+        opacity: 0;
+        filter: blur(5px);
+    }
+
+    .rolling-study.is-reveal-finished .rolling-study__shadow {
+        opacity: 0;
+    }
+
+    .rolling-study__loading {
+        position: absolute;
+        z-index: 9;
+        right: clamp(34px, 4vw, 68px);
+        bottom: clamp(38px, 5vh, 66px);
+        width: min(240px, 38vw);
+        display: grid;
+        gap: 9px;
+        color: rgba(255, 255, 255, .58);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+        text-transform: uppercase;
+        transition: opacity 500ms ease, transform 500ms ease;
+    }
+
+    .rolling-study.is-reveal-model-ready .rolling-study__loading,
+    .rolling-study.is-status-hidden .rolling-study__loading {
+        opacity: 0;
+        transform: translateY(8px);
+        pointer-events: none;
+    }
+
+    .rolling-study__loading i {
+        position: relative;
+        width: 100%;
+        height: 1px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, .2);
+    }
+
+    .rolling-study__loading b {
+        position: absolute;
+        inset: 0;
+        background: #fff;
+        transform: scaleX(.08);
+        transform-origin: left;
+        transition: transform 180ms ease;
+    }
+
+    .rolling-study__counter {
+        position: absolute;
+        z-index: 7;
+        bottom: clamp(38px, 5vh, 66px);
+        left: clamp(34px, 4vw, 68px);
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin: 0;
+        color: rgba(255, 255, 255, .46);
+        font-family: "Courier New", monospace;
+        font-size: 8px;
+        pointer-events: none;
+    }
+
+    .rolling-study__counter i {
+        width: 38px;
+        height: 1px;
+        background: rgba(255, 255, 255, .28);
+    }
+
+    .rolling-study.is-content-revealed .rolling-study__frame,
+    .rolling-study.is-content-revealed .rolling-study__meta,
+    .rolling-study.is-content-revealed .rolling-study__counter,
+    .rolling-study.is-content-revealed .rolling-study__veil {
+        opacity: 0;
+        transition: opacity 600ms ease 180ms;
+        pointer-events: none;
+    }
+
+    @keyframes drag-wave {
+        50% {
+            opacity: .28;
+            transform: scaleY(.55);
+        }
+    }
+
+    @keyframes optic-pulse {
+        50% {
+            opacity: .28;
+            transform: scale(.72);
+        }
+    }
+
+    @media (max-width: 900px) {
+        .rolling-study {
+            overflow-y: auto;
+        }
+
+        .rolling-study__content {
+            min-height: auto;
+            grid-template-columns: 1fr;
+        }
+
+        .object-viewer {
+            min-height: 58svh;
+        }
+
+        .object-viewer__index {
+            top: 96px;
+        }
+
+        .object-viewer__rings {
+            width: min(100vw, 560px);
+        }
+
+        .object-viewer__hint,
+        .object-viewer__loading {
+            bottom: 24px;
+        }
+
+        .object-copy {
+            min-height: 50svh;
+            padding: 76px 24px 116px;
+        }
+
+        .object-copy h1 {
+            font-size: clamp(3.8rem, 15vw, 6.8rem);
+        }
+
+        .object-copy__text {
+            margin-top: 30px;
+        }
+
+        .object-copy__footer {
+            right: 24px;
+            bottom: 76px;
+            left: 24px;
+        }
+
+        .rolling-study__frame {
+            inset: 82px 12px 64px;
+        }
+
+        .rolling-study__meta {
+            top: 98px;
+        }
+
+        .rolling-study__meta--left {
+            left: 26px;
+        }
+
+        .rolling-study__meta--right {
+            display: none;
+        }
+
+        .rolling-study__loading {
+            right: 26px;
+            bottom: 82px;
+            width: 190px;
+        }
+
+        .rolling-study__counter {
+            bottom: 82px;
+            left: 26px;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .object-viewer {
+            min-height: 58svh;
+        }
+
+        .object-viewer__index {
+            top: 92px;
+            right: 18px;
+            left: 18px;
+        }
+
+        .object-viewer__hint {
+            left: 18px;
+            font-size: 7px;
+        }
+
+        .object-viewer__loading {
+            right: 18px;
+            width: 150px;
+        }
+
+        .object-copy {
+            padding-top: 66px;
+        }
+
+        .object-copy__eyebrow {
+            margin-bottom: 20px;
+        }
+
+        .object-copy__text {
+            display: none;
+        }
+
+        .object-copy__actions {
+            margin-top: 24px;
+        }
+
+        .object-copy__actions a {
+            flex: 1 1 140px;
+        }
+
+        .object-copy__footer span:nth-child(2) {
+            display: none;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .rolling-study__dot,
+        .object-viewer__drag i {
+            animation: none;
+        }
+    }
+</style>

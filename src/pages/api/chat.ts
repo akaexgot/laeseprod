@@ -242,7 +242,7 @@ export const POST: APIRoute = async ({ request, clientAddress, cookies }) => {
                 await supabase.from('chat_messages').insert({ 
                     conversation_id, 
                     sender_type: 'admin', 
-                    message: "¡Hola! Gracias por contactar con LaesePROD. Enseguida te atenderemos."
+                    message: "¡Hola! Gracias por contactar con LaeseProd S.L. Enseguida te atenderemos."
                 });
             }
         }

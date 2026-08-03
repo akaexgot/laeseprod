@@ -299,8 +299,8 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             .admin-icon-button--danger:hover,
             .admin-icon-button--danger:focus-visible {
                 color: #fff;
-                background: #e11d48;
-                border-color: #e11d48;
+                background: #000000;
+                border-color: #000000;
             }
             .admin-icon-button svg,
             .admin-icon-button [data-lucide] {
@@ -353,8 +353,8 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             .admin-layout button {
                 font-family: inherit;
             }
-            .admin-layout button.bg-rose-600,
-            .admin-layout a.bg-rose-600,
+            .admin-layout button.bg-white,
+            .admin-layout a.bg-white,
             .admin-layout .portal-primary-button,
             .admin-layout .settings-save,
             .admin-layout .save-service,
@@ -384,10 +384,10 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
                 text-transform: uppercase !important;
                 transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease, opacity 160ms ease !important;
             }
-            .admin-layout button.bg-rose-600:hover,
-            .admin-layout button.bg-rose-600:focus-visible,
-            .admin-layout a.bg-rose-600:hover,
-            .admin-layout a.bg-rose-600:focus-visible,
+            .admin-layout button.bg-white:hover,
+            .admin-layout button.bg-white:focus-visible,
+            .admin-layout a.bg-white:hover,
+            .admin-layout a.bg-white:focus-visible,
             .admin-layout .portal-primary-button:hover,
             .admin-layout .portal-primary-button:focus-visible,
             .admin-layout .settings-save:hover,
@@ -467,7 +467,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             .admin-layout .btn-del-img,
             .admin-layout .btn-del-block,
             .admin-layout .btn-del-s {
-                color: #fb7185 !important;
+                color: #ffffff !important;
                 background: #111113 !important;
                 border: 1px solid #333339 !important;
                 border-radius: 50% !important;
@@ -481,8 +481,8 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             .admin-layout .btn-del-s:hover,
             .admin-layout .btn-del-s:focus-visible {
                 color: #fff !important;
-                background: #e11d48 !important;
-                border-color: #e11d48 !important;
+                background: #000000 !important;
+                border-color: #000000 !important;
             }
 
             /* --- MODAL BULLETPROOFING (Bypass Tailwind cache bugs) --- */
@@ -501,7 +501,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             .admin-layout #modal-overlay h4 { margin-bottom: 1rem !important; display: block !important; }
         </style>
     </head>
-    <body class="bg-zinc-950 text-zinc-100 antialiased overflow-hidden selection:bg-rose-500/30 selection:text-white admin-layout" style="font-family: 'Inter', sans-serif;">
+    <body class="bg-zinc-950 text-zinc-100 antialiased overflow-hidden selection:bg-white/30 selection:text-white admin-layout" style="font-family: 'Inter', sans-serif;">
         <script define:vars={{ supabaseUrl, supabaseKey }}>
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
         
@@ -537,8 +537,8 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             >
                 <!-- Logo -->
                 <div class="border-b border-zinc-800" style="height: 96px; display: flex; align-items: center; justify-content: center; padding: 0 1rem;">
-                    <a href="/admin" class="admin-brand" aria-label="LaesePROD admin">
-                        <img src="/logopositivo.png" alt="LaesePROD" width="386" height="353" />
+                    <a href="/admin" class="admin-brand" aria-label="LaeseProd S.L. admin">
+                        <img src="/logopositivo.png" alt="LaeseProd S.L." width="386" height="353" />
                     </a>
                 </div>
 
@@ -563,12 +563,12 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
                                                     ]}
                                                     style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500;"
                                                 >
-                                                    <i data-lucide={item.icon} class:list={["w-4 h-4 transition-colors", isActive ? "text-rose-500" : "text-zinc-500 group-hover:text-zinc-400"]}></i>
+                                                    <i data-lucide={item.icon} class:list={["w-4 h-4 transition-colors", isActive ? "text-white" : "text-zinc-500 group-hover:text-zinc-400"]}></i>
                                                     <span class="flex-1">{item.label}</span>
                                                     {(item.id === 'mensajes' || item.id === 'chat') && (
                                                         <span 
                                                             id={`badge-sidebar-${item.id}`} 
-                                                            class="hidden items-center justify-center bg-rose-600 text-white text-[10px] font-bold rounded-full h-4.5 min-w-[18px] px-1.5 shadow-sm"
+                                                            class="hidden items-center justify-center bg-white text-white text-[10px] font-bold rounded-full h-4.5 min-w-[18px] px-1.5 shadow-sm"
                                                         ></span>
                                                     )}
                                                 </a>
@@ -594,10 +594,10 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
                     </a>
                     <button
                         id="admin-logout"
-                        class="group text-zinc-400 hover:text-red-400 transition-colors hover:bg-zinc-800/50 w-full"
+                        class="group text-zinc-400 hover:text-white transition-colors hover:bg-zinc-800/50 w-full"
                         style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; margin-top: 0.25rem;"
                     >
-                        <i data-lucide="log-out" class="w-4 h-4 text-zinc-500 group-hover:text-red-400"></i>
+                        <i data-lucide="log-out" class="w-4 h-4 text-zinc-500 group-hover:text-white"></i>
                         Cerrar sesión
                     </button>
                 </div>

@@ -2,7 +2,7 @@
   "name": "laeseprod",
   "type": "module",
   "version": "1.0.0",
-  "description": "LaesePROD - Productora audiovisual de bodas y videoclips",
+  "description": "LaeseProd S.L. - Productora audiovisual de arte visual",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

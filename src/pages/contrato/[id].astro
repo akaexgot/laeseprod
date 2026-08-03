@@ -48,7 +48,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
 ---
 
 <BaseLayout
-    title="Firma de Contrato | LaesePROD"
+    title="Firma de Contrato | LaeseProd S.L."
     noindex={true}
     description="Portal seguro de firma de contratos y gestión de pagos."
 >
@@ -70,7 +70,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
                 ) : (
                     <div class="card main-card">
                         <div class="card-header">
-                            <div class="header-pre">LaesePROD</div>
+                            <div class="header-pre">LaeseProd S.L.</div>
                             <h1 class="header-title">Finalización de Contrato</h1>
                             <p class="header-desc">Sigue los pasos secuenciales para formalizar tu proyecto con nosotros de forma segura.</p>
                         </div>
@@ -171,7 +171,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
                                             <button class="btn-primary" id="btn-submit-signature" disabled>
                                                 {contract?.is_billable ? 'Firmar y proceder al pago' : 'Firmar y Finalizar'}
                                             </button>
-                                            <p id="signature-warning" style="color: #e11d48; font-size: 0.75rem; text-align: center; margin-top: 0.75rem; font-weight: 600;">
+                                            <p id="signature-warning" style="color: #000000; font-size: 0.75rem; text-align: center; margin-top: 0.75rem; font-weight: 600;">
                                                 Debes firmar y aceptar los términos
                                             </p>
                                         </div>
@@ -379,7 +379,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
 
         .card { background: #ffffff; border: 1px solid #e4e4e7; border-radius: 2rem; overflow: hidden; box-shadow: 0 40px 80px -15px rgba(0,0,0,0.5); position: relative; z-index: 20; pointer-events: auto; }
         .card-header { padding: 3.5rem 3rem 2.5rem; border-bottom: 1px solid #f4f4f5; text-align: center; background: #fafafa; }
-        .header-pre { color: #e11d48; font-family: 'Inter', monospace; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 0.75rem; }
+        .header-pre { color: #000000; font-family: 'Inter', monospace; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 0.75rem; }
         .header-title { font-family: 'Outfit', sans-serif; font-size: 2.25rem; font-weight: 800; color: #09090b; margin: 0; line-height: 1.1; }
         .header-desc { color: #71717a; font-size: 0.95rem; margin-top: 1rem; max-width: 500px; margin-inline: auto; line-height: 1.6; }
 
@@ -387,8 +387,8 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
         .step { flex: 1; height: 3px; background: #f4f4f5; border-radius: 2px; position: relative; transition: all 0.4s ease; }
         .step--hidden { display: none; }
         .step span { position: absolute; top: -1.25rem; left: 0; font-size: 0.6rem; text-transform: uppercase; color: #a1a1aa; font-weight: 700; letter-spacing: 0.05em; }
-        .step.active { background: #e11d48; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); }
-        .step.active span { color: #e11d48; }
+        .step.active { background: #000000; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+        .step.active span { color: #000000; }
 
         .card-body { padding: 3rem; color: #18181b; position: relative; z-index: 2; }
         
@@ -399,13 +399,13 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
         .input-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; z-index: 4; }
         .field-label { font-size: 0.7rem; text-transform: uppercase; color: #71717a; font-weight: 700; letter-spacing: 0.05em; }
         .field-label--with-badge { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-        .invoice-field-badge { display: inline-flex; align-items: center; border-radius: 999px; background: #ffe4e6; color: #be123c; padding: 0.18rem 0.5rem; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.04em; }
+        .invoice-field-badge { display: inline-flex; align-items: center; border-radius: 999px; background: #ffe4e6; color: #000000; padding: 0.18rem 0.5rem; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.04em; }
         
         input { width: 100%; padding: 0.875rem 1.25rem; background: #fafafa; border: 1.5px solid #e4e4e7; border-radius: 0.75rem; color: #09090b; font-size: 0.95rem; transition: all 0.2s; box-sizing: border-box; position: relative; z-index: 5; pointer-events: auto; user-select: text; }
-        input:focus { outline: none; border-color: #e11d48; background: #ffffff; box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.05); }
+        input:focus { outline: none; border-color: #000000; background: #ffffff; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05); }
         
-        .btn-primary { background: #e11d48; color: #fff; border: none; padding: 1.125rem 2rem; border-radius: 1rem; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 20px -5px rgba(225, 29, 72, 0.3); display: flex; align-items: center; justify-content: center; gap: 0.6rem; width: 100%; }
-        .btn-primary:hover { background: #f43f5e; transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(225, 29, 72, 0.4); }
+        .btn-primary { background: #000000; color: #fff; border: none; padding: 1.125rem 2rem; border-radius: 1rem; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center; gap: 0.6rem; width: 100%; }
+        .btn-primary:hover { background: #222222; transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.4); }
         .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 
         .btn-secondary { background: #f4f4f5; color: #71717a; border: 1px solid #e4e4e7; padding: 1.125rem; border-radius: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
@@ -416,7 +416,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
         .sign-section { border-top: 1px solid #f4f4f5; padding-top: 3rem; }
         .terms-check-wrapper { margin-bottom: 2rem; background: #fafafa; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e4e4e7; }
         .terms-label { display: flex; gap: 1rem; cursor: pointer; align-items: flex-start; }
-        .terms-label input { width: 1.25rem; height: 1.25rem; accent-color: #e11d48; margin-top: 0.2rem; }
+        .terms-label input { width: 1.25rem; height: 1.25rem; accent-color: #000000; margin-top: 0.2rem; }
         .terms-text { font-size: 0.85rem; color: #3f3f46; line-height: 1.5; }
 
         .signature-container { margin-bottom: 3rem; display: flex; flex-direction: column; gap: 0.75rem; }
@@ -463,7 +463,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
         .error-card { background: #09090b; border-color: #1a1a1c; padding: 5rem 2rem; color: #fff; }
         .error-title { font-family: 'Outfit', sans-serif; font-size: 1.75rem; margin-bottom: 0.5rem; }
         .error-text { color: #52525b; margin-bottom: 2rem; }
-        .btn-back { display: inline-block; background: #e11d48; color: #fff; padding: 1rem 2rem; border-radius: 1rem; text-decoration: none; font-weight: 700; }
+        .btn-back { display: inline-block; background: #000000; color: #fff; padding: 1rem 2rem; border-radius: 1rem; text-decoration: none; font-weight: 700; }
 
         @media (max-width: 768px) {
             .contract-body { padding-top: 6rem; }
@@ -517,7 +517,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
             let result = text;
             for (const [key, value] of Object.entries(data)) {
                 const regex = new RegExp(`{{${key}}}`, 'g');
-                result = result.replace(regex, value?.toString() || '<span style="color: #e11d48; border-bottom: 2px dashed #e11d48;">[?]</span>');
+                result = result.replace(regex, value?.toString() || '<span style="color: #000000; border-bottom: 2px dashed #000000;">[?]</span>');
             }
             return result;
         }
@@ -544,7 +544,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
             const clientData = {};
             let valid = true;
             inputs.forEach(i => {
-                if (!i.value.trim()) { i.style.borderColor = '#e11d48'; valid = false; }
+                if (!i.value.trim()) { i.style.borderColor = '#000000'; valid = false; }
                 else { i.style.borderColor = ''; clientData[i.dataset.field] = i.value.trim(); }
             });
 
@@ -814,7 +814,7 @@ const isAwaitingAsyncPayment = paymentStatus === 'pending' || paymentStatus === 
             toast.className = `toast ${type}`;
             toast.style.cssText = `
                 padding: 1rem 1.5rem;
-                background: ${type === 'success' ? '#10b981' : '#e11d48'};
+                background: ${type === 'success' ? '#10b981' : '#000000'};
                 color: white;
                 border-radius: 1rem;
                 font-weight: 600;

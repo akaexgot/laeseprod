@@ -18,9 +18,9 @@ export async function sendOwnerNotification(title: string, message: string) {
         const formattedMessage = `${message}\n\nPanel: ${publicSiteUrl}/admin`;
 
         await resend.emails.send({
-            from: `LaesePROD <${import.meta.env.RESEND_FROM_EMAIL || 'no-reply@laeseprod.com'}>`,
+            from: `LaeseProd S.L. <${import.meta.env.RESEND_FROM_EMAIL || 'no-reply@laeseprod.com'}>`,
             to: PUSHOVER_EMAIL,
-            subject: `[LaesePROD] ${title}`,
+            subject: `[LaeseProd S.L.] ${title}`,
             text: formattedMessage,
         });
     } catch (error) {

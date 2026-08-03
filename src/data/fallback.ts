@@ -3,8 +3,8 @@ const VIDEOCLIPS_ID = "22222222-2222-4222-8222-222222222222";
 const provisionalVideo = "https://www.youtube.com/watch?v=D91q99QK11k";
 
 export const siteSettings = {
-    site_name: "LaesePROD",
-    site_description: "Productora audiovisual especializada en bodas y videoclips.",
+    site_name: "LaeseProd S.L.",
+    site_description: "Productora audiovisual especializada en arte visual.",
     logo_url: "",
     primary_color: "#000000",
     secondary_color: "#FFFFFF",
@@ -20,8 +20,8 @@ export const siteSettings = {
     hero_video_desktop: provisionalVideo,
     hero_video_mobile: "",
     contact_hero_video: provisionalVideo,
-    about_summary: "Somos una productora audiovisual centrada en bodas y videoclips. Trabajamos cada proyecto de forma cercana, ágil y con una mirada cinematográfica.",
-    contract_terms_text: "Al continuar, aceptas la política de privacidad y los términos de servicio de LaesePROD.",
+    about_summary: "Somos una productora audiovisual centrada en arte visual. Trabajamos cada proyecto de forma cercana, ágil y con una mirada cinematográfica.",
+    contract_terms_text: "Al continuar, aceptas la política de privacidad y los términos de servicio de LaeseProd S.L.",
     faq_section_enabled: true,
     maintenance_mode: false,
 };
@@ -49,6 +49,6 @@ export const faqs = [
 ];
 
 export const footerData = {
-    description: "Bodas y videoclips con una mirada propia.",
-    copyright: `© ${new Date().getFullYear()} LaesePROD. Todos los derechos reservados.`,
+    description: "Arte visual con una mirada propia.",
+    copyright: `© ${new Date().getFullYear()} LaeseProd S.L. Todos los derechos reservados.`,
 };

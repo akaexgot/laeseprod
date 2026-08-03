@@ -24,7 +24,7 @@ const explanationDesktop = project.video_explanation_desktop;
 const explanationMobile = project.video_explanation_mobile;
 const hasExplanationVideo = Boolean(explanationDesktop || explanationMobile);
 const projectType = project.subtitle || "Producción audiovisual";
-const projectDescription = project.description || "Proyecto audiovisual desarrollado por LaesePROD con una mirada cercana, ritmo visual y una pieza final pensada para verse con intención.";
+const projectDescription = project.description || "Proyecto audiovisual desarrollado por LaeseProd S.L. con una mirada cercana, ritmo visual y una pieza final pensada para verse con intención.";
 ---
 
 <BaseLayout
@@ -49,7 +49,7 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
 
             <div class="project-case-hero__grid">
                 <article class="project-case-hero__copy">
-                    <p>{project.client_name || "LaesePROD"} / {projectType}</p>
+                    <p>{project.client_name || "LaeseProd S.L."} / {projectType}</p>
                     <h1 id="project-title">{project.title}</h1>
                     <div class="project-case-hero__summary">
                         <span>Resumen</span>
@@ -145,7 +145,7 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
         <nav class="project-case-nav" aria-label="Navegación de proyectos">
             {previousProject && (
                 <a href={`/proyectos/${previousProject.slug}`}>
-                    <span>Anterior</span>
+                    <span>Ver anterior</span>
                     <strong>{previousProject.title}</strong>
                 </a>
             )}
@@ -155,7 +155,7 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
             </a>
             {nextProject && (
                 <a href={`/proyectos/${nextProject.slug}`}>
-                    <span>Siguiente</span>
+                    <span>Ver siguiente</span>
                     <strong>{nextProject.title}</strong>
                 </a>
             )}
@@ -175,7 +175,7 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
                             ) : item.thumbnail ? (
                                 <img src={item.thumbnail} alt="" aria-hidden="true" />
                             ) : null}
-                            <span>{item.client_name || "LaesePROD"}</span>
+                            <span>{item.client_name || "LaeseProd S.L."}</span>
                             <strong>{item.title}</strong>
                         </a>
                     ))}
@@ -191,7 +191,7 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
         --ink: #080808;
         --line: rgba(8, 8, 8, .18);
         --muted: rgba(8, 8, 8, .58);
-        --signal: #e0312f;
+        --signal: #080808;
         color: var(--ink);
         background:
             linear-gradient(rgba(8, 8, 8, .045) 1px, transparent 1px),

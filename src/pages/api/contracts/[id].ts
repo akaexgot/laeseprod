@@ -145,7 +145,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
                 await sendContractCompletedOwnerEmail(
                     client_email,
                     clientName,
-                    contract.title || contract.contract_templates?.title || 'Contrato LaesePROD',
+                    contract.title || contract.contract_templates?.title || 'Contrato LaeseProd S.L.',
                     pdfBuffer
                 );
 

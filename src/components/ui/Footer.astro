@@ -13,15 +13,23 @@ const normalizeInstagramUrl = (value?: string | null) => {
     return `https://www.instagram.com/${user}`;
 };
 const instagramUrl = normalizeInstagramUrl(settings.instagram);
+const BRAND_NAME = "LaeseProd S.L.";
+const normalizeBrandText = (value?: string | null) => String(value || "")
+    .replace(/LaesePROD/g, BRAND_NAME)
+    .replace(/LaeseProd S\.L\.\./g, BRAND_NAME)
+    .replace(/Bodas\s*y\s*videoclips/gi, "Arte visual")
+    .replace(/Bodas\s*\/\s*Videoclips/gi, "Arte visual")
+    .trim();
+const siteName = normalizeBrandText(settings.site_name) || BRAND_NAME;
+const legalCopyright = normalizeBrandText(footer.copyright) || `© ${new Date().getFullYear()} ${BRAND_NAME}. Todos los derechos reservados.`;
 ---
 
 <footer class="site-footer site-footer--cinema">
     <div class="site-footer__stage">
-        <p class="site-footer__kicker">LaesePROD</p>
-        <a class="site-footer__wordmark" href="/" aria-label={`${settings.site_name || "LaesePROD"}, inicio`}>
-            <img src="/palabralogotipo-white.png?v=20260717-1" alt={settings.site_name || "LaesePROD"} width="1030" height="173" />
+        <p class="site-footer__kicker">LaeseProd S.L.</p>
+        <a class="site-footer__wordmark" href="/" aria-label={`${siteName}, inicio`}>
+            <img src="/logopositivo.png" alt={siteName} width="386" height="353" />
         </a>
-        <p class="site-footer__claim">{footer.description || settings.site_description}</p>
         <div class="site-footer__cta">
             <a href="/contacto">Empezar proyecto</a>
             <button class="js-open-chat" type="button">Chat en vivo</button>
@@ -48,7 +56,7 @@ const instagramUrl = normalizeInstagramUrl(settings.instagram);
     </div>
 
     <div class="site-footer__legal">
-        <span>{footer.copyright || `© ${new Date().getFullYear()} LaesePROD`}</span>
+        <span>{legalCopyright}</span>
         <a href="/legal#privacidad">Privacidad</a>
         <a href="/legal#aviso-legal">Aviso legal</a>
         <a href="/legal#cookies">Cookies</a>
@@ -82,7 +90,7 @@ const instagramUrl = normalizeInstagramUrl(settings.instagram);
     }
 
     footer.site-footer--cinema::after {
-        content: "LAESEPROD" !important;
+        content: "LAESEPROD S.L." !important;
         position: absolute !important;
         right: -2vw !important;
         bottom: 13vh !important;
@@ -115,7 +123,7 @@ const instagramUrl = normalizeInstagramUrl(settings.instagram);
 
     footer.site-footer--cinema .site-footer__wordmark {
         display: block !important;
-        width: min(960px, 84vw) !important;
+        width: min(620px, 78vw) !important;
         color: #fff !important;
         text-decoration: none !important;
         transition: transform 280ms cubic-bezier(.16, 1, .3, 1) !important;

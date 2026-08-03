@@ -9,7 +9,15 @@ export default defineConfig({
   output: 'server',
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: [
+        'three',
+        'three/examples/jsm/environments/RoomEnvironment.js',
+        'three/examples/jsm/loaders/GLTFLoader.js',
+        'three/examples/jsm/controls/OrbitControls.js',
+      ],
+    },
   },
 
   adapter: node({

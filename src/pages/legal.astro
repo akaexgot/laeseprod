@@ -3,12 +3,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getSettings } from "../lib/data";
 
 const settings = await getSettings();
-const siteName = settings.site_name || "LaesePROD";
+const siteName = settings.site_name || "LaeseProd S.L.";
 const contactEmail = settings.email || "laeseprod@gmail.com";
 const contactAddress = settings.address || "Andaluc\u00eda, Espa\u00f1a";
 ---
 
-<BaseLayout title="Legal" description="Aviso legal, privacidad y cookies de LaesePROD.">
+<BaseLayout title="Legal" description="Aviso legal, privacidad y cookies de LaeseProd S.L.">
     <section class="legal-hero">
         <div class="legal-hero__grid">
             <div class="legal-hero__content">

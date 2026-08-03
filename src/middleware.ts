@@ -69,7 +69,6 @@ function isStaticAssetPath(pathname: string) {
 
 function isMaintenanceBypassPath(pathname: string) {
   return pathname === "/mantenimiento"
-    || /^\/pagina0(?:1|3|6|7|8|9)(?:\/|$)/.test(pathname)
     || pathname.startsWith("/admin")
     || pathname.startsWith("/api/admin")
     || pathname.startsWith("/api/auth")

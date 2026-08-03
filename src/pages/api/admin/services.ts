@@ -21,7 +21,7 @@ export const PUT: APIRoute = async ({ request }) => {
 };
 
 const fixedServices: APIRoute = async () => new Response(
-    JSON.stringify({ error: "LaesePROD utiliza únicamente los servicios Bodas y Videoclips." }),
+    JSON.stringify({ error: "LaeseProd S.L. utiliza únicamente los servicios Bodas y Videoclips." }),
     { status: 405, headers: { Allow: "PUT" } },
 );
 

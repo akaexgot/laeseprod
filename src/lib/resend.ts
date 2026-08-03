@@ -73,7 +73,7 @@ function getEmailShell(title: string, contentHtml: string) {
           <tr>
             <td class="email-footer">
               <p>Este es un mensaje automático generado desde tu sitio web.</p>
-              <p>&copy; ${new Date().getFullYear()} LaesePROD</p>
+              <p>&copy; ${new Date().getFullYear()} LaeseProd S.L.</p>
             </td>
           </tr>
         </table>
@@ -104,7 +104,7 @@ export async function sendContactNotification(data: ContactFormData) {
     `;
 
     return sendEmailOrThrow({
-        from: `LaesePROD <${defaultFromEmail}>`,
+        from: `LaeseProd S.L. <${defaultFromEmail}>`,
         to: toEmail,
         replyTo: email,
         subject: `Nuevo contacto web: ${name}`,
@@ -149,14 +149,14 @@ export async function sendContactAutoReply(data: ContactFormData) {
         <p style="font-size: 15px; color: #000000; font-weight: 600;">¿Necesitas urgencia?</p>
         <p>Puedes escribirnos directamente a nuestro WhatsApp oficial para agilizar cualquier detalle previo.</p>
         <br/>
-        <p style="color: #666; font-style: italic;">— LaesePROD</p>
+        <p style="color: #666; font-style: italic;">— LaeseProd S.L.</p>
     `;
 
     return sendEmailOrThrow({
-        from: `LaesePROD <${defaultFromEmail}>`,
+        from: `LaeseProd S.L. <${defaultFromEmail}>`,
         to: data.email,
         subject: 'Hemos recibido tu solicitud de presupuesto',
-        html: getEmailShell('Notificación LaesePROD', content)
+        html: getEmailShell('Notificación LaeseProd S.L.', content)
     }, 'Error enviando autorespuesta de contacto');
 }
 /** Notificación de Contrato firmado con PDF adjunto */
@@ -170,27 +170,27 @@ export async function sendContractFinalizedEmail(
     const content = `
         <h2 class="email-title">Tu Contrato ha sido Firmado</h2>
         <p>¡Hola <strong>${clientName}</strong>!</p>
-        <p>Te enviamos adjunto a este correo la copia oficial y firmada digitalmente de tu contrato con LaesePROD.</p>
+        <p>Te enviamos adjunto a este correo la copia oficial y firmada digitalmente de tu contrato con LaeseProd S.L.</p>
         ${invoiceBuffer ? `<p>También encontrarás adjunta la factura correspondiente al pago realizado.</p>` : ''}
         <p>Este documento es legalmente vinculante y sirve como justificante de los acuerdos alcanzados.</p>
         <br/>
         <p>Si tienes cualquier duda respecto a las clausulas o los siguientes pasos, no dudes en responder a este correo.</p>
         <br/>
-        <p style="color: #666; font-style: italic;">— Gestión de Proyectos LaesePROD</p>
+        <p style="color: #666; font-style: italic;">— Gestión de Proyectos LaeseProd S.L.</p>
     `;
 
     const invoiceFilename = invoiceNumber
-        ? `Factura_${formatInvoiceNumber(invoiceNumber)}_LaesePROD.pdf`
-        : 'Factura_LaesePROD.pdf';
+        ? `Factura_${formatInvoiceNumber(invoiceNumber)}_LaeseProd_SL.pdf`
+        : 'Factura_LaeseProd_SL.pdf';
 
     return sendEmailOrThrow({
-        from: `Contratos | LaesePROD <${defaultFromEmail}>`,
+        from: `Contratos | LaeseProd S.L. <${defaultFromEmail}>`,
         to: clientEmail,
-        subject: `Documento firmado: Contrato LaesePROD`,
+        subject: `Documento firmado: Contrato LaeseProd S.L.`,
         html: getEmailShell('Copia de tu Contrato', content),
         attachments: [
             {
-                filename: `Contrato_LaesePROD_${clientName.replace(/\s+/g, '_')}.pdf`,
+                filename: `Contrato_LaeseProd_SL_${clientName.replace(/\s+/g, '_')}.pdf`,
                 content: Buffer.from(pdfBuffer),
                 contentType: 'application/pdf',
             },
@@ -225,18 +225,18 @@ export async function sendContractCompletedOwnerEmail(
     `;
 
     const invoiceFilename = invoiceNumber
-        ? `Factura_${formatInvoiceNumber(invoiceNumber)}_LaesePROD.pdf`
-        : 'Factura_LaesePROD.pdf';
+        ? `Factura_${formatInvoiceNumber(invoiceNumber)}_LaeseProd_SL.pdf`
+        : 'Factura_LaeseProd_SL.pdf';
 
     return sendEmailOrThrow({
-        from: `Contratos | LaesePROD <${defaultFromEmail}>`,
+        from: `Contratos | LaeseProd S.L. <${defaultFromEmail}>`,
         to: ownerEmail,
         replyTo: clientEmail,
         subject: `Contrato completado: ${contractTitle}`,
         html: getEmailShell('Contrato completado', content),
         attachments: [
             {
-                filename: `Contrato_LaesePROD_${clientName.replace(/\s+/g, '_')}.pdf`,
+                filename: `Contrato_LaeseProd_SL_${clientName.replace(/\s+/g, '_')}.pdf`,
                 content: Buffer.from(pdfBuffer),
                 contentType: 'application/pdf',
             },

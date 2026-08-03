@@ -28,7 +28,7 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
             <p class="admin-page-copy">Gestiona los listados de servicios publicos. Total: <strong>{cartas?.length || 0}</strong></p>
         </div>
         <button id="btn-add"
-            class="inline-flex items-center justify-center bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-500 transition-colors shadow-sm"
+            class="inline-flex items-center justify-center bg-white text-white text-sm font-medium rounded-md hover:bg-zinc-200 transition-colors shadow-sm"
             style="padding: 0.5rem 1rem; gap: 0.5rem;"
         >
             <i data-lucide="plus" class="w-4 h-4"></i>
@@ -62,7 +62,7 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
                                 <span class="capitalize text-xs px-2 py-1 bg-zinc-800 text-zinc-300 rounded border border-zinc-700">{req.tipo}</span>
                             </td>
                             <td class="hidden md:table-cell" style="padding: 1.25rem 1.5rem;">
-                                <a href={`/carta/${req.slug}`} target="_blank" class="text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1.5 text-xs">
+                                <a href={`/carta/${req.slug}`} target="_blank" class="text-zinc-200 hover:text-zinc-300 transition-colors flex items-center gap-1.5 text-xs">
                                     /carta/{req.slug} <i data-lucide="external-link" class="w-3 h-3"></i>
                                 </a>
                             </td>
@@ -71,7 +71,7 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
                                     <a href={`/admin/carta/${req.id}`} class="p-2 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 rounded-lg transition-all" title="Editar Contenido">
                                         <i data-lucide="edit" class="w-4.5 h-4.5"></i>
                                     </a>
-                                    <button class="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all btn-delete" data-id={req.id} title="Eliminar">
+                                    <button class="p-2 text-zinc-500 hover:text-white hover:bg-white/10 rounded-lg transition-all btn-delete" data-id={req.id} title="Eliminar">
                                         <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                     </button>
                                 </div>
@@ -100,34 +100,34 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
         <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
             <div>
                 <label class="block text-sm font-medium text-zinc-300 mb-2">Nombre interno *</label>
-                <input type="text" id="c-nombre" class="w-full px-4 py-2.5 border border-zinc-800 bg-zinc-950 rounded-lg text-zinc-100 focus:outline-none focus:border-rose-500 shadow-sm" placeholder="Ej: Precios Bodas 2024" />
+                <input type="text" id="c-nombre" class="w-full px-4 py-2.5 border border-zinc-800 bg-zinc-950 rounded-lg text-zinc-100 focus:outline-none focus:border-white shadow-sm" placeholder="Ej: Precios Bodas 2024" />
             </div>
             <div>
                 <label class="block text-sm font-medium text-zinc-300 mb-2">Slug (Ruta URL pública)</label>
-                <input type="text" id="c-slug" class="w-full px-4 py-2.5 border border-zinc-800 bg-zinc-950 rounded-lg text-zinc-100 focus:outline-none focus:border-rose-500 shadow-sm" placeholder="Dejar vacío para autogenerar" />
+                <input type="text" id="c-slug" class="w-full px-4 py-2.5 border border-zinc-800 bg-zinc-950 rounded-lg text-zinc-100 focus:outline-none focus:border-white shadow-sm" placeholder="Dejar vacío para autogenerar" />
             </div>
             <div>
                 <label class="block text-sm font-medium text-zinc-300 mb-3">Tipo de Contenido *</label>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
                     <label class="cursor-pointer h-full">
                         <input type="radio" name="c-tipo" value="imagenes" class="peer hidden" checked />
-                        <div class="h-full p-4 border border-zinc-800 bg-zinc-950/50 rounded-xl text-center peer-checked:border-rose-500 peer-checked:bg-rose-500/10 hover:border-zinc-700 transition-all flex flex-col items-center justify-center gap-2">
-                            <i data-lucide="image" class="w-6 h-6 text-zinc-500 peer-checked:text-rose-400 m-0"></i>
-                            <span class="text-xs font-semibold text-zinc-400 peer-checked:text-rose-300">Imágenes</span>
+                        <div class="h-full p-4 border border-zinc-800 bg-zinc-950/50 rounded-xl text-center peer-checked:border-white peer-checked:bg-white/10 hover:border-zinc-700 transition-all flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="image" class="w-6 h-6 text-zinc-500 peer-checked:text-zinc-200 m-0"></i>
+                            <span class="text-xs font-semibold text-zinc-400 peer-checked:text-zinc-300">Imágenes</span>
                         </div>
                     </label>
                     <label class="cursor-pointer h-full">
                         <input type="radio" name="c-tipo" value="pdf" class="peer hidden" />
-                        <div class="h-full p-4 border border-zinc-800 bg-zinc-950/50 rounded-xl text-center peer-checked:border-rose-500 peer-checked:bg-rose-500/10 hover:border-zinc-700 transition-all flex flex-col items-center justify-center gap-2">
-                            <i data-lucide="file-text" class="w-6 h-6 text-zinc-500 peer-checked:text-rose-400 m-0"></i>
-                            <span class="text-xs font-semibold text-zinc-400 peer-checked:text-rose-300">PDF</span>
+                        <div class="h-full p-4 border border-zinc-800 bg-zinc-950/50 rounded-xl text-center peer-checked:border-white peer-checked:bg-white/10 hover:border-zinc-700 transition-all flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="file-text" class="w-6 h-6 text-zinc-500 peer-checked:text-zinc-200 m-0"></i>
+                            <span class="text-xs font-semibold text-zinc-400 peer-checked:text-zinc-300">PDF</span>
                         </div>
                     </label>
                     <label class="cursor-pointer h-full">
                         <input type="radio" name="c-tipo" value="manual" class="peer hidden" />
-                        <div class="h-full p-4 border border-zinc-800 bg-zinc-950/50 rounded-xl text-center peer-checked:border-rose-500 peer-checked:bg-rose-500/10 hover:border-zinc-700 transition-all flex flex-col items-center justify-center gap-2">
-                            <i data-lucide="layout-list" class="w-6 h-6 text-zinc-500 peer-checked:text-rose-400 m-0"></i>
-                            <span class="text-xs font-semibold text-zinc-400 peer-checked:text-rose-300">Manual</span>
+                        <div class="h-full p-4 border border-zinc-800 bg-zinc-950/50 rounded-xl text-center peer-checked:border-white peer-checked:bg-white/10 hover:border-zinc-700 transition-all flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="layout-list" class="w-6 h-6 text-zinc-500 peer-checked:text-zinc-200 m-0"></i>
+                            <span class="text-xs font-semibold text-zinc-400 peer-checked:text-zinc-300">Manual</span>
                         </div>
                     </label>
                 </div>
@@ -138,18 +138,18 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
                 <!-- Imagenes -->
                 <div id="area-imagenes" class="upload-area block">
                     <label class="block text-sm font-medium text-zinc-300 mb-3">Imágenes de la carta</label>
-                    <div id="drop-imgs" class="relative group cursor-pointer border-2 border-dashed border-zinc-800 hover:border-rose-500/50 bg-zinc-950/50 rounded-xl transition-all h-32 flex flex-col items-center justify-center p-4 text-center">
+                    <div id="drop-imgs" class="relative group cursor-pointer border-2 border-dashed border-zinc-800 hover:border-white/50 bg-zinc-950/50 rounded-xl transition-all h-32 flex flex-col items-center justify-center p-4 text-center">
                         <input type="file" id="file-create-imgs" multiple accept="image/*" class="hidden" />
-                        <i data-lucide="image-plus" class="w-8 h-8 text-zinc-500 group-hover:text-rose-400 mb-2 transition-colors"></i>
+                        <i data-lucide="image-plus" class="w-8 h-8 text-zinc-500 group-hover:text-zinc-200 mb-2 transition-colors"></i>
                         <span id="text-imgs" class="text-sm font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors">Arrastra tus imágenes aquí o haz clic</span>
                     </div>
                 </div>
                 <!-- PDF -->
                 <div id="area-pdf" class="upload-area hidden">
                     <label class="block text-sm font-medium text-zinc-300 mb-3">Archivo PDF</label>
-                    <div id="drop-pdf" class="relative group cursor-pointer border-2 border-dashed border-zinc-800 hover:border-rose-500/50 bg-zinc-950/50 rounded-xl transition-all h-32 flex flex-col items-center justify-center p-4 text-center">
+                    <div id="drop-pdf" class="relative group cursor-pointer border-2 border-dashed border-zinc-800 hover:border-white/50 bg-zinc-950/50 rounded-xl transition-all h-32 flex flex-col items-center justify-center p-4 text-center">
                         <input type="file" id="file-create-pdf" accept="application/pdf" class="hidden" />
-                        <i data-lucide="file-up" class="w-8 h-8 text-zinc-500 group-hover:text-rose-400 mb-2 transition-colors"></i>
+                        <i data-lucide="file-up" class="w-8 h-8 text-zinc-500 group-hover:text-zinc-200 mb-2 transition-colors"></i>
                         <span id="text-pdf" class="text-sm font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors">Arrastra tu PDF aquí o haz clic</span>
                     </div>
                     <p class="text-xs text-zinc-500 mt-3 flex items-center gap-1.5"><i data-lucide="info" class="w-4 h-4"></i> El PDF se rasterizará y convertirá a imágenes.</p>
@@ -157,12 +157,12 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
                 <!-- Manual -->
                 <div id="area-manual" class="upload-area hidden">
                     <div class="flex items-start gap-3 bg-zinc-950/50 border border-zinc-800/80 p-4 rounded-lg text-zinc-400 text-sm">
-                        <i data-lucide="info" class="w-5 h-5 shrink-0 text-rose-500 mt-0.5"></i>
+                        <i data-lucide="info" class="w-5 h-5 shrink-0 text-white mt-0.5"></i>
                         <p class="leading-relaxed">Crearemos la carta base y te redirigiremos al <strong>editor avanzado</strong> para que puedas diseñar los bloques y servicios cómodamente.</p>
                     </div>
                 </div>
                 <!-- Uploading Status -->
-                <div id="upload-status" class="hidden items-center gap-3 mt-5 px-4 py-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs font-semibold text-rose-400">
+                <div id="upload-status" class="hidden items-center gap-3 mt-5 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-xs font-semibold text-zinc-200">
                     <i data-lucide="loader-2" class="w-4 h-4 animate-spin shrink-0"></i> 
                     <span id="upload-status-text">Subiendo archivos...</span>
                 </div>
@@ -170,13 +170,13 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
 
             <div style="border-top: 1px solid #27272a; padding-top: 1.5rem;">
                 <label class="block text-sm font-medium text-zinc-300 mb-2">Vídeo YouTube (Opcional)</label>
-                <input type="url" id="c-video" class="w-full px-4 py-2.5 border border-zinc-800 bg-zinc-950 rounded-lg text-zinc-100 focus:outline-none focus:border-rose-500 shadow-sm" placeholder="https://youtube.com/..." />
+                <input type="url" id="c-video" class="w-full px-4 py-2.5 border border-zinc-800 bg-zinc-950 rounded-lg text-zinc-100 focus:outline-none focus:border-white shadow-sm" placeholder="https://youtube.com/..." />
             </div>
         </div>
         <div class="bg-zinc-950/80 backdrop-blur-sm relative" style="border-top: 1px solid #27272a; padding: 1.25rem 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; align-items: center;">
-            <span id="modal-err" class="text-rose-400 text-sm font-medium absolute left-6 top-6 hidden"></span>
+            <span id="modal-err" class="text-zinc-200 text-sm font-medium absolute left-6 top-6 hidden"></span>
             <button id="modal-btn-cancel" class="text-zinc-400 hover:text-white transition-colors" style="padding: 0.625rem 1.25rem; font-size: 0.875rem; font-weight: 500; border-radius: 0.5rem;">Cancelar</button>
-            <button id="modal-btn-save" class="bg-rose-600 hover:bg-rose-500 text-white font-medium shadow-sm transition-all" style="padding: 0.625rem 1.5rem; font-size: 0.875rem; font-weight: 600; border-radius: 0.5rem;">Crear Carta</button>
+            <button id="modal-btn-save" class="bg-white hover:bg-zinc-200 text-white font-medium shadow-sm transition-all" style="padding: 0.625rem 1.5rem; font-size: 0.875rem; font-weight: 600; border-radius: 0.5rem;">Crear Carta</button>
         </div>
     </div>
 </div>
@@ -185,15 +185,15 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
 <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
         <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(0, 0, 0,0.1); border: 1px solid rgba(0, 0, 0,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             </div>
             <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar carta?</h3>
             <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción borrará la carta y todos sus servicios asociados permanentemente.</p>
         </div>
         <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
             <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
-            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #000000; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #000000; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0,0.3);">Eliminar</button>
         </div>
     </div>
 </div>
@@ -249,16 +249,16 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
             
             drop.addEventListener('dragover', (e) => { 
                 e.preventDefault(); 
-                drop.classList.add('border-rose-500', 'bg-rose-500/10'); 
+                drop.classList.add('border-white', 'bg-white/10'); 
             });
             
             drop.addEventListener('dragleave', (e) => { 
-                drop.classList.remove('border-rose-500', 'bg-rose-500/10'); 
+                drop.classList.remove('border-white', 'bg-white/10'); 
             });
             
             drop.addEventListener('drop', (e) => {
                 e.preventDefault();
-                drop.classList.remove('border-rose-500', 'bg-rose-500/10');
+                drop.classList.remove('border-white', 'bg-white/10');
                 if (e.dataTransfer?.files.length) {
                     input.files = e.dataTransfer.files;
                     updateText();
@@ -271,13 +271,13 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
                 const count = input.files?.length || 0;
                 if (count === 0) {
                     text.textContent = fileLabelPlural ? 'Arrastra tus imágenes aquí o haz clic' : 'Arrastra tu PDF aquí o haz clic';
-                    text.classList.remove('text-rose-400');
+                    text.classList.remove('text-zinc-200');
                 } else if (count === 1) {
                     text.textContent = input.files![0].name;
-                    text.classList.add('text-rose-400');
+                    text.classList.add('text-zinc-200');
                 } else {
                     text.textContent = `${count} imágenes seleccionadas`;
-                    text.classList.add('text-rose-400');
+                    text.classList.add('text-zinc-200');
                 }
             }
         }
@@ -406,7 +406,7 @@ const { data: cartas } = await sb.from('cartas').select('*').order('created_at',
             const container = document.getElementById('toast-container')!;
             const toast = document.createElement('div');
             toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
-                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-white text-white shadow-white/30'
             }`;
             toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
             if (type === 'success') {

@@ -45,7 +45,7 @@ if (serviceSupabase) {
     </div>
 
     {error && (
-        <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-md text-red-400 text-sm">
+        <div class="mb-6 p-4 bg-white/10 border border-white/20 rounded-md text-zinc-200 text-sm">
             Error al cargar mensajes: {error}
         </div>
     )}
@@ -72,7 +72,7 @@ if (serviceSupabase) {
                                             {msg.status === 'nuevo' && <span class="message-dot message-dot--inline"></span>}
                                         </div>
                                         <div class="text-xs text-zinc-400">
-                                            <a href={`mailto:${msg.email}`} class="hover:text-rose-400 transition-colors" onclick="event.stopPropagation()">{msg.email}</a>
+                                            <a href={`mailto:${msg.email}`} class="hover:text-zinc-200 transition-colors" onclick="event.stopPropagation()">{msg.email}</a>
                                         </div>
                                         {msg.phone && <span class="text-xs text-zinc-500 mt-1">{msg.phone}</span>}
                                     </div>
@@ -143,7 +143,7 @@ if (serviceSupabase) {
             <div class="mb-5 bg-zinc-950 p-4 border border-zinc-800/50 rounded-lg">
                 <p id="view-name" class="text-zinc-200 font-medium"></p>
                 <div class="flex items-center gap-3 mt-1 opacity-80">
-                    <a id="view-email" href="#" class="text-rose-400 text-sm hover:underline"></a>
+                    <a id="view-email" href="#" class="text-zinc-200 text-sm hover:underline"></a>
                     <span id="view-phone" class="text-zinc-500 text-sm"></span>
                 </div>
             </div>
@@ -156,7 +156,7 @@ if (serviceSupabase) {
             </div>
         </div>
         <div class="border-t border-zinc-800 bg-zinc-950 flex flex-shrink-0 justify-end rounded-b-xl" style="padding: 1rem 1.5rem; gap: 0.75rem;">
-            <button type="button" id="modal-view-delete" class="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
+            <button type="button" id="modal-view-delete" class="text-sm font-medium text-white hover:text-zinc-200 transition-colors mr-auto" style="padding: 0.5rem 1rem;">Eliminar</button>
             <button type="button" id="modal-view-close" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md bg-zinc-900" style="padding: 0.5rem 1rem;">Cerrar</button>
         </div>
     </div>
@@ -166,15 +166,15 @@ if (serviceSupabase) {
 <div id="confirm-overlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-[calc(100%-2rem)] sm:w-full max-w-[340px] shadow-2xl overflow-hidden" style="animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
         <div style="padding: 2rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(0, 0, 0,0.1); border: 1px solid rgba(0, 0, 0,0.2); display: flex; justify-content: center; align-items: center; margin-bottom: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             </div>
             <h3 style="font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">¿Eliminar permanentemente?</h3>
             <p style="font-size: 0.875rem; color: #a1a1aa; line-height: 1.4; margin: 0;">Esta acción no se puede deshacer. Los datos serán borrados del sistema.</p>
         </div>
         <div style="display: flex; border-top: 1px solid #27272a; padding: 1rem; gap: 0.75rem; background: #09090b;">
             <button id="confirm-cancel" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #27272a; color: #e4e4e7; font-weight: 500; font-size: 0.9rem; border: 1px solid #3f3f46; cursor: pointer;">Cancelar</button>
-            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #e11d48; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #be123c; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.3);">Eliminar</button>
+            <button id="confirm-yes" style="flex: 1; padding: 0.75rem; border-radius: 12px; background: #000000; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1px solid #000000; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0,0.3);">Eliminar</button>
         </div>
     </div>
 </div>
@@ -186,7 +186,7 @@ if (serviceSupabase) {
     .messages-surface table { border-collapse: collapse; }
     .message-row.is-new { background: rgba(255, 255, 255, .035); }
     .message-row.is-read { background: transparent !important; }
-    .message-dot { width: 8px; height: 8px; display: inline-block; flex: 0 0 auto; background: #f43f5e; border-radius: 50%; box-shadow: 0 0 10px rgba(244, 63, 94, .68); }
+    .message-dot { width: 8px; height: 8px; display: inline-block; flex: 0 0 auto; background: #222222; border-radius: 50%; box-shadow: 0 0 10px rgba(0, 0, 0, .68); }
     .message-dot--inline { margin-left: .1rem; }
     .messages-surface .btn-mark-read:disabled { opacity: .55; cursor: wait; transform: none; }
     @media (max-width: 640px) {
@@ -202,7 +202,7 @@ if (serviceSupabase) {
             const container = document.getElementById('toast-container')!;
             const toast = document.createElement('div');
             toast.className = `flex items-center shadow-2xl font-semibold pointer-events-auto ${
-                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-rose-500 text-white shadow-rose-500/30'
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-white text-white shadow-white/30'
             }`;
             toast.style.cssText = 'padding: 16px 24px; gap: 16px; border-radius: 16px; font-size: 16px; animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);';
             if (type === 'success') {

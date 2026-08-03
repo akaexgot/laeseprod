@@ -202,7 +202,7 @@ async function finalizePaidContract(supabase: SupabaseService, session: Stripe.C
         await sendContractCompletedOwnerEmail(
             contract.client_email,
             clientName,
-            contract.title || contract.contract_templates?.title || 'Contrato LaesePROD',
+            contract.title || contract.contract_templates?.title || 'Contrato LaeseProd S.L.',
             pdfBuffer,
             invoiceBuffer,
             invoiceNumber
