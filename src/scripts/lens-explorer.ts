@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+const HOME_MODEL_URL = "/logolaese3D.glb";
 
 function initLensExplorer() {
     const root = document.querySelector<HTMLElement>("[data-lens-explorer]");
@@ -88,20 +89,20 @@ function initLensExplorer() {
         const value = total > 0 ? clamp(loaded / total) : 0;
         if (progress) progress.style.transform = `scaleX(${value || 0.08})`;
         if (status) status.textContent = total > 0
-            ? `Cargando objeto · ${Math.round(value * 100)}%`
-            : "Cargando objeto";
+            ? `Cargando logo - ${Math.round(value * 100)}%`
+            : "Cargando logo";
     };
 
     const loader = new GLTFLoader();
     loader.load(
-        "/camera_lens.glb",
+        HOME_MODEL_URL,
         (gltf) => {
             if (disposed) return;
 
             const visual = new THREE.Group();
             const model = gltf.scene;
             visual.add(model);
-            visual.rotation.set(-0.08, 1.18, -0.035);
+            visual.rotation.set(Math.PI / 2, -0.18, 0);
 
             model.traverse((object) => {
                 if (!(object instanceof THREE.Mesh)) return;
@@ -133,15 +134,15 @@ function initLensExplorer() {
             const fittedSphere = fittedBox.getBoundingSphere(new THREE.Sphere());
             const fittedSize = fittedBox.getSize(new THREE.Vector3());
             const radius = Math.max(1, fittedSphere.radius);
-            const distance = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov * 0.5)) * 1.08;
+            const distance = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov * 0.5)) * 1.22;
 
-            camera.position.set(distance * 0.72, distance * 0.32, distance * 0.92);
+            camera.position.set(distance * 0.06, distance * 0.08, distance);
             camera.near = Math.max(0.01, distance / 100);
             camera.far = distance * 10;
             camera.updateProjectionMatrix();
 
             controls.target.set(0, 0, 0);
-            controls.minDistance = radius * 1.35;
+            controls.minDistance = radius * 1.18;
             controls.maxDistance = radius * 4.4;
             controls.update();
 
@@ -163,7 +164,7 @@ function initLensExplorer() {
         (event) => updateProgress(event.loaded, event.total),
         () => {
             root.classList.add("is-fallback");
-            if (status) status.textContent = "No se pudo cargar el objetivo";
+            if (status) status.textContent = "No se pudo cargar el logo";
         },
     );
 
