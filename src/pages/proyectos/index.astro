@@ -61,11 +61,61 @@ for (let index = 0; index < filteredProjects.length; index += 4) {
 
 <style>
     .projects-page { color: #fff; background: #000; }
-    .projects-page__head { position: sticky; top: 92px; z-index: 8; height: 0; display: flex; justify-content: flex-end; padding: 0 clamp(1rem, 4vw, 4.5rem); pointer-events: none; }
-    .projects-page__filters { display: flex; flex-wrap: wrap; gap: 18px; margin: 0; }
-    .projects-page__filters a { position: relative; padding: .95rem 0 .65rem; color: rgba(255, 255, 255, .66); font-family: "Courier New", monospace; font-size: .72rem; font-weight: 800; text-decoration: none; text-transform: uppercase; pointer-events: auto; text-shadow: 0 1px 12px rgba(0, 0, 0, .72); }
-    .projects-page__filters a::after { content: ""; position: absolute; right: 0; bottom: .35rem; left: 0; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform 180ms ease; }
-    .projects-page__filters a:hover, .projects-page__filters a:focus-visible, .projects-page__filters a.is-active { color: #fff; }
+    .projects-page__head { position: sticky; top: 96px; z-index: 8; height: 0; display: flex; justify-content: center; padding: 0 clamp(1rem, 4vw, 4.5rem); pointer-events: none; }
+    .projects-page__filters {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .2rem;
+        min-height: 3.35rem;
+        margin: 0;
+        padding: .28rem;
+        background: rgba(0, 0, 0, .56);
+        border: 1px solid rgba(255, 255, 255, .34);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, .34);
+        pointer-events: auto;
+    }
+    .projects-page__filters::before,
+    .projects-page__filters::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        color: rgba(255, 255, 255, .82);
+        pointer-events: none;
+    }
+    .projects-page__filters::before {
+        top: -5px;
+        left: -5px;
+        border-top: 1px solid currentColor;
+        border-left: 1px solid currentColor;
+    }
+    .projects-page__filters::after {
+        right: -5px;
+        bottom: -5px;
+        border-right: 1px solid currentColor;
+        border-bottom: 1px solid currentColor;
+    }
+    .projects-page__filters a {
+        position: relative;
+        min-width: 9.5rem;
+        padding: .9rem 1.35rem .82rem;
+        color: rgba(255, 255, 255, .58);
+        font-family: "Courier New", monospace;
+        font-size: .86rem;
+        font-weight: 900;
+        line-height: 1;
+        text-align: center;
+        text-decoration: none;
+        text-transform: uppercase;
+        text-shadow: 0 1px 12px rgba(0, 0, 0, .72);
+        transition: color 160ms ease, background 160ms ease;
+    }
+    .projects-page__filters a + a { border-left: 1px solid rgba(255, 255, 255, .2); }
+    .projects-page__filters a::after { content: ""; position: absolute; right: 1.35rem; bottom: .52rem; left: 1.35rem; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform 180ms ease; }
+    .projects-page__filters a:hover, .projects-page__filters a:focus-visible, .projects-page__filters a.is-active { color: #fff; background: rgba(255, 255, 255, .08); }
     .projects-page__filters a:hover::after, .projects-page__filters a:focus-visible::after, .projects-page__filters a.is-active::after { transform: scaleX(1); transform-origin: left; }
     .projects-screen { min-height: 100svh; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); background: #000; }
     .project-card { position: relative; min-height: 50svh; overflow: hidden; color: #fff; border: 1px solid rgba(255, 255, 255, .12); background: #050505; }
@@ -127,7 +177,9 @@ for (let index = 0; index < filteredProjects.length; index += 4) {
     .projects-empty p { margin: 0; color: rgba(255, 255, 255, .72); font-size: clamp(1.4rem, 6vw, 4rem); font-weight: 800; text-transform: uppercase; }
 
     @media (max-width: 760px) {
-        .projects-page__head { top: 82px; justify-content: flex-start; }
+        .projects-page__head { top: 82px; justify-content: center; padding: 0 1rem; }
+        .projects-page__filters { width: min(100%, 24rem); min-height: 3.1rem; }
+        .projects-page__filters a { min-width: 0; flex: 1; padding-inline: .85rem; font-size: .78rem; }
         .projects-screen { min-height: auto; grid-template-columns: 1fr; grid-template-rows: none; }
         .project-card { min-height: 50svh; }
         .project-card__content { justify-content: flex-start; }
