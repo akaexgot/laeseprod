@@ -10,6 +10,7 @@ import { deleteCloudinaryImage } from '../../../lib/cloudinary-admin';
 const PROJECT_COLUMNS = [
     'title',
     'subtitle',
+    'category',
     'slug',
     'description',
     'video_project',

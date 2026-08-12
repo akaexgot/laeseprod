@@ -53,6 +53,21 @@ const poster = sources.desktop.poster || sources.mobile.poster;
 </div>
 
 <script>
+    function disableBackgroundYouTubeCaptions(frame: HTMLIFrameElement) {
+        const send = (func: string, args: unknown[] = []) => {
+            frame.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+        };
+        const clean = () => {
+            send('unloadModule', ['captions']);
+            send('unloadModule', ['cc']);
+            send('setOption', ['captions', 'track', {}]);
+        };
+
+        frame.addEventListener('load', clean, { once: true });
+        window.setTimeout(clean, 450);
+        window.setTimeout(clean, 1400);
+    }
+
     function initVideoBackgrounds() {
         document.querySelectorAll<HTMLElement>('[data-video-background]:not([data-ready])').forEach((root) => {
             root.dataset.ready = 'true';
@@ -70,7 +85,9 @@ const poster = sources.desktop.poster || sources.mobile.poster;
                     video.addEventListener('playing', () => video.classList.add('is-visible'), { once: true });
                     video.play().catch(() => {});
                 } else if (selected.youtubeId && iframe) {
-                    iframe.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${selected.youtubeId}`;
+                    const origin = encodeURIComponent(window.location.origin);
+                    iframe.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${selected.youtubeId}&cc_load_policy=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${origin}`;
+                    disableBackgroundYouTubeCaptions(iframe);
                     iframe.addEventListener('load', () => iframe.classList.add('is-visible'), { once: true });
                 }
             };

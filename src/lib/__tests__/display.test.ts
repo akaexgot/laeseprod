@@ -48,7 +48,7 @@ describe('getVideoId / toYouTubeEmbed', () => {
   it('extracts shorts id and converts to embed', () => {
     const url = 'https://www.youtube.com/shorts/ZYXWVUTSRQP';
     expect(getVideoId(url)).toBe('ZYXWVUTSRQP');
-    expect(toYouTubeEmbed(url)).toBe('https://www.youtube-nocookie.com/embed/ZYXWVUTSRQP?rel=0');
+    expect(toYouTubeEmbed(url)).toBe('https://www.youtube-nocookie.com/embed/ZYXWVUTSRQP?rel=0&modestbranding=1&playsinline=1&cc_load_policy=0&iv_load_policy=3&disablekb=1&enablejsapi=1');
   });
 
   it('extracts mobile youtube ids with shared params', () => {

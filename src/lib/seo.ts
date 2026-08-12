@@ -1,4 +1,4 @@
-import { getVideoId } from './display';
+import { getVideoId, toYouTubeEmbed } from './display';
 
 export type JsonLd = Record<string, any>;
 
@@ -100,8 +100,8 @@ export function buildServiceSchema(service: any, path: string): JsonLd {
 
 export function buildProjectSchemas(project: any, path: string): JsonLd[] {
     const image = absoluteUrl(project.thumbnail) || getVideoThumbnail(project.video_project);
-    const videoId = getVideoId(project.video_project);
     const isNativeVideo = typeof project.video_project === 'string' && /\.(mp4|webm)(\?.*)?$/i.test(project.video_project);
+    const embedUrl = toYouTubeEmbed(project.video_project);
     const date = project.updated_at || project.created_at;
 
     const creativeWork = {
@@ -129,7 +129,7 @@ export function buildProjectSchemas(project: any, path: string): JsonLd[] {
             thumbnailUrl: image ? [image] : undefined,
             uploadDate: date,
             contentUrl: isNativeVideo ? absoluteUrl(project.video_project) : undefined,
-            embedUrl: videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : undefined,
+            embedUrl: embedUrl || undefined,
         }
         : null;
 

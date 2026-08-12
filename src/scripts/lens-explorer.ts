@@ -67,6 +67,7 @@ function initLensExplorer() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.055;
     controls.enablePan = false;
+    controls.enableZoom = false;
     controls.autoRotate = !reducedMotion.matches;
     controls.autoRotateSpeed = 0.62;
     controls.minPolarAngle = 0.22;
@@ -74,6 +75,7 @@ function initLensExplorer() {
 
     let disposed = false;
     let ground: THREE.Mesh<THREE.PlaneGeometry, THREE.ShadowMaterial> | null = null;
+    let resumeRotationTimer = 0;
 
     const resize = () => {
         const rect = root.getBoundingClientRect();
@@ -168,16 +170,27 @@ function initLensExplorer() {
         },
     );
 
-    const stopAutoRotation = () => {
+    const pauseAutoRotation = () => {
+        window.clearTimeout(resumeRotationTimer);
         controls.autoRotate = false;
-        root.classList.add("is-user-controlled");
+    };
+
+    const resumeAutoRotation = (delay = 900) => {
+        window.clearTimeout(resumeRotationTimer);
+        if (reducedMotion.matches) return;
+        resumeRotationTimer = window.setTimeout(() => {
+            if (!disposed) controls.autoRotate = true;
+        }, delay);
     };
 
     controls.addEventListener("start", () => {
-        stopAutoRotation();
+        pauseAutoRotation();
         root.classList.add("is-interacting");
     });
-    controls.addEventListener("end", () => root.classList.remove("is-interacting"));
+    controls.addEventListener("end", () => {
+        root.classList.remove("is-interacting");
+        resumeAutoRotation();
+    });
 
     canvas.addEventListener("keydown", (event) => {
         const step = 0.14;
@@ -198,10 +211,11 @@ function initLensExplorer() {
 
         if (handled) {
             event.preventDefault();
-            stopAutoRotation();
+            pauseAutoRotation();
             camera.position.copy(controls.target).add(offset.setFromSpherical(spherical));
             camera.lookAt(controls.target);
             controls.update();
+            resumeAutoRotation(1200);
         }
     });
 
@@ -215,6 +229,7 @@ function initLensExplorer() {
 
     window.addEventListener("pagehide", () => {
         disposed = true;
+        window.clearTimeout(resumeRotationTimer);
         renderer.setAnimationLoop(null);
         controls.dispose();
         ground?.geometry.dispose();

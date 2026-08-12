@@ -1,15 +1,23 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import VideoBackground from "../../components/ui/VideoBackground.astro";
+import InteractiveProjectVideo from "../../components/ui/InteractiveProjectVideo.astro";
 import FeaturedProjects from "../../components/home/FeaturedProjects.astro";
 import { getFeaturedProjects, getProjects } from "../../lib/data";
 import { buildItemListSchema } from "../../lib/seo";
 const [projects, featuredProjects] = await Promise.all([getProjects(), getFeaturedProjects()]);
-const featuredIds = new Set(featuredProjects.map((project: any) => project.id));
-const remainingProjects = projects.filter((project: any) => !featuredIds.has(project.id));
+const categoryParam = Astro.url.searchParams.get("categoria");
+const activeCategory = categoryParam === "bodas" ? "bodas" : "videoclips";
+const categoryLabels: Record<string, string> = { videoclips: "Videoclips", bodas: "Bodas" };
+const inferProjectCategory = (project: any) => {
+    const explicit = String(project.category || project.project_category || "").toLowerCase();
+    if (explicit === "bodas" || explicit === "videoclips") return explicit;
+    const haystack = `${project.slug || ""} ${project.subtitle || ""} ${project.title || ""}`.toLowerCase();
+    return /\bboda|wedding|ceremonia|celebraci[oó]n/.test(haystack) ? "bodas" : "videoclips";
+};
+const filteredProjects = projects.filter((project: any) => inferProjectCategory(project) === activeCategory);
 const projectScreens = [];
-for (let index = 0; index < remainingProjects.length; index += 4) {
-    projectScreens.push(remainingProjects.slice(index, index + 4));
+for (let index = 0; index < filteredProjects.length; index += 4) {
+    projectScreens.push(filteredProjects.slice(index, index + 4));
 }
 ---
 
@@ -17,17 +25,33 @@ for (let index = 0; index < remainingProjects.length; index += 4) {
     <section class="projects-page">
         <FeaturedProjects projects={featuredProjects} showAllLink={false} />
 
+        <header class="projects-page__head">
+            <nav class="projects-page__filters" aria-label="Categorias de proyectos">
+                <a class:list={{ "is-active": activeCategory === "videoclips" }} href="/proyectos">Videoclips</a>
+                <a class:list={{ "is-active": activeCategory === "bodas" }} href="/proyectos?categoria=bodas">Bodas</a>
+            </nav>
+        </header>
+
         {projectScreens.map((screen: any[], screenIndex: number) => (
             <section class="projects-screen" aria-label={`Pantalla de proyectos ${screenIndex + 1}`}>
                 {screen.map((project: any) => (
-                    <a class="project-card" href={`/proyectos/${project.slug}`} aria-label={project.title}>
-                        <VideoBackground desktop={project.video_project} mobile={project.video_project} title={project.title} overlay="dark" />
-                    </a>
+                    <article class="project-card" aria-label={project.title}>
+                        {project.video_project ? (
+                            <InteractiveProjectVideo url={project.video_project} title={project.title} poster={project.thumbnail} />
+                        ) : project.thumbnail ? (
+                            <img src={project.thumbnail} alt="" aria-hidden="true" />
+                        ) : (
+                            <div class="project-card__empty">Video no disponible</div>
+                        )}
+                        <div class="project-card__content">
+                            <a href={`/proyectos/${project.slug}`}>Ver proyecto completo</a>
+                        </div>
+                    </article>
                 ))}
             </section>
         ))}
 
-        {projects.length === 0 && (
+        {filteredProjects.length === 0 && (
             <section class="projects-empty">
                 <p>Pronto nuevos proyectos.</p>
             </section>
@@ -37,23 +61,81 @@ for (let index = 0; index < remainingProjects.length; index += 4) {
 
 <style>
     .projects-page { color: #fff; background: #000; }
+    .projects-page__head { position: sticky; top: 92px; z-index: 8; height: 0; display: flex; justify-content: flex-end; padding: 0 clamp(1rem, 4vw, 4.5rem); pointer-events: none; }
+    .projects-page__filters { display: flex; flex-wrap: wrap; gap: 18px; margin: 0; }
+    .projects-page__filters a { position: relative; padding: .95rem 0 .65rem; color: rgba(255, 255, 255, .66); font-family: "Courier New", monospace; font-size: .72rem; font-weight: 800; text-decoration: none; text-transform: uppercase; pointer-events: auto; text-shadow: 0 1px 12px rgba(0, 0, 0, .72); }
+    .projects-page__filters a::after { content: ""; position: absolute; right: 0; bottom: .35rem; left: 0; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform 180ms ease; }
+    .projects-page__filters a:hover, .projects-page__filters a:focus-visible, .projects-page__filters a.is-active { color: #fff; }
+    .projects-page__filters a:hover::after, .projects-page__filters a:focus-visible::after, .projects-page__filters a.is-active::after { transform: scaleX(1); transform-origin: left; }
     .projects-screen { min-height: 100svh; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); background: #000; }
-    .project-card { position: relative; min-height: 50svh; overflow: hidden; color: #fff; text-decoration: none; border: 1px solid rgba(255, 255, 255, .12); background: #050505; }
-    .project-card::after { content: ""; position: absolute; inset: 0; z-index: 2; background: rgba(0, 0, 0, .1); transition: opacity 260ms ease; pointer-events: none; }
-    .project-card :global(.video-background) { filter: grayscale(1) contrast(1.04); transition: transform 700ms cubic-bezier(.16, 1, .3, 1), filter 700ms cubic-bezier(.16, 1, .3, 1); }
-    .project-card:hover::after, .project-card:focus-visible::after { opacity: 0; }
-    .project-card:hover :global(.video-background), .project-card:focus-visible :global(.video-background) { transform: scale(1.055); filter: grayscale(0) contrast(1.04); }
+    .project-card { position: relative; min-height: 50svh; overflow: hidden; color: #fff; border: 1px solid rgba(255, 255, 255, .12); background: #050505; }
+    .project-card::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(180deg, transparent 46%, rgba(0, 0, 0, .78)); pointer-events: none; }
+    .project-card > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.04); }
+    .project-card :global(.interactive-project-video) { z-index: 1; }
+    .project-card__content { position: absolute; right: 1rem; bottom: 1rem; left: 1rem; z-index: 3; display: flex; justify-content: flex-end; pointer-events: none; }
+    .project-card__content a {
+        position: relative;
+        width: max-content;
+        padding: .72rem .9rem .68rem;
+        color: rgba(255, 255, 255, .88);
+        background: transparent;
+        border: 0;
+        text-decoration: none;
+        font-size: .66rem;
+        font-weight: 900;
+        line-height: 1;
+        text-transform: uppercase;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, .72);
+        pointer-events: auto;
+        transition: color 160ms ease, transform 160ms ease;
+    }
+    .project-card__content a::before,
+    .project-card__content a::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        color: rgba(255, 255, 255, .68);
+        transition: color 160ms ease, transform 160ms ease;
+    }
+    .project-card__content a::before {
+        top: 0;
+        left: 0;
+        border-top: 1px solid currentColor;
+        border-left: 1px solid currentColor;
+    }
+    .project-card__content a::after {
+        right: 0;
+        bottom: 0;
+        border-right: 1px solid currentColor;
+        border-bottom: 1px solid currentColor;
+    }
+    .project-card__content a:hover,
+    .project-card__content a:focus-visible {
+        color: #fff;
+        transform: translateY(-2px);
+    }
+    .project-card__content a:hover::before,
+    .project-card__content a:hover::after,
+    .project-card__content a:focus-visible::before,
+    .project-card__content a:focus-visible::after {
+        color: #fff;
+        transform: scale(1.08);
+    }
+    .project-card__empty { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .62); font-size: .82rem; font-weight: 900; text-transform: uppercase; }
     .projects-empty { min-height: 100svh; display: grid; place-items: center; padding: 7rem 1rem; background: #000; }
     .projects-empty p { margin: 0; color: rgba(255, 255, 255, .72); font-size: clamp(1.4rem, 6vw, 4rem); font-weight: 800; text-transform: uppercase; }
 
     @media (max-width: 760px) {
+        .projects-page__head { top: 82px; justify-content: flex-start; }
         .projects-screen { min-height: auto; grid-template-columns: 1fr; grid-template-rows: none; }
-        .project-card { min-height: 52svh; }
+        .project-card { min-height: 50svh; }
+        .project-card__content { justify-content: flex-start; }
     }
 
     @media (prefers-reduced-motion: reduce) {
         .project-card,
-        .project-card :global(.video-background) {
+        .project-card__content a {
             animation: none;
             transition: none;
         }

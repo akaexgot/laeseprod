@@ -25,6 +25,10 @@ const explanationMobile = project.video_explanation_mobile;
 const hasExplanationVideo = Boolean(explanationDesktop || explanationMobile);
 const projectType = project.subtitle || "Producción audiovisual";
 const projectDescription = project.description || "Proyecto audiovisual desarrollado por LaeseProd S.L. con una mirada cercana, ritmo visual y una pieza final pensada para verse con intención.";
+const projectDescriptionParagraphs = String(projectDescription)
+    .split(/\r?\n\s*\r?\n|\r?\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 ---
 
 <BaseLayout
@@ -51,10 +55,6 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
                 <article class="project-case-hero__copy">
                     <p>{project.client_name || "LaeseProd S.L."} / {projectType}</p>
                     <h1 id="project-title">{project.title}</h1>
-                    <div class="project-case-hero__summary">
-                        <span>Resumen</span>
-                        <p>{projectDescription}</p>
-                    </div>
                 </article>
 
                 <figure class="project-case-hero__media">
@@ -72,6 +72,27 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
                         <strong>{project.video_project ? "Pieza principal" : "Archivo visual"}</strong>
                     </figcaption>
                 </figure>
+
+                <div class="project-case-hero__summary">
+                    <div class="project-case-hero__summary-text">
+                        <span>Resumen</span>
+                        <div>
+                            {projectDescriptionParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+                        </div>
+                    </div>
+                    {hasExplanationVideo && (
+                        <figure class="project-case-hero__making">
+                            <InteractiveProjectVideo
+                                desktop={explanationDesktop}
+                                mobile={explanationMobile}
+                                title={`Making of de ${project.title}`}
+                                poster={project.thumbnail}
+                                orientation="vertical"
+                            />
+                            <figcaption>Making of</figcaption>
+                        </figure>
+                    )}
+                </div>
 
                 <aside class="project-case-hero__sheet" aria-label="Datos del proyecto">
                     <dl>
@@ -121,23 +142,14 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
             </div>
         </section>
 
-        {(hasExplanationVideo || project.thumbnail) && (
+        {(!hasExplanationVideo && project.thumbnail) && (
             <section class="project-case-process" aria-label="Material adicional">
                 <div class="project-case-process__label">
                     <span>Material adicional</span>
-                    <strong>{hasExplanationVideo ? "Making of" : "Imagen principal"}</strong>
+                    <strong>Imagen principal</strong>
                 </div>
                 <figure class="project-case-process__media">
-                    {hasExplanationVideo ? (
-                        <InteractiveProjectVideo
-                            desktop={explanationDesktop}
-                            mobile={explanationMobile}
-                            title={`Making of de ${project.title}`}
-                            poster={project.thumbnail}
-                        />
-                    ) : (
-                        <img src={project.thumbnail} alt={`Imagen de ${project.title}`} />
-                    )}
+                    <img src={project.thumbnail} alt={`Imagen de ${project.title}`} />
                 </figure>
             </section>
         )}
@@ -164,7 +176,7 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
         {relatedProjects.length > 0 && (
             <section class="project-case-related">
                 <div class="project-case-related__heading">
-                    <p>Más archivo</p>
+                    <p>Más archivos</p>
                     <h2>Otros trabajos</h2>
                 </div>
                 <div class="project-case-related__grid">
@@ -281,36 +293,91 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
     .project-case-hero h1 {
         max-width: 100%;
         margin: 0;
-        font-size: clamp(3.25rem, 5.25vw, 6.35rem);
+        font-size: clamp(3rem, 4.95vw, 5.95rem);
         font-weight: 950;
-        line-height: .88;
+        line-height: .96;
         letter-spacing: 0;
         text-transform: uppercase;
         overflow-wrap: anywhere;
     }
 
     .project-case-hero__summary {
-        max-width: 540px;
+        grid-column: 1 / -1;
+        width: 100%;
+        max-width: none;
         display: grid;
-        grid-template-columns: auto 1fr;
-        gap: .85rem;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+        gap: clamp(.9rem, 1.6vw, 1.6rem);
         align-items: start;
         border-top: 2px solid var(--ink);
         padding-top: 1rem;
+        overflow: visible;
     }
 
-    .project-case-hero__summary span {
+    .project-case-hero__summary-text {
+        display: grid;
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 1rem;
+        align-items: start;
+        max-width: 1040px;
+    }
+
+    .project-case-hero__summary-text > span {
         color: var(--signal);
         font-size: .68rem;
         font-weight: 900;
         text-transform: uppercase;
     }
 
+    .project-case-hero__summary-text > div {
+        display: grid;
+        gap: .85rem;
+    }
+
     .project-case-hero__summary p {
         margin: 0;
         color: rgba(8, 8, 8, .72);
-        font-size: clamp(.98rem, 1.25vw, 1.18rem);
-        line-height: 1.42;
+        font-size: clamp(1rem, 1.12vw, 1.12rem);
+        line-height: 1.36;
+    }
+
+    .project-case-hero__making {
+        position: relative;
+        width: 100%;
+        max-width: 340px;
+        aspect-ratio: 9 / 16;
+        min-height: 560px;
+        margin: 0;
+        overflow: visible;
+        align-self: start;
+        background: #000;
+        border: 2px solid var(--ink);
+        box-shadow: 9px 9px 0 var(--signal);
+    }
+
+    .project-case-hero__making :global(.interactive-project-video) {
+        overflow: hidden;
+    }
+
+    .project-case-hero__making figcaption {
+        position: absolute;
+        top: 0;
+        right: calc(100% + .85rem);
+        bottom: 0;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        padding: .55rem .28rem;
+        color: var(--ink);
+        background: transparent;
+        border-right: 0;
+        font-size: clamp(.9rem, 1.1vw, 1.15rem);
+        font-weight: 900;
+        line-height: .92;
+        text-transform: uppercase;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        pointer-events: none;
     }
 
     .project-case-hero__media {
@@ -326,8 +393,9 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
 
     .project-case-hero__frame {
         position: relative;
-        min-height: min(64svh, 620px);
         width: min(100%, 1080px);
+        aspect-ratio: 16 / 9;
+        max-height: min(64svh, 620px);
         justify-self: end;
         overflow: hidden;
         background: #050505;
@@ -511,6 +579,14 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
         padding: 0 clamp(1rem, 4vw, 4.5rem) clamp(4rem, 8vh, 6rem);
     }
 
+    .project-case-process--vertical {
+        grid-template-columns: minmax(160px, 250px) minmax(240px, 380px);
+        align-items: start;
+        justify-content: center;
+        gap: clamp(.8rem, 1.6vw, 1.25rem);
+        padding-inline: clamp(1rem, 4vw, 4.5rem);
+    }
+
     .project-case-process__label {
         display: grid;
         align-content: start;
@@ -518,6 +594,15 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
         padding: 1rem;
         color: #fff;
         background: var(--ink);
+        align-self: stretch;
+    }
+
+    .project-case-process--vertical .project-case-process__label {
+        align-self: start;
+        min-height: 0;
+        padding: .9rem 1rem;
+        border: 1px solid var(--ink);
+        box-shadow: 7px 7px 0 var(--signal);
     }
 
     .project-case-process__label span {
@@ -528,7 +613,7 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
     }
 
     .project-case-process__label strong {
-        font-size: clamp(1.6rem, 2.8vw, 3rem);
+        font-size: clamp(1.35rem, 2.1vw, 2.25rem);
         line-height: .94;
         text-transform: uppercase;
     }
@@ -539,6 +624,19 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
         margin: 0;
         overflow: hidden;
         background: #050505;
+    }
+
+    .project-case-process__media--vertical {
+        grid-column: 2;
+        width: 100%;
+        aspect-ratio: 9 / 16;
+        min-height: 0;
+        height: auto;
+        max-height: min(78svh, 660px);
+        justify-self: stretch;
+        border: 2px solid var(--ink);
+        background: #000;
+        box-shadow: 0 0 0 1px rgba(8, 8, 8, .18), 10px 10px 0 var(--signal);
     }
 
     .project-case-nav {
@@ -653,6 +751,16 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
             grid-template-columns: 1fr;
         }
 
+        .project-case-process--vertical {
+            grid-template-columns: minmax(0, 1fr);
+            justify-items: center;
+        }
+
+        .project-case-process--vertical .project-case-process__label {
+            width: min(100%, 360px);
+            justify-self: center;
+        }
+
         .project-case-hero__copy {
             align-self: end;
         }
@@ -681,9 +789,22 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
         }
 
         .project-case-hero__top,
-        .project-case-hero__summary,
         .project-case-hero__sheet {
             grid-template-columns: 1fr;
+        }
+
+        .project-case-hero__summary {
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        .project-case-hero__summary-text {
+            grid-template-columns: 1fr;
+        }
+
+        .project-case-hero__making {
+            width: min(100%, 330px);
+            min-height: 520px;
         }
 
         .project-case-hero__top {
@@ -691,7 +812,7 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
         }
 
         .project-case-hero__frame {
-            min-height: 54svh;
+            min-height: 0;
             box-shadow: 7px 7px 0 var(--signal);
         }
 
@@ -701,6 +822,12 @@ const projectDescription = project.description || "Proyecto audiovisual desarrol
 
         .project-case-process__media {
             min-height: 62svh;
+        }
+
+        .project-case-process__media--vertical {
+            grid-column: 1;
+            width: min(100%, 330px);
+            min-height: 0;
         }
     }
 

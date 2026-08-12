@@ -41,7 +41,7 @@ export function getInstagramEmbedUrl(url?: string | null): string | null {
 export function toYouTubeEmbed(url?: string | null): string | null {
   const id = getVideoId(url);
   if (!id) return null;
-  return `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
+  return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1&cc_load_policy=0&iv_load_policy=3&disablekb=1&enablejsapi=1`;
 }
 
 /**

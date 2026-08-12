@@ -3,6 +3,7 @@ import Head from "../components/seo/Head.astro";
 import GoogleTracking from "../components/seo/GoogleTracking.astro";
 import Navbar from "../components/ui/Navbar.astro";
 import Footer from "../components/ui/Footer.astro";
+import { MessageCircle } from "@lucide/astro";
 import { getSettings } from "../lib/data";
 import "../styles/global.css";
 import "../styles/contacto-chat.css";
@@ -20,6 +21,9 @@ interface Props {
 
 const props = Astro.props;
 const settings = await getSettings();
+const siteName = String(settings.site_name || "LaeseProd S.L.")
+    .replace(/LaesePROD/g, "LaeseProd S.L.")
+    .replace(/LaeseProd S\.L\.\./g, "LaeseProd S.L.");
 ---
 
 <!doctype html>
@@ -33,11 +37,16 @@ const settings = await getSettings();
         <main><slot /></main>
         <Footer />
 
+        <button id="floating-chat-btn" class="global-chat-trigger" type="button" aria-label="Abrir chat en vivo" title="Chat en vivo">
+            <MessageCircle size={19} stroke-width={2} aria-hidden="true" />
+            <span></span>
+        </button>
+
         <aside id="global-chat-panel" class="chat-panel" aria-label="Chat en vivo" aria-hidden="true">
             <header class="chat-panel__header">
                 <div class="chat-panel__avatar">LP</div>
                 <div class="chat-panel__header-info">
-                    <h2>{settings.site_name || "LaeseProd S.L."}</h2>
+                    <h2>{siteName}</h2>
                     <p><span class="chat-panel__status-dot"></span>En línea</p>
                 </div>
                 <button id="global-chat-close" class="chat-panel__close" type="button" aria-label="Cerrar chat">×</button>

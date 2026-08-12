@@ -34,8 +34,8 @@ export const navigation = [
 ];
 
 export const projects = [
-    { id: "p1", title: "Proyecto provisional 01", subtitle: "", slug: "proyecto-01", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 1, created_at: "2026-01-01" },
-    { id: "p2", title: "Proyecto provisional 02", subtitle: "", slug: "proyecto-02", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 2, created_at: "2026-01-02" },
+    { id: "p1", title: "Proyecto provisional 01", subtitle: "", category: "videoclips", slug: "proyecto-01", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 1, created_at: "2026-01-01" },
+    { id: "p2", title: "Proyecto provisional 02", subtitle: "", category: "bodas", slug: "proyecto-02", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 2, created_at: "2026-01-02" },
 ];
 
 export const services = [

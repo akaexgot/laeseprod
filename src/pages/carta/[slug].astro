@@ -30,9 +30,7 @@ const videoUrl = typeof carta.video_url === 'string' ? carta.video_url.trim() : 
 const hasVideo = !!videoUrl;
 const isVertical = hasVideo && /youtube(?:-nocookie)?\.com\/shorts\//i.test(videoUrl);
 const youtubeEmbedUrl = toYouTubeEmbed(videoUrl);
-const videoEmbedUrl = youtubeEmbedUrl
-    ? `${youtubeEmbedUrl}&playsinline=1&modestbranding=1`
-    : videoUrl;
+const videoEmbedUrl = youtubeEmbedUrl ? `${youtubeEmbedUrl}&origin=${encodeURIComponent(Astro.url.origin)}` : videoUrl;
 
 const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.tipo === 'manual';
 ---
@@ -194,6 +192,23 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
 </BaseLayout>
 
 <script is:inline>
+    function disableCartaYouTubeCaptions(frame) {
+        const send = (func, args = []) => {
+            frame.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+        };
+        const clean = () => {
+            send('unloadModule', ['captions']);
+            send('unloadModule', ['cc']);
+            send('setOption', ['captions', 'track', {}]);
+        };
+
+        frame.addEventListener('load', clean, { once: true });
+        window.setTimeout(clean, 450);
+        window.setTimeout(clean, 1400);
+    }
+
+    document.querySelectorAll('iframe[src*="youtube-nocookie.com/embed"]').forEach(disableCartaYouTubeCaptions);
+
     window.showShareToast = function() {
         navigator.clipboard.writeText(window.location.href);
         const toast = document.getElementById('toast-share');

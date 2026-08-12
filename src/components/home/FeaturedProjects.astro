@@ -26,8 +26,11 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
 
 <style>
     .featured-projects { position: relative; min-height: 100svh; overflow: hidden; color: #fff; background: #000; isolation: isolate; }
-    .featured-projects__all { position: absolute; right: clamp(1.2rem, 4vw, 3.5rem); bottom: clamp(1.2rem, 4vw, 3rem); z-index: 5; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0 1.05rem; color: #000; background: #fff; border: 1px solid rgba(255, 255, 255, .72); border-radius: 999px; font-size: .76rem; font-weight: 800; text-decoration: none; text-transform: uppercase; transition: transform 180ms ease, background 180ms ease, color 180ms ease; }
-    .featured-projects__all:hover, .featured-projects__all:focus-visible { color: #fff; background: #000; transform: translateY(-2px); }
+    .featured-projects__all { position: absolute; right: clamp(1.2rem, 4vw, 3.5rem); bottom: clamp(1.2rem, 4vw, 3rem); z-index: 5; display: inline-flex; align-items: center; justify-content: center; padding: .8rem .9rem; color: rgba(255, 255, 255, .78); background: rgba(0, 0, 0, .18); border: 0; border-radius: 0; font-family: "Courier New", monospace; font-size: .68rem; font-weight: 800; letter-spacing: 0; text-decoration: none; text-transform: uppercase; backdrop-filter: blur(8px); transition: color 180ms ease, transform 180ms ease; }
+    .featured-projects__all::before, .featured-projects__all::after { content: ""; position: absolute; width: 14px; height: 14px; color: currentColor; opacity: .72; }
+    .featured-projects__all::before { top: 0; left: 0; border-top: 1px solid currentColor; border-left: 1px solid currentColor; }
+    .featured-projects__all::after { right: 0; bottom: 0; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; }
+    .featured-projects__all:hover, .featured-projects__all:focus-visible { color: #fff; transform: translateY(-2px); }
     .featured-projects__cuts { position: absolute; inset: 0; z-index: 1; }
     .project-cut { position: absolute; inset: 0; overflow: hidden; color: #fff; text-decoration: none; background: #060606; }
     .project-cut::before { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(115deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, .05) 48%, rgba(0, 0, 0, .55)); transition: opacity 280ms ease; }

@@ -116,7 +116,10 @@ function initRollingContentReveal() {
         wheelRadius = targetSize * 0.46;
         travelEdge = viewWidth / 2 + targetSize * 0.7;
 
-        const screenYRatio = viewportWidth <= 900 ? 0.34 : 0.53;
+        const isCompactLandscape = viewportWidth >= 600 && viewportHeight <= 620;
+        const screenYRatio = isCompactLandscape
+            ? 0.5
+            : viewportWidth <= 900 ? 0.24 : 0.53;
         lensScreenY = viewportHeight * screenYRatio;
         rollingGroup.position.y = (0.5 - screenYRatio) * viewHeight;
 
@@ -238,7 +241,7 @@ function initRollingContentReveal() {
             finishReveal();
         } else {
             const elapsed = Math.max(0, time - animationStart);
-            const revealDuration = viewportWidth <= 680 ? 3600 : 4700;
+            const revealDuration = viewportWidth <= 680 ? 3000 : 4700;
             const progressValue = easeInOutCubic(clamp(elapsed / revealDuration));
             const worldX = THREE.MathUtils.lerp(-travelEdge, travelEdge, progressValue);
             const rotation = -(worldX + travelEdge) / wheelRadius;

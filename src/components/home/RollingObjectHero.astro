@@ -9,7 +9,7 @@
                 class="object-viewer__canvas"
                 data-explorer-canvas
                 tabindex="0"
-                aria-label="Logo 3D interactivo de LaeseProd. Arrastra para girarlo, usa la rueda para acercarlo o las flechas del teclado para rotarlo."
+                aria-label="Logo 3D interactivo de LaeseProd. Arrastra para girarlo o usa las flechas del teclado para rotarlo."
             ></canvas>
 
             <div class="object-viewer__rings" aria-hidden="true">
@@ -30,15 +30,16 @@
                 <span class="object-viewer__drag" aria-hidden="true">
                     <i></i><i></i><i></i>
                 </span>
-                Arrastra para girar - rueda para acercar
+                Arrastra para girar
             </p>
         </div>
 
         <div class="object-copy">
             <p class="object-copy__eyebrow"><span>01</span> LaeseProd S.L.</p>
             <h1 id="rolling-title">
-                La mirada que<br />
-                <em>lo cambia todo</em>
+                <span>La mirada</span>
+                <span>que lo cambia</span>
+                <span class="object-copy__title-accent">todo</span>
             </h1>
             <p class="object-copy__text">
                 Arte visual con mirada cinematografica para convertir cada instante en una imagen capaz de permanecer.
@@ -47,6 +48,10 @@
                 <a href="/proyectos">Ver proyectos</a>
                 <a href="/contacto">Contactar</a>
             </div>
+            <nav class="object-copy__service-links" aria-label="Accesos directos a servicios">
+                <a href="/servicios/videoclips">Videoclips</a>
+                <a href="/servicios/bodas">Bodas</a>
+            </nav>
             <div class="object-copy__footer" aria-hidden="true">
                 <span>LAESEPROD</span>
                 <span>SEVILLA - ESP</span>
@@ -368,17 +373,42 @@
         position: relative;
         z-index: 1;
         margin: 0;
-        font-size: clamp(4rem, 6.3vw, 8rem);
-        font-weight: 850;
-        line-height: .81;
+        max-width: min(760px, 100%);
+        font-family: "Arial Black", Arial, Helvetica, sans-serif;
+        font-size: clamp(3.6rem, 5.8vw, 7.2rem);
+        font-weight: 950;
+        line-height: .84;
+        text-transform: uppercase;
     }
 
-    .object-copy h1 em {
-        display: inline-block;
-        color: transparent;
-        -webkit-text-stroke: 1px rgba(255, 255, 255, .7);
-        font-family: Georgia, "Times New Roman", serif;
-        font-weight: 400;
+    .object-copy h1 span {
+        display: block;
+    }
+
+    .object-copy h1 span:nth-child(2) {
+        color: rgba(255, 255, 255, .9);
+    }
+
+    .object-copy__title-accent {
+        position: relative;
+        width: max-content;
+        color: #0a0a0a;
+        padding: .02em .12em .07em;
+        margin-top: .1em;
+        background: #fff;
+        line-height: .78;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .88);
+    }
+
+    .object-copy__title-accent::after {
+        content: "";
+        position: absolute;
+        right: -.18em;
+        bottom: -.08em;
+        width: .55em;
+        height: .55em;
+        border-right: 1px solid rgba(255, 255, 255, .62);
+        border-bottom: 1px solid rgba(255, 255, 255, .62);
     }
 
     .object-copy__text {
@@ -417,6 +447,54 @@
         text-decoration: none;
         text-transform: uppercase;
         transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+    }
+
+    .object-copy__service-links {
+        position: absolute;
+        z-index: 2;
+        right: clamp(42px, 6.5vw, 118px);
+        bottom: clamp(70px, 8vh, 96px);
+        display: flex;
+        gap: 18px;
+        font-family: "Courier New", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .object-copy__service-links a {
+        position: relative;
+        color: rgba(255, 255, 255, .66);
+        text-decoration: none;
+        padding: 10px 0 8px;
+    }
+
+    .object-copy__service-links a::before,
+    .object-copy__service-links a::after {
+        content: "";
+        position: absolute;
+        width: 11px;
+        height: 11px;
+        opacity: .62;
+    }
+
+    .object-copy__service-links a::before {
+        top: 0;
+        left: -9px;
+        border-top: 1px solid currentColor;
+        border-left: 1px solid currentColor;
+    }
+
+    .object-copy__service-links a::after {
+        right: -9px;
+        bottom: 0;
+        border-right: 1px solid currentColor;
+        border-bottom: 1px solid currentColor;
+    }
+
+    .object-copy__service-links a:hover,
+    .object-copy__service-links a:focus-visible {
+        color: #fff;
     }
 
     .object-copy__actions a + a {
@@ -613,7 +691,7 @@
 
     @media (max-width: 900px) {
         .rolling-study {
-            overflow-y: auto;
+            min-height: 100svh;
         }
 
         .rolling-study__content {
@@ -622,7 +700,11 @@
         }
 
         .object-viewer {
-            min-height: 58svh;
+            min-height: 44svh;
+        }
+
+        .object-viewer__canvas {
+            touch-action: pan-y !important;
         }
 
         .object-viewer__index {
@@ -639,12 +721,13 @@
         }
 
         .object-copy {
-            min-height: 50svh;
-            padding: 76px 24px 116px;
+            min-height: 56svh;
+            padding: 58px clamp(20px, 5vw, 36px) 72px;
         }
 
         .object-copy h1 {
-            font-size: clamp(3.8rem, 15vw, 6.8rem);
+            font-size: clamp(3.4rem, 11vw, 6.2rem);
+            line-height: .88;
         }
 
         .object-copy__text {
@@ -652,9 +735,14 @@
         }
 
         .object-copy__footer {
-            right: 24px;
-            bottom: 76px;
-            left: 24px;
+            right: clamp(20px, 5vw, 36px);
+            bottom: 24px;
+            left: clamp(20px, 5vw, 36px);
+        }
+
+        .object-copy__service-links {
+            right: clamp(20px, 5vw, 36px);
+            bottom: 52px;
         }
 
         .rolling-study__frame {
@@ -687,7 +775,7 @@
 
     @media (max-width: 520px) {
         .object-viewer {
-            min-height: 58svh;
+            min-height: 44svh;
         }
 
         .object-viewer__index {
@@ -707,11 +795,23 @@
         }
 
         .object-copy {
-            padding-top: 66px;
+            min-height: 56svh;
+            padding: 38px 18px 54px;
         }
 
         .object-copy__eyebrow {
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .object-copy__eyebrow span {
+            width: 28px;
+            height: 28px;
+        }
+
+        .object-copy h1 {
+            font-size: clamp(2.65rem, 13.2vw, 3.55rem);
+            line-height: .88;
         }
 
         .object-copy__text {
@@ -719,15 +819,86 @@
         }
 
         .object-copy__actions {
-            margin-top: 24px;
+            gap: 8px;
+            margin-top: 18px;
         }
 
         .object-copy__actions a {
-            flex: 1 1 140px;
+            min-height: 46px;
+            flex: 1 1 128px;
+            padding-inline: .85rem;
+            font-size: .69rem;
         }
 
-        .object-copy__footer span:nth-child(2) {
+        .object-copy__service-links {
+            right: 18px;
+            bottom: 42px;
+            gap: 14px;
+            font-size: 8px;
+        }
+
+        .object-copy__footer {
+            right: 18px;
+            bottom: 18px;
+            left: 18px;
+        }
+
+        .object-copy__footer span:nth-child(2),
+        .object-copy__footer span:nth-child(3) {
             display: none;
+        }
+    }
+
+    @media (min-width: 600px) and (max-width: 900px) and (max-height: 620px) and (orientation: landscape) {
+        .rolling-study__content {
+            min-height: 100svh;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .object-viewer,
+        .object-copy {
+            min-height: 100svh;
+        }
+
+        .object-copy {
+            padding: 84px 28px 18px;
+        }
+
+        .object-copy__eyebrow {
+            margin-bottom: 12px;
+        }
+
+        .object-copy h1 {
+            font-size: clamp(2.65rem, 6vw, 3.45rem);
+            line-height: .88;
+        }
+
+        .object-copy__text {
+            display: none;
+        }
+
+        .object-copy__actions {
+            margin-top: 14px;
+        }
+
+        .object-copy__footer {
+            right: 28px;
+            bottom: 18px;
+            left: 28px;
+        }
+
+        .object-viewer__index,
+        .rolling-study__meta {
+            top: 90px;
+        }
+
+        .rolling-study__frame {
+            inset: 78px 12px 18px;
+        }
+
+        .rolling-study__counter,
+        .rolling-study__loading {
+            bottom: 28px;
         }
     }
 

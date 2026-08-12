@@ -143,6 +143,13 @@ const projects = await getProjects();
                             <input type="text" id="p-subtitle" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="Ej: Video corporativo / Spots" />
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Categoría *</label>
+                            <select id="p-category" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm">
+                                <option value="videoclips">Videoclips</option>
+                                <option value="bodas">Bodas</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Cliente</label>
                             <input type="text" id="p-client" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" />
                         </div>
@@ -174,7 +181,7 @@ const projects = await getProjects();
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Fondo (YouTube o Cloudinary MP4)</label>
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo principal / Home (Cloudinary recomendado)</label>
                             <div class="flex gap-2">
                                 <input type="text" id="p-video" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="URL YouTube o Cloudinary" />
                                 <button type="button" onclick="document.getElementById('file-p-video').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
@@ -187,8 +194,17 @@ const projects = await getProjects();
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of (YouTube Shorts / Instagram Reel)</label>
-                            <input type="url" id="p-makingof" class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="URL de YouTube Short o Instagram Reel" />
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of vertical (9:16)</label>
+                            <div class="flex gap-2">
+                                <input type="url" id="p-makingof" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="URL Cloudinary, YouTube Short o Instagram Reel" />
+                                <button type="button" onclick="document.getElementById('file-p-makingof').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
+                                    <i data-lucide="upload" class="w-4 h-4"></i>
+                                </button>
+                                <input type="file" id="file-p-makingof" class="hidden" accept="video/mp4,video/webm" />
+                            </div>
+                            <div id="loading-p-makingof" class="hidden items-center gap-2 mt-2 text-xs text-white font-medium">
+                                <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo...
+                            </div>
                         </div>
                         <div style="padding-top: 0.5rem;">
                             <label class="flex items-center gap-2 cursor-pointer">
@@ -370,6 +386,7 @@ const projects = await getProjects();
             $('project-id').value = data?.id || '';
             $('p-title').value = data?.title || '';
             $('p-subtitle').value = data?.subtitle || '';
+            $('p-category').value = data?.category === 'bodas' ? 'bodas' : 'videoclips';
             $('p-client').value = data?.client_name || '';
             $('p-description').value = data?.description || '';
             
@@ -496,6 +513,31 @@ const projects = await getProjects();
                     loading.classList.add('hidden');
                     loading.classList.remove('flex');
                     fileInputVideo.value = '';
+                }
+            });
+        }
+
+        const fileInputMakingOf = document.getElementById('file-p-makingof') as HTMLInputElement;
+        if (fileInputMakingOf) {
+            fileInputMakingOf.addEventListener('change', async () => {
+                const file = fileInputMakingOf.files?.[0];
+                if (!file) return;
+
+                const loading = document.getElementById('loading-p-makingof')!;
+                loading.classList.remove('hidden');
+                loading.classList.add('flex');
+
+                try {
+                    const data = await uploadToCloudinary(file, 'making_of');
+                    $('p-makingof').value = data.url;
+                    showToast('Making of subido correctamente', 'success');
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : 'Error de red al subir making of';
+                    showToast(message, 'error');
+                } finally {
+                    loading.classList.add('hidden');
+                    loading.classList.remove('flex');
+                    fileInputMakingOf.value = '';
                 }
             });
         }
@@ -716,6 +758,7 @@ const projects = await getProjects();
             const body: any = {
                 title,
                 subtitle: $('p-subtitle').value.trim() || null,
+                category: $('p-category').value === 'bodas' ? 'bodas' : 'videoclips',
                 client_name: $('p-client').value.trim() || null,
                 description: $('p-description').value.trim() || null,
                 thumbnail: $('p-thumbnail').value.trim() || null,

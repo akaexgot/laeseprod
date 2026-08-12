@@ -1,4 +1,5 @@
 ---
+import { Play } from "@lucide/astro";
 import { getInstagramEmbedUrl, getVideoId, isInstagramReel } from "../../lib/display";
 import { optimizeCloudinaryVideo } from "../../lib/cloudinary";
 
@@ -8,9 +9,11 @@ interface Props {
     mobile?: string | null;
     title?: string;
     poster?: string | null;
+    orientation?: "auto" | "vertical";
 }
 
-const { url = "", desktop = "", mobile = "", title = "Video del proyecto", poster = "" } = Astro.props;
+const { url = "", desktop = "", mobile = "", title = "Video del proyecto", poster = "", orientation = "auto" } = Astro.props;
+const forceVertical = orientation === "vertical";
 
 function source(value: string | null | undefined, width: number) {
     const cleanUrl = String(value || "").trim();
@@ -22,8 +25,9 @@ function source(value: string | null | undefined, width: number) {
     return {
         nativeUrl: isNative ? optimizeCloudinaryVideo(cleanUrl, { width, quality: "auto:best" }) : "",
         youtubeId,
+        youtubePoster: youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : "",
         instagramEmbed: isInstagram ? getInstagramEmbedUrl(cleanUrl) : "",
-        isVertical: isShort || isInstagram,
+        isVertical: forceVertical || isShort || isInstagram,
         hasMedia: Boolean(cleanUrl),
     };
 }
@@ -57,10 +61,28 @@ const sources = {
         allowfullscreen
     ></iframe>
     <img class="interactive-project-video__media interactive-project-video__poster" alt={title} />
+    <button class="interactive-project-video__play" type="button" aria-label={`Reproducir ${title}`}>
+        <Play size={34} stroke-width={2.6} fill="currentColor" aria-hidden="true" />
+    </button>
     <div class="interactive-project-video__empty">Video no disponible</div>
 </div>
 
 <script>
+    function disableInteractiveYouTubeCaptions(frame: HTMLIFrameElement) {
+        const send = (func: string, args: unknown[] = []) => {
+            frame.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+        };
+        const clean = () => {
+            send('unloadModule', ['captions']);
+            send('unloadModule', ['cc']);
+            send('setOption', ['captions', 'track', {}]);
+        };
+
+        frame.addEventListener('load', clean, { once: true });
+        window.setTimeout(clean, 450);
+        window.setTimeout(clean, 1400);
+    }
+
     function initInteractiveProjectVideos() {
         document.querySelectorAll<HTMLElement>('[data-interactive-project-video]:not([data-ready])').forEach((root) => {
             root.dataset.ready = 'true';
@@ -72,10 +94,11 @@ const sources = {
             const youtubeFrame = root.querySelector<HTMLIFrameElement>('.interactive-project-video__youtube');
             const instagramFrame = root.querySelector<HTMLIFrameElement>('.interactive-project-video__instagram');
             const posterImage = root.querySelector<HTMLImageElement>('.interactive-project-video__poster');
+            const playButton = root.querySelector<HTMLButtonElement>('.interactive-project-video__play');
             const empty = root.querySelector<HTMLElement>('.interactive-project-video__empty');
 
             const hideAll = () => {
-                root.querySelectorAll<HTMLElement>('.interactive-project-video__media, .interactive-project-video__empty').forEach((item) => {
+                root.querySelectorAll<HTMLElement>('.interactive-project-video__media, .interactive-project-video__empty, .interactive-project-video__play').forEach((item) => {
                     item.classList.remove('is-visible');
                 });
                 if (nativeVideo) {
@@ -99,15 +122,30 @@ const sources = {
             }
 
             if (selected?.youtubeId && youtubeFrame) {
-                youtubeFrame.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?rel=0&modestbranding=1&playsinline=1&controls=1`;
-                youtubeFrame.title = title;
-                youtubeFrame.classList.add('is-visible');
+                const loadYouTube = () => {
+                    const origin = encodeURIComponent(window.location.origin);
+                    posterImage?.classList.remove('is-visible');
+                    playButton?.classList.remove('is-visible');
+                    youtubeFrame.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&controls=1&cc_load_policy=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${origin}`;
+                    youtubeFrame.title = title;
+                    disableInteractiveYouTubeCaptions(youtubeFrame);
+                    youtubeFrame.classList.add('is-visible');
+                };
+
+                if (posterImage) {
+                    posterImage.src = poster || selected.youtubePoster || `https://i.ytimg.com/vi/${selected.youtubeId}/hqdefault.jpg`;
+                    posterImage.alt = title;
+                    posterImage.classList.add('is-visible');
+                }
+                playButton?.classList.add('is-visible');
+                playButton?.addEventListener('click', loadYouTube, { once: true });
                 return;
             }
 
             if (selected?.instagramEmbed && instagramFrame) {
                 instagramFrame.src = selected.instagramEmbed;
                 instagramFrame.title = title;
+                root.classList.add('interactive-project-video--instagram');
                 instagramFrame.classList.add('is-visible');
                 return;
             }
@@ -145,15 +183,50 @@ const sources = {
         background: #050505;
     }
 
+    .interactive-project-video__poster {
+        object-fit: cover;
+        filter: grayscale(1) contrast(1.05);
+    }
+
     .interactive-project-video__media.is-visible,
+    .interactive-project-video__play.is-visible,
     .interactive-project-video__empty.is-visible {
         display: block;
     }
 
+    .interactive-project-video__play {
+        position: absolute;
+        z-index: 4;
+        inset: 50% auto auto 50%;
+        width: 78px;
+        height: 78px;
+        display: none;
+        place-items: center;
+        color: #fff;
+        background: rgba(0, 0, 0, .42);
+        border: 1px solid rgba(255, 255, 255, .72);
+        border-radius: 50%;
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+        backdrop-filter: blur(10px);
+        transition: color 160ms ease, background 160ms ease, transform 160ms ease, border-color 160ms ease;
+    }
+
+    .interactive-project-video__play.is-visible {
+        display: grid;
+    }
+
+    .interactive-project-video__play:hover,
+    .interactive-project-video__play:focus-visible {
+        color: #000;
+        background: #fff;
+        border-color: #fff;
+        transform: translate(-50%, -50%) scale(1.04);
+        outline: none;
+    }
+
     .interactive-project-video--vertical {
-        background:
-            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .08), transparent 32%),
-            #050505;
+        background: #000;
     }
 
     .interactive-project-video--vertical .interactive-project-video__media {
@@ -173,12 +246,34 @@ const sources = {
         height: 100%;
     }
 
+    .interactive-project-video--vertical.interactive-project-video--instagram {
+        overflow: hidden;
+        background: #000;
+    }
+
+    .interactive-project-video--vertical.interactive-project-video--instagram .interactive-project-video__instagram {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        aspect-ratio: auto;
+        transform: none;
+        transform-origin: center;
+        background: #000;
+        box-shadow: none;
+    }
+
     @media (max-width: 760px) {
         .interactive-project-video--vertical .interactive-project-video__media,
         .interactive-project-video--vertical iframe.interactive-project-video__media {
             width: 100%;
             height: auto;
             max-height: 100%;
+        }
+
+        .interactive-project-video--vertical.interactive-project-video--instagram .interactive-project-video__instagram {
+            width: 100%;
+            height: 100%;
+            transform: none;
         }
     }
 

@@ -2,11 +2,11 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import VideoBackground from "../../components/ui/VideoBackground.astro";
 import FaqsSection from "../../components/home/FaqsSection.astro";
-import { getServiceBySlug, getSettings } from "../../lib/data";
+import { getProjects, getServiceBySlug, getSettings } from "../../lib/data";
 import { buildBreadcrumbSchema, buildServiceSchema } from "../../lib/seo";
 
 const { slug } = Astro.params;
-const [service, settings] = await Promise.all([getServiceBySlug(slug || ""), getSettings()]);
+const [service, settings, projects] = await Promise.all([getServiceBySlug(slug || ""), getSettings(), getProjects()]);
 if (!service) return Astro.redirect("/servicios");
 
 const path = `/servicios/${service.slug}`;
@@ -18,6 +18,11 @@ const serviceCopy: Record<string, any> = {
         briefLabel: "Empezamos por tu fecha",
         briefTitle: "Cu\u00e9ntanos d\u00f3nde, cu\u00e1ndo y qu\u00e9 quer\u00e9is recordar.",
         notes: ["01 Preparativos", "02 Ceremonia", "03 Celebraci\u00f3n"],
+        processDetails: [
+            { title: "01 Preparativos", text: "La calma previa, los gestos peque\u00f1os y el ambiente antes de salir. Rodamos sin invadir para conservar la verdad del momento." },
+            { title: "02 Ceremonia", text: "Cuidamos entradas, miradas, votos y reacciones con una cobertura discreta, pensada para que el recuerdo tenga ritmo y emoci\u00f3n." },
+            { title: "03 Celebraci\u00f3n", text: "El pulso cambia: abrazos, brindis, baile y detalles de familia. Buscamos una pieza viva, elegante y fiel a vuestra noche." },
+        ],
         afterLabel: "Bodas",
         afterTitle: "Lo importante no se posa. Se acompa\u00f1a.",
     },
@@ -28,6 +33,11 @@ const serviceCopy: Record<string, any> = {
         briefLabel: "Empezamos por tu canci\u00f3n",
         briefTitle: "Cu\u00e9ntanos el tema, la idea y el universo visual.",
         notes: ["01 Concepto", "02 Rodaje", "03 Edici\u00f3n"],
+        processDetails: [
+            { title: "01 Concepto", text: "Partimos de la canción, la letra y la identidad del artista para construir una idea visual clara, con referencias, tono y ritmo antes de grabar." },
+            { title: "02 Rodaje", text: "Preparamos localizaciones, luz, dirección y puesta en escena para que cada plano tenga intención y el videoclip respire con la música." },
+            { title: "03 Edición", text: "Montaje, color y acabado final para convertir el material en una pieza con pulso, preparada para YouTube, redes y lanzamiento." },
+        ],
         afterLabel: "Videoclips",
         afterTitle: "Una canci\u00f3n tambi\u00e9n se mira.",
     },
@@ -43,6 +53,23 @@ const copy = serviceCopy[service.slug] || {
     afterLabel: service.title,
     afterTitle: "Cada proyecto pide una mirada propia.",
 };
+
+const inferProjectCategory = (project: any) => {
+    const explicit = String(project.category || project.project_category || "").toLowerCase();
+    if (explicit === "bodas" || explicit === "videoclips") return explicit;
+    const haystack = `${project.slug || ""} ${project.subtitle || ""} ${project.title || ""}`.toLowerCase();
+    return /\bboda|wedding|ceremonia|celebraci[oó]n/.test(haystack) ? "bodas" : "videoclips";
+};
+const serviceProjects = projects
+    .filter((project: any) => inferProjectCategory(project) === service.slug)
+    .sort((a: any, b: any) => {
+        const dateA = Date.parse(a.published_at || a.created_at || a.updated_at || "") || 0;
+        const dateB = Date.parse(b.published_at || b.created_at || b.updated_at || "") || 0;
+        if (dateA !== dateB) return dateB - dateA;
+        return Number(a.order || 0) - Number(b.order || 0);
+    })
+    .slice(0, 3);
+const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\u00daltimos videoclips";
 ---
 
 <BaseLayout title={service.title} description={service.description} structuredData={[buildBreadcrumbSchema([{ name: "Inicio", path: "/" }, { name: "Servicios", path: "/servicios" }, { name: service.title, path }]), buildServiceSchema(service, path)]}>
@@ -70,18 +97,59 @@ const copy = serviceCopy[service.slug] || {
             </aside>
         </div>
 
-        <div class="service-detail__notes" aria-label="Proceso">
-            {copy.notes.map((note: string) => <span>{note}</span>)}
+        {copy.processDetails ? (
+            <div class="service-detail__notes service-detail__notes--accordion" aria-label="Proceso">
+                {copy.processDetails.map((item: any) => (
+                    <details class="service-detail__note">
+                        <summary>{item.title}</summary>
+                        <p>{item.text}</p>
+                    </details>
+                ))}
+            </div>
+        ) : (
+            <div class="service-detail__notes" aria-label="Proceso">
+                {copy.notes.map((note: string) => <span>{note}</span>)}
+            </div>
+        )}
+    </section>
+
+    <section class:list={["service-detail__after", { "service-detail__after--no-projects": serviceProjects.length === 0 }]}>
+        <div class="service-detail__after-content">
+            {serviceProjects.length > 0 && (
+                <section class="service-detail__related" aria-label={`Últimos proyectos de ${service.title}`}>
+                    <div class="service-detail__related-heading">
+                        <h2>{latestProjectsTitle}</h2>
+                    </div>
+                    <div class="service-detail__related-grid">
+                        {serviceProjects.map((project: any) => (
+                            <a class="service-detail__related-item" href={`/proyectos/${project.slug}`} aria-label={`Ver ${project.title}`}>
+                                {project.video_project ? (
+                                    <VideoBackground desktop={project.video_project} mobile={project.video_project} title={project.title} overlay="none" />
+                                ) : project.thumbnail ? (
+                                    <img src={project.thumbnail} alt="" aria-hidden="true" />
+                                ) : null}
+                            </a>
+                        ))}
+                    </div>
+                </section>
+            )}
+            <FaqsSection serviceSlug={service.slug} serviceId={service.id} />
         </div>
     </section>
 
-    <section class="service-detail__after">
-        <div class="service-detail__after-heading">
-            <p>{copy.afterLabel}</p>
-            <h2>{copy.afterTitle}</h2>
-        </div>
-        <FaqsSection serviceSlug={service.slug} serviceId={service.id} />
-    </section>
+    <script>
+        document.querySelectorAll<HTMLDetailsElement>('.service-detail__note').forEach((item) => {
+            item.addEventListener('mouseenter', () => {
+                if (!window.matchMedia('(hover: hover)').matches) return;
+                item.parentElement?.querySelectorAll<HTMLDetailsElement>('.service-detail__note').forEach((sibling) => {
+                    sibling.open = sibling === item;
+                });
+            });
+            item.addEventListener('mouseleave', () => {
+                if (window.matchMedia('(hover: hover)').matches) item.open = false;
+            });
+        });
+    </script>
 </BaseLayout>
 
 <style>
@@ -105,18 +173,96 @@ const copy = serviceCopy[service.slug] || {
     .service-detail__actions a:hover, .service-detail__actions button:hover, .service-detail__actions a:focus-visible, .service-detail__actions button:focus-visible { color: #fff; background: #000; transform: translateY(-2px); }
     .service-detail__notes { position: absolute; right: clamp(1rem, 4vw, 4rem); bottom: clamp(.7rem, 1.4vh, 1rem); left: clamp(1rem, 4vw, 4rem); z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; border: 1px solid rgba(255, 255, 255, .24); background: rgba(255, 255, 255, .2); }
     .service-detail__notes span { min-height: 58px; display: grid; place-items: center; padding: .65rem; color: rgba(255, 255, 255, .82); background: rgba(0, 0, 0, .55); font-size: .7rem; font-weight: 850; text-align: center; text-transform: uppercase; backdrop-filter: blur(14px); }
-    .service-detail__after { display: grid; grid-template-columns: minmax(280px, .55fr) minmax(0, 1fr); gap: clamp(1rem, 4vw, 4rem); align-items: start; padding: clamp(5.8rem, 9vh, 6.8rem) clamp(1rem, 4vw, 4rem) clamp(3rem, 6vh, 4.8rem); color: #000; background: #fff; }
-    .service-detail__after-heading { position: sticky; top: 7rem; display: grid; gap: .8rem; }
-    .service-detail__after-heading p { margin: 0; color: rgba(0, 0, 0, .48); font-size: .7rem; font-weight: 850; text-transform: uppercase; }
-    .service-detail__after-heading h2 { max-width: 520px; margin: 0; font-size: clamp(2.2rem, 4.6vw, 4.8rem); font-weight: 900; line-height: .92; text-transform: uppercase; }
-    .service-detail__after :global(.service-faqs) { margin: 0; }
+    .service-detail__notes--accordion { display: flex; gap: .75rem; align-items: stretch; border: 0; background: transparent; }
+    .service-detail__note {
+        flex: 1 1 0;
+        min-height: 86px;
+        display: grid;
+        align-content: end;
+        color: rgba(255, 255, 255, .82);
+        background: linear-gradient(180deg, rgba(255, 255, 255, .075), rgba(0, 0, 0, .68));
+        border: 1px solid rgba(255, 255, 255, .24);
+        backdrop-filter: blur(16px);
+        overflow: hidden;
+        transition: flex 240ms ease, background 180ms ease, border-color 180ms ease;
+    }
+    .service-detail__note[open] { flex-grow: 1.25; background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(0, 0, 0, .82)); border-color: rgba(255, 255, 255, .44); }
+    .service-detail__note summary { position: relative; min-height: 84px; display: grid; place-items: center; padding: .95rem 2.3rem; font-size: clamp(1rem, 1.25vw, 1.35rem); font-weight: 950; line-height: .95; text-align: center; text-transform: uppercase; cursor: pointer; list-style: none; }
+    .service-detail__note summary::after { content: "+"; position: absolute; right: 1rem; top: 50%; color: rgba(255, 255, 255, .62); font-size: 1.25rem; line-height: 1; transform: translateY(-50%); }
+    .service-detail__note[open] summary::after { content: "-"; }
+    .service-detail__note summary::-webkit-details-marker { display: none; }
+    .service-detail__note p { max-width: 620px; margin: 0; padding: 0 1rem 1rem; color: rgba(255, 255, 255, .72); font-size: .84rem; line-height: 1.42; }
+    .service-detail__after { display: grid; gap: clamp(2rem, 5vw, 4rem); align-items: start; padding: 0 0 clamp(3rem, 6vh, 4.8rem); color: #000; background: #fff; }
+    .service-detail__after--no-projects {
+        padding-top: clamp(4.5rem, 10vh, 7rem);
+    }
+    .service-detail__after-content > :global(.service-faqs) { margin-inline: clamp(1rem, 4vw, 4rem); }
+    .service-detail__after-content { display: grid; gap: clamp(2rem, 5vw, 4rem); }
+    .service-detail__related {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: 1.2rem;
+        min-height: 100svh;
+        padding: clamp(4rem, 8vh, 6rem) clamp(1rem, 4vw, 4.5rem);
+        color: #fff;
+        background: #080808;
+    }
+    .service-detail__related-heading h2 {
+        margin: 0;
+        font-size: clamp(2.2rem, 4.6vw, 5.2rem);
+        font-weight: 950;
+        line-height: .9;
+        text-transform: uppercase;
+    }
+    .service-detail__related-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        min-height: 0;
+        background: rgba(255, 255, 255, .2);
+        border: 1px solid rgba(255, 255, 255, .2);
+    }
+    .service-detail__related-item {
+        position: relative;
+        min-height: clamp(420px, 64svh, 760px);
+        display: grid;
+        align-content: end;
+        color: #fff;
+        text-decoration: none;
+        overflow: hidden;
+        background: #050505;
+    }
+    .service-detail__related-item::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .82));
+    }
+    .service-detail__related-item > img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .service-detail__related-item :global(.video-background) {
+        filter: grayscale(1) contrast(1.06);
+        transition: filter 500ms ease, transform 500ms ease;
+    }
+    .service-detail__related-item:hover :global(.video-background),
+    .service-detail__related-item:focus-visible :global(.video-background) {
+        filter: grayscale(0) contrast(1.06);
+        transform: scale(1.04);
+    }
+    .service-detail__after :global(.service-faqs) { margin-block: 0; }
     .service-detail__after :global(.service-faqs h2) { margin-bottom: 1rem; font-family: inherit; font-size: .82rem; font-weight: 850; text-transform: uppercase; }
 
     @media (max-width: 940px) {
         .service-detail--cinematic { height: auto; min-height: 100svh; overflow: visible; }
-        .service-detail__stage, .service-detail__after { grid-template-columns: 1fr; }
+        .service-detail__stage { grid-template-columns: 1fr; }
         .service-detail__brief { padding: 1rem 0 0; border-top: 1px solid rgba(255, 255, 255, .28); border-left: 0; }
-        .service-detail__after-heading { position: static; }
+        .service-detail__related-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 700px) {
@@ -124,5 +270,13 @@ const copy = serviceCopy[service.slug] || {
         .service-detail--cinematic h1 { font-size: clamp(3.5rem, 17vw, 5.6rem); }
         .service-detail__stage { padding-bottom: 11rem; }
         .service-detail__notes { grid-template-columns: 1fr; }
+        .service-detail__related { min-height: auto; }
+        .service-detail__related-item { min-height: 54svh; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .service-detail__related-item :global(.video-background) {
+            transition: none;
+        }
     }
 </style>
