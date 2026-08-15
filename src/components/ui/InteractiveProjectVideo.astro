@@ -15,7 +15,7 @@ interface Props {
 const { url = "", desktop = "", mobile = "", title = "Video del proyecto", poster = "", orientation = "auto" } = Astro.props;
 const forceVertical = orientation === "vertical";
 
-function source(value: string | null | undefined, width: number) {
+function source(value: string | null | undefined, width: number, bitRate: string) {
     const cleanUrl = String(value || "").trim();
     const isNative = /cloudinary\.com|\.(mp4|webm)(\?.*)?$/i.test(cleanUrl);
     const isInstagram = isInstagramReel(cleanUrl);
@@ -23,7 +23,7 @@ function source(value: string | null | undefined, width: number) {
     const youtubeId = !isNative && !isInstagram ? getVideoId(cleanUrl) : "";
 
     return {
-        nativeUrl: isNative ? optimizeCloudinaryVideo(cleanUrl, { width, quality: "auto:best" }) : "",
+        nativeUrl: isNative ? optimizeCloudinaryVideo(cleanUrl, { width, quality: "auto:good", bitRate }) : "",
         youtubeId,
         youtubePoster: youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : "",
         instagramEmbed: isInstagram ? getInstagramEmbedUrl(cleanUrl) : "",
@@ -35,8 +35,8 @@ function source(value: string | null | undefined, width: number) {
 const desktopUrl = desktop || url || mobile;
 const mobileUrl = mobile || url || desktop;
 const sources = {
-    desktop: source(desktopUrl, 1920),
-    mobile: source(mobileUrl, 1080),
+    desktop: source(desktopUrl, 1600, "5m"),
+    mobile: source(mobileUrl, 720, "3m"),
 };
 ---
 

@@ -132,6 +132,8 @@ Astro.response.headers.set("Cache-Control", "no-store");
 
   .maintenance-shell {
     position: relative;
+    width: 100%;
+    max-width: 100vw;
     min-height: 100dvh;
     overflow: hidden;
     background:
@@ -225,7 +227,7 @@ Astro.response.headers.set("Cache-Control", "no-store");
     align-items: center;
     justify-content: flex-end;
     gap: 1.5rem;
-    width: min(100% - 4.5rem, 1180px);
+    width: min(calc(100% - 4.5rem), 1180px);
     margin: 0 auto;
     padding: 2rem 0 0;
   }
@@ -267,13 +269,14 @@ Astro.response.headers.set("Cache-Control", "no-store");
     grid-template-columns: minmax(0, 1fr) minmax(26rem, 0.72fr);
     align-items: center;
     gap: 5.8rem;
-    width: min(100% - 4.5rem, 1320px);
+    width: min(calc(100% - 4.5rem), 1320px);
     min-height: calc(100dvh - 6.2rem);
     margin: 0 auto;
     padding: 2.6rem 0 4rem;
   }
 
   .maintenance-copy {
+    min-width: 0;
     max-width: 44rem;
   }
 
@@ -653,7 +656,9 @@ Astro.response.headers.set("Cache-Control", "no-store");
 
     .maintenance-header,
     .maintenance-stage {
-      width: min(100% - 2rem, 42rem);
+      width: calc(100% - 2rem);
+      max-width: 42rem;
+      min-width: 0;
     }
 
     .maintenance-header {
@@ -731,7 +736,7 @@ Astro.response.headers.set("Cache-Control", "no-store");
     }
 
     h1 {
-      font-size: 3.1rem;
+      font-size: clamp(2.55rem, 14.5vw, 3.1rem);
     }
 
     .maintenance-actions {

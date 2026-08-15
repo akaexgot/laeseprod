@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const easeInOutCubic = (value: number) => (
@@ -149,6 +150,7 @@ function initRollingContentReveal() {
         revealTarget.style.setProperty("--content-reveal", "100%");
         document.documentElement.style.setProperty("--rolling-nav-reveal", "100%");
         if (status) status.textContent = "Contenido revelado";
+        window.dispatchEvent(new CustomEvent("laese:rolling-reveal-finished"));
         window.setTimeout(() => hero.classList.add("is-status-hidden"), 900);
     };
 
@@ -157,12 +159,13 @@ function initRollingContentReveal() {
         revealFinished = true;
         document.documentElement.style.setProperty("--rolling-nav-reveal", "100%");
         hero.classList.add("is-content-revealed", "is-reveal-finished");
+        window.dispatchEvent(new CustomEvent("laese:rolling-reveal-finished"));
         finishTimer = window.setTimeout(() => {
             if (!disposed) renderer.setAnimationLoop(null);
         }, 760);
     };
 
-    const loader = new GLTFLoader();
+    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     loader.load(
         "/camera_lens.glb",
         (gltf) => {

@@ -16,20 +16,20 @@ const {
     overlay = "dark",
 } = Astro.props;
 
-function source(value: string | null | undefined, width: number) {
+function source(value: string | null | undefined, width: number, bitRate: string) {
     const url = String(value || "").trim();
     const native = /cloudinary\.com|\.(mp4|webm)(\?.*)?$/i.test(url);
     const youtubeId = native ? "" : getVideoId(url) || "";
     return {
-        url: native ? optimizeCloudinaryVideo(url, { width, quality: "auto:best" }) : "",
+        url: native ? optimizeCloudinaryVideo(url, { width, quality: "auto:good", bitRate }) : "",
         youtubeId,
         poster: youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : "",
     };
 }
 
 const sources = {
-    desktop: source(desktop || mobile, 1920),
-    mobile: source(mobile || desktop, 1080),
+    desktop: source(desktop || mobile, 1600, "4m"),
+    mobile: source(mobile || desktop, 720, "2m"),
 };
 const poster = sources.desktop.poster || sources.mobile.poster;
 ---

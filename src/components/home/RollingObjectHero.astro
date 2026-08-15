@@ -5,6 +5,12 @@
             data-lens-explorer
             aria-label="Visor interactivo del logo 3D de LaeseProd"
         >
+            <img
+                class="object-viewer__fallback"
+                src="/logopositivo.png"
+                alt=""
+                aria-hidden="true"
+            />
             <canvas
                 class="object-viewer__canvas"
                 data-explorer-canvas
@@ -18,7 +24,8 @@
 
             <p class="object-viewer__index" aria-hidden="true">
                 <span>LOGO / HOME</span>
-                <span>3D - INTERACTIVE</span>
+                <span data-heavy-label>3D - INTERACTIVE</span>
+                <span data-lite-label hidden>LAESEPROD</span>
             </p>
 
             <div class="object-viewer__loading" aria-live="polite">
@@ -93,8 +100,40 @@
 </section>
 
 <script>
-    import "../../scripts/lens-explorer";
-    import "../../scripts/rolling-content-reveal";
+    const hero = document.querySelector<HTMLElement>("[data-rolling-content-reveal]");
+    const revealTarget = hero?.querySelector<HTMLElement>("[data-reveal-target]");
+    const explorer = hero?.querySelector<HTMLElement>("[data-lens-explorer]");
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+    const prefersLiteExperience = window.matchMedia("(max-width: 767px), (prefers-reduced-motion: reduce)").matches
+        || connection?.saveData === true
+        || (typeof deviceMemory === "number" && deviceMemory <= 4);
+
+    const revealWithout3D = () => {
+        hero?.classList.add("is-lite", "is-content-revealed", "is-status-hidden");
+        explorer?.classList.add("is-fallback");
+        hero?.querySelector<HTMLElement>("[data-heavy-label]")?.setAttribute("hidden", "");
+        hero?.querySelector<HTMLElement>("[data-lite-label]")?.removeAttribute("hidden");
+        revealTarget?.style.setProperty("--content-reveal", "100%");
+        document.documentElement.style.setProperty("--rolling-nav-reveal", "100%");
+    };
+
+    if (prefersLiteExperience) {
+        revealWithout3D();
+    } else {
+        let explorerStarted = false;
+        const startExplorer = () => {
+            if (explorerStarted) return;
+            explorerStarted = true;
+            void import("../../scripts/lens-explorer").catch(() => explorer?.classList.add("is-fallback"));
+        };
+
+        window.addEventListener("laese:rolling-reveal-finished", startExplorer, { once: true });
+        void import("../../scripts/rolling-content-reveal").catch(() => {
+            revealWithout3D();
+            startExplorer();
+        });
+    }
 </script>
 
 <noscript>
@@ -190,6 +229,28 @@
         outline: none;
         touch-action: none;
         transition: opacity 650ms ease;
+    }
+
+    .object-viewer__fallback {
+        position: absolute;
+        z-index: 1;
+        top: 50%;
+        left: 50%;
+        width: min(76%, 620px);
+        height: auto;
+        transform: translate(-50%, -50%);
+        filter: drop-shadow(0 28px 22px rgba(0, 0, 0, .12));
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 420ms ease;
+    }
+
+    .rolling-study.is-lite .object-viewer__fallback {
+        opacity: .92;
+    }
+
+    .object-viewer.is-model-ready .object-viewer__fallback {
+        opacity: 0;
     }
 
     .object-viewer__canvas:active,
@@ -715,6 +776,10 @@
             width: min(100vw, 560px);
         }
 
+        .object-viewer__fallback {
+            width: min(84%, 500px);
+        }
+
         .object-viewer__hint,
         .object-viewer__loading {
             bottom: 24px;
@@ -792,6 +857,14 @@
         .object-viewer__loading {
             right: 18px;
             width: 150px;
+        }
+
+        .rolling-study.is-lite .object-viewer__loading {
+            display: none;
+        }
+
+        .rolling-study.is-lite .object-viewer__hint {
+            display: none;
         }
 
         .object-copy {

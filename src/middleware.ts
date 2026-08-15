@@ -5,7 +5,7 @@ import { getServiceSupabase } from "./lib/supabase";
 const PROTECTED = ["/admin", "/api/admin"];
 const PUBLIC = ["/admin/login"];
 const CANONICAL_HOST = new URL(import.meta.env.PUBLIC_SITE_URL || "https://laeseprod.com").hostname;
-const MAINTENANCE_CACHE_MS = 5000;
+const MAINTENANCE_CACHE_MS = Number(import.meta.env.MAINTENANCE_CACHE_MS || 30_000);
 let maintenanceCache: { value: boolean; expiresAt: number } | null = null;
 
 const LEGACY_REDIRECTS: Record<string, string> = {

@@ -266,10 +266,17 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
     }
 
     @media (max-width: 700px) {
-        .service-detail--cinematic { padding: 6rem 1rem 5.8rem; }
+        .service-detail--cinematic { padding: 6rem 1rem 1rem; }
         .service-detail--cinematic h1 { font-size: clamp(3.5rem, 17vw, 5.6rem); }
-        .service-detail__stage { padding-bottom: 11rem; }
-        .service-detail__notes { grid-template-columns: 1fr; }
+        .service-detail__stage { padding-bottom: 2rem; }
+        .service-detail__notes {
+            position: relative;
+            inset: auto;
+            grid-template-columns: 1fr;
+        }
+        .service-detail__notes--accordion { flex-direction: column; gap: .5rem; }
+        .service-detail__note { flex: none; width: 100%; min-height: 72px; }
+        .service-detail__note summary { min-height: 70px; }
         .service-detail__related { min-height: auto; }
         .service-detail__related-item { min-height: 54svh; }
     }
