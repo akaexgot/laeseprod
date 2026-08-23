@@ -20,7 +20,16 @@ const currentIndex = orderedProjects.findIndex((item: any) => item.slug === proj
 const caseNumber = String(Math.max(currentIndex + 1, 1)).padStart(2, "0");
 const previousProject = currentIndex > 0 ? orderedProjects[currentIndex - 1] : orderedProjects.at(-1);
 const nextProject = currentIndex >= 0 && currentIndex < orderedProjects.length - 1 ? orderedProjects[currentIndex + 1] : orderedProjects[0];
-const relatedProjects = orderedProjects.filter((item: any) => item.slug !== project.slug).slice(0, 3);
+const inferProjectCategory = (item: any) => {
+    const explicit = String(item.category || item.project_category || "").toLowerCase();
+    if (explicit === "bodas" || explicit === "videoclips") return explicit;
+    const haystack = `${item.slug || ""} ${item.subtitle || ""} ${item.title || ""}`.toLowerCase();
+    return /\bboda|wedding|ceremonia|celebraci[oó]n/.test(haystack) ? "bodas" : "videoclips";
+};
+const currentCategory = inferProjectCategory(project);
+const relatedProjects = orderedProjects
+    .filter((item: any) => item.slug !== project.slug && inferProjectCategory(item) === currentCategory)
+    .slice(0, 3);
 const explanationDesktop = project.video_explanation_desktop;
 const explanationMobile = project.video_explanation_mobile;
 const explanationSources = [explanationDesktop, explanationMobile].filter(Boolean);

@@ -3,6 +3,8 @@ import Head from "../components/seo/Head.astro";
 import GoogleTracking from "../components/seo/GoogleTracking.astro";
 import Navbar from "../components/ui/Navbar.astro";
 import Footer from "../components/ui/Footer.astro";
+import { MessageCircle } from "@lucide/astro";
+import { getSettings } from "../lib/data";
 import "../styles/global.css";
 
 interface Props {
@@ -17,6 +19,9 @@ interface Props {
 }
 
 const props = Astro.props;
+const settings = await getSettings();
+const whatsappNumber = String(settings.whatsapp_number || settings.phone || "34662908416").replace(/\D/g, "");
+const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20quiero%20hablar%20sobre%20un%20proyecto.`;
 ---
 
 <!doctype html>
@@ -29,5 +34,56 @@ const props = Astro.props;
         <Navbar />
         <main><slot /></main>
         <Footer />
+        <a class="global-whatsapp-trigger" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp" title="WhatsApp">
+            <MessageCircle size={21} stroke-width={2.15} aria-hidden="true" />
+            <span></span>
+        </a>
     </body>
 </html>
+
+<style>
+    .global-whatsapp-trigger {
+        position: fixed;
+        right: max(18px, env(safe-area-inset-right));
+        bottom: max(18px, env(safe-area-inset-bottom));
+        z-index: 72;
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: #25d366;
+        border: 1px solid rgba(255, 255, 255, .22);
+        border-radius: 50%;
+        box-shadow: 0 18px 48px rgba(0, 0, 0, .32);
+        text-decoration: none;
+        backdrop-filter: blur(14px);
+        transition: transform 180ms ease, background 180ms ease, opacity 180ms ease;
+    }
+
+    .global-whatsapp-trigger:hover,
+    .global-whatsapp-trigger:focus-visible {
+        background: #1ebe5d;
+        transform: translateY(-2px);
+    }
+
+    .global-whatsapp-trigger span {
+        position: absolute;
+        top: 9px;
+        right: 9px;
+        width: 8px;
+        height: 8px;
+        background: #fff;
+        border: 2px solid #0d7a35;
+        border-radius: 50%;
+    }
+
+    @media (max-width: 900px) {
+        .global-whatsapp-trigger {
+            right: max(14px, env(safe-area-inset-right));
+            bottom: max(14px, env(safe-area-inset-bottom));
+            width: 46px;
+            height: 46px;
+        }
+    }
+</style>

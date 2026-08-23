@@ -13,6 +13,7 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
 
 {projects.length > 0 && (
     <section id="featured-projects" class:list={["featured-projects", `featured-projects--count-${projects.length}`]}>
+        <h2 class="featured-projects__mobile-title">Proyectos destacados</h2>
         {showAllLink && <a class="featured-projects__all" href="/proyectos">Ver todos</a>}
         <div class="featured-projects__cuts" aria-label="Proyectos destacados">
             {projects.map((project: any, index: number) => (
@@ -26,6 +27,7 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
 
 <style>
     .featured-projects { position: relative; min-height: 100svh; overflow: hidden; color: #fff; background: #000; isolation: isolate; }
+    .featured-projects__mobile-title { display: none; }
     .featured-projects__all { position: absolute; right: clamp(1.2rem, 4vw, 3.5rem); bottom: clamp(1.2rem, 4vw, 3rem); z-index: 5; display: inline-flex; align-items: center; justify-content: center; padding: .8rem .9rem; color: rgba(255, 255, 255, .78); background: rgba(0, 0, 0, .18); border: 0; border-radius: 0; font-family: "Courier New", monospace; font-size: .68rem; font-weight: 800; letter-spacing: 0; text-decoration: none; text-transform: uppercase; backdrop-filter: blur(8px); transition: color 180ms ease, transform 180ms ease; }
     .featured-projects__all::before, .featured-projects__all::after { content: ""; position: absolute; width: 14px; height: 14px; color: currentColor; opacity: .72; }
     .featured-projects__all::before { top: 0; left: 0; border-top: 1px solid currentColor; border-left: 1px solid currentColor; }
@@ -57,7 +59,8 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
     .project-cut:hover :global(.video-background), .project-cut:focus-visible :global(.video-background) { transform: scale(1.055); filter: grayscale(0) contrast(1.04); }
 
     @media (max-width: 760px) {
-        .featured-projects { min-height: auto; padding: 4.25rem 1rem 5rem; }
+        .featured-projects { min-height: auto; padding: 6rem 1rem 5rem; }
+        .featured-projects__mobile-title { display: block; width: min(100%, 520px); margin: 0 auto 1rem; color: #fff; font-size: clamp(1.85rem, 8vw, 3rem); font-weight: 950; line-height: .92; text-transform: uppercase; }
         .featured-projects__all { right: 1rem; bottom: 1rem; }
         .featured-projects__cuts { position: relative; inset: auto; display: grid; gap: .9rem; width: min(100%, 520px); margin: 0 auto; }
         .project-cut,

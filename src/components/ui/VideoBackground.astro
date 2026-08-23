@@ -86,7 +86,7 @@ const poster = sources.desktop.poster || sources.mobile.poster;
                     video.play().catch(() => {});
                 } else if (selected.youtubeId && iframe) {
                     const origin = encodeURIComponent(window.location.origin);
-                    iframe.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${selected.youtubeId}&cc_load_policy=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${origin}`;
+                    iframe.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${selected.youtubeId}&cc_load_policy=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${origin}`;
                     disableBackgroundYouTubeCaptions(iframe);
                     iframe.addEventListener('load', () => iframe.classList.add('is-visible'), { once: true });
                 }
@@ -137,6 +137,13 @@ const poster = sources.desktop.poster || sources.mobile.poster;
     .video-background__native.is-visible,
     .video-background__youtube.is-visible {
         opacity: 1;
+    }
+
+    .video-background__youtube {
+        width: 120%;
+        height: 120%;
+        min-width: 213.34vh;
+        min-height: 67.5vw;
     }
 
     .video-background__overlay {
