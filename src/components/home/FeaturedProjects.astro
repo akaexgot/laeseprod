@@ -57,13 +57,23 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
     .project-cut:hover :global(.video-background), .project-cut:focus-visible :global(.video-background) { transform: scale(1.055); filter: grayscale(0) contrast(1.04); }
 
     @media (max-width: 760px) {
+        .featured-projects { min-height: auto; padding: 4.25rem 1rem 5rem; }
         .featured-projects__all { right: 1rem; bottom: 1rem; }
-        .project-cut--1 { clip-path: polygon(0 0, 100% 0, 100% 38%, 0 52%); }
-        .project-cut--2 { clip-path: polygon(0 34%, 100% 20%, 100% 72%, 0 86%); }
-        .project-cut--3 { clip-path: polygon(0 70%, 100% 56%, 100% 100%, 0 100%); }
-        .featured-projects--count-1 .project-cut--1 { clip-path: none; }
-        .featured-projects--count-2 .project-cut--1 { clip-path: polygon(0 0, 100% 0, 100% 54%, 0 66%); }
-        .featured-projects--count-2 .project-cut--2 { clip-path: polygon(0 48%, 100% 36%, 100% 100%, 0 100%); }
+        .featured-projects__cuts { position: relative; inset: auto; display: grid; gap: .9rem; width: min(100%, 520px); margin: 0 auto; }
+        .project-cut,
+        .project-cut--1,
+        .project-cut--2,
+        .project-cut--3,
+        .featured-projects--count-1 .project-cut--1,
+        .featured-projects--count-2 .project-cut--1,
+        .featured-projects--count-2 .project-cut--2 {
+            position: relative;
+            inset: auto;
+            aspect-ratio: 16 / 9;
+            min-height: 0;
+            clip-path: none;
+            border: 1px solid rgba(255, 255, 255, .16);
+        }
         .project-cut--1 :global(.video-background),
         .project-cut--2 :global(.video-background),
         .project-cut--3 :global(.video-background) { background-position: center center; }

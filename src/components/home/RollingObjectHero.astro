@@ -47,6 +47,7 @@
                 <span>La mirada</span>
                 <span>que lo cambia</span>
                 <span class="object-copy__title-accent">todo</span>
+                <img src="/palabralogotipo-white.png" alt="LaeseProd S.L." width="1030" height="173" />
             </h1>
             <p class="object-copy__text">
                 Arte visual con mirada cinematografica para convertir cada instante en una imagen capaz de permanecer.
@@ -105,9 +106,10 @@
     const explorer = hero?.querySelector<HTMLElement>("[data-lens-explorer]");
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-    const prefersLiteExperience = window.matchMedia("(max-width: 767px), (prefers-reduced-motion: reduce)").matches
+    const isMobileViewport = window.matchMedia("(max-width: 767px)").matches;
+    const prefersLiteExperience = window.matchMedia("(prefers-reduced-motion: reduce)").matches
         || connection?.saveData === true
-        || (typeof deviceMemory === "number" && deviceMemory <= 4);
+        || (typeof deviceMemory === "number" && deviceMemory <= 2);
 
     const revealWithout3D = () => {
         hero?.classList.add("is-lite", "is-content-revealed", "is-status-hidden");
@@ -118,16 +120,21 @@
         document.documentElement.style.setProperty("--rolling-nav-reveal", "100%");
     };
 
+    let explorerStarted = false;
+    const startExplorer = () => {
+        if (explorerStarted) return;
+        explorerStarted = true;
+        void import("../../scripts/lens-explorer").catch(() => explorer?.classList.add("is-fallback"));
+    };
+
     if (prefersLiteExperience) {
         revealWithout3D();
+    } else if (isMobileViewport) {
+        hero?.classList.add("is-content-revealed", "is-status-hidden", "is-mobile-direct");
+        revealTarget?.style.setProperty("--content-reveal", "100%");
+        document.documentElement.style.setProperty("--rolling-nav-reveal", "100%");
+        startExplorer();
     } else {
-        let explorerStarted = false;
-        const startExplorer = () => {
-            if (explorerStarted) return;
-            explorerStarted = true;
-            void import("../../scripts/lens-explorer").catch(() => explorer?.classList.add("is-fallback"));
-        };
-
         window.addEventListener("laese:rolling-reveal-finished", startExplorer, { once: true });
         void import("../../scripts/rolling-content-reveal").catch(() => {
             revealWithout3D();
@@ -446,6 +453,13 @@
         display: block;
     }
 
+    .object-copy h1 img {
+        display: none;
+        width: min(100%, 680px);
+        height: auto;
+        object-fit: contain;
+    }
+
     .object-copy h1 span:nth-child(2) {
         color: rgba(255, 255, 255, .9);
     }
@@ -750,9 +764,21 @@
         }
     }
 
+    @keyframes logo-mobile-spin {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -50%) rotate(-1turn) scale(.76);
+        }
+        to {
+            opacity: .92;
+            transform: translate(-50%, -50%) rotate(0) scale(1);
+        }
+    }
+
     @media (max-width: 900px) {
         .rolling-study {
             min-height: 100svh;
+            background: #ecece8;
         }
 
         .rolling-study__content {
@@ -761,7 +787,10 @@
         }
 
         .object-viewer {
-            min-height: 44svh;
+            min-height: 100svh;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(255, 255, 255, .98), rgba(239, 239, 235, .92) 48%, rgba(226, 226, 220, .9) 100%),
+                #ecece8;
         }
 
         .object-viewer__canvas {
@@ -769,11 +798,11 @@
         }
 
         .object-viewer__index {
-            top: 96px;
+            top: 112px;
         }
 
         .object-viewer__rings {
-            width: min(100vw, 560px);
+            width: min(112vw, 520px);
         }
 
         .object-viewer__fallback {
@@ -782,12 +811,11 @@
 
         .object-viewer__hint,
         .object-viewer__loading {
-            bottom: 24px;
+            bottom: max(24px, env(safe-area-inset-bottom));
         }
 
         .object-copy {
-            min-height: 56svh;
-            padding: 58px clamp(20px, 5vw, 36px) 72px;
+            display: none;
         }
 
         .object-copy h1 {
@@ -840,11 +868,11 @@
 
     @media (max-width: 520px) {
         .object-viewer {
-            min-height: 44svh;
+            min-height: 100svh;
         }
 
         .object-viewer__index {
-            top: 92px;
+            top: 106px;
             right: 18px;
             left: 18px;
         }
@@ -867,53 +895,8 @@
             display: none;
         }
 
-        .object-copy {
-            min-height: 56svh;
-            padding: 38px 18px 54px;
-        }
-
-        .object-copy__eyebrow {
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-
-        .object-copy__eyebrow span {
-            width: 28px;
-            height: 28px;
-        }
-
-        .object-copy h1 {
-            font-size: clamp(2.65rem, 13.2vw, 3.55rem);
-            line-height: .88;
-        }
-
-        .object-copy__text {
-            display: none;
-        }
-
-        .object-copy__actions {
-            gap: 8px;
-            margin-top: 18px;
-        }
-
-        .object-copy__actions a {
-            min-height: 46px;
-            flex: 1 1 128px;
-            padding-inline: .85rem;
-            font-size: .69rem;
-        }
-
-        .object-copy__service-links {
-            right: 18px;
-            bottom: 42px;
-            gap: 14px;
-            font-size: 8px;
-        }
-
-        .object-copy__footer {
-            right: 18px;
-            bottom: 18px;
-            left: 18px;
+        .rolling-study.is-lite .object-viewer__fallback {
+            animation: logo-mobile-spin 760ms cubic-bezier(.16, 1, .3, 1) both;
         }
 
         .object-copy__footer span:nth-child(2),

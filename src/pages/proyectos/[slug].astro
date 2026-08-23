@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import VideoBackground from "../../components/ui/VideoBackground.astro";
 import InteractiveProjectVideo from "../../components/ui/InteractiveProjectVideo.astro";
 import { getProjectBySlug, getProjects } from "../../lib/data";
+import { isInstagramReel } from "../../lib/display";
 import { buildBreadcrumbSchema, buildProjectSchemas } from "../../lib/seo";
 
 const { slug } = Astro.params;
@@ -22,7 +23,8 @@ const nextProject = currentIndex >= 0 && currentIndex < orderedProjects.length -
 const relatedProjects = orderedProjects.filter((item: any) => item.slug !== project.slug).slice(0, 3);
 const explanationDesktop = project.video_explanation_desktop;
 const explanationMobile = project.video_explanation_mobile;
-const hasExplanationVideo = Boolean(explanationDesktop || explanationMobile);
+const explanationSources = [explanationDesktop, explanationMobile].filter(Boolean);
+const hasExplanationVideo = explanationSources.length > 0 && !explanationSources.some((value) => isInstagramReel(String(value)));
 const projectType = project.subtitle || "Producción audiovisual";
 const projectDescription = project.description || "Proyecto audiovisual desarrollado por LaeseProd S.L. con una mirada cercana, ritmo visual y una pieza final pensada para verse con intención.";
 const projectDescriptionParagraphs = String(projectDescription)
@@ -124,21 +126,18 @@ const projectDescriptionParagraphs = String(projectDescription)
             </div>
 
             <div class="project-case-notes__cards">
-                <article>
-                    <span>01</span>
-                    <h3>Mirada</h3>
-                    <p>La intención visual se adapta al cliente, al ritmo de la historia y al lugar donde la pieza va a vivir.</p>
-                </article>
-                <article>
-                    <span>02</span>
-                    <h3>Montaje</h3>
-                    <p>El corte busca que cada plano tenga peso, sin rellenar por rellenar ni perder la energía del proyecto.</p>
-                </article>
-                <article>
-                    <span>03</span>
-                    <h3>Entrega</h3>
-                    <p>La pieza queda preparada para web, portfolio, redes o campaña, según el uso real del proyecto.</p>
-                </article>
+                <details open>
+                    <summary><span>01</span> Mirada</summary>
+                    <p>La intencion visual se adapta al cliente, al ritmo de la historia y al lugar donde la pieza va a vivir.</p>
+                </details>
+                <details>
+                    <summary><span>02</span> Montaje</summary>
+                    <p>El corte busca que cada plano tenga peso, sin rellenar por rellenar ni perder la energia del proyecto.</p>
+                </details>
+                <details>
+                    <summary><span>03</span> Entrega</summary>
+                    <p>La pieza queda preparada para web, portfolio, redes o campana, segun el uso real del proyecto.</p>
+                </details>
             </div>
         </section>
 
@@ -344,9 +343,9 @@ const projectDescriptionParagraphs = String(projectDescription)
     .project-case-hero__making {
         position: relative;
         width: 100%;
-        max-width: 340px;
+        max-width: 300px;
         aspect-ratio: 9 / 16;
-        min-height: 560px;
+        min-height: 0;
         margin: 0;
         overflow: visible;
         align-self: start;
@@ -536,19 +535,43 @@ const projectDescriptionParagraphs = String(projectDescription)
 
     .project-case-notes__cards {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1px;
-        border: 1px solid var(--line);
-        background: var(--line);
+        gap: .65rem;
     }
 
-    .project-case-notes__cards article {
-        min-height: 260px;
+    .project-case-notes__cards details {
         display: grid;
-        align-content: space-between;
-        gap: 1.5rem;
-        padding: 1rem;
         background: rgba(255, 255, 255, .64);
+        border: 1px solid var(--line);
+    }
+
+    .project-case-notes__cards summary {
+        min-height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .82rem 1rem;
+        font-size: clamp(1.1rem, 1.7vw, 1.55rem);
+        font-weight: 950;
+        line-height: .95;
+        text-transform: uppercase;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .project-case-notes__cards summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .project-case-notes__cards summary::after {
+        content: "+";
+        color: var(--muted);
+        font-size: 1.25rem;
+        line-height: 1;
+    }
+
+    .project-case-notes__cards details[open] summary::after {
+        content: "-";
     }
 
     .project-case-notes__cards span {
@@ -557,19 +580,12 @@ const projectDescriptionParagraphs = String(projectDescription)
         font-weight: 900;
     }
 
-    .project-case-notes__cards h3 {
-        margin: auto 0 0;
-        font-size: clamp(1.55rem, 2.4vw, 2.8rem);
-        font-weight: 950;
-        line-height: .9;
-        text-transform: uppercase;
-    }
-
     .project-case-notes__cards p {
         margin: 0;
+        padding: 0 1rem 1rem;
         color: rgba(8, 8, 8, .68);
-        font-size: .95rem;
-        line-height: 1.42;
+        font-size: .9rem;
+        line-height: 1.38;
     }
 
     .project-case-process {
@@ -695,7 +711,8 @@ const projectDescriptionParagraphs = String(projectDescription)
 
     .project-case-related__item {
         position: relative;
-        min-height: 46svh;
+        aspect-ratio: 16 / 9;
+        min-height: 0;
         display: grid;
         align-content: end;
         gap: .28rem;
@@ -803,8 +820,8 @@ const projectDescriptionParagraphs = String(projectDescription)
         }
 
         .project-case-hero__making {
-            width: min(100%, 330px);
-            min-height: 520px;
+            width: min(100%, 300px);
+            justify-self: center;
         }
 
         .project-case-hero__top {

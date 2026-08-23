@@ -15,11 +15,12 @@ export const POST: APIRoute = async ({ request }) => {
             idea,
             captchaToken,
             captchaAnswer,
+            "cf-turnstile-response": turnstileToken,
             website,
             formStartedAt,
         } = data;
 
-        if (!validateCaptcha({ token: captchaToken, answer: captchaAnswer, website, startedAt: formStartedAt })) {
+        if (!await validateCaptcha({ token: captchaToken, answer: captchaAnswer, website, startedAt: formStartedAt, turnstileToken })) {
             return new Response(JSON.stringify({ error: 'Verificacion anti-spam incorrecta' }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },

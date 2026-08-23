@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import VideoBackground from "../../components/ui/VideoBackground.astro";
+import InteractiveProjectVideo from "../../components/ui/InteractiveProjectVideo.astro";
 import FaqsSection from "../../components/home/FaqsSection.astro";
 import { getProjects, getServiceBySlug, getSettings } from "../../lib/data";
 import { buildBreadcrumbSchema, buildServiceSchema } from "../../lib/seo";
@@ -70,6 +71,8 @@ const serviceProjects = projects
     })
     .slice(0, 3);
 const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\u00daltimos videoclips";
+const whatsappNumber = String(settings.whatsapp_number || settings.phone || "34662908416").replace(/\D/g, "");
+const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20quiero%20hablar%20sobre%20un%20proyecto.`;
 ---
 
 <BaseLayout title={service.title} description={service.description} structuredData={[buildBreadcrumbSchema([{ name: "Inicio", path: "/" }, { name: "Servicios", path: "/servicios" }, { name: service.title, path }]), buildServiceSchema(service, path)]}>
@@ -92,7 +95,7 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
                 <h2>{copy.briefTitle}</h2>
                 <div class="service-detail__actions">
                     <a href="/contacto">Contactar</a>
-                    <button class="js-open-chat" type="button">Chat en vivo</button>
+                    <a class="service-detail__whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
                 </div>
             </aside>
         </div>
@@ -115,6 +118,21 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
 
     <section class:list={["service-detail__after", { "service-detail__after--no-projects": serviceProjects.length === 0 }]}>
         <div class="service-detail__after-content">
+            {service.slug === "videoclips" && (
+                <section class="service-detail__seo-block" aria-label="Produccion de videoclips">
+                    <div class="service-detail__seo-copy">
+                        <p>Videoclips en Sevilla</p>
+                        <h2>Produccion visual para canciones con identidad propia</h2>
+                        <div>
+                            <p>Trabajamos cada videoclip desde el concepto: escuchamos la cancion, definimos el tono, buscamos referencias y preparamos una pieza pensada para YouTube, redes y lanzamiento.</p>
+                            <p>La direccion, el rodaje, el montaje y el color se ajustan al artista para que el resultado tenga ritmo, presencia y una imagen reconocible sin sobrecargar la produccion.</p>
+                        </div>
+                    </div>
+                    <figure class="service-detail__seo-video">
+                        <InteractiveProjectVideo url={service.video || settings.hero_video_desktop} title="Video explicativo de videoclips" />
+                    </figure>
+                </section>
+            )}
             {serviceProjects.length > 0 && (
                 <section class="service-detail__related" aria-label={`Últimos proyectos de ${service.title}`}>
                     <div class="service-detail__related-heading">
@@ -128,6 +146,7 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
                                 ) : project.thumbnail ? (
                                     <img src={project.thumbnail} alt="" aria-hidden="true" />
                                 ) : null}
+                                <span>{project.title}</span>
                             </a>
                         ))}
                     </div>
@@ -171,6 +190,7 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
     .service-detail__actions { display: flex; flex-wrap: wrap; gap: .55rem; }
     .service-detail__actions a, .service-detail__actions button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0 1rem; color: #000; background: #fff; border: 1px solid #fff; border-radius: 999px; text-decoration: none; font: inherit; font-size: .75rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
     .service-detail__actions a:hover, .service-detail__actions button:hover, .service-detail__actions a:focus-visible, .service-detail__actions button:focus-visible { color: #fff; background: #000; transform: translateY(-2px); }
+    .service-detail__actions .service-detail__whatsapp { color: #fff; background: #25d366; border-color: #25d366; }
     .service-detail__notes { position: absolute; right: clamp(1rem, 4vw, 4rem); bottom: clamp(.7rem, 1.4vh, 1rem); left: clamp(1rem, 4vw, 4rem); z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; border: 1px solid rgba(255, 255, 255, .24); background: rgba(255, 255, 255, .2); }
     .service-detail__notes span { min-height: 58px; display: grid; place-items: center; padding: .65rem; color: rgba(255, 255, 255, .82); background: rgba(0, 0, 0, .55); font-size: .7rem; font-weight: 850; text-align: center; text-transform: uppercase; backdrop-filter: blur(14px); }
     .service-detail__notes--accordion { display: flex; gap: .75rem; align-items: stretch; border: 0; background: transparent; }
@@ -198,11 +218,26 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
     }
     .service-detail__after-content > :global(.service-faqs) { margin-inline: clamp(1rem, 4vw, 4rem); }
     .service-detail__after-content { display: grid; gap: clamp(2rem, 5vw, 4rem); }
+    .service-detail__seo-block {
+        display: grid;
+        grid-template-columns: minmax(0, .92fr) minmax(320px, .8fr);
+        gap: clamp(1.2rem, 4vw, 4rem);
+        align-items: center;
+        padding: clamp(4rem, 8vh, 6rem) clamp(1rem, 4vw, 4.5rem) 0;
+        color: #080808;
+        background: #fff;
+    }
+    .service-detail__seo-copy { display: grid; gap: 1rem; }
+    .service-detail__seo-copy > p { margin: 0; color: rgba(8, 8, 8, .52); font-size: .72rem; font-weight: 850; text-transform: uppercase; }
+    .service-detail__seo-copy h2 { max-width: 760px; margin: 0; font-size: clamp(2.2rem, 5.4vw, 5.8rem); font-weight: 950; line-height: .88; text-transform: uppercase; }
+    .service-detail__seo-copy div { display: grid; gap: .85rem; max-width: 700px; color: rgba(8, 8, 8, .7); font-size: clamp(1rem, 1.3vw, 1.16rem); line-height: 1.46; }
+    .service-detail__seo-copy div p { margin: 0; }
+    .service-detail__seo-video { position: relative; aspect-ratio: 16 / 9; margin: 0; overflow: hidden; background: #050505; border: 1px solid rgba(0, 0, 0, .14); }
     .service-detail__related {
         display: grid;
         grid-template-rows: auto minmax(0, 1fr);
         gap: 1.2rem;
-        min-height: 100svh;
+        min-height: auto;
         padding: clamp(4rem, 8vh, 6rem) clamp(1rem, 4vw, 4.5rem);
         color: #fff;
         background: #080808;
@@ -224,9 +259,11 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
     }
     .service-detail__related-item {
         position: relative;
-        min-height: clamp(420px, 64svh, 760px);
+        aspect-ratio: 16 / 9;
+        min-height: 0;
         display: grid;
         align-content: end;
+        padding: .9rem;
         color: #fff;
         text-decoration: none;
         overflow: hidden;
@@ -246,6 +283,16 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
         height: 100%;
         object-fit: cover;
     }
+    .service-detail__related-item span {
+        position: relative;
+        z-index: 2;
+        color: #fff;
+        font-size: clamp(.9rem, 1.3vw, 1.1rem);
+        font-weight: 950;
+        line-height: .98;
+        text-transform: uppercase;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, .7);
+    }
     .service-detail__related-item :global(.video-background) {
         filter: grayscale(1) contrast(1.06);
         transition: filter 500ms ease, transform 500ms ease;
@@ -262,6 +309,7 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
         .service-detail--cinematic { height: auto; min-height: 100svh; overflow: visible; }
         .service-detail__stage { grid-template-columns: 1fr; }
         .service-detail__brief { padding: 1rem 0 0; border-top: 1px solid rgba(255, 255, 255, .28); border-left: 0; }
+        .service-detail__seo-block { grid-template-columns: 1fr; }
         .service-detail__related-grid { grid-template-columns: 1fr; }
     }
 
@@ -277,8 +325,8 @@ const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\
         .service-detail__notes--accordion { flex-direction: column; gap: .5rem; }
         .service-detail__note { flex: none; width: 100%; min-height: 72px; }
         .service-detail__note summary { min-height: 70px; }
-        .service-detail__related { min-height: auto; }
-        .service-detail__related-item { min-height: 54svh; }
+        .service-detail__related { min-height: auto; padding-block: 3rem; }
+        .service-detail__related-item { min-height: 0; }
     }
 
     @media (prefers-reduced-motion: reduce) {

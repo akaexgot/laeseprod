@@ -95,7 +95,7 @@ async function getMaintenanceMode(supabaseAdmin: ReturnType<typeof getServiceSup
 }
 
 export const onRequest = defineMiddleware(async ({ request, cookies, redirect, rewrite, locals }, next) => {
-  const { pathname, searchParams, host } = new URL(request.url);
+  const { pathname, host } = new URL(request.url);
   const canonicalRedirectUrl = getCanonicalRedirectUrl(request);
   const supabaseAdmin = getServiceSupabase();
   const isApiRequest = pathname.startsWith("/api/");
@@ -184,8 +184,7 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, r
     }
   }
 
-  const isAdminChatAction = pathname === "/api/chat" && searchParams.get("list") === "1";
-  const isProtected = (PROTECTED.some((r) => pathname.startsWith(r)) || isAdminChatAction)
+  const isProtected = PROTECTED.some((r) => pathname.startsWith(r))
     && !PUBLIC.includes(pathname);
 
   if (!isProtected) return next();
@@ -213,7 +212,6 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, r
     "/admin/portal": "portal",
     "/admin/contratos": "contratos",
     "/admin/mensajes": "mensajes",
-    "/admin/chat": "chat",
     "/admin/ajustes": "ajustes",
     "/admin/seo": "seo",
     "/admin/usuarios": "usuarios",
@@ -232,7 +230,6 @@ export const onRequest = defineMiddleware(async ({ request, cookies, redirect, r
     "/api/admin/cloudinary-sign": "upload",
     "/api/admin/seo": "seo",
     "/api/admin/users": "usuarios",
-    "/api/chat": "chat",
   };
 
   const targetPath = Object.keys(SECTION_MAP)

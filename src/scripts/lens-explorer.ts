@@ -16,6 +16,7 @@ function initLensExplorer() {
     const status = root.querySelector<HTMLElement>("[data-explorer-status]");
     const progress = root.querySelector<HTMLElement>("[data-explorer-progress]");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const compactViewport = window.matchMedia("(max-width: 767px)");
 
     if (!canvas) return;
 
@@ -70,7 +71,7 @@ function initLensExplorer() {
     controls.enablePan = false;
     controls.enableZoom = false;
     controls.autoRotate = !reducedMotion.matches;
-    controls.autoRotateSpeed = 0.62;
+    controls.autoRotateSpeed = compactViewport.matches ? 4.2 : 1.25;
     controls.minPolarAngle = 0.22;
     controls.maxPolarAngle = Math.PI - 0.22;
 
@@ -129,7 +130,8 @@ function initLensExplorer() {
             const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
             const sourceSize = sourceBox.getSize(new THREE.Vector3());
             visual.position.sub(sourceCenter);
-            visual.scale.setScalar(4.4 / Math.max(sourceSize.x, sourceSize.y, sourceSize.z));
+            const targetModelSize = compactViewport.matches ? 2.15 : 4.4;
+            visual.scale.setScalar(targetModelSize / Math.max(sourceSize.x, sourceSize.y, sourceSize.z));
             visual.updateMatrixWorld(true);
             scene.add(visual);
 
@@ -137,7 +139,11 @@ function initLensExplorer() {
             const fittedSphere = fittedBox.getBoundingSphere(new THREE.Sphere());
             const fittedSize = fittedBox.getSize(new THREE.Vector3());
             const radius = Math.max(1, fittedSphere.radius);
-            const distance = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov * 0.5)) * 1.22;
+            const verticalHalfFov = THREE.MathUtils.degToRad(camera.fov * 0.5);
+            const horizontalHalfFov = Math.atan(Math.tan(verticalHalfFov) * camera.aspect);
+            const fittingHalfFov = Math.min(verticalHalfFov, horizontalHalfFov);
+            const distancePadding = compactViewport.matches ? 1.08 : 1.22;
+            const distance = radius / Math.sin(fittingHalfFov) * distancePadding;
 
             camera.position.set(distance * 0.06, distance * 0.08, distance);
             camera.near = Math.max(0.01, distance / 100);
@@ -145,8 +151,8 @@ function initLensExplorer() {
             camera.updateProjectionMatrix();
 
             controls.target.set(0, 0, 0);
-            controls.minDistance = radius * 1.18;
-            controls.maxDistance = radius * 4.4;
+            controls.minDistance = compactViewport.matches ? distance * 0.72 : radius * 1.18;
+            controls.maxDistance = compactViewport.matches ? distance * 1.65 : radius * 4.4;
             controls.update();
 
             const shadowMaterial = new THREE.ShadowMaterial({

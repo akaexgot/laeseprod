@@ -13,6 +13,8 @@ const normalizeInstagramUrl = (value?: string | null) => {
     return `https://www.instagram.com/${user}`;
 };
 const instagramUrl = normalizeInstagramUrl(settings.instagram);
+const whatsappNumber = String(settings.whatsapp_number || settings.phone || "34662908416").replace(/\D/g, "");
+const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20quiero%20hablar%20sobre%20un%20proyecto.`;
 const BRAND_NAME = "LaeseProd S.L.";
 const normalizeBrandText = (value?: string | null) => String(value || "")
     .replace(/LaesePROD/g, BRAND_NAME)
@@ -32,7 +34,7 @@ const legalCopyright = normalizeBrandText(footer.copyright) || `© ${new Date().
         </a>
         <div class="site-footer__cta">
             <a href="/contacto">Empezar proyecto</a>
-            <button class="js-open-chat" type="button">Chat en vivo</button>
+            <a class="site-footer__whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
         </div>
     </div>
 
@@ -51,6 +53,7 @@ const legalCopyright = normalizeBrandText(footer.copyright) || `© ${new Date().
             <span>Contacto</span>
             {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
             {settings.phone && <a href={`tel:${String(settings.phone).replace(/\s/g, "")}`}>{settings.phone}</a>}
+            <a href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
             {instagramUrl && <a href={instagramUrl} target="_blank" rel="noreferrer">Instagram</a>}
         </div>
     </div>
@@ -179,16 +182,16 @@ const legalCopyright = normalizeBrandText(footer.copyright) || `© ${new Date().
         transition: transform 180ms ease, color 180ms ease, background 180ms ease !important;
     }
 
-    footer.site-footer--cinema .site-footer__cta button {
+    footer.site-footer--cinema .site-footer__cta .site-footer__whatsapp {
         color: #fff !important;
-        background: rgba(255, 255, 255, .08) !important;
-        border-color: rgba(255, 255, 255, .42) !important;
+        background: #25d366 !important;
+        border-color: #25d366 !important;
     }
 
     footer.site-footer--cinema .site-footer__cta a:hover,
     footer.site-footer--cinema .site-footer__cta a:focus-visible,
-    footer.site-footer--cinema .site-footer__cta button:hover,
-    footer.site-footer--cinema .site-footer__cta button:focus-visible {
+    footer.site-footer--cinema .site-footer__cta .site-footer__whatsapp:hover,
+    footer.site-footer--cinema .site-footer__cta .site-footer__whatsapp:focus-visible {
         transform: translateY(-2px) !important;
     }
 
@@ -269,9 +272,10 @@ const legalCopyright = normalizeBrandText(footer.copyright) || `© ${new Date().
 
     @media (max-width: 760px) {
         footer.site-footer--cinema {
-            grid-template-rows: minmax(0, 1fr) auto auto !important;
-            gap: 1.4rem !important;
-            padding: 6.5rem 1rem 6.5rem !important;
+            min-height: auto !important;
+            grid-template-rows: auto auto auto !important;
+            gap: 1.05rem !important;
+            padding: 3.5rem 1rem 2.75rem !important;
         }
 
         footer.site-footer--cinema::after {
@@ -282,7 +286,8 @@ const legalCopyright = normalizeBrandText(footer.copyright) || `© ${new Date().
         }
 
         footer.site-footer--cinema .site-footer__stage {
-            align-self: end !important;
+            align-self: start !important;
+            gap: .8rem !important;
         }
 
         footer.site-footer--cinema .site-footer__wordmark {
@@ -300,7 +305,8 @@ const legalCopyright = normalizeBrandText(footer.copyright) || `© ${new Date().
 
         footer.site-footer--cinema .site-footer__directory {
             grid-template-columns: 1fr !important;
-            gap: 1rem !important;
+            gap: .78rem !important;
+            padding-top: .85rem !important;
         }
 
         footer.site-footer--cinema nav,

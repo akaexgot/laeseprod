@@ -13,7 +13,21 @@ const captcha = createCaptchaChallenge();
     <div class="minimal-contact-form__honeypot" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off" /></div>
     <input type="hidden" name="captchaToken" value={captcha.token} />
     <input type="hidden" name="formStartedAt" value={captcha.startedAt} />
-    <label class="minimal-contact-form__captcha">Cuanto es {captcha.question}?<input type="number" name="captchaAnswer" required inputmode="numeric" /></label>
+    <label class="minimal-contact-form__captcha-label" for="contact-captcha">Captcha</label>
+    <div class="minimal-contact-form__captcha">
+        <img src={captcha.image} alt="Captcha de seguridad" width="190" height="62" />
+        <input
+            type="text"
+            id="contact-captcha"
+            name="captchaAnswer"
+            required
+            inputmode="text"
+            autocomplete="off"
+            autocapitalize="characters"
+            maxlength="6"
+            placeholder="Codigo"
+        />
+    </div>
     <button type="submit">Enviar</button>
     <p class="minimal-contact-form__status" data-form-status aria-live="polite"></p>
 </form>
@@ -57,8 +71,10 @@ const captcha = createCaptchaChallenge();
     .minimal-contact-form input::placeholder, .minimal-contact-form textarea::placeholder { color: rgba(255, 255, 255, .48); font-weight: 800; }
     .minimal-contact-form textarea { min-height: 104px; resize: vertical; }
     .minimal-contact-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-    .minimal-contact-form__captcha { grid-template-columns: auto 92px; align-items: end; justify-content: start; gap: 1rem; }
-    .minimal-contact-form__captcha input { text-align: center; }
+    .minimal-contact-form__captcha-label { color: rgba(255, 255, 255, .9); font-size: .74rem; font-weight: 900; line-height: 1; text-transform: uppercase; }
+    .minimal-contact-form__captcha { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .75rem; }
+    .minimal-contact-form__captcha img { width: 190px; height: 62px; border: 1px solid rgba(255, 255, 255, .22); border-radius: 12px; background: #f9fafb; }
+    .minimal-contact-form__captcha input { padding-inline: .85rem; text-transform: uppercase; }
     .minimal-contact-form button { min-height: 54px; color: #000; background: #fff; border: 1px solid #fff; border-radius: 999px; font: inherit; font-size: .82rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: transform 160ms ease, opacity 160ms ease, color 160ms ease, background 160ms ease; }
     .minimal-contact-form button:hover, .minimal-contact-form button:focus-visible { color: #fff; background: #000; transform: translateY(-2px); }
     .minimal-contact-form button:disabled { opacity: .5; transform: none; }
@@ -67,6 +83,7 @@ const captcha = createCaptchaChallenge();
 
     @media (max-width: 560px) {
         .minimal-contact-form__row { grid-template-columns: 1fr; }
-        .minimal-contact-form__captcha { grid-template-columns: 1fr 84px; }
+        .minimal-contact-form__captcha { grid-template-columns: 1fr; }
+        .minimal-contact-form__captcha img { width: 100%; max-width: 190px; }
     }
 </style>

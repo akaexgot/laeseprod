@@ -6,6 +6,8 @@ import { getSettings } from "../../lib/data";
 const settings = await getSettings();
 const aboutText = settings.about_summary || "Somos una productora audiovisual centrada en arte visual. Trabajamos cada proyecto de forma cercana, agil y con una mirada cinematografica.";
 const contactBase = "Andalucia, Espa\u00f1a";
+const whatsappNumber = String(settings.whatsapp_number || settings.phone || "34662908416").replace(/\D/g, "");
+const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20quiero%20hablar%20sobre%20un%20proyecto.`;
 ---
 
 <section class="contact-page">
@@ -52,6 +54,10 @@ const contactBase = "Andalucia, Espa\u00f1a";
                 <strong>{settings.email}</strong>
             </a>
         )}
+        <a class="contact-page__whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">
+            <span>WhatsApp</span>
+            <strong>Escribir ahora</strong>
+        </a>
         {settings.address && (
             <div>
                 <span>Base</span>
@@ -76,8 +82,9 @@ const contactBase = "Andalucia, Espa\u00f1a";
     .contact-page__form-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; padding-bottom: .55rem; border-bottom: 1px solid rgba(255, 255, 255, .24); }
     .contact-page__form-heading p { margin: 0; font-size: clamp(1.8rem, 2.85vw, 3rem); font-weight: 900; line-height: .92; text-transform: uppercase; }
     .contact-page__form-heading span { max-width: 150px; color: rgba(255, 255, 255, .58); font-size: .7rem; font-weight: 800; line-height: 1.18; text-align: right; text-transform: uppercase; }
-    .contact-page__direct { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: rgba(255, 255, 255, .2); border: 1px solid rgba(255, 255, 255, .2); }
+    .contact-page__direct { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: rgba(255, 255, 255, .2); border: 1px solid rgba(255, 255, 255, .2); }
     .contact-page__direct a, .contact-page__direct div { min-height: 56px; display: grid; align-content: center; gap: .18rem; padding: .62rem .85rem; color: #fff; background: rgba(0, 0, 0, .62); text-decoration: none; backdrop-filter: blur(14px); }
+    .contact-page__direct .contact-page__whatsapp { background: #25d366; }
     .contact-page__direct span { color: rgba(255, 255, 255, .5); font-size: .6rem; font-weight: 800; text-transform: uppercase; }
     .contact-page__direct strong { min-width: 0; overflow-wrap: anywhere; font-size: clamp(.8rem, 1.2vw, .98rem); line-height: 1.12; }
     .contact-page__direct a:hover strong, .contact-page__direct a:focus-visible strong { text-decoration: underline; text-underline-offset: 4px; }

@@ -1,5 +1,5 @@
 ---
-import { ChevronDown, FolderLock, Menu, MessageCircle, Moon, Sun, X } from "@lucide/astro";
+import { Camera, ChevronDown, FolderLock, Menu, MessageCircle, Moon, Sun, X } from "@lucide/astro";
 import { getNavigation, getSettings } from "../../lib/data";
 
 const [navigation, settings] = await Promise.all([getNavigation(), getSettings()]);
@@ -11,6 +11,16 @@ const isSplitLeft = (href: string) => href === "/" || href === "/proyectos";
 const siteName = String(settings.site_name || "LaeseProd S.L.")
     .replace(/LaesePROD/g, "LaeseProd S.L.")
     .replace(/LaeseProd S\.L\.\./g, "LaeseProd S.L.");
+const normalizeInstagramUrl = (value?: string | null) => {
+    const raw = String(value || "").trim();
+    if (!raw) return "https://www.instagram.com/laeseprod";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    const user = raw.replace(/^@/, "").replace(/^instagram\.com\//i, "").replace(/^www\.instagram\.com\//i, "").replace(/^\/+/, "");
+    return `https://www.instagram.com/${user}`;
+};
+const whatsappNumber = String(settings.whatsapp_number || settings.phone || "34662908416").replace(/\D/g, "");
+const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20quiero%20hablar%20sobre%20un%20proyecto.`;
+const instagramUrl = normalizeInstagramUrl(settings.instagram);
 ---
 
 <header class:list={["site-header", "nav-theme-light", { "is-home": isHome }]} data-site-header>
@@ -58,10 +68,10 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
             <button class="site-nav__portal" type="button" aria-label="Portal de clientes" title="Portal de clientes" data-portal-open>
                 <FolderLock size={19} stroke-width={2} aria-hidden="true" />
             </button>
-            <button class="site-nav__chat js-open-chat" type="button" aria-label="Abrir chat en vivo" title="Chat en vivo">
+            <a class="site-nav__whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="WhatsApp" title="WhatsApp">
                 <MessageCircle size={21} stroke-width={2} aria-hidden="true" />
-                <span class="site-nav__chat-status"></span>
-            </button>
+                <span class="site-nav__whatsapp-status"></span>
+            </a>
             <button class="site-nav__toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-navigation" data-nav-toggle>
                 <Menu class="site-nav__menu-icon" size={23} stroke-width={2} aria-hidden="true" />
                 <X class="site-nav__close-icon" size={23} stroke-width={2} aria-hidden="true" />
@@ -83,15 +93,10 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
                 ))}
             </div>
 
-            <div class="mobile-navigation__services">
-                <p>Ir directamente a</p>
-                <a href="/servicios/bodas"><span class="nav-reveal"><span>Bodas</span></span></a>
-                <a href="/servicios/videoclips"><span class="nav-reveal"><span>Videoclips</span></span></a>
-            </div>
-
             <div class="mobile-navigation__actions">
-                <button type="button" data-portal-open><FolderLock size={18} aria-hidden="true" />Portal de clientes</button>
-                <button class="js-open-chat" type="button"><MessageCircle size={18} aria-hidden="true" />Chat en vivo</button>
+                <button type="button" data-portal-open><FolderLock size={18} aria-hidden="true" />Portal cliente</button>
+                <a href={instagramUrl} target="_blank" rel="noreferrer"><Camera size={18} aria-hidden="true" />Instagram</a>
+                <a class="mobile-navigation__whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle size={18} aria-hidden="true" />WhatsApp</a>
             </div>
         </div>
     </div>
@@ -266,24 +271,24 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
     .site-header { position: fixed; inset: 0 0 auto; z-index: 60; display: flex; justify-content: center; padding: 12px 18px 0; color: #fff; pointer-events: none; }
     .site-nav { position: relative; z-index: 2; width: clamp(780px, 52vw, 1020px); height: 70px; display: grid; grid-template-columns: minmax(96px, .9fr) auto minmax(92px, auto); align-items: center; padding: 0 10px 0 22px; background: rgba(0, 0, 0, .96); border: 1px solid rgba(255, 255, 255, .18); border-radius: 14px; box-shadow: 0 14px 38px rgba(0, 0, 0, .34); backdrop-filter: blur(18px); pointer-events: auto; animation: nav-drop-in 620ms cubic-bezier(.16, 1, .3, 1) both; transition: box-shadow 180ms ease, background 220ms ease, border-color 220ms ease; }
     .site-header.is-scrolled .site-nav, .site-header.menu-is-open .site-nav { background: rgba(0, 0, 0, .96); box-shadow: 0 18px 48px rgba(0, 0, 0, .34); }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover),
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible),
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover),
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible),
     .site-nav:has(.site-nav__group:hover),
     .site-nav:has(.site-nav__group:focus-within) { background: rgba(255, 255, 255, .96); border-color: rgba(0, 0, 0, .08); box-shadow: 0 18px 48px rgba(0, 0, 0, .26); }
     .site-nav__brand { position: relative; z-index: 3; justify-self: start; min-width: 0; display: inline-grid; align-items: center; color: #fff; text-decoration: none; line-height: 1; white-space: nowrap; }
     .site-nav__brand-logo { grid-area: 1 / 1; display: block; width: auto; height: 44px; object-fit: contain; object-position: left center; transition: opacity 180ms ease, transform 420ms cubic-bezier(.16, 1, .3, 1), filter 220ms ease; transform-origin: center; }
     .site-nav__brand-logo--negative { opacity: 0; }
     .site-nav__brand-logo--positive { opacity: 1; animation: none; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__brand-logo,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__brand-logo,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__brand-logo,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__brand-logo,
     .site-nav:has(.site-nav__group:hover) .site-nav__brand-logo,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__brand-logo { transform: translateY(-1px) scale(1.025); }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__brand-logo--negative,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__brand-logo--negative,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__brand-logo--negative,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__brand-logo--negative,
     .site-nav:has(.site-nav__group:hover) .site-nav__brand-logo--negative,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__brand-logo--negative { opacity: 1; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .08)); }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__brand-logo--positive,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__brand-logo--positive,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__brand-logo--positive,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__brand-logo--positive,
     .site-nav:has(.site-nav__group:hover) .site-nav__brand-logo--positive,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__brand-logo--positive { opacity: 0; }
     .site-nav__desktop { position: absolute; top: 0; bottom: 0; left: 50%; z-index: 2; display: flex; align-items: stretch; justify-content: center; gap: .2rem; transform: translateX(-50%); transition: inset 620ms cubic-bezier(.16, 1, .3, 1), gap 620ms cubic-bezier(.16, 1, .3, 1), transform 620ms cubic-bezier(.16, 1, .3, 1), width 620ms cubic-bezier(.16, 1, .3, 1); }
@@ -301,18 +306,18 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
     .site-nav__link::after { content: ""; position: absolute; right: .8rem; bottom: 13px; left: .8rem; height: 3px; background: #fff; border-radius: 3px; transform: scaleX(0); transform-origin: right; transition: transform 180ms ease; }
     .site-nav__link:hover, .site-nav__link:focus-visible, .site-nav__link.is-active { color: #fff; }
     .site-nav__link:hover::after, .site-nav__link:focus-visible::after, .site-nav__link.is-active::after { transform: scaleX(1); transform-origin: left; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__link,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__link,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__link,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__link,
     .site-nav:has(.site-nav__group:hover) .site-nav__link,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__link { color: #5d5d5d; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__link:hover,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__link:focus-visible,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__link.is-active,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__link.is-active,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__link:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__link:focus-visible,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__link.is-active,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__link.is-active,
     .site-nav:has(.site-nav__group:hover) .site-nav__link.is-active,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__link.is-active { color: #000; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__link::after,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__link::after,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__link::after,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__link::after,
     .site-nav:has(.site-nav__group:hover) .site-nav__link::after,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__link::after { background: #000; }
     .site-nav__group { position: relative; display: flex; }
@@ -328,50 +333,50 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
     .site-nav__submenu small { color: #5b5b5b; font-size: .8rem; }
     .site-nav__actions { position: relative; z-index: 3; justify-self: end; display: flex; align-items: center; gap: .4rem; padding-left: .8rem; }
     .site-nav__actions::before { content: ""; position: absolute; top: 8px; bottom: 8px; left: 0; width: 1px; background: rgba(255, 255, 255, .24); }
-    .site-nav__theme, .site-nav__portal, .site-nav__chat, .site-nav__toggle { width: 40px; height: 40px; display: grid; place-items: center; color: #fff; background: rgba(255, 255, 255, .1); border: 0; border-radius: 50%; text-decoration: none; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .site-nav__theme, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle { width: 40px; height: 40px; display: grid; place-items: center; color: #fff; background: rgba(255, 255, 255, .1); border: 0; border-radius: 50%; text-decoration: none; cursor: pointer; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
     .site-nav__theme { position: relative; overflow: hidden; }
     .site-nav__theme svg { grid-area: 1 / 1; transition: opacity 160ms ease, transform 180ms ease; }
     .site-nav__theme-moon { opacity: 0; transform: scale(.72) rotate(-45deg); }
-    .site-nav__chat { position: relative; color: #fff; background: rgba(255, 255, 255, .1); }
-    .site-nav__theme:hover, .site-nav__theme:focus-visible, .site-nav__portal:hover, .site-nav__portal:focus-visible, .site-nav__chat:hover, .site-nav__chat:focus-visible { transform: translateY(-2px); }
-    .site-nav__theme:hover, .site-nav__theme:focus-visible, .site-nav__portal:hover, .site-nav__portal:focus-visible, .site-nav__chat:hover, .site-nav__chat:focus-visible { color: #000; background: #fff; }
-    .site-nav__chat-status { position: absolute; top: 3px; right: 3px; width: 10px; height: 10px; background: #fff; border: 2px solid #000; border-radius: 50%; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__actions::before,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__actions::before,
+    .site-nav__whatsapp { position: relative; color: #fff; background: rgba(255, 255, 255, .1); }
+    .site-nav__theme:hover, .site-nav__theme:focus-visible, .site-nav__portal:hover, .site-nav__portal:focus-visible, .site-nav__whatsapp:hover, .site-nav__whatsapp:focus-visible { transform: translateY(-2px); }
+    .site-nav__theme:hover, .site-nav__theme:focus-visible, .site-nav__portal:hover, .site-nav__portal:focus-visible, .site-nav__whatsapp:hover, .site-nav__whatsapp:focus-visible { color: #000; background: #fff; }
+    .site-nav__whatsapp-status { position: absolute; top: 3px; right: 3px; width: 10px; height: 10px; background: #fff; border: 2px solid #000; border-radius: 50%; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__actions::before,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__actions::before,
     .site-nav:has(.site-nav__group:hover) .site-nav__actions::before,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__actions::before { background: #d6d6d6; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__theme,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__theme,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__portal,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__portal,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__toggle,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__toggle,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__theme,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__theme,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__portal,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__portal,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__toggle,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__toggle,
     .site-nav:has(.site-nav__group:hover) .site-nav__theme,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__theme,
     .site-nav:has(.site-nav__group:hover) .site-nav__portal,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__portal,
     .site-nav:has(.site-nav__group:hover) .site-nav__toggle,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__toggle { color: #000; background: #f0f0f0; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__chat,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__chat,
-    .site-nav:has(.site-nav__group:hover) .site-nav__chat,
-    .site-nav:has(.site-nav__group:focus-within) .site-nav__chat { color: #fff; background: #000; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__theme:hover,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__theme:focus-visible,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__portal:hover,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__portal:focus-visible,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__whatsapp,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__whatsapp,
+    .site-nav:has(.site-nav__group:hover) .site-nav__whatsapp,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__whatsapp { color: #fff; background: #000; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__theme:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__theme:focus-visible,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__portal:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__portal:focus-visible,
     .site-nav:has(.site-nav__group:hover) .site-nav__theme:hover,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__theme:focus-visible,
     .site-nav:has(.site-nav__group:hover) .site-nav__portal:hover,
     .site-nav:has(.site-nav__group:focus-within) .site-nav__portal:focus-visible { color: #fff; background: #000; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__chat:hover,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__chat:focus-visible,
-    .site-nav:has(.site-nav__group:hover) .site-nav__chat:hover,
-    .site-nav:has(.site-nav__group:focus-within) .site-nav__chat:focus-visible { color: #000; background: #e5e5e5; }
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):hover) .site-nav__chat-status,
-    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__chat, .site-nav__toggle):focus-visible) .site-nav__chat-status,
-    .site-nav:has(.site-nav__group:hover) .site-nav__chat-status,
-    .site-nav:has(.site-nav__group:focus-within) .site-nav__chat-status { background: #fff; border-color: #000; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__whatsapp:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__whatsapp:focus-visible,
+    .site-nav:has(.site-nav__group:hover) .site-nav__whatsapp:hover,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__whatsapp:focus-visible { color: #000; background: #e5e5e5; }
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__whatsapp-status,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__whatsapp-status,
+    .site-nav:has(.site-nav__group:hover) .site-nav__whatsapp-status,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__whatsapp-status { background: #fff; border-color: #000; }
     .site-nav__toggle { display: none; color: #fff; background: #000; }
     .site-nav__close-icon { display: none; }
     .mobile-navigation { display: none; }
@@ -413,11 +418,11 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
         color: #fff !important;
         background: rgba(255, 255, 255, .1) !important;
     }
-    .site-header.nav-theme-dark .site-nav__chat {
+    .site-header.nav-theme-dark .site-nav__whatsapp {
         color: #fff !important;
         background: rgba(255, 255, 255, .1) !important;
     }
-    .site-header.nav-theme-dark .site-nav__chat-status {
+    .site-header.nav-theme-dark .site-nav__whatsapp-status {
         background: #fff !important;
         border-color: #000 !important;
     }
@@ -434,10 +439,10 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
     .site-header.nav-theme-light .site-nav__theme,
     .site-header.nav-theme-light .site-nav__portal,
     .site-header.nav-theme-light .site-nav__toggle { color: #000; background: #f0f0f0; }
-    .site-header.nav-theme-light .site-nav__chat { color: #fff; background: #000; }
+    .site-header.nav-theme-light .site-nav__whatsapp { color: #fff; background: #000; }
     .site-header.nav-theme-light .site-nav__theme-sun { opacity: 0; transform: scale(.72) rotate(45deg); }
     .site-header.nav-theme-light .site-nav__theme-moon { opacity: 1; transform: scale(1) rotate(0); }
-    .site-header.nav-theme-light .site-nav__chat-status { background: #fff; border-color: #000; }
+    .site-header.nav-theme-light .site-nav__whatsapp-status { background: #fff; border-color: #000; }
 
     .site-header.nav-theme-dark .site-nav__theme-sun { opacity: 1; transform: scale(1) rotate(0); }
     .site-header.nav-theme-dark .site-nav__theme-moon { opacity: 0; transform: scale(.72) rotate(-45deg); }
@@ -529,7 +534,7 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
 
         .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__theme,
         .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__portal,
-        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__chat {
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__whatsapp {
             color: #fff !important;
             background: rgba(255, 255, 255, .1) !important;
         }
@@ -538,13 +543,13 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
         .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__theme:focus-visible,
         .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__portal:hover,
         .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__portal:focus-visible,
-        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__chat:hover,
-        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__chat:focus-visible {
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__whatsapp:hover,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__whatsapp:focus-visible {
             color: #000 !important;
             background: #fff !important;
         }
 
-        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__chat-status {
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__whatsapp-status {
             background: #fff !important;
             border-color: #000 !important;
         }
@@ -643,7 +648,7 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
         .site-header { padding: max(10px, env(safe-area-inset-top)) 10px 0; }
         .site-nav { width: min(540px, calc(100vw - 20px)); height: 66px; grid-template-columns: 1fr auto; padding: 0 10px 0 18px; }
         .site-nav__brand-logo { width: auto; height: 42px; }
-        .site-nav__desktop, .site-nav__portal, .site-nav__chat, .site-nav__actions::before { display: none; }
+        .site-nav__desktop, .site-nav__portal, .site-nav__whatsapp, .site-nav__actions::before { display: none; }
         .site-nav__actions { min-width: 86px; display: flex; justify-content: flex-end; padding: 0; }
         .site-nav__toggle { display: grid; }
         .site-header.menu-is-open .site-nav__menu-icon { display: none; }
@@ -669,7 +674,7 @@ const siteName = String(settings.site_name || "LaeseProd S.L.")
         .mobile-navigation__services a { min-height: 42px; min-width: 0; display: grid; place-items: center; color: #000; border: 1px solid #000; border-radius: 999px; text-decoration: none; font-size: clamp(.72rem, 3vw, .8rem); font-weight: 500; text-transform: uppercase; }
         .mobile-navigation__actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1rem; padding-top: 0; }
         .mobile-navigation__actions a, .mobile-navigation__actions button { min-width: 0; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: .4rem; color: #fff; background: #000; border: 1px solid #000; border-radius: 999px; text-decoration: none; white-space: nowrap; font: inherit; font-size: clamp(.66rem, 2.8vw, .74rem); font-weight: 500; cursor: pointer; }
-        .mobile-navigation__actions button.js-open-chat { color: #000; background: #fff; }
+        .mobile-navigation__actions .mobile-navigation__whatsapp { grid-column: 1 / -1; min-height: 50px; color: #fff; background: #25d366; border-color: #25d366; font-size: clamp(.78rem, 3.4vw, .88rem); font-weight: 900; }
     }
 
     @media (max-width: 420px) {
