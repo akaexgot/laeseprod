@@ -71,6 +71,31 @@ const serviceProjects = projects
     })
     .slice(0, 3);
 const latestProjectsTitle = service.slug === "bodas" ? "\u00daltimas bodas" : "\u00daltimos videoclips";
+const serviceSeoContent: Record<string, { ariaLabel: string; eyebrow: string; title: string; paragraphs: string[]; videoTitle: string }> = {
+    bodas: {
+        ariaLabel: "Videos de boda en Sevilla",
+        eyebrow: "Videos de boda en Sevilla",
+        title: "Peliculas de boda naturales, cuidadas y con emocion real",
+        paragraphs: [
+            "Trabajamos cada boda con una mirada documental y cinematografica: preparativos, ceremonia, celebracion y todos esos gestos que hacen que el recuerdo vuelva con fuerza.",
+            "El objetivo es crear una pelicula de boda elegante, cercana y fiel a vuestra historia, cuidando el ritmo, el sonido, el color y la forma de contar el dia sin interrumpir lo que esta pasando.",
+        ],
+        videoTitle: "Video explicativo de bodas",
+    },
+    videoclips: {
+        ariaLabel: "Produccion de videoclips",
+        eyebrow: "Videoclips en Sevilla",
+        title: "Produccion visual para canciones con identidad propia",
+        paragraphs: [
+            "Trabajamos cada videoclip desde el concepto: escuchamos la cancion, definimos el tono, buscamos referencias y preparamos una pieza pensada para YouTube, redes y lanzamiento.",
+            "La direccion, el rodaje, el montaje y el color se ajustan al artista para que el resultado tenga ritmo, presencia y una imagen reconocible sin sobrecargar la produccion.",
+        ],
+        videoTitle: "Video explicativo de videoclips",
+    },
+};
+const seoContent = serviceSeoContent[service.slug];
+const seoVideoDesktop = service.seo_video || service.video || settings.hero_video_desktop;
+const seoVideoMobile = service.seo_video_mobile || service.seo_video || service.video_vertical || service.video || settings.hero_video_mobile || settings.hero_video_desktop;
 const whatsappNumber = String(settings.whatsapp_number || settings.phone || "34662908416").replace(/\D/g, "");
 const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20quiero%20hablar%20sobre%20un%20proyecto.`;
 ---
@@ -118,18 +143,17 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20qu
 
     <section class:list={["service-detail__after", { "service-detail__after--no-projects": serviceProjects.length === 0 }]}>
         <div class="service-detail__after-content">
-            {service.slug === "videoclips" && (
-                <section class="service-detail__seo-block" aria-label="Produccion de videoclips">
+            {seoContent && (
+                <section class="service-detail__seo-block" aria-label={seoContent.ariaLabel}>
                     <div class="service-detail__seo-copy">
-                        <p>Videoclips en Sevilla</p>
-                        <h2>Produccion visual para canciones con identidad propia</h2>
+                        <p>{seoContent.eyebrow}</p>
+                        <h2>{seoContent.title}</h2>
                         <div>
-                            <p>Trabajamos cada videoclip desde el concepto: escuchamos la cancion, definimos el tono, buscamos referencias y preparamos una pieza pensada para YouTube, redes y lanzamiento.</p>
-                            <p>La direccion, el rodaje, el montaje y el color se ajustan al artista para que el resultado tenga ritmo, presencia y una imagen reconocible sin sobrecargar la produccion.</p>
+                            {seoContent.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
                         </div>
                     </div>
                     <figure class="service-detail__seo-video">
-                        <InteractiveProjectVideo url={service.video || settings.hero_video_desktop} title="Video explicativo de videoclips" />
+                        <InteractiveProjectVideo desktop={seoVideoDesktop} mobile={seoVideoMobile} title={seoContent.videoTitle} />
                     </figure>
                 </section>
             )}

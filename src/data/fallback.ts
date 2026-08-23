@@ -39,8 +39,8 @@ export const projects = [
 ];
 
 export const services = [
-    { id: BODAS_ID, title: "Bodas", slug: "bodas", description: "Películas de boda naturales, cuidadas y hechas para volver a sentir cada momento.", video: provisionalVideo, video_vertical: "", preview_seconds: 3, order: 1 },
-    { id: VIDEOCLIPS_ID, title: "Videoclips", slug: "videoclips", description: "Piezas visuales para artistas que convierten una canción en una imagen con identidad propia.", video: provisionalVideo, video_vertical: "", preview_seconds: 3, order: 2 },
+    { id: BODAS_ID, title: "Bodas", slug: "bodas", description: "Películas de boda naturales, cuidadas y hechas para volver a sentir cada momento.", video: provisionalVideo, video_vertical: "", seo_video: "", seo_video_mobile: "", preview_seconds: 3, order: 1 },
+    { id: VIDEOCLIPS_ID, title: "Videoclips", slug: "videoclips", description: "Piezas visuales para artistas que convierten una canción en una imagen con identidad propia.", video: provisionalVideo, video_vertical: "", seo_video: "", seo_video_mobile: "", preview_seconds: 3, order: 2 },
 ];
 
 export const faqs = [

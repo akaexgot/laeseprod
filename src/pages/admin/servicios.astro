@@ -64,6 +64,26 @@ const services = await getServices();
                             </button>
                         </div>
                     </label>
+
+                    <label class="service-field">
+                        <span>Video explicativo SEO</span>
+                        <div class="service-input-action">
+                            <input id={`seo-video-${service.id}`} name="seo_video" value={service.seo_video || ""} placeholder="URL del video explicativo" />
+                            <button class="service-upload" type="button" data-target={`seo-video-${service.id}`} title="Subir video explicativo" aria-label="Subir video explicativo">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </label>
+
+                    <label class="service-field">
+                        <span>Video explicativo movil</span>
+                        <div class="service-input-action">
+                            <input id={`seo-mobile-${service.id}`} name="seo_video_mobile" value={service.seo_video_mobile || ""} placeholder="URL vertical opcional del explicativo" />
+                            <button class="service-upload" type="button" data-target={`seo-mobile-${service.id}`} title="Subir video explicativo movil" aria-label="Subir video explicativo movil">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="service-card-foot">
