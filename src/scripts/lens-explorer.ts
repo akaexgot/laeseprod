@@ -71,7 +71,7 @@ function initLensExplorer() {
     controls.enablePan = false;
     controls.enableZoom = false;
     controls.autoRotate = !reducedMotion.matches;
-    controls.autoRotateSpeed = compactViewport.matches ? 4.2 : 1.25;
+    controls.autoRotateSpeed = compactViewport.matches ? 2.4 : 0.8;
     controls.minPolarAngle = 0.22;
     controls.maxPolarAngle = Math.PI - 0.22;
 
