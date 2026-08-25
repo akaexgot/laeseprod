@@ -26,7 +26,7 @@ const services = [...allServices]
     .home-services { min-height: 100svh; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #000; }
     .home-service { position: relative; min-height: 100svh; display: grid; place-items: center; overflow: hidden; color: #fff; text-decoration: none; border-right: 1px solid rgba(255,255,255,.5); }
     .home-service:last-child { border-right: 0; }
-    .home-service h2 { position: relative; z-index: 2; margin: 0; padding: 1rem; font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; font-size: clamp(4rem, 9vw, 9rem); font-weight: 400; line-height: .85; text-align: center; text-transform: uppercase; }
+    .home-service h2 { position: relative; z-index: 2; margin: 0; padding: 1rem; font-family: var(--font-display); font-size: clamp(4rem, 9vw, 9rem); font-weight: 400; line-height: .85; text-align: center; text-transform: uppercase; }
     .home-service :global(.video-background) { filter: grayscale(1) contrast(1.08); transition: filter 400ms ease, transform 400ms ease; }
     .home-service:hover :global(.video-background), .home-service:focus-visible :global(.video-background) { filter: grayscale(0) contrast(1.04); transform: scale(1.02); }
     @media (max-width: 760px) { .home-services { grid-template-columns: 1fr; } .home-service { min-height: 64svh; border-right: 0; border-bottom: 1px solid #fff; } .home-service h2 { font-size: clamp(3rem, 16vw, 5rem); } }
