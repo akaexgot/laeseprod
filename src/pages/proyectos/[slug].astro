@@ -3,7 +3,6 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import VideoBackground from "../../components/ui/VideoBackground.astro";
 import InteractiveProjectVideo from "../../components/ui/InteractiveProjectVideo.astro";
 import { getProjectBySlug, getProjects } from "../../lib/data";
-import { isInstagramReel } from "../../lib/display";
 import { buildBreadcrumbSchema, buildProjectSchemas } from "../../lib/seo";
 
 const { slug } = Astro.params;
@@ -33,7 +32,7 @@ const relatedProjects = orderedProjects
 const explanationDesktop = project.video_explanation_desktop;
 const explanationMobile = project.video_explanation_mobile;
 const explanationSources = [explanationDesktop, explanationMobile].filter(Boolean);
-const hasExplanationVideo = explanationSources.length > 0 && !explanationSources.some((value) => isInstagramReel(String(value)));
+const hasExplanationVideo = explanationSources.length > 0;
 const projectType = project.subtitle || "Producción audiovisual";
 const projectDescription = project.description || "Proyecto audiovisual desarrollado por LaeseProd S.L. con una mirada cercana, ritmo visual y una pieza final pensada para verse con intención.";
 const projectDescriptionParagraphs = String(projectDescription)

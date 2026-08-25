@@ -23,8 +23,18 @@ function source(value: string | null | undefined, width: number, bitRate: string
     return {
         url: native ? optimizeCloudinaryVideo(url, { width, quality: "auto:good", bitRate }) : "",
         youtubeId,
-        poster: youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : "",
+        poster: youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : cloudinaryPoster(url, width),
     };
+}
+
+function cloudinaryPoster(value: string, width: number) {
+    if (!value.includes("cloudinary.com") || !value.includes("/upload/")) return "";
+
+    const [path, query = ""] = value.split("?");
+    const imagePath = path.replace(/\.(mp4|webm|mov)$/i, ".jpg");
+    const transformed = imagePath.replace("/upload/", `/upload/so_0,f_jpg,q_auto,w_${width}/`);
+
+    return query ? `${transformed}?${query}` : transformed;
 }
 
 const sources = {
@@ -72,13 +82,18 @@ const poster = sources.desktop.poster || sources.mobile.poster;
         document.querySelectorAll<HTMLElement>('[data-video-background]:not([data-ready])').forEach((root) => {
             root.dataset.ready = 'true';
             const sources = JSON.parse(root.dataset.sources || '{}');
-            const selected = window.matchMedia('(max-width: 767px)').matches ? sources.mobile : sources.desktop;
+            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            const selected = isMobile ? sources.mobile : sources.desktop;
             const video = root.querySelector<HTMLVideoElement>('.video-background__native');
             const iframe = root.querySelector<HTMLIFrameElement>('.video-background__youtube');
             if (!selected || (!selected.url && !selected.youtubeId)) return;
+            if (selected.poster) root.style.backgroundImage = `url(${selected.poster})`;
+            if (isMobile) {
+                root.classList.add('video-background--poster-only');
+                return;
+            }
 
             const load = () => {
-                if (selected.poster) root.style.backgroundImage = `url(${selected.poster})`;
                 if (selected.url && video) {
                     video.src = selected.url;
                     video.autoplay = true;
