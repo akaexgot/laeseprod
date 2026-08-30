@@ -1,5 +1,4 @@
 ---
-import VideoBackground from "../ui/VideoBackground.astro";
 import ContactFormBlock from "../ui/ContactFormBlock.astro";
 import { getSettings } from "../../lib/data";
 
@@ -11,12 +10,6 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20qu
 ---
 
 <section class="contact-page">
-    <VideoBackground
-        desktop={settings.contact_hero_video || settings.hero_video_desktop}
-        mobile={settings.contact_hero_video || settings.hero_video_mobile || settings.hero_video_desktop}
-        title="Fondo de contacto"
-        overlay="none"
-    />
     <div class="contact-page__shade" aria-hidden="true"></div>
 
     <div class="contact-page__layout">
@@ -73,7 +66,7 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20qu
     .contact-page__layout { position: relative; z-index: 2; min-height: 0; display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: clamp(.2rem, .45vw, .55rem); align-items: center; }
     .contact-page__about { display: grid; align-content: center; gap: clamp(.55rem, 1.05vh, .82rem); max-width: 780px; }
     .contact-page__kicker { margin: 0; color: rgba(255, 255, 255, .68); font-size: .7rem; font-weight: 800; text-transform: uppercase; }
-    .contact-page h1 { max-width: 880px; margin: 0; font-family: var(--font-display); font-size: clamp(5rem, 10vw, min(10rem, 19vh)); font-weight: 400; line-height: .86; text-transform: uppercase; }
+    .contact-page h1 { display: grid; gap: .07em; max-width: 880px; margin: 0; font-family: var(--font-display); font-size: clamp(5rem, 10vw, min(10rem, 19vh)); font-weight: 400; line-height: .92; text-transform: uppercase; }
     .contact-page h1 span { display: block; }
     .contact-page__summary { max-width: 660px; margin: 0; color: rgba(255, 255, 255, .82); font-size: clamp(.9rem, 1.25vw, 1.08rem); line-height: 1.3; }
     .contact-page__badges { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .1rem; }
