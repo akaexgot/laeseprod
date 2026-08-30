@@ -54,6 +54,9 @@ const copy = serviceCopy[service.slug] || {
     afterLabel: service.title,
     afterTitle: "Cada proyecto pide una mirada propia.",
 };
+const heroKicker = String(service.hero_kicker || "").trim() || copy.kicker;
+const heroTitle = String(service.hero_title || "").trim();
+const heroTitleLines = heroTitle ? heroTitle.split(/\r?\n/).map((line) => line.trim()).filter(Boolean) : copy.title;
 
 const inferProjectCategory = (project: any) => {
     const explicit = String(project.category || project.project_category || "").toLowerCase();
@@ -93,7 +96,18 @@ const serviceSeoContent: Record<string, { ariaLabel: string; eyebrow: string; ti
         videoTitle: "Video explicativo de videoclips",
     },
 };
-const seoContent = serviceSeoContent[service.slug];
+const getText = (value: unknown, fallbackText: string) => String(value || "").trim() || fallbackText;
+const defaultSeoContent = serviceSeoContent[service.slug];
+const seoContent = defaultSeoContent ? {
+    ariaLabel: getText(service.seo_eyebrow, defaultSeoContent.ariaLabel),
+    eyebrow: getText(service.seo_eyebrow, defaultSeoContent.eyebrow),
+    title: getText(service.seo_title, defaultSeoContent.title),
+    paragraphs: [
+        getText(service.seo_paragraph_1, defaultSeoContent.paragraphs[0] || ""),
+        getText(service.seo_paragraph_2, defaultSeoContent.paragraphs[1] || ""),
+    ].filter(Boolean),
+    videoTitle: getText(service.seo_video_title, defaultSeoContent.videoTitle),
+} : null;
 const seoVideoDesktop = service.seo_video || service.video || settings.hero_video_desktop;
 const seoVideoMobile = service.seo_video_mobile || service.seo_video || service.video_vertical || service.video || settings.hero_video_mobile || settings.hero_video_desktop;
 const whatsappNumber = String(settings.whatsapp_number || settings.phone || "34662908416").replace(/\D/g, "");
@@ -108,9 +122,9 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20qu
         <div class="service-detail__stage">
             <article class="service-detail__hero" aria-labelledby="service-title">
                 <a class="service-detail__back" href="/servicios">{copy.back}</a>
-                <p class="service-detail__kicker">{copy.kicker}</p>
+                <p class="service-detail__kicker">{heroKicker}</p>
                 <h1 id="service-title">
-                    {copy.title.map((line: string) => <span>{line}</span>)}
+                    {heroTitleLines.map((line: string) => <span>{line}</span>)}
                 </h1>
                 {service.description && <p class="service-detail__description">{service.description}</p>}
             </article>
@@ -339,7 +353,12 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20qu
 
     @media (max-width: 700px) {
         .service-detail--cinematic { padding: 6rem 1rem 1rem; }
-        .service-detail--cinematic h1 { font-size: clamp(3.5rem, 17vw, 5.6rem); }
+        .service-detail--cinematic h1 {
+            display: grid;
+            gap: .08em;
+            font-size: clamp(3.5rem, 17vw, 5.6rem);
+            line-height: .94;
+        }
         .service-detail__stage { padding-bottom: 2rem; }
         .service-detail__notes {
             position: relative;

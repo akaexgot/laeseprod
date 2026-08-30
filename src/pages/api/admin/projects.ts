@@ -16,6 +16,7 @@ const PROJECT_COLUMNS = [
     'video_project',
     'video_explanation_desktop',
     'video_explanation_mobile',
+    'video_explanation_thumbnail',
     'thumbnail',
     'client_name',
     'client_logo',
@@ -116,6 +117,23 @@ export const PUT: APIRoute = async ({ request }) => {
             }
         }
 
+        if (Object.prototype.hasOwnProperty.call(updates, 'video_explanation_thumbnail') && updates.video_explanation_thumbnail === null) {
+            const { data: existingProject, error: readError } = await sb
+                .from('projects')
+                .select('video_explanation_thumbnail')
+                .eq('id', id)
+                .single();
+
+            if (readError) return new Response(JSON.stringify({ error: readError.message }), { status: 400 });
+
+            try {
+                await deleteCloudinaryImage(existingProject?.video_explanation_thumbnail);
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'No se pudo eliminar la miniatura del making of de Cloudinary.';
+                console.warn(`[projects] Miniatura del making of limpiada en BD, pero no se pudo borrar el archivo remoto: ${message}`);
+            }
+        }
+
         const { data, error } = await sb.from('projects').update(updates).eq('id', id).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
         invalidateCache("projects");
@@ -158,7 +176,7 @@ export const DELETE: APIRoute = async ({ request }) => {
 
         const { data: existingProject, error: readError } = await sb
             .from('projects')
-            .select('thumbnail')
+            .select('thumbnail, video_explanation_thumbnail')
             .eq('id', id)
             .single();
 
@@ -169,9 +187,10 @@ export const DELETE: APIRoute = async ({ request }) => {
 
         try {
             await deleteCloudinaryImage(existingProject?.thumbnail);
+            await deleteCloudinaryImage(existingProject?.video_explanation_thumbnail);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'No se pudo eliminar la miniatura de Cloudinary.';
-            console.warn(`[projects] Proyecto eliminado en BD, pero no se pudo borrar la miniatura remota: ${message}`);
+            console.warn(`[projects] Proyecto eliminado en BD, pero no se pudo borrar alguna miniatura remota: ${message}`);
         }
 
         invalidateCache("projects");

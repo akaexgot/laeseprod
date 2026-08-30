@@ -8,7 +8,23 @@ export const PUT: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
         if (!body.id) return new Response(JSON.stringify({ error: "id required" }), { status: 400 });
-        const allowed = ["title", "description", "video", "video_vertical", "seo_video", "seo_video_mobile", "preview_seconds", "order"];
+        const allowed = [
+            "title",
+            "description",
+            "video",
+            "video_vertical",
+            "hero_kicker",
+            "hero_title",
+            "seo_video",
+            "seo_video_mobile",
+            "seo_eyebrow",
+            "seo_title",
+            "seo_paragraph_1",
+            "seo_paragraph_2",
+            "seo_video_title",
+            "preview_seconds",
+            "order",
+        ];
         const updates: Record<string, unknown> = {};
         for (const key of allowed) if (key in body) updates[key] = body[key];
         const { data, error } = await sb.from("services").update(updates).eq("id", body.id).select().single();

@@ -7,6 +7,7 @@ interface Props {
     mobile?: string | null;
     title?: string;
     overlay?: "light" | "dark" | "none";
+    startAt?: number;
 }
 
 const {
@@ -14,9 +15,12 @@ const {
     mobile = desktop,
     title = "Video de fondo",
     overlay = "dark",
+    startAt = 20,
 } = Astro.props;
 
-function source(value: string | null | undefined, width: number, bitRate: string) {
+const startSeconds = Math.max(0, Number(startAt) || 0);
+
+function source(value: string | null | undefined, width: number, bitRate: string, posterSecond: number) {
     const url = String(value || "").trim();
     const native = /cloudinary\.com|\.(mp4|webm)(\?.*)?$/i.test(url);
     const youtubeId = native ? "" : getVideoId(url) || "";
@@ -24,22 +28,23 @@ function source(value: string | null | undefined, width: number, bitRate: string
         url: native ? optimizeCloudinaryVideo(url, { width, quality: "auto:good", bitRate }) : "",
         youtubeId,
         poster: youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : cloudinaryPoster(url, width),
+        startAt: posterSecond,
     };
 }
 
-function cloudinaryPoster(value: string, width: number) {
+function cloudinaryPoster(value: string, width: number, second = startSeconds) {
     if (!value.includes("cloudinary.com") || !value.includes("/upload/")) return "";
 
     const [path, query = ""] = value.split("?");
     const imagePath = path.replace(/\.(mp4|webm|mov)$/i, ".jpg");
-    const transformed = imagePath.replace("/upload/", `/upload/so_0,f_jpg,q_auto,w_${width}/`);
+    const transformed = imagePath.replace("/upload/", `/upload/so_${second},f_jpg,q_auto,w_${width}/`);
 
     return query ? `${transformed}?${query}` : transformed;
 }
 
 const sources = {
-    desktop: source(desktop || mobile, 1600, "4m"),
-    mobile: source(mobile || desktop, 720, "2m"),
+    desktop: source(desktop || mobile, 1600, "4m", startSeconds),
+    mobile: source(mobile || desktop, 720, "2m", startSeconds),
 };
 const poster = sources.desktop.poster || sources.mobile.poster;
 ---
@@ -84,6 +89,7 @@ const poster = sources.desktop.poster || sources.mobile.poster;
             const sources = JSON.parse(root.dataset.sources || '{}');
             const isMobile = window.matchMedia('(max-width: 767px)').matches;
             const selected = isMobile ? sources.mobile : sources.desktop;
+            const startAt = Math.max(0, Number(selected?.startAt || 0));
             const video = root.querySelector<HTMLVideoElement>('.video-background__native');
             const iframe = root.querySelector<HTMLIFrameElement>('.video-background__youtube');
             if (!selected || (!selected.url && !selected.youtubeId)) return;
@@ -97,11 +103,24 @@ const poster = sources.desktop.poster || sources.mobile.poster;
                 if (selected.url && video) {
                     video.src = selected.url;
                     video.autoplay = true;
+                    const playFromStartTime = () => {
+                        try {
+                            const safeStart = Number.isFinite(video.duration) && video.duration > 0
+                                ? Math.min(startAt, Math.max(0, video.duration - 0.25))
+                                : startAt;
+                            if (safeStart > 0) video.currentTime = safeStart;
+                        } catch {}
+                        video.play().catch(() => {});
+                    };
                     video.addEventListener('playing', () => video.classList.add('is-visible'), { once: true });
-                    video.play().catch(() => {});
+                    if (video.readyState >= 1) playFromStartTime();
+                    else {
+                        video.addEventListener('loadedmetadata', playFromStartTime, { once: true });
+                        video.load();
+                    }
                 } else if (selected.youtubeId && iframe) {
                     const origin = encodeURIComponent(window.location.origin);
-                    iframe.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${selected.youtubeId}&cc_load_policy=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${origin}`;
+                    iframe.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${selected.youtubeId}&start=${startAt}&cc_load_policy=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${origin}`;
                     disableBackgroundYouTubeCaptions(iframe);
                     iframe.addEventListener('load', () => iframe.classList.add('is-visible'), { once: true });
                 }

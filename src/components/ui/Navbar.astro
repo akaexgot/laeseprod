@@ -446,6 +446,39 @@ const instagramUrl = normalizeInstagramUrl(settings.instagram);
 
     .site-header.nav-theme-dark .site-nav__theme-sun { opacity: 1; transform: scale(1) rotate(0); }
     .site-header.nav-theme-dark .site-nav__theme-moon { opacity: 0; transform: scale(.72) rotate(-45deg); }
+    .site-nav__whatsapp,
+    .site-header.nav-theme-light .site-nav__whatsapp,
+    .site-header.nav-theme-dark .site-nav__whatsapp,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__whatsapp,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__whatsapp,
+    .site-nav:has(.site-nav__group:hover) .site-nav__whatsapp,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__whatsapp {
+        color: #fff;
+        background: #25d366;
+    }
+    .site-nav__whatsapp:hover,
+    .site-nav__whatsapp:focus-visible,
+    .site-header.nav-theme-light .site-nav__whatsapp:hover,
+    .site-header.nav-theme-light .site-nav__whatsapp:focus-visible,
+    .site-header.nav-theme-dark .site-nav__whatsapp:hover,
+    .site-header.nav-theme-dark .site-nav__whatsapp:focus-visible,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__whatsapp:hover,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__whatsapp:focus-visible,
+    .site-nav:has(.site-nav__group:hover) .site-nav__whatsapp:hover,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__whatsapp:focus-visible {
+        color: #fff;
+        background: #1fb95b;
+    }
+    .site-nav__whatsapp-status,
+    .site-header.nav-theme-light .site-nav__whatsapp-status,
+    .site-header.nav-theme-dark .site-nav__whatsapp-status,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):hover) .site-nav__whatsapp-status,
+    .site-nav:has(:is(.site-nav__brand, .site-nav__link, .site-nav__portal, .site-nav__whatsapp, .site-nav__toggle):focus-visible) .site-nav__whatsapp-status,
+    .site-nav:has(.site-nav__group:hover) .site-nav__whatsapp-status,
+    .site-nav:has(.site-nav__group:focus-within) .site-nav__whatsapp-status {
+        background: #fff;
+        border-color: #25d366;
+    }
 
     :global(html.is-rolling-reveal-active) .site-header.is-home:not(.is-scrolled):not(.menu-is-open) {
         clip-path: inset(0 calc(100% - var(--rolling-nav-reveal, 0%)) 0 0);
@@ -694,6 +727,27 @@ const instagramUrl = normalizeInstagramUrl(settings.instagram);
         .site-nav__actions > *,
         .site-header.menu-is-open .mobile-navigation .nav-reveal > span {
             animation: none;
+        }
+    }
+
+    @media (min-width: 1081px) {
+        .site-header .site-nav__whatsapp,
+        .site-header.nav-theme-light .site-nav__whatsapp,
+        .site-header.nav-theme-dark .site-nav__whatsapp,
+        .site-header.is-home:not(.is-scrolled):not(.menu-is-open) .site-nav__whatsapp {
+            color: #fff !important;
+            background: #25d366 !important;
+        }
+
+        .site-header .site-nav__whatsapp:hover,
+        .site-header .site-nav__whatsapp:focus-visible {
+            color: #fff !important;
+            background: #1fb95b !important;
+        }
+
+        .site-header .site-nav__whatsapp-status {
+            background: #fff !important;
+            border-color: #25d366 !important;
         }
     }
 </style>

@@ -106,7 +106,7 @@ function initLensExplorer() {
             const visual = new THREE.Group();
             const model = gltf.scene;
             visual.add(model);
-            visual.rotation.set(Math.PI / 2, -0.18, 0);
+            visual.rotation.set(Math.PI / 2 - 0.06, -0.04, 0);
 
             model.traverse((object) => {
                 if (!(object instanceof THREE.Mesh)) return;

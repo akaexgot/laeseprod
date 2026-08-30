@@ -24,12 +24,23 @@ function source(value: string | null | undefined, width: number, bitRate: string
 
     return {
         nativeUrl: isNative ? optimizeCloudinaryVideo(cleanUrl, { width, quality: "auto:good", bitRate }) : "",
+        nativePoster: isNative ? cloudinaryPoster(cleanUrl, width) : "",
         youtubeId,
         youtubePoster: youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : "",
         instagramEmbed: isInstagram ? getInstagramEmbedUrl(cleanUrl) : "",
         isVertical: forceVertical || isShort || isInstagram,
         hasMedia: Boolean(cleanUrl),
     };
+}
+
+function cloudinaryPoster(value: string, width: number) {
+    if (!value.includes("cloudinary.com") || !value.includes("/upload/")) return "";
+
+    const [path, query = ""] = value.split("?");
+    const imagePath = path.replace(/\.(mp4|webm|mov)$/i, ".jpg");
+    const transformed = imagePath.replace("/upload/", `/upload/so_0,f_jpg,q_auto,w_${width}/`);
+
+    return query ? `${transformed}?${query}` : transformed;
 }
 
 const desktopUrl = desktop || url || mobile;
@@ -84,6 +95,36 @@ const sources = {
     }
 
     function initInteractiveProjectVideos() {
+        const pauseVideoRoot = (root: HTMLElement) => {
+            const nativeVideo = root.querySelector<HTMLVideoElement>('.interactive-project-video__native');
+            const youtubeFrame = root.querySelector<HTMLIFrameElement>('.interactive-project-video__youtube');
+            const instagramFrame = root.querySelector<HTMLIFrameElement>('.interactive-project-video__instagram');
+            const posterImage = root.querySelector<HTMLImageElement>('.interactive-project-video__poster');
+            const playButton = root.querySelector<HTMLButtonElement>('.interactive-project-video__play');
+            nativeVideo?.pause();
+            youtubeFrame?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+            if (instagramFrame?.getAttribute('src')) {
+                instagramFrame.removeAttribute('src');
+                const instagramEmbed = root.dataset.instagramEmbed || '';
+                if (instagramEmbed) {
+                    window.setTimeout(() => {
+                        if (!root.classList.contains('is-playing')) instagramFrame.src = instagramEmbed;
+                    }, 40);
+                } else {
+                    instagramFrame.classList.remove('is-visible');
+                    if (posterImage?.getAttribute('src')) posterImage.classList.add('is-visible');
+                    playButton?.classList.add('is-visible');
+                }
+            }
+            root.classList.remove('is-playing');
+        };
+
+        const pauseOtherVideos = (activeRoot: HTMLElement) => {
+            document.querySelectorAll<HTMLElement>('[data-interactive-project-video]').forEach((otherRoot) => {
+                if (otherRoot !== activeRoot) pauseVideoRoot(otherRoot);
+            });
+        };
+
         document.querySelectorAll<HTMLElement>('[data-interactive-project-video]:not([data-ready])').forEach((root) => {
             root.dataset.ready = 'true';
             const sources = JSON.parse(root.dataset.sources || '{}');
@@ -104,6 +145,7 @@ const sources = {
                 if (nativeVideo) {
                     nativeVideo.pause();
                     nativeVideo.removeAttribute('src');
+                    nativeVideo.removeAttribute('poster');
                     nativeVideo.load();
                 }
                 if (youtubeFrame) youtubeFrame.removeAttribute('src');
@@ -116,7 +158,13 @@ const sources = {
 
             if (selected?.nativeUrl && nativeVideo) {
                 nativeVideo.src = selected.nativeUrl;
-                if (poster) nativeVideo.poster = poster;
+                const nativePoster = poster || selected.nativePoster || '';
+                if (nativePoster) nativeVideo.poster = nativePoster;
+                nativeVideo.addEventListener('play', () => {
+                    pauseOtherVideos(root);
+                    root.classList.add('is-playing');
+                });
+                nativeVideo.addEventListener('pause', () => root.classList.remove('is-playing'));
                 nativeVideo.classList.add('is-visible');
                 return;
             }
@@ -124,12 +172,14 @@ const sources = {
             if (selected?.youtubeId && youtubeFrame) {
                 const loadYouTube = () => {
                     const origin = encodeURIComponent(window.location.origin);
+                    pauseOtherVideos(root);
                     posterImage?.classList.remove('is-visible');
                     playButton?.classList.remove('is-visible');
                     youtubeFrame.src = `https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&controls=1&cc_load_policy=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${origin}`;
                     youtubeFrame.title = title;
                     disableInteractiveYouTubeCaptions(youtubeFrame);
                     youtubeFrame.classList.add('is-visible');
+                    root.classList.add('is-playing');
                 };
 
                 if (posterImage) {
@@ -143,10 +193,18 @@ const sources = {
             }
 
             if (selected?.instagramEmbed && instagramFrame) {
+                const markInstagramActive = () => {
+                    pauseOtherVideos(root);
+                    root.classList.add('is-playing');
+                };
+
+                root.classList.add('interactive-project-video--instagram');
+                root.dataset.instagramEmbed = selected.instagramEmbed;
                 instagramFrame.src = selected.instagramEmbed;
                 instagramFrame.title = title;
-                root.classList.add('interactive-project-video--instagram');
                 instagramFrame.classList.add('is-visible');
+                instagramFrame.addEventListener('pointerdown', markInstagramActive);
+                instagramFrame.addEventListener('focus', markInstagramActive);
                 return;
             }
 
@@ -252,10 +310,10 @@ const sources = {
     }
 
     .interactive-project-video--vertical.interactive-project-video--instagram .interactive-project-video__instagram {
-        width: 100%;
+        width: min(100%, calc(100svh * .5625));
         height: 100%;
-        max-width: none;
-        aspect-ratio: auto;
+        max-width: 100%;
+        aspect-ratio: 9 / 16;
         transform: none;
         transform-origin: center;
         background: #000;
@@ -271,7 +329,7 @@ const sources = {
         }
 
         .interactive-project-video--vertical.interactive-project-video--instagram .interactive-project-video__instagram {
-            width: 100%;
+            width: min(100%, calc(100svh * .5625));
             height: 100%;
             transform: none;
         }

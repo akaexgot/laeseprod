@@ -206,6 +206,24 @@ const projects = await getProjects();
                                 <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo...
                             </div>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.5rem;">CarÃ¡tula del Making Of</label>
+                            <div id="drop-zone-makingof-thumb" class="relative group cursor-pointer border-2 border-dashed border-zinc-800 hover:border-white/50 bg-zinc-950/50 rounded-xl transition-all overflow-hidden" style="height: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <input type="file" id="file-makingof-thumb" class="hidden" accept="image/*" />
+                                <input type="hidden" id="p-makingof-thumbnail" />
+                                <div id="preview-makingof-thumb" class="absolute inset-0 bg-cover bg-center hidden opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                                <div id="empty-makingof-thumb" class="relative z-10 flex flex-direction: column; align-items: center; gap: 0.25rem; text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                                    <i data-lucide="image-plus" class="w-7 h-7"></i>
+                                    <span class="text-sm font-medium">Miniatura independiente</span>
+                                </div>
+                                <div id="loading-makingof-thumb" class="absolute inset-0 bg-zinc-950/80 hidden items-center justify-center z-20">
+                                    <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-white"></i>
+                                </div>
+                            </div>
+                            <button type="button" id="btn-remove-makingof-thumb" class="hidden mt-2 text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-200/10 border border-white/20 rounded-lg transition-all" style="padding: 0.45rem 0.75rem;">
+                                Eliminar miniatura del making of
+                            </button>
+                        </div>
                         <div style="padding-top: 0.5rem;">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" id="p-featured" class="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-white focus:ring-white focus:ring-offset-zinc-900" />
@@ -409,6 +427,21 @@ const projects = await getProjects();
 
             $('p-video').value = data?.video_project || '';
             $('p-makingof').value = data?.video_explanation_mobile || '';
+            const makingOfThumbUrl = data?.video_explanation_thumbnail || '';
+            $('p-makingof-thumbnail').value = makingOfThumbUrl;
+            const previewMakingOfThumb = document.getElementById('preview-makingof-thumb')!;
+            const emptyMakingOfThumb = document.getElementById('empty-makingof-thumb')!;
+            const removeMakingOfThumbBtn = document.getElementById('btn-remove-makingof-thumb')!;
+            if (makingOfThumbUrl) {
+                previewMakingOfThumb.style.backgroundImage = `url('${makingOfThumbUrl}')`;
+                previewMakingOfThumb.classList.remove('hidden');
+                emptyMakingOfThumb.classList.add('hidden');
+                removeMakingOfThumbBtn.classList.remove('hidden');
+            } else {
+                previewMakingOfThumb.classList.add('hidden');
+                emptyMakingOfThumb.classList.remove('hidden');
+                removeMakingOfThumbBtn.classList.add('hidden');
+            }
             $('p-featured').checked = data?.featured_home || false;
             
             if (data) modalDeleteBtn.classList.remove('hidden');
@@ -423,8 +456,10 @@ const projects = await getProjects();
         // Drag & Drop Logic
         const dropZoneThumb = document.getElementById('drop-zone-thumb')!;
         const fileInputThumb = document.getElementById('file-thumb') as HTMLInputElement;
+        const dropZoneMakingOfThumb = document.getElementById('drop-zone-makingof-thumb')!;
+        const fileInputMakingOfThumb = document.getElementById('file-makingof-thumb') as HTMLInputElement;
 
-        function setupDropZone(dropZone: HTMLElement, fileInput: HTMLInputElement, inputId: string, previewId: string, emptyId: string, loadingId: string) {
+        function setupDropZone(dropZone: HTMLElement, fileInput: HTMLInputElement, inputId: string, previewId: string, emptyId: string, loadingId: string, folder = 'projects') {
             dropZone.addEventListener('click', () => fileInput.click());
             dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-white', 'bg-white/5'); });
             dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-white', 'bg-white/5'); });
@@ -432,15 +467,16 @@ const projects = await getProjects();
                 e.preventDefault();
                 dropZone.classList.remove('border-white', 'bg-white/5');
                 const file = e.dataTransfer?.files[0];
-                if (file) handleUpload(file, inputId, previewId, emptyId, loadingId);
+                if (file) handleUpload(file, inputId, previewId, emptyId, loadingId, folder);
             });
             fileInput.addEventListener('change', () => {
                 const file = fileInput.files?.[0];
-                if (file) handleUpload(file, inputId, previewId, emptyId, loadingId);
+                if (file) handleUpload(file, inputId, previewId, emptyId, loadingId, folder);
             });
         }
 
         setupDropZone(dropZoneThumb, fileInputThumb, 'p-thumbnail', 'preview-thumb', 'empty-thumb', 'loading-thumb');
+        setupDropZone(dropZoneMakingOfThumb, fileInputMakingOfThumb, 'p-makingof-thumbnail', 'preview-makingof-thumb', 'empty-makingof-thumb', 'loading-makingof-thumb', 'making_of_thumbnails');
 
         async function readUploadError(res: Response) {
             const contentType = res.headers.get('content-type') || '';
@@ -542,13 +578,13 @@ const projects = await getProjects();
             });
         }
 
-        async function handleUpload(file: File, inputId: string, previewId: string, emptyId: string, loadingId: string) {
+        async function handleUpload(file: File, inputId: string, previewId: string, emptyId: string, loadingId: string, folder = 'projects') {
             const loading = document.getElementById(loadingId)!;
             loading.classList.remove('hidden');
             loading.classList.add('flex');
 
             try {
-                const data = await uploadToCloudinary(file, 'projects');
+                const data = await uploadToCloudinary(file, folder);
                 $(inputId).value = data.url;
                 updatePreview(data.url, previewId, emptyId);
                 showToast('Imagen subida correctamente', 'success');
@@ -564,7 +600,11 @@ const projects = await getProjects();
         function updatePreview(url: string, previewId: string, emptyId: string) {
             const preview = document.getElementById(previewId)!;
             const empty = document.getElementById(emptyId)!;
-            const removeThumbBtn = previewId === 'preview-thumb' ? document.getElementById('btn-remove-thumb') : null;
+            const removeThumbBtn = previewId === 'preview-thumb'
+                ? document.getElementById('btn-remove-thumb')
+                : previewId === 'preview-makingof-thumb'
+                    ? document.getElementById('btn-remove-makingof-thumb')
+                    : null;
             if (url) {
                 preview.style.backgroundImage = `url('${url}')`;
                 preview.classList.remove('hidden');
@@ -607,6 +647,12 @@ const projects = await getProjects();
             event.stopPropagation();
             if (!$('p-thumbnail').value) return;
             openThumbConfirm();
+        });
+        document.getElementById('btn-remove-makingof-thumb')?.addEventListener('click', (event) => {
+            event.stopPropagation();
+            $('p-makingof-thumbnail').value = '';
+            updatePreview('', 'preview-makingof-thumb', 'empty-makingof-thumb');
+            showToast('Miniatura del making of marcada para eliminar. Guarda los cambios para confirmarlo.', 'success');
         });
 
         // Close on outside click is disabled
@@ -764,6 +810,7 @@ const projects = await getProjects();
                 thumbnail: $('p-thumbnail').value.trim() || null,
                 video_project: $('p-video').value.trim() || null,
                 video_explanation_mobile: $('p-makingof').value.trim() || null,
+                video_explanation_thumbnail: $('p-makingof-thumbnail').value.trim() || null,
                 featured_home: $('p-featured').checked
             };
 

@@ -44,6 +44,47 @@ const services = await getServices();
                     <textarea name="description" rows="5">{service.description}</textarea>
                 </label>
 
+                <fieldset class="service-seo-fields">
+                    <legend>Hero del servicio</legend>
+                    <label class="service-field">
+                        <span>Frase pequeña</span>
+                        <input name="hero_kicker" value={service.hero_kicker || ""} placeholder="Historias para volver a vivirlas" />
+                    </label>
+
+                    <label class="service-field">
+                        <span>Titulo grande</span>
+                        <textarea name="hero_title" rows="3" placeholder={"Bodas\ncon pulso real"}>{service.hero_title || ""}</textarea>
+                    </label>
+                </fieldset>
+
+                <fieldset class="service-seo-fields">
+                    <legend>Texto SEO visible</legend>
+                    <label class="service-field">
+                        <span>Etiqueta superior</span>
+                        <input name="seo_eyebrow" value={service.seo_eyebrow || ""} placeholder="Videos de boda en Sevilla" />
+                    </label>
+
+                    <label class="service-field">
+                        <span>Titulo SEO</span>
+                        <textarea name="seo_title" rows="3" placeholder="Titulo visible del bloque SEO">{service.seo_title || ""}</textarea>
+                    </label>
+
+                    <label class="service-field">
+                        <span>Parrafo SEO 1</span>
+                        <textarea name="seo_paragraph_1" rows="5" placeholder="Primer parrafo del bloque SEO">{service.seo_paragraph_1 || ""}</textarea>
+                    </label>
+
+                    <label class="service-field">
+                        <span>Parrafo SEO 2</span>
+                        <textarea name="seo_paragraph_2" rows="5" placeholder="Segundo parrafo del bloque SEO">{service.seo_paragraph_2 || ""}</textarea>
+                    </label>
+
+                    <label class="service-field">
+                        <span>Titulo del video SEO</span>
+                        <input name="seo_video_title" value={service.seo_video_title || ""} placeholder="Video explicativo de bodas" />
+                    </label>
+                </fieldset>
+
                 <div class="service-video-fields">
                     <label class="service-field">
                         <span>Video horizontal</span>
@@ -122,6 +163,8 @@ const services = await getServices();
     .service-field input, .service-field textarea { width: 100%; min-width: 0; padding: .82rem .9rem; color: #fff; background: #09090b; border: 1px solid #3f3f46; border-radius: 10px; outline: none; font: inherit; font-size: .9rem; font-weight: 650; text-transform: none; letter-spacing: 0; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
     .service-field textarea { min-height: 132px; resize: vertical; line-height: 1.45; }
     .service-field input:focus, .service-field textarea:focus { border-color: #fff; background: #050505; box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+    .service-seo-fields { display: grid; gap: .85rem; min-width: 0; margin: 0; padding: 1rem; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: rgba(255,255,255,.025); }
+    .service-seo-fields legend { padding: 0 .4rem; color: #f4f4f5; font-size: .72rem; font-weight: 950; text-transform: uppercase; letter-spacing: .04em; }
     .service-video-fields { display: grid; gap: .85rem; }
     .service-input-action { display: grid; grid-template-columns: minmax(0, 1fr) 46px; gap: .55rem; }
     .service-upload { min-height: 46px; display: grid; place-items: center; color: #e4e4e7; background: #111113; border: 1px solid #3f3f46; border-radius: 10px; cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease; }

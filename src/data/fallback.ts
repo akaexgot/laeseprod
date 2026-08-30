@@ -34,13 +34,49 @@ export const navigation = [
 ];
 
 export const projects = [
-    { id: "p1", title: "Proyecto provisional 01", subtitle: "", category: "videoclips", slug: "proyecto-01", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 1, created_at: "2026-01-01" },
-    { id: "p2", title: "Proyecto provisional 02", subtitle: "", category: "bodas", slug: "proyecto-02", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 2, created_at: "2026-01-02" },
+    { id: "p1", title: "Proyecto provisional 01", subtitle: "", category: "videoclips", slug: "proyecto-01", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", video_explanation_thumbnail: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 1, created_at: "2026-01-01" },
+    { id: "p2", title: "Proyecto provisional 02", subtitle: "", category: "bodas", slug: "proyecto-02", description: "Contenido provisional editable desde el panel.", video_project: provisionalVideo, video_explanation_desktop: "", video_explanation_mobile: "", video_explanation_thumbnail: "", thumbnail: "", client_name: "", client_logo: "", featured_home: true, order: 2, created_at: "2026-01-02" },
 ];
 
 export const services = [
-    { id: BODAS_ID, title: "Bodas", slug: "bodas", description: "Películas de boda naturales, cuidadas y hechas para volver a sentir cada momento.", video: provisionalVideo, video_vertical: "", seo_video: "", seo_video_mobile: "", preview_seconds: 3, order: 1 },
-    { id: VIDEOCLIPS_ID, title: "Videoclips", slug: "videoclips", description: "Piezas visuales para artistas que convierten una canción en una imagen con identidad propia.", video: provisionalVideo, video_vertical: "", seo_video: "", seo_video_mobile: "", preview_seconds: 3, order: 2 },
+    {
+        id: BODAS_ID,
+        title: "Bodas",
+        slug: "bodas",
+        description: "Películas de boda naturales, cuidadas y hechas para volver a sentir cada momento.",
+        video: provisionalVideo,
+        video_vertical: "",
+        hero_kicker: "Historias para volver a vivirlas",
+        hero_title: "Bodas\ncon pulso real",
+        seo_video: "",
+        seo_video_mobile: "",
+        seo_eyebrow: "Videos de boda en Sevilla",
+        seo_title: "Peliculas de boda naturales, cuidadas y con emocion real",
+        seo_paragraph_1: "Trabajamos cada boda con una mirada documental y cinematografica: preparativos, ceremonia, celebracion y todos esos gestos que hacen que el recuerdo vuelva con fuerza.",
+        seo_paragraph_2: "El objetivo es crear una pelicula de boda elegante, cercana y fiel a vuestra historia, cuidando el ritmo, el sonido, el color y la forma de contar el dia sin interrumpir lo que esta pasando.",
+        seo_video_title: "Video explicativo de bodas",
+        preview_seconds: 3,
+        order: 1,
+    },
+    {
+        id: VIDEOCLIPS_ID,
+        title: "Videoclips",
+        slug: "videoclips",
+        description: "Piezas visuales para artistas que convierten una canción en una imagen con identidad propia.",
+        video: provisionalVideo,
+        video_vertical: "",
+        hero_kicker: "Imagen para canciones con identidad",
+        hero_title: "Videoclips\ncon carácter",
+        seo_video: "",
+        seo_video_mobile: "",
+        seo_eyebrow: "Videoclips en Sevilla",
+        seo_title: "Produccion visual para canciones con identidad propia",
+        seo_paragraph_1: "Trabajamos cada videoclip desde el concepto: escuchamos la cancion, definimos el tono, buscamos referencias y preparamos una pieza pensada para YouTube, redes y lanzamiento.",
+        seo_paragraph_2: "La direccion, el rodaje, el montaje y el color se ajustan al artista para que el resultado tenga ritmo, presencia y una imagen reconocible sin sobrecargar la produccion.",
+        seo_video_title: "Video explicativo de videoclips",
+        preview_seconds: 3,
+        order: 2,
+    },
 ];
 
 export const faqs = [

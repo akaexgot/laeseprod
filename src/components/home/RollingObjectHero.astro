@@ -104,12 +104,8 @@
     const hero = document.querySelector<HTMLElement>("[data-rolling-content-reveal]");
     const revealTarget = hero?.querySelector<HTMLElement>("[data-reveal-target]");
     const explorer = hero?.querySelector<HTMLElement>("[data-lens-explorer]");
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
     const isMobileViewport = window.matchMedia("(max-width: 767px)").matches;
-    const prefersLiteExperience = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        || connection?.saveData === true
-        || (typeof deviceMemory === "number" && deviceMemory <= 2);
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const revealWithout3D = () => {
         hero?.classList.add("is-lite", "is-content-revealed", "is-status-hidden");
@@ -127,8 +123,11 @@
         void import("../../scripts/lens-explorer").catch(() => explorer?.classList.add("is-fallback"));
     };
 
-    if (prefersLiteExperience) {
-        revealWithout3D();
+    if (prefersReducedMotion) {
+        hero?.classList.add("is-content-revealed", "is-status-hidden", "is-reduced-motion");
+        revealTarget?.style.setProperty("--content-reveal", "100%");
+        document.documentElement.style.setProperty("--rolling-nav-reveal", "100%");
+        startExplorer();
     } else if (isMobileViewport) {
         hero?.classList.add("is-content-revealed", "is-status-hidden", "is-mobile-direct");
         revealTarget?.style.setProperty("--content-reveal", "100%");

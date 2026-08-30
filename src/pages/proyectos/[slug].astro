@@ -96,7 +96,7 @@ const projectDescriptionParagraphs = String(projectDescription)
                                 desktop={explanationDesktop}
                                 mobile={explanationMobile}
                                 title={`Making of de ${project.title}`}
-                                poster={project.thumbnail}
+                                poster={project.video_explanation_thumbnail}
                                 orientation="vertical"
                             />
                             <figcaption>Making of</figcaption>
@@ -190,7 +190,7 @@ const projectDescriptionParagraphs = String(projectDescription)
                     {relatedProjects.map((item: any) => (
                         <a href={`/proyectos/${item.slug}`} class="project-case-related__item">
                             {item.video_project ? (
-                                <VideoBackground desktop={item.video_project} mobile={item.video_project} title={item.title} overlay="none" />
+                                <VideoBackground desktop={item.video_project} mobile={item.video_project} title={item.title} overlay="none" startAt={0} />
                             ) : item.thumbnail ? (
                                 <img src={item.thumbnail} alt="" aria-hidden="true" />
                             ) : null}
