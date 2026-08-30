@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildProjectScreens, toYouTubeEmbed, getVideoId } from '../display';
+import { buildProjectScreens, getVideoId, getVimeoId, normalizeSampleVideos, resolveVideoEmbed, toYouTubeEmbed, toVimeoEmbed } from '../display';
 
 describe('buildProjectScreens', () => {
   it('returns empty array for no projects', () => {
@@ -62,5 +62,43 @@ describe('getVideoId / toYouTubeEmbed', () => {
   it('returns null for invalid urls', () => {
     expect(getVideoId('not a url')).toBe(null);
     expect(toYouTubeEmbed('')).toBe(null);
+  });
+});
+
+describe('video embed resolution', () => {
+  it('marks youtube shorts as vertical', () => {
+    const video = resolveVideoEmbed('https://www.youtube.com/shorts/ZYXWVUTSRQP');
+    expect(video?.provider).toBe('youtube');
+    expect(video?.orientation).toBe('vertical');
+    expect(video?.aspectRatio).toBe('9 / 16');
+  });
+
+  it('converts vimeo links to horizontal embeds', () => {
+    expect(getVimeoId('https://vimeo.com/123456789')).toBe('123456789');
+    expect(toVimeoEmbed('https://player.vimeo.com/video/987654321')).toBe('https://player.vimeo.com/video/987654321?dnt=1');
+    const video = resolveVideoEmbed('https://vimeo.com/123456789');
+    expect(video?.provider).toBe('vimeo');
+    expect(video?.orientation).toBe('horizontal');
+  });
+
+  it('converts instagram posts and reels to vertical embeds', () => {
+    const reel = resolveVideoEmbed('https://www.instagram.com/reel/ABC123/');
+    const post = resolveVideoEmbed('https://www.instagram.com/p/XYZ789/');
+    expect(reel?.embedUrl).toBe('https://www.instagram.com/reel/ABC123/embed/');
+    expect(post?.embedUrl).toBe('https://www.instagram.com/p/XYZ789/embed/');
+    expect(reel?.orientation).toBe('vertical');
+    expect(post?.orientation).toBe('vertical');
+  });
+
+  it('uses native playback for direct videos and detects vertical hints', () => {
+    const horizontal = resolveVideoEmbed('https://cdn.example.com/video.mp4');
+    const vertical = resolveVideoEmbed('https://cdn.example.com/reel-portrait.mp4');
+    expect(horizontal?.isNative).toBe(true);
+    expect(horizontal?.orientation).toBe('horizontal');
+    expect(vertical?.orientation).toBe('vertical');
+  });
+
+  it('cleans and limits sample videos', () => {
+    expect(normalizeSampleVideos([' one ', '', null, 'two', 'three', 'four'])).toEqual(['one', 'two', 'three']);
   });
 });

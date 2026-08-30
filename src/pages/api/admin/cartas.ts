@@ -4,6 +4,15 @@
  */
 import type { APIRoute } from 'astro';
 import { getServiceSupabase } from '../../../lib/supabase';
+import { normalizeSampleVideos } from '../../../lib/display';
+
+function cleanCartaPayload(body: Record<string, any>, allowed: string[]) {
+    const payload: any = {};
+    for (const key of allowed) {
+        if (key in body) payload[key] = key === 'sample_videos' ? normalizeSampleVideos(body[key]) : body[key];
+    }
+    return payload;
+}
 
 export const POST: APIRoute = async ({ request }) => {
     const sb = getServiceSupabase();
@@ -12,11 +21,8 @@ export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
         
-        const allowed = ['nombre', 'slug', 'tipo', 'video_url'];
-        const filteredBody: any = {};
-        for (const key of allowed) {
-            if (key in body) filteredBody[key] = body[key];
-        }
+        const allowed = ['nombre', 'slug', 'tipo', 'video_url', 'sample_videos'];
+        const filteredBody = cleanCartaPayload(body, allowed);
 
         if (!filteredBody.slug && filteredBody.nombre) {
             filteredBody.slug = filteredBody.nombre
@@ -44,11 +50,8 @@ export const PUT: APIRoute = async ({ request }) => {
         const { id } = body;
         if (!id) return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
 
-        const allowed = ['nombre', 'slug', 'tipo', 'video_url'];
-        const updates: any = {};
-        for (const key of allowed) {
-            if (key in body) updates[key] = body[key];
-        }
+        const allowed = ['nombre', 'slug', 'tipo', 'video_url', 'sample_videos'];
+        const updates = cleanCartaPayload(body, allowed);
 
         const { data, error } = await sb.from('cartas').update(updates).eq('id', id).select().single();
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });

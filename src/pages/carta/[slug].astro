@@ -3,7 +3,7 @@
  * Página pública de Carta de Servicios
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { toYouTubeEmbed } from "../../lib/display";
+import { normalizeSampleVideos, resolveVideoEmbed } from "../../lib/display";
 import { getServiceSupabase } from "../../lib/supabase";
 
 const sb = getServiceSupabase()!;
@@ -27,10 +27,12 @@ if (carta.tipo === 'imagenes' || carta.tipo === 'pdf') {
 }
 
 const videoUrl = typeof carta.video_url === 'string' ? carta.video_url.trim() : '';
-const hasVideo = !!videoUrl;
-const isVertical = hasVideo && /youtube(?:-nocookie)?\.com\/shorts\//i.test(videoUrl);
-const youtubeEmbedUrl = toYouTubeEmbed(videoUrl);
-const videoEmbedUrl = youtubeEmbedUrl ? `${youtubeEmbedUrl}&origin=${encodeURIComponent(Astro.url.origin)}` : videoUrl;
+const mainVideo = resolveVideoEmbed(videoUrl, { origin: Astro.url.origin });
+const hasVideo = !!mainVideo;
+const isVertical = mainVideo?.orientation === 'vertical';
+const sampleVideos = normalizeSampleVideos(carta.sample_videos)
+    .map((url) => resolveVideoEmbed(url, { origin: Astro.url.origin }))
+    .filter((video): video is NonNullable<ReturnType<typeof resolveVideoEmbed>> => Boolean(video));
 
 const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.tipo === 'manual';
 ---
@@ -64,17 +66,27 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
                 {hasVideo && (
                     <div class={`w-full flex justify-center relative lg:sticky lg:top-40 z-30 ${isVertical ? 'lg:col-span-5' : 'lg:col-span-7'}`}>
                         <div 
-                            style={`width: 100%; aspect-ratio: ${isVertical ? '9/16' : '16/9'};`}
+                            style={`width: 100%; max-width: ${isVertical ? '430px' : 'none'}; aspect-ratio: ${mainVideo.aspectRatio};`}
                             class="relative rounded-2xl overflow-hidden shadow-2xl border border-zinc-200 bg-zinc-950"
                         >
-                            <iframe title="Reproductor multimedia" 
-                                src={videoEmbedUrl}
-                                style="width: 100% !important; height: 100% !important; border: 0;"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                                allowfullscreen
-                                loading="lazy"
-                                referrerpolicy="strict-origin-when-cross-origin"
-                            ></iframe>
+                            {mainVideo.isNative ? (
+                                <video
+                                    src={mainVideo.embedUrl}
+                                    controls
+                                    playsinline
+                                    preload="metadata"
+                                    style="width: 100% !important; height: 100% !important; border: 0; object-fit: contain; background: #050505;"
+                                ></video>
+                            ) : (
+                                <iframe title="Reproductor multimedia" 
+                                    src={mainVideo.embedUrl}
+                                    style="width: 100% !important; height: 100% !important; border: 0;"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                                    allowfullscreen
+                                    loading="lazy"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                ></iframe>
+                            )}
                         </div>
                     </div>
                 )}
@@ -163,8 +175,38 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
                     </div>
                 </div>
             )}
-        </div>
-    </div>
+                </div>
+            </div>
+
+            {sampleVideos.length > 0 && (
+                <section class="carta-sample-videos" aria-labelledby="sample-videos-title">
+                    <h2 id="sample-videos-title">Vídeos de ejemplo</h2>
+                    <div class={`carta-sample-videos__grid carta-sample-videos__grid--${sampleVideos.length}`}>
+                        {sampleVideos.map((video, index) => (
+                            <article class={`carta-sample-video carta-sample-video--${video.orientation}`}>
+                                {video.isNative ? (
+                                    <video
+                                        src={video.embedUrl}
+                                        controls
+                                        playsinline
+                                        preload="metadata"
+                                        aria-label={`Vídeo de ejemplo ${index + 1}`}
+                                    ></video>
+                                ) : (
+                                    <iframe
+                                        title={`Vídeo de ejemplo ${index + 1}`}
+                                        src={video.embedUrl}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                                        allowfullscreen
+                                        loading="lazy"
+                                        referrerpolicy="strict-origin-when-cross-origin"
+                                    ></iframe>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                </section>
+            )}
             
             <div style="margin-top: 6rem; display: flex; justify-content: center; padding-bottom: 4rem; border-bottom: 1px solid #e4e4e7;">
                                 <button onclick="window.showShareToast()" aria-label="Compartir carta" style="width: 4rem; height: 4rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center;" class="bg-zinc-900 hover:bg-zinc-800 text-white transition-all shadow-[0_10px_40px_rgba(0,0,0,0.15)] hover:shadow-2xl hover:-translate-y-1 relative group overflow-hidden" title="Copiar enlace para compartir">
@@ -317,4 +359,72 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
     .manual-swiper .swiper-pagination-bullet-active { background: #000000 !important; transform: scale(1.2); box-shadow: 0 4px 10px rgba(0, 0, 0,0.4); }
     
     .swiper-button-next::after, .swiper-button-prev::after { font-size: 1.25rem !important; font-weight: 900; }
+
+    .carta-sample-videos {
+        margin-top: 4.5rem;
+        padding-top: 3rem;
+        border-top: 1px solid #e4e4e7;
+    }
+
+    .carta-sample-videos h2 {
+        margin: 0 0 1.5rem;
+        color: #18181b;
+        font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+        font-weight: 800;
+        letter-spacing: 0;
+        text-align: center;
+    }
+
+    .carta-sample-videos__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .carta-sample-videos__grid--1 {
+        max-width: 860px;
+        margin: 0 auto;
+    }
+
+    .carta-sample-video {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        border: 1px solid #e4e4e7;
+        border-radius: 1rem;
+        background: #050505;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, .12);
+    }
+
+    .carta-sample-video--horizontal {
+        aspect-ratio: 16 / 9;
+    }
+
+    .carta-sample-video--vertical {
+        aspect-ratio: 9 / 16;
+        max-width: 360px;
+        justify-self: center;
+    }
+
+    .carta-sample-video iframe,
+    .carta-sample-video video {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        object-fit: contain;
+        background: #050505;
+    }
+
+    @media (max-width: 760px) {
+        .carta-sample-videos {
+            margin-top: 3rem;
+            padding-top: 2rem;
+        }
+
+        .carta-sample-videos__grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
