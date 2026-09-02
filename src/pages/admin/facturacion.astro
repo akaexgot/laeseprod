@@ -199,7 +199,13 @@ const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minim
                                         <i data-lucide="download" class="w-4 h-4"></i>
                                     </a>
                                     {invoice.source === "manual" && (
-                                        <button type="button" class="admin-icon-button admin-icon-button--danger" data-delete-invoice={invoice.id} title="Eliminar factura manual">
+                                        <button
+                                            type="button"
+                                            class="admin-icon-button admin-icon-button--danger"
+                                            data-delete-invoice={invoice.id}
+                                            data-invoice-reference={invoice.invoiceRef}
+                                            title="Eliminar factura manual"
+                                        >
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     )}
@@ -286,6 +292,24 @@ const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minim
         </div>
     </div>
 
+    <div id="invoice-delete-modal" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md shadow-2xl" style="padding: 1.5rem;">
+            <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                <i data-lucide="trash-2" class="w-6 h-6 text-red-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Eliminar factura</h3>
+            <p id="invoice-delete-message" class="text-sm text-zinc-400 leading-relaxed mb-6">
+                Esta accion no se puede deshacer.
+            </p>
+            <div class="flex justify-end gap-3">
+                <button id="invoice-delete-cancel" type="button" class="invoice-secondary-button">Cancelar</button>
+                <button id="invoice-delete-confirm" type="button" class="bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-full transition-colors" style="min-height: 42px; padding: 0 1.1rem;">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
 
     <script>
@@ -302,6 +326,11 @@ const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minim
         const sourceSelect = document.getElementById('invoice-source') as HTMLSelectElement | null;
         const clearButton = document.getElementById('invoice-clear-filters');
         const noResults = document.getElementById('invoice-no-results');
+        const deleteModal = document.getElementById('invoice-delete-modal');
+        const deleteMessage = document.getElementById('invoice-delete-message');
+        const deleteCancel = document.getElementById('invoice-delete-cancel');
+        const deleteConfirm = document.getElementById('invoice-delete-confirm') as HTMLButtonElement | null;
+        let pendingDeleteInvoiceId: string | null = null;
 
         const today = new Date().toISOString().slice(0, 10);
         if (issueDate) issueDate.value = today;
@@ -313,6 +342,16 @@ const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minim
                 if (issueDate) issueDate.value = today;
                 window.setTimeout(() => form?.querySelector<HTMLInputElement>('input[name="client_name"]')?.focus(), 80);
             }
+        }
+
+        function setDeleteModalOpen(open: boolean, id = '', reference = 'esta factura manual') {
+            pendingDeleteInvoiceId = open ? id : null;
+            if (deleteMessage) deleteMessage.textContent = `Vas a eliminar ${reference}. Esta accion no se puede deshacer.`;
+            if (deleteConfirm) {
+                deleteConfirm.disabled = false;
+                deleteConfirm.textContent = 'Eliminar';
+            }
+            deleteModal?.classList.toggle('hidden', !open);
         }
 
         function filterInvoices() {
@@ -361,9 +400,13 @@ const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minim
         async function deleteInvoice(id: string) {
             const button = document.querySelector<HTMLButtonElement>(`[data-delete-invoice="${id}"]`);
             const row = button?.closest<HTMLElement>('[data-invoice-row]');
-            if (!button || !window.confirm('¿Eliminar esta factura manual?')) return;
+            if (!button) return;
 
             button.disabled = true;
+            if (deleteConfirm) {
+                deleteConfirm.disabled = true;
+                deleteConfirm.textContent = 'Eliminando...';
+            }
 
             try {
                 const response = await fetch('/api/admin/invoices', {
@@ -382,9 +425,14 @@ const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minim
 
                 row?.remove();
                 filterInvoices();
+                setDeleteModalOpen(false);
                 showToast('Factura eliminada correctamente.');
             } catch (err: any) {
                 button.disabled = false;
+                if (deleteConfirm) {
+                    deleteConfirm.disabled = false;
+                    deleteConfirm.textContent = 'Eliminar';
+                }
                 showToast(getFriendlyError(err), 'error');
             }
         }
@@ -392,6 +440,13 @@ const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minim
         addButton?.addEventListener('click', () => setModalOpen(true));
         closeButton?.addEventListener('click', () => setModalOpen(false));
         cancelButton?.addEventListener('click', () => setModalOpen(false));
+        deleteCancel?.addEventListener('click', () => setDeleteModalOpen(false));
+        deleteModal?.addEventListener('click', (event) => {
+            if (event.target === deleteModal) setDeleteModalOpen(false);
+        });
+        deleteConfirm?.addEventListener('click', () => {
+            if (pendingDeleteInvoiceId) deleteInvoice(pendingDeleteInvoiceId);
+        });
         searchInput?.addEventListener('input', filterInvoices);
         dateFromInput?.addEventListener('change', filterInvoices);
         dateToInput?.addEventListener('change', filterInvoices);
@@ -406,7 +461,8 @@ const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minim
         document.querySelectorAll<HTMLButtonElement>('[data-delete-invoice]').forEach((button) => {
             button.addEventListener('click', () => {
                 const id = button.dataset.deleteInvoice;
-                if (id) deleteInvoice(id);
+                const reference = button.dataset.invoiceReference || 'esta factura manual';
+                if (id) setDeleteModalOpen(true, id, reference);
             });
         });
 
