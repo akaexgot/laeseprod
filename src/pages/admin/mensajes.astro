@@ -74,7 +74,7 @@ if (serviceSupabase) {
                                         <div class="text-xs text-zinc-400">
                                             <a href={`mailto:${msg.email}`} class="hover:text-zinc-200 transition-colors" onclick="event.stopPropagation()">{msg.email}</a>
                                         </div>
-                                        {msg.phone && <span class="text-xs text-zinc-500 mt-1">{msg.phone}</span>}
+                                        {msg.phone && <a href={`tel:${String(msg.phone).replace(/[^\d+]/g, "")}`} class="block text-xs text-zinc-500 mt-1 hover:text-zinc-200 transition-colors" onclick="event.stopPropagation()">{msg.phone}</a>}
                                     </div>
                                     <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-600 sm:hidden flex-shrink-0 mt-1"></i>
                                 </div>
@@ -144,7 +144,7 @@ if (serviceSupabase) {
                 <p id="view-name" class="text-zinc-200 font-medium"></p>
                 <div class="flex items-center gap-3 mt-1 opacity-80">
                     <a id="view-email" href="#" class="text-zinc-200 text-sm hover:underline"></a>
-                    <span id="view-phone" class="text-zinc-500 text-sm"></span>
+                    <a id="view-phone" href="#" class="text-zinc-500 text-sm hover:underline"></a>
                 </div>
             </div>
             <div>
@@ -228,7 +228,16 @@ if (serviceSupabase) {
                 const elEmail = document.getElementById('view-email') as HTMLAnchorElement;
                 elEmail.textContent = msg.email;
                 elEmail.href = `mailto:${msg.email}`;
-                document.getElementById('view-phone')!.textContent = msg.phone ? `| ${msg.phone}` : '';
+                const elPhone = document.getElementById('view-phone') as HTMLAnchorElement;
+                if (msg.phone) {
+                    elPhone.textContent = `| ${msg.phone}`;
+                    elPhone.href = `tel:${String(msg.phone).replace(/[^\d+]/g, '')}`;
+                    elPhone.hidden = false;
+                } else {
+                    elPhone.textContent = '';
+                    elPhone.href = '#';
+                    elPhone.hidden = true;
+                }
                 document.getElementById('view-message')!.textContent = msg.idea || 'Sin idea descrita';
                 
                 const d = new Date(msg.created_at);

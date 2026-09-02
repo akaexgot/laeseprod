@@ -179,8 +179,7 @@ const needsSwiper = carta.tipo === 'imagenes' || carta.tipo === 'pdf' || carta.t
             </div>
 
             {sampleVideos.length > 0 && (
-                <section class="carta-sample-videos" aria-labelledby="sample-videos-title">
-                    <h2 id="sample-videos-title">Vídeos de ejemplo</h2>
+                <section class="carta-sample-videos">
                     <div class={`carta-sample-videos__grid carta-sample-videos__grid--${sampleVideos.length}`}>
                         {sampleVideos.map((video, index) => (
                             <article class={`carta-sample-video carta-sample-video--${video.orientation}`}>

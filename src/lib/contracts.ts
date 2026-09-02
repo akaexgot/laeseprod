@@ -26,7 +26,7 @@ export function extractPlaceholders(content: string): string[] {
     return [...new Set(matches.map(m => m.replace(/{{|}}/g, '')))];
 }
 
-export const INVOICE_START_NUMBER = 20000;
+export const INVOICE_START_NUMBER = 30000;
 export const INVOICE_SERIES = 'F';
 export const INVOICE_VAT_RATE = 0.21;
 export const INVOICE_FIXED_CONCEPT = 'Prestacion de servicios audiovisuales.';
@@ -375,6 +375,7 @@ interface InvoicePdfInput {
     concept: string;
     amount: number;
     contractId: string;
+    paymentMethod?: string;
 }
 
 /**
@@ -446,7 +447,7 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
     page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 1, color: lightLine });
     y -= 28;
 
-    page.drawText(INVOICE_FIXED_CONCEPT, {
+    page.drawText(input.concept || INVOICE_FIXED_CONCEPT, {
         x: margin,
         y,
         size: 10,
@@ -472,7 +473,7 @@ export async function generateInvoicePDF(input: InvoicePdfInput) {
     page.drawText(formatEuro(vat.total), { x: width - margin - 95, y, size: 12, font: fontBold, color: carmin });
 
     y -= 45;
-    page.drawText('Forma de pago: Stripe / tarjeta bancaria.', {
+    page.drawText(`Forma de pago: ${input.paymentMethod || 'Stripe / tarjeta bancaria'}.`, {
         x: margin,
         y,
         size: 9,

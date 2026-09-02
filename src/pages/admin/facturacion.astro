@@ -1,0 +1,634 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { formatInvoiceNumber } from "../../lib/contracts";
+import { getServiceSupabase } from "../../lib/supabase";
+
+const supabase = getServiceSupabase();
+
+type InvoiceRow = {
+    id: string;
+    source: "manual" | "contract";
+    sourceLabel: string;
+    invoiceNumber: number;
+    invoiceRef: string;
+    invoiceUrl: string;
+    clientName: string;
+    clientEmail: string;
+    concept: string;
+    amount: number;
+    paymentMethod: string;
+    issueDate: string;
+    createdAt: string;
+};
+
+let invoices: InvoiceRow[] = [];
+let loadError = "";
+
+if (supabase) {
+    const [manualResult, contractResult] = await Promise.all([
+        supabase
+            .from("manual_invoices")
+            .select("*")
+            .order("issue_date", { ascending: false })
+            .order("invoice_number", { ascending: false }),
+        supabase
+            .from("contracts")
+            .select("id, invoice_number, invoice_url, invoice_issued_at, amount_to_pay, client_email, client_data, admin_data, payment_method, created_at")
+            .not("invoice_number", "is", null)
+            .order("invoice_issued_at", { ascending: false }),
+    ]);
+
+    if (manualResult.error) {
+        loadError = manualResult.error.message;
+    }
+
+    const manualInvoices = (manualResult.data || []).map((invoice: any) => ({
+        id: invoice.id,
+        source: "manual" as const,
+        sourceLabel: "Manual",
+        invoiceNumber: Number(invoice.invoice_number),
+        invoiceRef: formatInvoiceNumber(Number(invoice.invoice_number)),
+        invoiceUrl: invoice.invoice_url || "",
+        clientName: invoice.client_name || "Cliente sin identificar",
+        clientEmail: invoice.client_email || "",
+        concept: invoice.concept || "Factura manual",
+        amount: Number(invoice.amount || 0),
+        paymentMethod: invoice.payment_method || "Transferencia bancaria",
+        issueDate: invoice.issue_date || invoice.created_at?.slice(0, 10) || "",
+        createdAt: invoice.created_at || invoice.issue_date || "",
+    }));
+
+    const contractInvoices = (contractResult.data || []).map((contract: any) => ({
+        id: contract.id,
+        source: "contract" as const,
+        sourceLabel: "Contrato",
+        invoiceNumber: Number(contract.invoice_number),
+        invoiceRef: formatInvoiceNumber(Number(contract.invoice_number)),
+        invoiceUrl: contract.invoice_url || "",
+        clientName: contract.client_data?.CLIENTE_NOMBRE_FISCAL || contract.client_data?.NOMBRE || contract.client_email || "Cliente sin identificar",
+        clientEmail: contract.client_email || "",
+        concept: contract.admin_data?.SERVICIO || "Servicios audiovisuales",
+        amount: Number(contract.amount_to_pay || 0),
+        paymentMethod: contract.payment_method ? `Stripe / ${contract.payment_method}` : "Stripe",
+        issueDate: contract.invoice_issued_at?.slice(0, 10) || contract.created_at?.slice(0, 10) || "",
+        createdAt: contract.invoice_issued_at || contract.created_at || "",
+    }));
+
+    invoices = [...manualInvoices, ...contractInvoices]
+        .filter((invoice) => invoice.invoiceNumber && invoice.invoiceUrl)
+        .sort((a, b) => b.invoiceNumber - a.invoiceNumber);
+} else {
+    loadError = "Supabase no configurado";
+}
+
+const totalInvoiced = invoices.reduce((total, invoice) => total + invoice.amount, 0);
+const manualCount = invoices.filter((invoice) => invoice.source === "manual").length;
+const nextInvoiceNumber = Math.max(29999, ...invoices.map((invoice) => invoice.invoiceNumber || 0)) + 1;
+const formatEuro = (amount: number) => `${amount.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR`;
+---
+
+<AdminLayout title="Facturacion" activeSection="facturacion">
+    <div class="admin-page-head">
+        <div>
+            <p class="admin-page-kicker">Comunicacion / Facturacion</p>
+            <h1 class="admin-page-title">Facturacion</h1>
+            <p class="admin-page-copy">Consulta facturas emitidas desde contratos y crea facturas manuales con la serie fiscal de LaeseProd.</p>
+        </div>
+        <button id="btn-add-invoice" class="inline-flex items-center justify-center bg-white text-white text-sm font-medium rounded-md hover:bg-zinc-200 transition-colors shadow-sm" style="padding: 0.5rem 1rem; gap: 0.5rem;">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Nueva factura
+        </button>
+    </div>
+
+    <div class="invoice-stats">
+        <div>
+            <span>Total facturado</span>
+            <strong>{formatEuro(totalInvoiced)}</strong>
+        </div>
+        <div>
+            <span>Facturas emitidas</span>
+            <strong>{invoices.length}</strong>
+        </div>
+        <div>
+            <span>Manuales</span>
+            <strong>{manualCount}</strong>
+        </div>
+        <div>
+            <span>Siguiente numero</span>
+            <strong>{formatInvoiceNumber(nextInvoiceNumber)}</strong>
+        </div>
+    </div>
+
+    {loadError && (
+        <div class="invoice-alert">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            <span>No se pudieron cargar las facturas manuales. Revisa que la migracion de facturacion este aplicada.</span>
+        </div>
+    )}
+
+    <section class="invoice-toolbar" aria-label="Filtros de facturacion">
+        <label>
+            <span>Buscar</span>
+            <input id="invoice-search" type="search" placeholder="Cliente, email, concepto o numero..." />
+        </label>
+        <label>
+            <span>Desde</span>
+            <input id="invoice-date-from" type="date" />
+        </label>
+        <label>
+            <span>Hasta</span>
+            <input id="invoice-date-to" type="date" />
+        </label>
+        <label>
+            <span>Origen</span>
+            <select id="invoice-source">
+                <option value="all">Todas</option>
+                <option value="manual">Manual</option>
+                <option value="contract">Contrato</option>
+            </select>
+        </label>
+        <button id="invoice-clear-filters" type="button" class="invoice-secondary-button">
+            <i data-lucide="x" class="w-4 h-4"></i>
+            Limpiar
+        </button>
+    </section>
+
+    <div class="admin-surface invoice-table-wrap">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead>
+                    <tr>
+                        <th style="padding: 1.1rem 1.25rem;">Factura</th>
+                        <th style="padding: 1.1rem 1.25rem;">Cliente</th>
+                        <th style="padding: 1.1rem 1.25rem;">Concepto</th>
+                        <th style="padding: 1.1rem 1.25rem;">Fecha</th>
+                        <th style="padding: 1.1rem 1.25rem;">Importe</th>
+                        <th class="text-right" style="padding: 1.1rem 1.25rem;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-table-body">
+                    {invoices.map((invoice) => (
+                        <tr
+                            data-invoice-row
+                            data-invoice-id={invoice.id}
+                            data-source={invoice.source}
+                            data-date={invoice.issueDate}
+                            data-search={`${invoice.invoiceRef} ${invoice.clientName} ${invoice.clientEmail} ${invoice.concept} ${invoice.paymentMethod}`.toLowerCase()}
+                        >
+                            <td style="padding: 1.15rem 1.25rem;">
+                                <div class="invoice-ref">{invoice.invoiceRef}</div>
+                                <div class="invoice-source">{invoice.sourceLabel}</div>
+                            </td>
+                            <td style="padding: 1.15rem 1.25rem;">
+                                <div class="invoice-client">{invoice.clientName}</div>
+                                {invoice.clientEmail && <a class="invoice-email" href={`mailto:${invoice.clientEmail}`}>{invoice.clientEmail}</a>}
+                            </td>
+                            <td style="padding: 1.15rem 1.25rem;">
+                                <div class="invoice-concept">{invoice.concept}</div>
+                                <div class="invoice-method">{invoice.paymentMethod}</div>
+                            </td>
+                            <td style="padding: 1.15rem 1.25rem;" class="invoice-date">
+                                {invoice.issueDate ? new Date(`${invoice.issueDate}T12:00:00`).toLocaleDateString("es-ES") : "-"}
+                            </td>
+                            <td style="padding: 1.15rem 1.25rem;" class="invoice-amount">
+                                {formatEuro(invoice.amount)}
+                            </td>
+                            <td style="padding: 1.15rem 1.25rem;" class="text-right">
+                                <div class="invoice-actions">
+                                    <a href={invoice.invoiceUrl} target="_blank" rel="noopener" class="admin-icon-button" title="Descargar factura">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                    </a>
+                                    {invoice.source === "manual" && (
+                                        <button type="button" class="admin-icon-button admin-icon-button--danger" data-delete-invoice={invoice.id} title="Eliminar factura manual">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    )}
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                    <tr id="invoice-no-results" class:list={[{ hidden: invoices.length > 0 }]}>
+                        <td colspan="6" class="text-center text-zinc-500" style="padding: 3rem 1rem;">
+                            No hay facturas para mostrar.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal-invoice" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-[calc(100%-2rem)] sm:w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex items-center justify-between border-b border-zinc-800" style="padding: 1rem 1.5rem;">
+                <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
+                    Nueva factura manual
+                </h3>
+                <button id="invoice-modal-close" class="admin-icon-button" type="button" title="Cerrar">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="invoice-form" class="invoice-form">
+                <div class="invoice-form-grid">
+                    <label>
+                        <span>Cliente *</span>
+                        <input name="client_name" type="text" required placeholder="Nombre fiscal o cliente" />
+                    </label>
+                    <label>
+                        <span>Email</span>
+                        <input name="client_email" type="email" placeholder="cliente@email.com" />
+                    </label>
+                    <label>
+                        <span>NIF / CIF</span>
+                        <input name="client_cif" type="text" placeholder="B00000000" />
+                    </label>
+                    <label>
+                        <span>Fecha *</span>
+                        <input id="invoice-issue-date" name="issue_date" type="date" required />
+                    </label>
+                    <label class="invoice-form-wide">
+                        <span>Direccion fiscal</span>
+                        <input name="client_address" type="text" placeholder="Direccion completa del cliente" />
+                    </label>
+                    <label class="invoice-form-wide">
+                        <span>Concepto *</span>
+                        <textarea name="concept" rows="3" required placeholder="Concepto que aparecera en la factura"></textarea>
+                    </label>
+                    <label>
+                        <span>Importe con IVA *</span>
+                        <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00" />
+                    </label>
+                    <label>
+                        <span>Forma de pago</span>
+                        <select name="payment_method">
+                            <option value="Transferencia bancaria">Transferencia bancaria</option>
+                            <option value="Stripe">Stripe</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="Bizum">Bizum</option>
+                            <option value="Efectivo">Efectivo</option>
+                        </select>
+                    </label>
+                    <label class="invoice-form-wide">
+                        <span>Notas internas</span>
+                        <textarea name="notes" rows="2" placeholder="Opcional"></textarea>
+                    </label>
+                </div>
+
+                <div class="invoice-form-actions">
+                    <button id="invoice-modal-cancel" type="button" class="invoice-secondary-button">Cancelar</button>
+                    <button id="invoice-submit" type="submit" class="bg-white text-white">
+                        <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+                        Crear factura
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2" style="pointer-events: none;"></div>
+
+    <script>
+        const modal = document.getElementById('modal-invoice');
+        const addButton = document.getElementById('btn-add-invoice');
+        const closeButton = document.getElementById('invoice-modal-close');
+        const cancelButton = document.getElementById('invoice-modal-cancel');
+        const form = document.getElementById('invoice-form') as HTMLFormElement | null;
+        const issueDate = document.getElementById('invoice-issue-date') as HTMLInputElement | null;
+        const submitButton = document.getElementById('invoice-submit') as HTMLButtonElement | null;
+        const searchInput = document.getElementById('invoice-search') as HTMLInputElement | null;
+        const dateFromInput = document.getElementById('invoice-date-from') as HTMLInputElement | null;
+        const dateToInput = document.getElementById('invoice-date-to') as HTMLInputElement | null;
+        const sourceSelect = document.getElementById('invoice-source') as HTMLSelectElement | null;
+        const clearButton = document.getElementById('invoice-clear-filters');
+        const noResults = document.getElementById('invoice-no-results');
+
+        const today = new Date().toISOString().slice(0, 10);
+        if (issueDate) issueDate.value = today;
+
+        function setModalOpen(open: boolean) {
+            modal?.classList.toggle('hidden', !open);
+            if (open) {
+                form?.reset();
+                if (issueDate) issueDate.value = today;
+                window.setTimeout(() => form?.querySelector<HTMLInputElement>('input[name="client_name"]')?.focus(), 80);
+            }
+        }
+
+        function filterInvoices() {
+            const query = searchInput?.value.trim().toLowerCase() || '';
+            const dateFrom = dateFromInput?.value || '';
+            const dateTo = dateToInput?.value || '';
+            const source = sourceSelect?.value || 'all';
+            let visible = 0;
+
+            document.querySelectorAll<HTMLElement>('[data-invoice-row]').forEach((row) => {
+                const haystack = row.dataset.search || '';
+                const date = row.dataset.date || '';
+                const matchesSearch = !query || haystack.includes(query);
+                const matchesSource = source === 'all' || row.dataset.source === source;
+                const matchesFrom = !dateFrom || date >= dateFrom;
+                const matchesTo = !dateTo || date <= dateTo;
+                const show = matchesSearch && matchesSource && matchesFrom && matchesTo;
+                row.classList.toggle('hidden', !show);
+                if (show) visible += 1;
+            });
+
+            noResults?.classList.toggle('hidden', visible > 0);
+        }
+
+        function showToast(message: string, type: 'success' | 'error' = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = type === 'success' ? 'invoice-toast invoice-toast--success' : 'invoice-toast invoice-toast--error';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 250);
+            }, 3500);
+        }
+
+        function getFriendlyError(err: any) {
+            const rawMessage = String(err?.message || '');
+            return /failed to fetch|networkerror|load failed/i.test(rawMessage)
+                ? 'No se pudo conectar con el servidor. Revisa la conexion e intentalo de nuevo.'
+                : rawMessage || 'Operacion no completada.';
+        }
+
+        async function deleteInvoice(id: string) {
+            const button = document.querySelector<HTMLButtonElement>(`[data-delete-invoice="${id}"]`);
+            const row = button?.closest<HTMLElement>('[data-invoice-row]');
+            if (!button || !window.confirm('¿Eliminar esta factura manual?')) return;
+
+            button.disabled = true;
+
+            try {
+                const response = await fetch('/api/admin/invoices', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id }),
+                });
+                const result = await response.json().catch(() => null);
+                if (response.status === 401) {
+                    throw new Error('Tu sesion ha caducado. Inicia sesion de nuevo para eliminar la factura.');
+                }
+                if (response.status === 403) {
+                    throw new Error('No tienes permisos para eliminar facturas.');
+                }
+                if (!response.ok) throw new Error(result?.error || 'No se pudo eliminar la factura.');
+
+                row?.remove();
+                filterInvoices();
+                showToast('Factura eliminada correctamente.');
+            } catch (err: any) {
+                button.disabled = false;
+                showToast(getFriendlyError(err), 'error');
+            }
+        }
+
+        addButton?.addEventListener('click', () => setModalOpen(true));
+        closeButton?.addEventListener('click', () => setModalOpen(false));
+        cancelButton?.addEventListener('click', () => setModalOpen(false));
+        searchInput?.addEventListener('input', filterInvoices);
+        dateFromInput?.addEventListener('change', filterInvoices);
+        dateToInput?.addEventListener('change', filterInvoices);
+        sourceSelect?.addEventListener('change', filterInvoices);
+        clearButton?.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            if (dateFromInput) dateFromInput.value = '';
+            if (dateToInput) dateToInput.value = '';
+            if (sourceSelect) sourceSelect.value = 'all';
+            filterInvoices();
+        });
+        document.querySelectorAll<HTMLButtonElement>('[data-delete-invoice]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const id = button.dataset.deleteInvoice;
+                if (id) deleteInvoice(id);
+            });
+        });
+
+        form?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!submitButton) return;
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Creando...';
+
+            try {
+                const payload = Object.fromEntries(new FormData(form).entries());
+                const response = await fetch('/api/admin/invoices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const result = await response.json().catch(() => null);
+                if (response.status === 401) {
+                    throw new Error('Tu sesion ha caducado. Inicia sesion de nuevo para crear la factura.');
+                }
+                if (response.status === 403) {
+                    throw new Error('No tienes permisos para crear facturas.');
+                }
+                if (!response.ok) throw new Error(result?.error || 'No se pudo crear la factura.');
+                showToast('Factura creada correctamente.');
+                window.setTimeout(() => window.location.reload(), 650);
+            } catch (err: any) {
+                showToast(getFriendlyError(err), 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i data-lucide="file-plus-2" class="w-4 h-4"></i> Crear factura';
+                // @ts-ignore
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        });
+
+        filterInvoices();
+        // @ts-ignore
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    </script>
+</AdminLayout>
+
+<style>
+    .invoice-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .invoice-stats > div {
+        min-height: 96px;
+        display: grid;
+        align-content: center;
+        gap: .45rem;
+        padding: 1rem;
+        color: #fff;
+        background: linear-gradient(180deg, #18181b 0%, #101012 100%);
+        border: 1px solid #303036;
+        border-radius: 12px;
+    }
+
+    .invoice-stats span,
+    .invoice-toolbar span,
+    .invoice-form span {
+        color: #8b8b92;
+        font-size: .68rem;
+        font-weight: 850;
+        text-transform: uppercase;
+    }
+
+    .invoice-stats strong {
+        color: #fff;
+        font-size: 1.45rem;
+        line-height: 1;
+    }
+
+    .invoice-alert {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        margin-bottom: 1rem;
+        padding: .85rem 1rem;
+        color: #fef3c7;
+        background: rgba(245, 158, 11, .1);
+        border: 1px solid rgba(245, 158, 11, .24);
+        border-radius: 10px;
+        font-size: .85rem;
+        font-weight: 700;
+    }
+
+    .invoice-toolbar {
+        display: grid;
+        grid-template-columns: minmax(240px, 1.4fr) repeat(3, minmax(145px, .6fr)) auto;
+        align-items: end;
+        gap: .85rem;
+        margin: 1.5rem 0;
+    }
+
+    .invoice-toolbar label,
+    .invoice-form label {
+        display: grid;
+        gap: .45rem;
+    }
+
+    .invoice-secondary-button {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .45rem;
+        padding: 0 .95rem;
+        color: #e4e4e7;
+        background: #141417;
+        border: 1px solid #3f3f46;
+        border-radius: 999px;
+        font-size: .78rem;
+        font-weight: 850;
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+
+    .invoice-table-wrap {
+        border-radius: 12px;
+    }
+
+    .invoice-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: .45rem;
+    }
+
+    [data-invoice-row] {
+        border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    [data-invoice-row]:hover {
+        background: rgba(255,255,255,.035);
+    }
+
+    .invoice-ref,
+    .invoice-amount {
+        color: #f4f4f5;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-weight: 800;
+    }
+
+    .invoice-source,
+    .invoice-method,
+    .invoice-date {
+        color: #8b8b92;
+        font-size: .76rem;
+        font-weight: 750;
+    }
+
+    .invoice-client,
+    .invoice-concept {
+        color: #f4f4f5;
+        font-weight: 800;
+    }
+
+    .invoice-email {
+        color: #a1a1aa;
+        font-size: .78rem;
+        text-decoration: none;
+    }
+
+    .invoice-email:hover,
+    .invoice-email:focus-visible {
+        color: #fff;
+        text-decoration: underline;
+    }
+
+    .invoice-form {
+        display: grid;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .invoice-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .invoice-form-wide {
+        grid-column: 1 / -1;
+    }
+
+    .invoice-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: .75rem;
+        padding-top: 1rem;
+        border-top: 1px solid #27272a;
+    }
+
+    .invoice-toast {
+        padding: .9rem 1.1rem;
+        color: #fff;
+        border-radius: 12px;
+        font-size: .9rem;
+        font-weight: 800;
+        box-shadow: 0 16px 40px rgba(0,0,0,.32);
+        transition: opacity 220ms ease, transform 220ms ease;
+    }
+
+    .invoice-toast--success {
+        background: #059669;
+    }
+
+    .invoice-toast--error {
+        background: #18181b;
+        border: 1px solid #3f3f46;
+    }
+
+    @media (max-width: 960px) {
+        .invoice-stats,
+        .invoice-toolbar,
+        .invoice-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

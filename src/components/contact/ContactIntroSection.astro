@@ -7,6 +7,7 @@ const aboutText = settings.about_summary || "Somos una productora audiovisual ce
 const contactBase = "Andalucia, Espa\u00f1a";
 const whatsappNumber = String(settings.whatsapp_number || settings.phone || "34662908416").replace(/\D/g, "");
 const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20quiero%20hablar%20sobre%20un%20proyecto.`;
+const phoneHref = `tel:${String(settings.phone || "").replace(/[^\d+]/g, "")}`;
 ---
 
 <section class="contact-page">
@@ -36,7 +37,7 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20qu
 
     <aside class="contact-page__direct" aria-label="Contacto directo">
         {settings.phone && (
-            <a href={`tel:${String(settings.phone).replace(/\s/g, "")}`}>
+            <a href={phoneHref}>
                 <span>Telefono</span>
                 <strong>{settings.phone}</strong>
             </a>

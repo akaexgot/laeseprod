@@ -2,11 +2,11 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { getServiceSupabase } from '../../../lib/supabase';
 import {
-    INVOICE_START_NUMBER,
     generateContractPDF,
     generateInvoicePDF,
     replacePlaceholders,
 } from '../../../lib/contracts';
+import { getNextInvoiceNumber } from '../../../lib/invoices';
 import { sendContractCompletedOwnerEmail, sendContractFinalizedEmail } from '../../../lib/resend';
 import { sendOwnerNotification } from '../../../lib/notifications';
 
@@ -17,19 +17,6 @@ const stripe = new Stripe((import.meta.env.STRIPE_SECRET_KEY || '').trim(), {
 const endpointSecret = (import.meta.env.STRIPE_WEBHOOK_SECRET || '').trim();
 
 type SupabaseService = NonNullable<ReturnType<typeof getServiceSupabase>>;
-
-async function getNextInvoiceNumber(supabase: SupabaseService) {
-    const { data, error } = await supabase
-        .from('contracts')
-        .select('invoice_number')
-        .not('invoice_number', 'is', null)
-        .order('invoice_number', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-    if (error || !data?.invoice_number) return INVOICE_START_NUMBER;
-    return Math.max(Number(data.invoice_number) + 1, INVOICE_START_NUMBER);
-}
 
 function getPaymentIntentId(session: Stripe.Checkout.Session) {
     if (!session.payment_intent) return null;
@@ -154,6 +141,7 @@ async function finalizePaidContract(supabase: SupabaseService, session: Stripe.C
         concept: 'Prestacion de servicios audiovisuales.',
         amount: Number(contract.amount_to_pay || 0),
         contractId,
+        paymentMethod: paymentMethod ? `Stripe / ${paymentMethod}` : 'Stripe',
     });
 
     const fileName = `contrato_${contractId}.pdf`;

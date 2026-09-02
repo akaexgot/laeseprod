@@ -86,13 +86,14 @@ function getEmailShell(title: string, contentHtml: string) {
 export async function sendContactNotification(data: ContactFormData) {
     const { name, email, phone, idea, adminEmail } = data;
     const toEmail = adminEmail || ownerEmail;
+    const phoneHref = `tel:${String(phone || '').replace(/[^\d+]/g, '')}`;
 
     const content = `
         <h2 class="email-title">Nueva Solicitud de Presupuesto</h2>
         <table class="data-table">
           <tr><td class="data-label">Nombre</td><td class="data-value">${name}</td></tr>
           <tr><td class="data-label">Email</td><td class="data-value"><a href="mailto:${email}" style="color: #000000; text-decoration: none;">${email}</a></td></tr>
-          <tr><td class="data-label">Teléfono</td><td class="data-value">${phone}</td></tr>
+          <tr><td class="data-label">Teléfono</td><td class="data-value"><a href="${phoneHref}" style="color: #000000; text-decoration: none;">${phone}</a></td></tr>
         </table>
         <p style="font-weight: 600; color: #1A1A1A; margin-bottom: 5px;">Idea:</p>
         <div class="message-box">

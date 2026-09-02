@@ -9,7 +9,7 @@ import {
 
 describe('invoice helpers', () => {
   it('formats invoice numbers with the fiscal series', () => {
-    expect(formatInvoiceNumber(20000)).toBe('F-20000');
+    expect(formatInvoiceNumber(30000)).toBe('F-30000');
   });
 
   it('splits a gross Stripe amount into Spanish VAT amounts', () => {

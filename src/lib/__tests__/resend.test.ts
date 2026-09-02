@@ -24,7 +24,7 @@ describe('sendContractFinalizedEmail', () => {
       'Cliente Test',
       new Uint8Array([37, 80, 68, 70]),
       new Uint8Array([37, 80, 68, 70, 45]),
-      20000
+      30000
     );
 
     expect(sendMock).toHaveBeenCalledTimes(1);
@@ -37,7 +37,7 @@ describe('sendContractFinalizedEmail', () => {
       contentType: 'application/pdf',
     });
     expect(payload.attachments[1]).toMatchObject({
-      filename: 'Factura_F-20000_LaeseProd_SL.pdf',
+      filename: 'Factura_F-30000_LaeseProd_SL.pdf',
       contentType: 'application/pdf',
     });
     expect(Buffer.isBuffer(payload.attachments[0].content)).toBe(true);
@@ -57,7 +57,7 @@ describe('sendContractFinalizedEmail', () => {
         'Cliente Test',
         new Uint8Array([37, 80, 68, 70]),
         new Uint8Array([37, 80, 68, 70, 45]),
-        20000
+        30000
       )
     ).rejects.toThrow('Error enviando contrato finalizado: Invalid attachment');
   });
@@ -71,7 +71,7 @@ describe('sendContractFinalizedEmail', () => {
       'Contrato Demo',
       new Uint8Array([37, 80, 68, 70]),
       new Uint8Array([37, 80, 68, 70, 45]),
-      20001
+      30001
     );
 
     expect(sendMock).toHaveBeenCalledTimes(1);
@@ -82,6 +82,6 @@ describe('sendContractFinalizedEmail', () => {
     expect(payload.subject).toContain('Contrato Demo');
     expect(payload.attachments).toHaveLength(2);
     expect(payload.attachments[0].filename).toBe('Contrato_LaeseProd_SL_Cliente_Test.pdf');
-    expect(payload.attachments[1].filename).toBe('Factura_F-20001_LaeseProd_SL.pdf');
+    expect(payload.attachments[1].filename).toBe('Factura_F-30001_LaeseProd_SL.pdf');
   });
 });
