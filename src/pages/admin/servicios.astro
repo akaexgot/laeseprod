@@ -97,6 +97,16 @@ const services = await getServices();
                     </label>
 
                     <label class="service-field">
+                        <span>Video preview corto (20-30s)</span>
+                        <div class="service-input-action">
+                            <input id={`preview-${service.id}`} name="video_preview" value={service.video_preview || ""} placeholder="URL Cloudinary para tarjetas y listados" />
+                            <button class="service-upload" type="button" data-target={`preview-${service.id}`} title="Subir video preview" aria-label="Subir video preview">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </label>
+
+                    <label class="service-field">
                         <span>Video vertical</span>
                         <div class="service-input-action">
                             <input id={`vertical-${service.id}`} name="video_vertical" value={service.video_vertical || ""} placeholder="URL vertical para movil" />
@@ -207,7 +217,7 @@ const services = await getServices();
 
         const body = new FormData();
         body.append('file', file);
-        body.append('folder', 'service_videos');
+        body.append('folder', targetId.startsWith('preview-') ? 'preview_videos' : 'service_videos');
 
         const response = await fetch('/api/admin/upload', { method: 'POST', body });
         const result = await response.json().catch(() => ({}));

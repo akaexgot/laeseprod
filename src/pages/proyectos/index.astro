@@ -38,8 +38,8 @@ for (let index = 0; index < filteredProjects.length; index += 4) {
             <section class="projects-screen" aria-label={`Pantalla de proyectos ${screenIndex + 1}`}>
                 {screen.map((project: any) => (
                     <article class="project-card" aria-label={project.title}>
-                        {project.video_project ? (
-                            <InteractiveProjectVideo url={project.video_project} title={project.title} poster={project.thumbnail} />
+                        {project.video_preview || project.video_project ? (
+                            <InteractiveProjectVideo url={project.video_preview || project.video_project} title={project.title} poster={project.thumbnail} />
                         ) : project.thumbnail ? (
                             <img src={project.thumbnail} alt="" aria-hidden="true" />
                         ) : (

@@ -14,6 +14,7 @@ const PROJECT_COLUMNS = [
     'slug',
     'description',
     'video_project',
+    'video_preview',
     'video_explanation_desktop',
     'video_explanation_mobile',
     'video_explanation_thumbnail',

@@ -12,6 +12,7 @@ export const PUT: APIRoute = async ({ request }) => {
             "title",
             "description",
             "video",
+            "video_preview",
             "video_vertical",
             "hero_kicker",
             "hero_title",

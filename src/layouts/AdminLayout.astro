@@ -40,7 +40,8 @@ const allMenuGroups = [
             { label: "Contratos", href: "/admin/contratos", icon: "file-text", id: "contratos" },
             { label: "Facturacion", href: "/admin/facturacion", icon: "receipt", id: "facturacion" },
             { label: "Carta", href: "/admin/carta", icon: "scroll", id: "carta" },
-            { label: "Mensajes", href: "/admin/mensajes", icon: "mail", id: "mensajes" }
+            { label: "Mensajes", href: "/admin/mensajes", icon: "mail", id: "mensajes" },
+            { label: "Chat", href: "/admin/chat", icon: "messages-square", id: "chat" }
         ]
     },
     {
@@ -565,7 +566,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
                                                 >
                                                     <i data-lucide={item.icon} class:list={["w-4 h-4 transition-colors", isActive ? "text-white" : "text-zinc-500 group-hover:text-zinc-400"]}></i>
                                                     <span class="flex-1">{item.label}</span>
-                                                    {item.id === 'mensajes' && (
+                                                    {(item.id === 'mensajes' || item.id === 'chat') && (
                                                         <span 
                                                             id={`badge-sidebar-${item.id}`} 
                                                             class="hidden items-center justify-center bg-white text-white text-[10px] font-bold rounded-full h-4.5 min-w-[18px] px-1.5 shadow-sm"
@@ -821,6 +822,16 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
                                 msgBadge.classList.replace('hidden', 'flex');
                             } else {
                                 msgBadge.classList.replace('flex', 'hidden');
+                            }
+                        }
+
+                        const chatBadge = document.getElementById('badge-sidebar-chat');
+                        if (chatBadge) {
+                            if (data.chats > 0) {
+                                chatBadge.textContent = data.chats > 99 ? '99+' : data.chats;
+                                chatBadge.classList.replace('hidden', 'flex');
+                            } else {
+                                chatBadge.classList.replace('flex', 'hidden');
                             }
                         }
 

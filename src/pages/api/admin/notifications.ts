@@ -12,8 +12,19 @@ export const GET: APIRoute = async () => {
             .select('*', { count: 'exact', head: true })
             .eq('status', 'nuevo');
 
+        let unreadChats = 0;
+        const { count: chatCount, error: chatError } = await supabase
+            .from('chat_conversations')
+            .select('*', { count: 'exact', head: true })
+            .in('status', ['nuevo', 'open']);
+
+        if (!chatError) {
+            unreadChats = chatCount || 0;
+        }
+
         return new Response(JSON.stringify({
-            messages: unreadMessages || 0
+            messages: unreadMessages || 0,
+            chats: unreadChats
         }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }

@@ -179,8 +179,8 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20qu
                     <div class="service-detail__related-grid">
                         {serviceProjects.map((project: any) => (
                             <a class="service-detail__related-item" href={`/proyectos/${project.slug}`} aria-label={`Ver ${project.title}`}>
-                                {project.video_project ? (
-                                    <VideoBackground desktop={project.video_project} mobile={project.video_project} title={project.title} overlay="none" />
+                                {project.video_preview || project.video_project ? (
+                                    <VideoBackground desktop={project.video_preview || project.video_project} mobile={project.video_preview || project.video_project} title={project.title} overlay="none" />
                                 ) : project.thumbnail ? (
                                     <img src={project.thumbnail} alt="" aria-hidden="true" />
                                 ) : null}

@@ -12,8 +12,8 @@ const services = [...allServices]
     {services.map((service: any) => (
         <a href={`/servicios/${service.slug}`} class="home-service">
             <VideoBackground
-                desktop={service.video || settings.hero_video_desktop}
-                mobile={service.video_vertical || service.video || settings.hero_video_mobile || settings.hero_video_desktop}
+                desktop={service.video_preview || service.video || settings.hero_video_desktop}
+                mobile={service.video_preview || service.video_vertical || service.video || settings.hero_video_mobile || settings.hero_video_desktop}
                 title={`Vídeo de ${service.title}`}
                 overlay="dark"
             />

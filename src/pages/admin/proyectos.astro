@@ -194,6 +194,19 @@ const projects = await getProjects();
                             </div>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Video preview corto (20-30s)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="p-video-preview" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="URL Cloudinary para tarjetas y listados" />
+                                <button type="button" onclick="document.getElementById('file-p-video-preview').click()" class="inline-flex items-center justify-center bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors px-3 py-2 rounded-md border border-zinc-700 text-sm font-medium">
+                                    <i data-lucide="upload" class="w-4 h-4"></i>
+                                </button>
+                                <input type="file" id="file-p-video-preview" class="hidden" accept="video/mp4,video/webm" />
+                            </div>
+                            <div id="loading-p-video-preview" class="hidden items-center gap-2 mt-2 text-xs text-white font-medium">
+                                <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Subiendo preview...
+                            </div>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-zinc-300" style="margin-bottom: 0.25rem;">Vídeo Making Of vertical (9:16)</label>
                             <div class="flex gap-2">
                                 <input type="url" id="p-makingof" class="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-100 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all text-sm" placeholder="URL Cloudinary, YouTube Short o Instagram Reel" />
@@ -426,6 +439,7 @@ const projects = await getProjects();
             }
 
             $('p-video').value = data?.video_project || '';
+            $('p-video-preview').value = data?.video_preview || '';
             $('p-makingof').value = data?.video_explanation_mobile || '';
             const makingOfThumbUrl = data?.video_explanation_thumbnail || '';
             $('p-makingof-thumbnail').value = makingOfThumbUrl;
@@ -549,6 +563,31 @@ const projects = await getProjects();
                     loading.classList.add('hidden');
                     loading.classList.remove('flex');
                     fileInputVideo.value = '';
+                }
+            });
+        }
+
+        const fileInputPreviewVideo = document.getElementById('file-p-video-preview') as HTMLInputElement;
+        if (fileInputPreviewVideo) {
+            fileInputPreviewVideo.addEventListener('change', async () => {
+                const file = fileInputPreviewVideo.files?.[0];
+                if (!file) return;
+
+                const loading = document.getElementById('loading-p-video-preview')!;
+                loading.classList.remove('hidden');
+                loading.classList.add('flex');
+
+                try {
+                    const data = await uploadToCloudinary(file, 'preview_videos');
+                    $('p-video-preview').value = data.url;
+                    showToast('Preview subido correctamente', 'success');
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : 'Error de red al subir preview';
+                    showToast(message, 'error');
+                } finally {
+                    loading.classList.add('hidden');
+                    loading.classList.remove('flex');
+                    fileInputPreviewVideo.value = '';
                 }
             });
         }
@@ -809,6 +848,7 @@ const projects = await getProjects();
                 description: $('p-description').value.trim() || null,
                 thumbnail: $('p-thumbnail').value.trim() || null,
                 video_project: $('p-video').value.trim() || null,
+                video_preview: $('p-video-preview').value.trim() || null,
                 video_explanation_mobile: $('p-makingof').value.trim() || null,
                 video_explanation_thumbnail: $('p-makingof-thumbnail').value.trim() || null,
                 featured_home: $('p-featured').checked

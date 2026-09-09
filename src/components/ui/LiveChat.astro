@@ -1,0 +1,770 @@
+---
+/**
+ * LiveChat
+ * Conversational live chat widget.
+ */
+---
+
+<div class="vm-live-chat" id="chat-en-vivo" data-live-chat>
+    <button
+        class="vm-live-chat__launcher"
+        type="button"
+        data-chat-toggle
+        aria-label="Abrir chat en vivo"
+        title="Chat en vivo"
+    >
+        <span class="vm-live-chat__launcher-pulse" aria-hidden="true"></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4.5 5.25A3.25 3.25 0 0 1 7.75 2h8.5a3.25 3.25 0 0 1 3.25 3.25v6.5A3.25 3.25 0 0 1 16.25 15H11l-4.15 3.35A1.1 1.1 0 0 1 5.1 17.5V15.1a3.25 3.25 0 0 1-2.6-3.18V5.25Zm3.25-1.5A1.5 1.5 0 0 0 6.25 5.25v6.67c0 .82.66 1.48 1.48 1.48h.62v2.18l2.12-1.7c.2-.16.44-.25.7-.25h5.08a1.5 1.5 0 0 0 1.5-1.5V5.25a1.5 1.5 0 0 0-1.5-1.5h-8.5Z"/>
+            <path d="M8.2 7.15h7.6v1.55H8.2V7.15Zm0 3.05h4.9v1.55H8.2V10.2Z"/>
+        </svg>
+    </button>
+
+    <section class="vm-live-chat__panel" data-chat-panel hidden aria-label="Chat en vivo">
+        <header class="vm-live-chat__header">
+            <div class="vm-live-chat__agent">
+                <span class="vm-live-chat__avatar" aria-hidden="true">
+                    V
+                    <i></i>
+                </span>
+                <div>
+                    <span>Victor &middot; LaeseProd S.L.</span>
+                    <strong>Chat en vivo</strong>
+                    <small>Respuesta estimada: 2 a 5 minutos</small>
+                </div>
+            </div>
+            <button type="button" data-chat-close aria-label="Cerrar chat">&times;</button>
+        </header>
+
+        <div class="vm-live-chat__messages" data-chat-messages aria-live="polite"></div>
+
+        <form class="vm-live-chat__composer" data-chat-composer>
+            <input type="text" name="message" autocomplete="off" placeholder="Escribe tu respuesta..." required />
+            <button type="submit" aria-label="Enviar mensaje">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m3.4 20.4 17.45-8.2a.75.75 0 0 0 0-1.36L3.4 2.65a.75.75 0 0 0-1.04.84l1.65 6.25 8.6 1.78-8.6 1.78-1.65 6.26a.75.75 0 0 0 1.04.84Z"/>
+                </svg>
+            </button>
+        </form>
+    </section>
+</div>
+
+<script>
+    (function () {
+        var root = document.querySelector("[data-live-chat]");
+        if (!root) return;
+
+        var storageKey = "laese_live_chat_session_v1";
+        var legacyStorageKeys = ["vm_live_chat_session", "vm_live_chat_session_v2", "vm_live_chat_session_v3", "vm_live_chat_session_v4"];
+        var toggle = root.querySelector("[data-chat-toggle]");
+        var close = root.querySelector("[data-chat-close]");
+        var panel = root.querySelector("[data-chat-panel]");
+        var composer = root.querySelector("[data-chat-composer]");
+        var input = composer?.querySelector("input[name='message']");
+        var messagesEl = root.querySelector("[data-chat-messages]");
+        var session = null;
+        var transcript = [];
+        var pollTimer = null;
+        var lastRendered = "";
+
+        function escapeHtml(value) {
+            return String(value || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function uid(prefix) {
+            return prefix + "-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+        }
+
+        function formatTime(value) {
+            try {
+                return new Intl.DateTimeFormat("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }).format(new Date(value));
+            } catch (error) {
+                return "";
+            }
+        }
+
+        function getPlaceholder() {
+            if (!session || session.step === "name") return "Escribe tu nombre...";
+            if (session.step === "phone") return "Escribe tu teléfono...";
+            return "Escribe tu mensaje...";
+        }
+
+        function persist() {
+            try {
+                window.localStorage.setItem(storageKey, JSON.stringify({ session: session, transcript: transcript }));
+            } catch (error) {}
+        }
+
+        function addMessage(sender, message, persistMessage) {
+            transcript.push({
+                id: uid(sender),
+                sender: sender,
+                message: message,
+                created_at: new Date().toISOString(),
+            });
+            renderMessages();
+            if (persistMessage !== false) persist();
+        }
+
+        function addBot(message, persistMessage) {
+            addMessage("admin", message, persistMessage);
+        }
+
+        function addVisitor(message) {
+            addMessage("visitor", message, true);
+        }
+
+        function resetChat(message) {
+            session = { step: "name" };
+            transcript = [];
+            try {
+                window.localStorage.removeItem(storageKey);
+                legacyStorageKeys.forEach(function (key) { window.localStorage.removeItem(key); });
+            } catch (error) {}
+            addBot(message || "Hola, soy Victor, del equipo de LaeseProd S.L. Para atenderte mejor, primero dime tu nombre.", false);
+            persist();
+            setInputState(false);
+        }
+
+        function loadState() {
+            try {
+                legacyStorageKeys.forEach(function (key) { window.localStorage.removeItem(key); });
+                var raw = window.localStorage.getItem(storageKey);
+                if (raw) {
+                    var parsed = JSON.parse(raw);
+                    session = parsed.session || null;
+                    transcript = Array.isArray(parsed.transcript) ? parsed.transcript : [];
+                }
+            } catch (error) {
+                session = null;
+                transcript = [];
+            }
+
+            if (!session) session = { step: "name" };
+            if (!transcript.length) resetChat();
+        }
+
+        function setInputState(disabled) {
+            if (!input) return;
+            input.disabled = disabled;
+            input.placeholder = disabled ? "Enviando..." : getPlaceholder();
+            if (!disabled && !panel?.hidden) input.focus();
+        }
+
+        function renderMessages() {
+            if (!messagesEl) return;
+            var html = transcript.map(function (msg) {
+                var sender = msg.sender === "visitor" ? "visitor" : "admin";
+                var label = sender === "visitor" ? "Tu" : "Victor";
+                var time = formatTime(msg.created_at);
+                return [
+                    '<div class="vm-live-chat__row vm-live-chat__row--' + sender + '">',
+                    '<div class="vm-live-chat__bubble vm-live-chat__bubble--' + sender + '">',
+                    '<span class="vm-live-chat__bubble-name">' + label + '</span>',
+                    '<p>' + escapeHtml(msg.message) + '</p>',
+                    time ? '<small>' + time + '</small>' : '',
+                    '</div>',
+                    '</div>',
+                ].join("");
+            }).join("");
+
+            if (html !== lastRendered) {
+                messagesEl.innerHTML = html;
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+                lastRendered = html;
+            }
+        }
+
+        async function createConversation(name) {
+            var res = await fetch("/api/chat/conversations", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: name,
+                    sourcePath: window.location.pathname,
+                }),
+            });
+            var data = await res.json().catch(function () { return {}; });
+            if (!res.ok || !data.conversation) {
+                throw new Error(data.error || "No se pudo iniciar el chat");
+            }
+
+            session = {
+                id: data.conversation.id,
+                token: data.conversation.token,
+                step: "phone",
+                name: name,
+            };
+            persist();
+        }
+
+        async function sendConversationMessage(message, field) {
+            if (!session || !session.id || !session.token) return;
+            var res = await fetch("/api/chat/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    conversationId: session.id,
+                    token: session.token,
+                    message: message,
+                    field: field || undefined,
+                }),
+            });
+            var data = await res.json().catch(function () { return {}; });
+            if (res.status === 404) {
+                resetChat("La conversación anterior ya no está disponible. Empezamos una nueva. ¿Cómo te llamas?");
+                throw new Error("Conversacion no encontrada");
+            }
+            if (!res.ok) {
+                throw new Error(data.error || "No se pudo enviar el mensaje");
+            }
+        }
+
+        async function fetchMessages() {
+            if (!session || !session.id || !session.token) return;
+            try {
+                var params = new URLSearchParams({
+                    conversationId: session.id,
+                    token: session.token,
+                });
+                var res = await fetch("/api/chat/messages?" + params.toString());
+                if (res.status === 404) {
+                    resetChat("La conversación anterior ya no está disponible. Empezamos una nueva. ¿Cómo te llamas?");
+                    return;
+                }
+                if (!res.ok) return;
+
+                var data = await res.json();
+                (data.messages || [])
+                    .filter(function (msg) { return msg.sender === "admin"; })
+                    .forEach(function (msg) {
+                        if (transcript.some(function (item) { return item.id === msg.id; })) return;
+                        transcript.push(msg);
+                    });
+                persist();
+                renderMessages();
+            } catch (error) {}
+        }
+
+        function startPolling() {
+            stopPolling();
+            if (session && session.id && session.token) {
+                pollTimer = window.setInterval(fetchMessages, 7000);
+            }
+        }
+
+        function stopPolling() {
+            if (pollTimer) window.clearInterval(pollTimer);
+            pollTimer = null;
+        }
+
+        function validatePhone(value) {
+            return value.replace(/\D/g, "").length >= 7;
+        }
+
+        async function handleLeadAnswer(message) {
+            if (!session || session.step === "name") {
+                if (message.length < 2) {
+                    addBot("Dime tu nombre con al menos dos caracteres, por favor.");
+                    return;
+                }
+                await createConversation(message);
+                addBot("Gracias, " + message + ". ¿Podrías facilitarnos tu número de teléfono?");
+                startPolling();
+                return;
+            }
+
+            if (session.step === "phone") {
+                if (!validatePhone(message)) {
+                    addBot("Ese teléfono parece incompleto. Escríbelo con prefijo o al menos 7 números.");
+                    return;
+                }
+                await sendConversationMessage(message, "phone");
+                session.phone = message;
+                session.step = "open";
+                persist();
+                addBot("Gracias por facilitarnos los datos. Dame un segundo y te atenderé lo antes posible. Si lo deseas, puedes ir escribiendo lo que necesites.");
+            }
+        }
+
+        function openPanel() {
+            if (!panel) return;
+            panel.hidden = false;
+            renderMessages();
+            setInputState(false);
+            fetchMessages();
+            startPolling();
+        }
+
+        window.vmOpenLiveChat = openPanel;
+
+        function closePanel() {
+            if (!panel) return;
+            panel.hidden = true;
+            stopPolling();
+        }
+
+        toggle?.addEventListener("click", function () {
+            if (!panel) return;
+            if (panel.hidden) openPanel();
+            else closePanel();
+        });
+
+        document.addEventListener("click", function (event) {
+            var target = event.target instanceof Element ? event.target.closest("[data-open-live-chat]") : null;
+            if (!target) return;
+            event.preventDefault();
+            openPanel();
+        });
+
+        window.addEventListener("vm-open-live-chat", openPanel);
+        close?.addEventListener("click", closePanel);
+
+        composer?.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            if (!input) return;
+
+            var message = input.value.trim();
+            if (!message) return;
+
+            input.value = "";
+            addVisitor(message);
+            setInputState(true);
+
+            try {
+                if (!session || session.step !== "open") {
+                    await handleLeadAnswer(message);
+                } else {
+                    await sendConversationMessage(message);
+                    await fetchMessages();
+                }
+            } catch (error) {
+                addBot("No he podido guardar ese mensaje ahora mismo. Prueba otra vez en unos segundos.");
+            } finally {
+                setInputState(false);
+            }
+        });
+
+        loadState();
+        renderMessages();
+    })();
+</script>
+
+<style>
+    .vm-live-chat {
+        position: fixed;
+        right: clamp(1rem, 2.4vw, 1.6rem);
+        bottom: calc(clamp(1rem, 2.4vw, 1.6rem) + 76px);
+        z-index: 100002;
+        font-family: Inter, system-ui, sans-serif;
+        isolation: isolate;
+    }
+
+    .vm-live-chat__launcher {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, .78);
+        border-radius: 50%;
+        color: #000;
+        background: linear-gradient(135deg, #fff 0%, #d4d4d8 100%);
+        box-shadow: 0 20px 46px rgba(0, 0, 0, .46), 0 8px 18px rgba(255, 255, 255, .08);
+        cursor: pointer;
+        transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .vm-live-chat__launcher-pulse {
+        position: absolute;
+        right: .15rem;
+        top: .15rem;
+        width: .78rem;
+        height: .78rem;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background: #050505;
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, .28);
+        animation: vm-chat-pulse 1.8s ease-out infinite;
+    }
+
+    .vm-live-chat__launcher svg,
+    .vm-live-chat__composer svg {
+        width: 28px;
+        height: 28px;
+        fill: currentColor;
+    }
+
+    .vm-live-chat__launcher:hover,
+    .vm-live-chat__launcher:focus-visible {
+        transform: none;
+        background: linear-gradient(135deg, #fff 0%, #d4d4d8 100%);
+        color: #000;
+        box-shadow: 0 20px 46px rgba(0, 0, 0, .46), 0 8px 18px rgba(255, 255, 255, .08);
+        outline: none;
+    }
+
+    .vm-live-chat__panel {
+        position: absolute;
+        right: 0;
+        bottom: 76px;
+        width: min(calc(100vw - 2rem), 402px);
+        height: min(640px, calc(100vh - 10rem));
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        color: #f7f2ec;
+        background: linear-gradient(180deg, rgba(20, 20, 24, .98), rgba(6, 6, 8, .99));
+        border: 1px solid rgba(255, 255, 255, .14);
+        border-radius: 1.15rem;
+        box-shadow: 0 34px 90px rgba(0, 0, 0, .58), 0 10px 26px rgba(255, 255, 255, .06);
+        transform-origin: right bottom;
+        animation: vm-chat-pop 180ms ease-out;
+        backdrop-filter: blur(18px);
+    }
+
+    .vm-live-chat__panel[hidden] {
+        display: none !important;
+    }
+
+    .vm-live-chat__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        min-height: 5.6rem;
+        padding: 1rem 1rem .95rem;
+        background:
+            radial-gradient(circle at 12% 0%, rgba(255, 255, 255, .16), transparent 32%),
+            linear-gradient(135deg, #222, #0b0b0d 58%, #000);
+        border-bottom: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .vm-live-chat__agent {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        gap: .75rem;
+    }
+
+    .vm-live-chat__avatar {
+        position: relative;
+        flex: 0 0 auto;
+        width: 2.75rem;
+        height: 2.75rem;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, .28);
+        border-radius: 50%;
+        color: #000;
+        background: linear-gradient(135deg, #fff, #d4d4d8);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 12px 22px rgba(0, 0, 0, .2);
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1rem;
+        font-weight: 900;
+    }
+
+    .vm-live-chat__avatar i {
+        position: absolute;
+        right: .1rem;
+        bottom: .1rem;
+        width: .72rem;
+        height: .72rem;
+        border: 2px solid #09090b;
+        border-radius: 50%;
+        background: #fff;
+    }
+
+    .vm-live-chat__header span:not(.vm-live-chat__avatar) {
+        display: block;
+        font-size: .72rem;
+        font-weight: 800;
+        color: rgba(255, 255, 255, .68);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .vm-live-chat__header strong {
+        display: block;
+        margin-top: .15rem;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1.1rem;
+        letter-spacing: 0;
+    }
+
+    .vm-live-chat__header small {
+        display: block;
+        margin-top: .22rem;
+        color: rgba(255, 255, 255, .72);
+        font-size: .76rem;
+        font-weight: 650;
+    }
+
+    .vm-live-chat__header button {
+        flex: 0 0 auto;
+        width: 2.15rem;
+        height: 2.15rem;
+        border: 1px solid rgba(255, 255, 255, .14);
+        border-radius: 50%;
+        color: #fff;
+        background: rgba(255, 255, 255, .08);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 900;
+        line-height: 1;
+        transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .vm-live-chat__header button:hover,
+    .vm-live-chat__header button:focus-visible {
+        background: rgba(255, 255, 255, .16);
+        outline: none;
+        transform: scale(1.04);
+    }
+
+    .vm-live-chat__messages {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: .85rem;
+        padding: 1rem .95rem 1.05rem;
+        background:
+            linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
+            radial-gradient(circle at 20% 0%, rgba(255, 255, 255, .08), transparent 34%),
+            #09090b;
+        background-size: 100% 30px, auto, auto;
+        scrollbar-color: rgba(255, 255, 255, .22) transparent;
+    }
+
+    .vm-live-chat__row {
+        display: flex;
+        width: 100%;
+    }
+
+    .vm-live-chat__row--admin {
+        justify-content: flex-end;
+        text-align: left;
+    }
+
+    .vm-live-chat__row--visitor {
+        justify-content: flex-start;
+        text-align: left;
+    }
+
+    .vm-live-chat__bubble {
+        position: relative;
+        max-width: 82%;
+        padding: .72rem .82rem .58rem;
+        border-radius: 1.05rem;
+        border: 1px solid rgba(255, 255, 255, .1);
+        box-shadow: 0 12px 26px rgba(0, 0, 0, .18);
+    }
+
+    .vm-live-chat__bubble-name {
+        display: block;
+        margin-bottom: .2rem;
+        font-size: .67rem;
+        font-weight: 800;
+        color: rgba(255, 255, 255, .66);
+    }
+
+    .vm-live-chat__bubble p {
+        margin: 0;
+        color: inherit;
+        font-size: .9rem;
+        line-height: 1.48;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .vm-live-chat__bubble small {
+        display: block;
+        margin-top: .42rem;
+        color: rgba(255, 255, 255, .56);
+        font-size: .66rem;
+        font-weight: 700;
+        line-height: 1;
+        text-align: right;
+    }
+
+    .vm-live-chat__bubble--admin {
+        color: #050505;
+        background: linear-gradient(135deg, #fff, #e4e4e7);
+        border-color: rgba(255, 255, 255, .22);
+        border-top-right-radius: .42rem;
+    }
+
+    .vm-live-chat__bubble--admin .vm-live-chat__bubble-name,
+    .vm-live-chat__bubble--admin small {
+        color: rgba(0, 0, 0, .56);
+    }
+
+    .vm-live-chat__bubble--admin::after {
+        content: "";
+        position: absolute;
+        right: -.36rem;
+        bottom: .75rem;
+        width: .7rem;
+        height: .7rem;
+        background: #e4e4e7;
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+    }
+
+    .vm-live-chat__bubble--visitor {
+        color: #f7f2ec;
+        background: rgba(31, 31, 36, .96);
+        border-color: rgba(255, 255, 255, .12);
+        border-top-left-radius: .42rem;
+    }
+
+    .vm-live-chat__bubble--visitor::after {
+        content: "";
+        position: absolute;
+        left: -.36rem;
+        bottom: .75rem;
+        width: .7rem;
+        height: .7rem;
+        background: rgba(31, 31, 36, .96);
+        clip-path: polygon(100% 0, 0 50%, 100% 100%);
+    }
+
+    .vm-live-chat__composer {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 2.85rem;
+        align-items: center;
+        gap: .65rem;
+        padding: .9rem;
+        border-top: 1px solid rgba(255, 255, 255, .1);
+        background: rgba(6, 6, 8, .96);
+    }
+
+    .vm-live-chat__composer input {
+        width: 100%;
+        min-height: 2.85rem;
+        border: 1px solid rgba(255, 255, 255, .12);
+        border-radius: 999px;
+        color: #f7f2ec;
+        background: rgba(255, 255, 255, .055);
+        padding: .7rem 1rem .72rem;
+        font: inherit;
+        font-size: .9rem;
+        outline: none;
+        transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .vm-live-chat__composer input:focus {
+        border-color: rgba(255, 255, 255, .75);
+        background: rgba(255, 255, 255, .08);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, .1);
+    }
+
+    .vm-live-chat__composer button {
+        width: 2.85rem;
+        height: 2.85rem;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        color: #000;
+        background: linear-gradient(135deg, #fff, #d4d4d8);
+        border: 1px solid rgba(255, 255, 255, .28);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, .3);
+        cursor: pointer;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .vm-live-chat__composer button:hover,
+    .vm-live-chat__composer button:focus-visible {
+        outline: none;
+        transform: translateY(-1px);
+        background: #fff;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, .36);
+    }
+
+    .vm-live-chat__composer button:disabled,
+    .vm-live-chat__composer input:disabled {
+        opacity: .65;
+        cursor: wait;
+    }
+
+    .vm-live-chat__composer svg {
+        width: 1.18rem;
+        height: 1.18rem;
+    }
+
+    @media (max-width: 1024px) {
+        .vm-live-chat {
+            right: 1rem;
+            bottom: calc(5.35rem + env(safe-area-inset-bottom, 0px) + 66px);
+        }
+
+        .vm-live-chat__launcher {
+            width: 54px;
+            height: 54px;
+        }
+
+        .vm-live-chat__panel {
+            bottom: 66px;
+            height: min(560px, calc(100vh - 11rem));
+        }
+    }
+
+    @media (max-width: 520px) {
+        .vm-live-chat__panel {
+            position: fixed;
+            left: 1rem;
+            right: 1rem;
+            bottom: calc(5.35rem + env(safe-area-inset-bottom, 0px) + 66px);
+            width: auto;
+            height: min(560px, calc(100vh - 10rem));
+            border-radius: 1rem;
+        }
+
+        .vm-live-chat__header {
+            min-height: 5.2rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .vm-live-chat__launcher,
+        .vm-live-chat__launcher-pulse,
+        .vm-live-chat__panel {
+            animation: none;
+            transition: none;
+        }
+    }
+
+    @keyframes vm-chat-pop {
+        from {
+            opacity: 0;
+            transform: translateY(.45rem) scale(.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes vm-chat-pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, .28);
+        }
+        70% {
+            box-shadow: 0 0 0 .45rem rgba(0, 0, 0, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        }
+    }
+</style>
