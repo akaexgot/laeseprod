@@ -6,6 +6,7 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const HOME_MODEL_URL = "/logolaese3D.glb";
+const ENABLE_IDLE_ROTATION = true;
 
 function initLensExplorer() {
     const root = document.querySelector<HTMLElement>("[data-lens-explorer]");
@@ -65,12 +66,16 @@ function initLensExplorer() {
     rimLight.position.set(7, 2, -3);
     scene.add(rimLight);
 
+    const lowerGlowLight = new THREE.DirectionalLight(0xffffff, 2.35);
+    lowerGlowLight.position.set(0, -5.5, 5.8);
+    scene.add(lowerGlowLight);
+
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
     controls.dampingFactor = 0.055;
     controls.enablePan = false;
     controls.enableZoom = false;
-    controls.autoRotate = !reducedMotion.matches;
+    controls.autoRotate = ENABLE_IDLE_ROTATION && !reducedMotion.matches;
     controls.autoRotateSpeed = compactViewport.matches ? 2.4 : 0.8;
     controls.minPolarAngle = 0.22;
     controls.maxPolarAngle = Math.PI - 0.22;
@@ -119,7 +124,7 @@ function initLensExplorer() {
                         material instanceof THREE.MeshStandardMaterial
                         || material instanceof THREE.MeshPhysicalMaterial
                     ) {
-                        material.envMapIntensity = 1.4;
+                        material.envMapIntensity = 1.75;
                         material.needsUpdate = true;
                     }
                 });
@@ -145,7 +150,7 @@ function initLensExplorer() {
             const distancePadding = compactViewport.matches ? 1.08 : 1.22;
             const distance = radius / Math.sin(fittingHalfFov) * distancePadding;
 
-            camera.position.set(distance * 0.06, distance * 0.08, distance);
+            camera.position.set(distance * 0.16, distance * -0.28, distance * 0.96);
             camera.near = Math.max(0.01, distance / 100);
             camera.far = distance * 10;
             camera.updateProjectionMatrix();
@@ -186,7 +191,7 @@ function initLensExplorer() {
         window.clearTimeout(resumeRotationTimer);
         if (reducedMotion.matches) return;
         resumeRotationTimer = window.setTimeout(() => {
-            if (!disposed) controls.autoRotate = true;
+            if (!disposed) controls.autoRotate = ENABLE_IDLE_ROTATION;
         }, delay);
     };
 
