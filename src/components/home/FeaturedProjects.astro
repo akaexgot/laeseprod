@@ -5,9 +5,10 @@ import VideoBackground from "../ui/VideoBackground.astro";
 interface Props {
     projects?: any[];
     showAllLink?: boolean;
+    playPreviewsOnMobile?: boolean;
 }
 
-const { projects: providedProjects, showAllLink = true } = Astro.props;
+const { projects: providedProjects, showAllLink = true, playPreviewsOnMobile = true } = Astro.props;
 const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
 ---
 
@@ -18,7 +19,14 @@ const projects = (providedProjects || await getFeaturedProjects()).slice(0, 3);
         <div class="featured-projects__cuts" aria-label="Proyectos destacados">
             {projects.map((project: any, index: number) => (
                 <a class={`project-cut project-cut--${index + 1}`} href={`/proyectos/${project.slug}`}>
-                    <VideoBackground desktop={project.video_preview || project.video_project} mobile={project.video_preview || project.video_project} title={project.title} overlay="dark" />
+                    <VideoBackground
+                        desktop={project.video_preview || project.video_project}
+                        mobile={project.video_preview || project.video_project}
+                        title={project.title}
+                        overlay="dark"
+                        startAt={0}
+                        playOnMobile={playPreviewsOnMobile}
+                    />
                 </a>
             ))}
         </div>

@@ -8,6 +8,7 @@ interface Props {
     title?: string;
     overlay?: "light" | "dark" | "none";
     startAt?: number;
+    playOnMobile?: boolean;
 }
 
 const {
@@ -16,6 +17,7 @@ const {
     title = "Video de fondo",
     overlay = "dark",
     startAt = 20,
+    playOnMobile = false,
 } = Astro.props;
 
 const startSeconds = Math.max(0, Number(startAt) || 0);
@@ -53,6 +55,7 @@ const poster = sources.desktop.poster || sources.mobile.poster;
     class="video-background"
     data-video-background
     data-sources={JSON.stringify(sources)}
+    data-play-on-mobile={playOnMobile ? "true" : "false"}
     style={poster ? `background-image:url(${poster})` : undefined}
     aria-hidden="true"
 >
@@ -88,13 +91,14 @@ const poster = sources.desktop.poster || sources.mobile.poster;
             root.dataset.ready = 'true';
             const sources = JSON.parse(root.dataset.sources || '{}');
             const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            const playOnMobile = root.dataset.playOnMobile === 'true';
             const selected = isMobile ? sources.mobile : sources.desktop;
             const startAt = Math.max(0, Number(selected?.startAt || 0));
             const video = root.querySelector<HTMLVideoElement>('.video-background__native');
             const iframe = root.querySelector<HTMLIFrameElement>('.video-background__youtube');
             if (!selected || (!selected.url && !selected.youtubeId)) return;
             if (selected.poster) root.style.backgroundImage = `url(${selected.poster})`;
-            if (isMobile) {
+            if (isMobile && !playOnMobile) {
                 root.classList.add('video-background--poster-only');
                 return;
             }
