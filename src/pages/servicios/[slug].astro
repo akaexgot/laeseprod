@@ -116,7 +116,7 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola%20LaeseProd,%20qu
 
 <BaseLayout title={service.title} description={service.description} structuredData={[buildBreadcrumbSchema([{ name: "Inicio", path: "/" }, { name: "Servicios", path: "/servicios" }, { name: service.title, path }]), buildServiceSchema(service, path)]}>
     <section class={`service-detail service-detail--cinematic service-detail--${service.slug}`}>
-        <VideoBackground desktop={service.video || settings.hero_video_desktop} mobile={service.video_vertical || service.video || settings.hero_video_mobile} title={service.title} overlay="none" />
+        <VideoBackground desktop={service.video || settings.hero_video_desktop} mobile={service.video_vertical || service.video || settings.hero_video_mobile} title={service.title} overlay="none" playOnMobile />
         <div class="service-detail__shade" aria-hidden="true"></div>
 
         <div class="service-detail__stage">

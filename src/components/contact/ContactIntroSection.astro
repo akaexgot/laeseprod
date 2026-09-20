@@ -13,7 +13,7 @@ const phoneHref = `tel:${String(settings.phone || "").replace(/[^\d+]/g, "")}`;
 
 <section class="contact-page">
     {settings.contact_hero_video && (
-        <VideoBackground desktop={settings.contact_hero_video} mobile={settings.contact_hero_video} title="Video de fondo de contacto" overlay="none" />
+        <VideoBackground desktop={settings.contact_hero_video} mobile={settings.contact_hero_video} title="Video de fondo de contacto" overlay="none" playOnMobile />
     )}
     <div class="contact-page__shade" aria-hidden="true"></div>
 

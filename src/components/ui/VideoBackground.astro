@@ -105,6 +105,9 @@ const poster = sources.desktop.poster || sources.mobile.poster;
 
             const load = () => {
                 if (selected.url && video) {
+                    video.muted = true;
+                    video.defaultMuted = true;
+                    video.playsInline = true;
                     video.src = selected.url;
                     video.autoplay = true;
                     const playFromStartTime = () => {

@@ -16,6 +16,7 @@ const services = [...allServices]
                 mobile={service.video_preview || service.video_vertical || service.video || settings.hero_video_mobile || settings.hero_video_desktop}
                 title={`Vídeo de ${service.title}`}
                 overlay="dark"
+                playOnMobile
             />
             <h2>{service.title}</h2>
         </a>
