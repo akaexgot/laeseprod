@@ -705,8 +705,9 @@
 
     @media (max-width: 1024px) {
         .vm-live-chat {
-            right: 1rem;
-            bottom: calc(5.35rem + env(safe-area-inset-bottom, 0px) + 66px);
+            right: calc(clamp(1rem, 2.4vw, 1.6rem) + env(safe-area-inset-right, 0px) + 2px);
+            /* WhatsApp is 58px tall; keep a 12px gap between the buttons. */
+            bottom: calc(clamp(1rem, 2.4vw, 1.6rem) + env(safe-area-inset-bottom, 0px) + 70px);
         }
 
         .vm-live-chat__launcher {
@@ -725,7 +726,7 @@
             position: fixed;
             left: 1rem;
             right: 1rem;
-            bottom: calc(5.35rem + env(safe-area-inset-bottom, 0px) + 66px);
+            bottom: calc(clamp(1rem, 2.4vw, 1.6rem) + env(safe-area-inset-bottom, 0px) + 136px);
             width: auto;
             height: min(560px, calc(100vh - 10rem));
             border-radius: 1rem;
