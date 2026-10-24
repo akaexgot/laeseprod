@@ -4,10 +4,16 @@
 NIXPACKS_NODE_VERSION = '22'
 
 [phases.setup]
+# Node.js 22.23.4, including the shared-llhttp build fix.
+# https://github.com/NixOS/nixpkgs/commit/338d3b462fc836d0673f068cbad1c8c1b471bc36
+nixpkgsArchive = '338d3b462fc836d0673f068cbad1c8c1b471bc36'
 nixPkgs = ['nodejs_22']
 
 [phases.install]
-cmds = ['npm ci']
+cmds = [
+  '''node -e "console.log('Node.js ' + process.versions.node); if (process.versions.node !== '22.23.4') throw new Error('Expected Node.js 22.23.4');"''',
+  'npm ci',
+]
 
 [phases.build]
 cmds = ['npm run build']
